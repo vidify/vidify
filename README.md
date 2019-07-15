@@ -6,9 +6,19 @@ A simple tool to show Youtube **videoclips** and **lyrics** for the currently pl
 
 ## How to install
 
+Download the latest [release](https://github.com/marioortizmanero/spotify-videoclips/releases). Uncompress the .tar.gz file and run inside the folder:
+
+`python ./setup.py install`
+
+*Note: you can add the --user flag to install it locally*
+
+### Manually:
+
 All you have to do is to install the latest version of `youtube-dl` and `python-vlc`. With pip:
 
 * `pip install --user youtube-dl; pip install --user python-vlc`
+
+Then you can execute the script with python as you like.
 
 *Note that they're avaliable on the AUR too: [youtube-dl](https://www.archlinux.org/packages/community/any/youtube-dl/), [python-vlc](https://aur.archlinux.org/packages/python-vlc/)*.
 
