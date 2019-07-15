@@ -1,4 +1,5 @@
 import os
+import sys
 import vlc
 import youtube_dl
 import dbus
