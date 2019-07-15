@@ -15,9 +15,9 @@ Download the latest [release](https://github.com/marioortizmanero/spotify-videoc
 
 ### Manually:
 
-All you have to do is to install the latest version of `youtube-dl` and `python-vlc`. With pip:
+Install the latest version of `youtube-dl`, `python-vlc` and `lyricwikia`. With pip:
 
-* `pip install --user youtube-dl; pip install --user python-vlc`
+* `pip install --user youtube-dl; pip install --user python-vlc; pip install --user lyricwikia`
 
 Then you can execute the script with python as you like.
 
@@ -28,7 +28,6 @@ Then you can execute the script with python as you like.
 
 ## TODO
 
-* Use better lyrics API/module
 * Find a better cache for the videos to load them faster
 * Implement offset lists with delays to start the video. That way synchronization with videoclips with different length would fit better.
 
