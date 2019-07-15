@@ -8,11 +8,12 @@ Instance = vlc.Instance(
 player = Instance.media_player_new()
 
 # playing the video on VLC
-def play_video(filename):
+def play_video(filename, offset):
     # Media instance
     Media = Instance.media_new(filename)
     Media.get_mrl()
     # Player instance
     player.set_media(Media)
+    player.set_time(offset)
     player.play()
 

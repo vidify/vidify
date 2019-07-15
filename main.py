@@ -1,8 +1,9 @@
 #! /usr/bin/pn
 import os
+from datetime import datetime
 
 from libs import vlc
-from libs import yt
+from libs import youtube
 from libs import spotify
 
 
@@ -13,18 +14,18 @@ videos = {}
 # Plays the video until a new song is found
 def main(artist, title):
     name = spotify.format_name(artist, title)
-
+    
+    # Counts seconds to add a delay and sync the start
+    start_time = datetime.now()
     # Only downloading the video if it's not listed
     if name not in videos:
-        print(">> Downloading '" + name + "'")
-        filename = yt.download_video(name)
+        filename = youtube.download_video(name)
         videos[name] = filename
     else:
-        print(">> '" + name + "' is already downloaded")
         filename = videos[name]
 
-    print(">> Playing '" + name + "'")
-    vlc.play_video(filename)
+    offset = int((datetime.now() - start_time).microseconds / 1000)
+    vlc.play_video(filename, offset)
     spotify.get_lyrics(artist, title)
 
     # Waiting for the song to finish
