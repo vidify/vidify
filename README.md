@@ -15,15 +15,20 @@ The project is currently in progress. An installation guide will be provided onc
 
 ## TODO
 
-* Clean up the vlc module, maybe create a class to access the properties
-* Check [PropertiesChanged](https://dbus.freedesktop.org/doc/dbus-specification.html) rather than the current ugly manual check
 * Use better lyrics API/module
 * Find a better cache for the videos to load them faster
+* Implement offset lists with delays to start the video. That way synchronization with videoclips with different length would fit better.
+* Investigate error messages: 
+```
+libva error: va_getDriverName() failed with operation failed,driver_name=radeonsi
+Failed to open VDPAU backend libvdpau_radeonsi.so: cannot open shared object file: No such file or directory
+Failed to open VDPAU backend libvdpau_radeonsi.so: cannot open shared object file: No such file or directory
+```
 
 ## Documentation
 
 Helpful documentation links for contributing:
-* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html)
+* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [DBus official](https://dbus.freedesktop.org/doc/dbus-specification.html)
 * [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/)
 * [youtube-dl](https://github.com/ytdl-org/youtube-dl)
