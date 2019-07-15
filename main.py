@@ -12,7 +12,7 @@ DBusGMainLoop(set_as_default=True)
 
 
 # DEBUGGING OPTIONS
-debug = True
+debug = False
 
 def log(msg):
     if debug:
