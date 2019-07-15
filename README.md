@@ -10,7 +10,8 @@ Download the latest [release](https://github.com/marioortizmanero/spotify-videoc
 
 `python ./setup.py install`
 
-*Note: you can add the --user flag to install it locally*
+*Note: you can add the --user flag to install it locally.*
+*Also, it's based on DBus so it only works on Linux.*
 
 ### Manually:
 
@@ -22,7 +23,6 @@ Then you can execute the script with python as you like.
 
 *Note that they're avaliable on the AUR too: [youtube-dl](https://www.archlinux.org/packages/community/any/youtube-dl/), [python-vlc](https://aur.archlinux.org/packages/python-vlc/)*.
 
-*Also, it's based on DBus so it only works on Linux.*
 
 ---
 
