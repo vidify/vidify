@@ -14,4 +14,3 @@ def download_video(name):
     # Fix for error with prepare_filename inside youtube_dl
     return "downloads/" + info['entries'][0]['id'] + ".mp4"
 
-

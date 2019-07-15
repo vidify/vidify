@@ -11,7 +11,9 @@ videos = {}
 
 
 # Plays the video until a new song is found
-def main(name):
+def main(artist, title):
+    name = spotify.format_name(artist, title)
+
     # Only downloading the video if it's not listed
     if name not in videos:
         print(">> Downloading '" + name + "'")
@@ -23,19 +25,21 @@ def main(name):
 
     print(">> Playing '" + name + "'")
     vlc.play_video(filename)
+    spotify.get_lyrics(artist, title)
 
     # Waiting for the song to finish
     while True:
-        new_name = spotify.get_name()
+        artist, title = spotify.get_name()
+        new_name = spotify.format_name(artist, title)
         if new_name != name:
             break
-    main(new_name)
+    main(artist, title)
 
 
 if __name__ == '__main__':
-    name = spotify.get_name()
+    artist, title = spotify.get_name()
     try:
-        main(name)
+        main(artist, title)
     except KeyboardInterrupt:
         print("\n>> Removing cache...")
         os.system("rm downloads/*")

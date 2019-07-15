@@ -2,9 +2,10 @@ import vlc
 
 # VLC Instance
 Instance = vlc.Instance(
-        "--play-and-exit " + # Closing after the song is finished
-        "--quiet " # Don't print to stdout
+        "--quiet " + # Don't print warnings to stdout
+        "--no-qt-error-dialogs" # Don't print errors to stdout
 )
+player = Instance.media_player_new()
 
 # playing the video on VLC
 def play_video(filename):
@@ -12,7 +13,6 @@ def play_video(filename):
     Media = Instance.media_new(filename)
     Media.get_mrl()
     # Player instance
-    player = Instance.media_player_new()
     player.set_media(Media)
     player.play()
 

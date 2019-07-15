@@ -1,4 +1,5 @@
 import dbus
+import requests
 
 session_bus = dbus.SessionBus()
 
@@ -8,5 +9,17 @@ def get_name():
     spotify_properties = dbus.Interface(spotify_bus, "org.freedesktop.DBus.Properties")
     metadata = spotify_properties.Get("org.mpris.MediaPlayer2.Player", "Metadata")
 
-    return metadata['xesam:artist'][0] + " - " + metadata['xesam:title']
+    return metadata['xesam:artist'][0], metadata['xesam:title']
+
+
+def format_name(artist, title):
+    return artist + " - " + title
+
+
+def get_lyrics(artist, title):
+    print("\033[4m" + artist + ": " + title + "\033[0m\n")
+    pageurl = "https://makeitpersonal.co/lyrics?artist=" + artist + \
+              "&title=" + title
+    lyrics = requests.get(pageurl).text.strip()
+    print(lyrics)
 
