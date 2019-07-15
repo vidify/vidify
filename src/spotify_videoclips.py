@@ -4,6 +4,7 @@ import youtube_dl
 import dbus
 import requests
 from datetime import datetime
+from contextlib import contextmanager
 # Asynchronous calls
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
@@ -19,6 +20,25 @@ def log(msg):
 
 def error(msg):
     print("\033[91m[ERROR]: " + msg + "\033[0m")
+
+
+# HIDING STDERR WITHOUT LEAKS
+@contextmanager
+def stderr_redirected(to=os.devnull):
+    fd = sys.stderr.fileno()
+
+    def _redirect_stderr(to):
+        sys.stderr.close() # + implicit flush()
+        os.dup2(to.fileno(), fd) # fd writes to 'to' file
+        sys.stderr = os.fdopen(fd, 'w') # Python writes to fd
+
+    with os.fdopen(os.dup(fd), 'w') as old_stderr:
+        with open(to, 'w') as file:
+            _redirect_stderr(to=file)
+        try:
+            yield # Allow code to be run with the redirected stderr
+        finally:
+            _redirect_stderr(to=old_stderr) # Restore stderr. Some flags may change
 
 
 # YOUTUBE-DL CONFIGURATION
@@ -200,8 +220,7 @@ def play_video(player):
         filename = player.videos[name]
 
     print("\033[4m" + name + "\033[0m")
-    print("----------------------")
-    print(player.get_lyrics())
+    print(player.get_lyrics() + "\n")
 
     offset = int((datetime.now() - start_time).microseconds / 1000)
     player.start_video(filename, offset)
@@ -218,7 +237,8 @@ def main():
             dbus.SessionBus(),
             "org.mpris.MediaPlayer2.spotify"
     )
-    play_video(player)
+    with stderr_redirected(os.devnull):
+        play_video(player)
 
 if __name__ == '__main__':
     main()
