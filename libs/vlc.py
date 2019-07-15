@@ -9,7 +9,7 @@ Instance = vlc.Instance(
 player = Instance.media_player_new()
 
 # playing the video on VLC
-def start_video(filename, offset):
+def start_video(filename):
     # Media instance
     Media = Instance.media_new(filename)
     Media.get_mrl()
@@ -20,19 +20,17 @@ def start_video(filename, offset):
         player.play()
 
 
+# Accessing properties from dbus
 session_bus = dbus.SessionBus()
 proxy = session_bus.get_object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2")
 device_prop = dbus.Interface(proxy, "org.freedesktop.DBus.Properties")
-# Returns the status of the dbus stream (Paused/Playing)
 def get_audio_status():
     return device_prop.Get("org.mpris.MediaPlayer2.Player", "PlaybackStatus")
-
-# Returns the current position of the dbus stream in milliseconds
 def get_current_position():
     return device_prop.Get("org.mpris.MediaPlayer2.Player", "Position")
 
 def toggle_pause(status):
-    if status == "Paused":
+    if status == "Paused" or status == "paused":
         player.pause()
     else:
         player.play()

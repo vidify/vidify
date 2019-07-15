@@ -1,6 +1,5 @@
 #! /usr/bin/pn
 import os
-from datetime import datetime
 
 from libs import vlc
 from libs import youtube
@@ -16,7 +15,6 @@ def main(artist, title):
     name = spotify.format_name(artist, title)
     
     # Counts seconds to add a delay and sync the start
-    start_time = datetime.now()
     # Only downloading the video if it's not listed
     if name not in videos:
         filename = youtube.download_video(name)
@@ -24,8 +22,7 @@ def main(artist, title):
     else:
         filename = videos[name]
 
-    offset = int((datetime.now() - start_time).microseconds / 1000)
-    vlc.start_video(filename, offset)
+    vlc.start_video(filename)
 
     print("\033[4m" + name + "\033[0m")
     print("----------------------")
