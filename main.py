@@ -25,11 +25,21 @@ def main(artist, title):
         filename = videos[name]
 
     offset = int((datetime.now() - start_time).microseconds / 1000)
-    vlc.play_video(filename, offset)
-    spotify.get_lyrics(artist, title)
+    vlc.start_video(filename, offset)
+
+    print("\033[4m" + name + "\033[0m")
+    print("----------------------")
+    print(spotify.get_lyrics(artist, title))
 
     # Waiting for the song to finish
+    status = vlc.get_audio_status()
     while True:
+        # Checks if the song has been paused
+        new_status = vlc.get_audio_status()
+        if status != new_status:
+            vlc.toggle_pause(new_status)
+            status = new_status
+
         artist, title = spotify.get_name()
         new_name = spotify.format_name(artist, title)
         if new_name != name:

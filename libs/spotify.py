@@ -17,9 +17,7 @@ def format_name(artist, title):
 
 
 def get_lyrics(artist, title):
-    print("\033[4m" + artist + ": " + title + "\033[0m\n")
-    pageurl = "https://makeitpersonal.co/lyrics?artist=" + artist + \
-              "&title=" + title
+    pageurl = "https://makeitpersonal.co/lyrics?artist=" + artist + "&title=" + title
     lyrics = requests.get(pageurl).text.strip()
-    print(lyrics)
+    return lyrics
 
