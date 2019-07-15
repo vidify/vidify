@@ -46,9 +46,9 @@ def stderr_redirected(to=os.devnull):
 ydl_opts = {
     'format' : '136/135/134/133',
     'outtmpl': 'downloads/%(id)s.%(ext)s',
-    'quiet' : 'true'
+    'quiet'  : 'true'
 }
-if debug: ydl_opts['quiet'] = 'false'
+if debug: ydl_opts['quiet'] = ''
 ydl = youtube_dl.YoutubeDL(ydl_opts)
 
 
@@ -64,10 +64,9 @@ class Player:
         self.videos = {}
 
         # VLC Instance
-        self._instance = vlc.Instance(
-                "--quiet " + # Don't print warnings to stdout
-                "--no-qt-error-dialogs" # Don't print errors to stdout
-        )
+        if debug: _args = ""
+        else: _args = "--quiet"
+        self._instance = vlc.Instance(_args)
         self.video_player = self._instance.media_player_new()
 
         # DBus internal properties
@@ -213,27 +212,26 @@ def download_video(name):
 
 # Plays the video until a new song is found
 def play_video(player):
-    name = player.format_name()
-    
-    # Counts seconds to add a delay and sync the start
-    start_time = datetime.now()
-    # Only downloading the video if it's not listed
-    if name not in player.videos:
-        filename = download_video(name)
-        player.videos[name] = filename
-    else:
-        filename = player.videos[name]
+    while True:
+        name = player.format_name()
 
-    print("\033[4m" + name + "\033[0m")
-    print(player.get_lyrics() + "\n")
+        # Counts seconds to add a delay and sync the start
+        start_time = datetime.now()
+        # Only downloading the video if it's not listed
+        if name not in player.videos:
+            filename = download_video(name)
+            player.videos[name] = filename
+        else:
+            filename = player.videos[name]
 
-    offset = int((datetime.now() - start_time).microseconds / 1000)
-    player.start_video(filename, offset)
+        print("\033[4m" + name + "\033[0m")
+        print(player.get_lyrics() + "\n")
 
-    # Waiting for the song to finish
-    player.wait()
+        offset = int((datetime.now() - start_time).microseconds / 1000)
+        player.start_video(filename, offset)
 
-    play_video(player)
+        # Waiting for the song to finish
+        player.wait()
 
 
 # Player initialization and starting the main function
@@ -242,8 +240,11 @@ def main():
             dbus.SessionBus(),
             "org.mpris.MediaPlayer2.spotify"
     )
-    with stderr_redirected(os.devnull):
+    if debug:
         play_video(player)
+    else:
+        with stderr_redirected(os.devnull):
+            play_video(player)
 
 if __name__ == '__main__':
     main()
