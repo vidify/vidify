@@ -18,6 +18,7 @@ The project is currently in progress. An installation guide will be provided onc
 * Clean up the vlc module, maybe create a class to access the properties
 * Check [PropertiesChanged](https://dbus.freedesktop.org/doc/dbus-specification.html) rather than the current ugly manual check
 * Use better lyrics API/module
+* Find a better cache for the videos to load them faster
 
 ## Documentation
 
