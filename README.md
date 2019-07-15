@@ -19,3 +19,11 @@ The project is currently in progress. An installation guide will be provided onc
 * Check [PropertiesChanged](https://dbus.freedesktop.org/doc/dbus-specification.html) rather than the current ugly manual check
 * Use better lyrics API/module
 
+## Documentation
+
+Helpful documentation links for contributing:
+* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html)
+* [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
+* [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/)
+* [youtube-dl](https://github.com/ytdl-org/youtube-dl)
+
