@@ -1,4 +1,3 @@
-#! /usr/bin/pn
 import os
 import vlc
 import youtube_dl
@@ -188,7 +187,7 @@ def download_video(name):
 
 
 # Plays the video until a new song is found
-def main(player):
+def play_video(player):
     name = player.format_name()
     
     # Counts seconds to add a delay and sync the start
@@ -210,14 +209,17 @@ def main(player):
     # Waiting for the song to finish
     player.wait()
 
-    main(player)
+    play_video(player)
 
 
 # Player initialization and starting the main function
-if __name__ == '__main__':
+def main():
     player = Player(
             dbus.SessionBus(),
             "org.mpris.MediaPlayer2.spotify"
     )
-    main(player)
+    play_video(player)
+
+if __name__ == '__main__':
+    main()
 
