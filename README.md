@@ -18,12 +18,6 @@ The project is currently in progress. An installation guide will be provided onc
 * Use better lyrics API/module
 * Find a better cache for the videos to load them faster
 * Implement offset lists with delays to start the video. That way synchronization with videoclips with different length would fit better.
-* Investigate error messages: 
-```
-libva error: va_getDriverName() failed with operation failed,driver_name=radeonsi
-Failed to open VDPAU backend libvdpau_radeonsi.so: cannot open shared object file: No such file or directory
-Failed to open VDPAU backend libvdpau_radeonsi.so: cannot open shared object file: No such file or directory
-```
 
 ## Documentation
 

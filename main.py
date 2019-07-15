@@ -3,6 +3,7 @@ import os
 import vlc
 import dbus
 import requests
+from datetime import datetime
 from libs import youtube
 # Asynchronous calls
 from dbus.mainloop.glib import DBusGMainLoop
@@ -141,17 +142,14 @@ class Player:
         else:
             self.video_player.play()
 
-    def get_current_position(self):
-        return self._properties_interface.Get("org.mpris.MediaPlayer2.Player", "Position")
-
-    def start_video(self, filename):
-        log("Starting video")
+    def start_video(self, filename, offset):
+        log("Starting video with offset " + str(offset))
         # Media instance
         Media = self._instance.media_new(filename)
         Media.get_mrl()
         # Player instance
         self.video_player.set_media(Media)
-        self.video_player.set_time(self.get_current_position())
+        self.video_player.set_time(offset)
         if self.status == "playing":
             self.video_player.play()
 
@@ -165,6 +163,8 @@ class Player:
 def main(player):
     name = player.formatName()
     
+    # Counts seconds to add a delay and sync the start
+    start_time = datetime.now()
     # Only downloading the video if it's not listed
     if name not in player.videos:
         filename = youtube.download_video(name)
@@ -175,7 +175,9 @@ def main(player):
     print("\033[4m" + name + "\033[0m")
     print("----------------------")
     print(player.get_lyrics())
-    player.start_video(filename)
+
+    offset = int((datetime.now() - start_time).microseconds / 1000)
+    player.start_video(filename, offset)
 
     # Waiting for the song to finish
     player.wait()
