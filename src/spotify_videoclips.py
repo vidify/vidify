@@ -3,7 +3,7 @@ import sys
 import vlc
 import youtube_dl
 import dbus
-import requests
+import lyricwikia
 from datetime import datetime
 from contextlib import contextmanager
 # Asynchronous calls
@@ -48,6 +48,7 @@ ydl_opts = {
     'outtmpl': 'downloads/%(id)s.%(ext)s',
     'quiet' : 'true'
 }
+if debug: ydl_opts['quiet'] = 'false'
 ydl = youtube_dl.YoutubeDL(ydl_opts)
 
 
@@ -193,11 +194,14 @@ class Player:
         if self.status == "playing":
             self.video_player.play()
 
-    # Returns for lyrics from makeitpersonal.co
+    # Returns the song lyrics
     def get_lyrics(self):
-        pageurl = "https://makeitpersonal.co/lyrics?artist=" + self.metadata['artist'] + "&title=" + self.metadata['title']
-        lyrics = requests.get(pageurl).text.strip()
-        return lyrics
+        # First tries using lyricwikia
+        try:
+            return lyricwikia.get_lyrics(self.metadata['artist'], self.metadata['title'])
+        except lyricwikia.LyricsNotFound:
+            return "No lyrics found"
+
 
 
 # Download the video with youtube-dl and return the filename

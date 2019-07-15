@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='spotify-videoclips',
-    version='1.0',
+    version='1.1',
     packages=find_packages(include=[
         'src', 'src.*'
     ]),
@@ -29,7 +29,7 @@ setup(
     ],
     keywords='spotify videoclip videoclips video videos lyrics',
     python_requires='>=3.5',
-    install_requires=['youtube-dl', 'python-vlc'],
+    install_requires=['youtube-dl', 'python-vlc', 'lyricwikia'],
     entry_points={
         'console_scripts' : [ 'spotify-videoclips = src.spotify_videoclips:main' ]
     }
