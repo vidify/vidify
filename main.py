@@ -4,6 +4,7 @@ import vlc
 import dbus
 # Asynchronous calls
 from dbus.mainloop.glib import DBusGMainLoop
+from gi.repository import GLib
 DBusGMainLoop(set_as_default=True)
 
 from libs import youtube
@@ -16,6 +17,7 @@ class Player:
         self._session_bus = session_bus
         self.bus_name = bus_name
         self._disconnecting = False
+        self._connect = connect
         self.metadata = {
                 'artist' : '',
                 'title'  : ''
@@ -40,7 +42,17 @@ class Player:
 
         self.refreshStatus()
         self.refreshMetadata()
-        if connect: self.connect()
+        if self._connect: connect()
+
+    # Waits for changes in dbus properties
+    def wait(self):
+        loop = GLib.MainLoop()
+        try:
+            loop.run()
+        except KeyboardInterrupt:
+            print("\n>> Removing cache...")
+            os.system("rm downloads/* &>/dev/null")
+            exit()
 
     def connect(self):
         if self._disconnecting is False:
@@ -84,7 +96,7 @@ class Player:
     def onPropertiesChanged(self, interface, properties, signature):
         if dbus.String('Metadata') in properties:
             _metadata = properties[dbus.String('Metadata')]
-            if _metadata != self._metadata:
+            if _metadata != self.metadata:
                 self._parseMetadata()
         if dbus.String('PlaybackStatus') in properties:
             status = str(properties[dbus.String('PlaybackStatus')]).lower()
@@ -134,16 +146,7 @@ def main(player):
 
     # Waiting for the song to finish
     metadata = player.metadata
-    status = player.status
-    while True:
-        # Checks if the video is paused/played
-        new_status = player.status
-        if status != new_status:
-            player.toggle_pause()
-
-        # Checks if a new song is played
-        if metadata != player.metadata:
-            break
+    player.wait()
 
     main(player)
 
@@ -152,11 +155,7 @@ if __name__ == '__main__':
     player = Player(
             dbus.SessionBus(),
             "org.mpris.MediaPlayer2.spotify",
+            connect = False
     )
-    try:
-        main(player)
-    except KeyboardInterrupt:
-        print("\n>> Removing cache...")
-        os.system("rm downloads/* &>/dev/null")
-        exit()
+    main(player)
 
