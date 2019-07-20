@@ -12,6 +12,12 @@ import player
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--debug", action="store_true", dest="debug",
         default=False, help="turn on debug mode")
+parser.add_argument("-n", "--no-lyrics", action="store_false", dest="lyrics",
+        default=True, help="do not display lyrics")
+parser.add_argument("-f", "--fullscreen", action="store_true", dest="fullscreen",
+        default=False, help="play videos in fullscreen mode")
+parser.add_argument("-a", "--args", action="store", dest="vlc_args",
+        default="", help="other arguments used when opening VLC. Note that some like --fullscreen won't work in here.")
 args = parser.parse_args()
 
 
@@ -39,7 +45,7 @@ ydl_opts = {
     'format' : 'bestvideo',
     'quiet'  : True
 }
-if args.debug: ydl_opts['quiet'] = ''
+if args.debug: ydl_opts['quiet'] = False
 
 
 # Plays the video until a new song is found
@@ -58,8 +64,9 @@ def play_video(player):
         player.start_video(url, offset)
         
         # Lyrics
-        print("\033[4m" + name + "\033[0m")
-        print(player.get_lyrics() + "\n")
+        if args.lyrics:
+            print("\033[4m" + name + "\033[0m")
+            print(player.get_lyrics() + "\n")
 
         # Waiting for the song to finish
         player.wait()
@@ -70,7 +77,8 @@ def main():
     p = player.Player(
             dbus.SessionBus(),
             "org.mpris.MediaPlayer2.spotify",
-            debug = args.debug
+            debug = args.debug,
+            vlc_args = args.vlc_args
     )
     if args.debug:
         play_video(p)
