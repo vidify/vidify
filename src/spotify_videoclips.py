@@ -1,6 +1,7 @@
 import os
 import sys
 import vlc
+import argparse
 import youtube_dl
 import dbus
 import lyricwikia
@@ -13,14 +14,19 @@ DBusGMainLoop(set_as_default=True)
 
 
 # DEBUGGING OPTIONS
-debug = False
-
 def log(msg):
-    if debug:
+    if args.debug:
         print("\033[92m>> " + msg + "\033[0m")
 
 def error(msg):
     print("\033[91m[ERROR]: " + msg + "\033[0m")
+
+
+# ARGUMENT PARSING
+parser = argparse.ArgumentParser()
+parser.add_argument("-d", "--debug", action="store_true", dest="debug",
+        default=False, help="turn on debug mode")
+args = parser.parse_args()
 
 
 # HIDING STDERR WITHOUT LEAKS
@@ -48,7 +54,7 @@ ydl_opts = {
     'outtmpl': 'downloads/%(id)s.%(ext)s',
     'quiet'  : 'true'
 }
-if debug: ydl_opts['quiet'] = ''
+if args.debug: ydl_opts['quiet'] = ''
 ydl = youtube_dl.YoutubeDL(ydl_opts)
 
 
@@ -64,7 +70,7 @@ class Player:
         self.videos = {}
 
         # VLC Instance
-        if debug: _args = ""
+        if args.debug: _args = ""
         else: _args = "--quiet"
         try:
             self._instance = vlc.Instance(_args)
@@ -206,7 +212,6 @@ class Player:
             return "No lyrics found"
 
 
-
 # Download the video with youtube-dl and return the filename
 def download_video(name):
     info = ydl.extract_info("ytsearch:" + name, download=True)
@@ -244,11 +249,12 @@ def main():
             dbus.SessionBus(),
             "org.mpris.MediaPlayer2.spotify"
     )
-    if debug:
+    if args.debug:
         play_video(player)
     else:
         with stderr_redirected(os.devnull):
             play_video(player)
+
 
 if __name__ == '__main__':
     main()
