@@ -7,7 +7,7 @@ import dbus
 import lyricwikia
 from datetime import datetime
 from contextlib import contextmanager
-# Asynchronous calls
+# Asynchronous calls to dbus loops
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
 DBusGMainLoop(set_as_default=True)
@@ -199,9 +199,9 @@ class Player:
         Media.get_mrl()
         # Player instance
         self.video_player.set_media(Media)
-        self.video_player.set_time(offset)
         if self.status == "playing":
             self.video_player.play()
+        self.video_player.set_time(offset)
 
     # Returns the song lyrics
     def get_lyrics(self):
@@ -236,7 +236,7 @@ def play_video(player):
         print("\033[4m" + name + "\033[0m")
         print(player.get_lyrics() + "\n")
 
-        offset = int((datetime.now() - start_time).microseconds / 1000)
+        offset = int((datetime.now() - start_time).total_seconds() * 1000) # In milliseconds
         player.start_video(filename, offset)
 
         # Waiting for the song to finish
