@@ -24,6 +24,23 @@ Then you can execute the script with python as you like.
 *Note that they're avaliable on the AUR too: [youtube-dl](https://www.archlinux.org/packages/community/any/youtube-dl/), [python-vlc](https://aur.archlinux.org/packages/python-vlc/)*.
 
 
+## How to use
+
+You can use these flags to modify the behavior of the program:
+
+```
+usage: spotify_videoclips.py [-h] [-d] [-n] [-f] [-a VLC_ARGS]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -d, --debug           turn on debug mode
+  -n, --no-lyrics       do not display lyrics
+  -f, --fullscreen      play videos in fullscreen mode
+  -a VLC_ARGS, --args VLC_ARGS
+                        other arguments used when opening VLC. Note that some
+                        like --args='--fullscreen' won't work.
+```
+
 ---
 
 ## Current limitations:

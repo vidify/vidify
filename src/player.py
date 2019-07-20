@@ -10,18 +10,21 @@ DBusGMainLoop(set_as_default=True)
 
 # PLAYER CLASS WITH VLC AND DBUS PROPERTIES
 class Player:
-    def __init__(self, session_bus, bus_name, connect = True, debug = False):
+    def __init__(self, session_bus, bus_name, connect = True,
+            debug = False, vlc_args = "", fullscreen = False):
         # Main player properties
         self.metadata = {
                 'artist' : '',
                 'title'  : ''
         }
         self.status = 'stopped'
-        self.debug = debug
+        self._debug = debug
+        self._fullscreen = fullscreen
 
         # VLC Instance
-        if self.debug: _args = "--verbose 1"
-        else: _args = "--quiet"
+        _args = vlc_args
+        if self._debug: _args += " --verbose 1"
+        else: _args += " --quiet"
         try:
             self._instance = vlc.Instance(_args)
         except NameError:
@@ -142,6 +145,7 @@ class Player:
         if self.status == "playing":
             self.video_player.play()
         self.video_player.set_time(offset)
+        self.video_player.set_fullscreen(self._fullscreen)
 
     # Returns the song lyrics
     def get_lyrics(self):
@@ -153,7 +157,7 @@ class Player:
 
     # Prints formatted logs to the console
     def _log(self, msg):
-        if self.debug:
+        if self._debug:
             print("\033[92m>> " + msg + "\033[0m")
 
     # Prints formatted errors to the console
