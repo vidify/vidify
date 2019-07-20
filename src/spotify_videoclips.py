@@ -17,7 +17,7 @@ parser.add_argument("-n", "--no-lyrics", action="store_false", dest="lyrics",
 parser.add_argument("-f", "--fullscreen", action="store_true", dest="fullscreen",
         default=False, help="play videos in fullscreen mode")
 parser.add_argument("-a", "--args", action="store", dest="vlc_args",
-        default="", help="other arguments used when opening VLC. Note that some like --fullscreen won't work in here.")
+        default="", help="other arguments used when opening VLC. Note that some like args='--fullscreen' won't work in here.")
 args = parser.parse_args()
 
 

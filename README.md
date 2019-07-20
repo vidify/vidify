@@ -38,7 +38,7 @@ optional arguments:
   -f, --fullscreen      play videos in fullscreen mode
   -a VLC_ARGS, --args VLC_ARGS
                         other arguments used when opening VLC. Note that some
-                        like --fullscreen won't work in here.
+                        like --args='--fullscreen' won't work.
 ```
 
 ---
