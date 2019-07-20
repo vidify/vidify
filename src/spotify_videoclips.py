@@ -3,8 +3,9 @@ import sys
 import argparse
 import youtube_dl
 import dbus
-import player
+from datetime import datetime
 from contextlib import contextmanager
+import player
 
 
 # ARGUMENT PARSING
@@ -12,15 +13,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--debug", action="store_true", dest="debug",
         default=False, help="turn on debug mode")
 args = parser.parse_args()
-
-
-# VLC PLAYER
-player_run = False
-player = player.Player(
-        dbus.SessionBus(),
-        "org.mpris.MediaPlayer2.spotify",
-        debug = args.debug
-)
 
 
 # HIDING STDERR WITHOUT LEAKS
@@ -43,57 +35,48 @@ def stderr_redirected(to=os.devnull):
 
 
 # YOUTUBE-DL CONFIGURATION
-def hook(d):
-    global player, player_run
-    # Starts playing the video as soon as the download starts
-    if not player_run:
-        player_run = True
-        player.start_video(d['filename'])
-
 ydl_opts = {
     'format' : 'bestvideo',
-    'outtmpl': 'downloads/%(id)s.%(ext)s',
-    'progress_hooks': [hook],
-    'nopart' : True,
     'quiet'  : True
 }
 if args.debug: ydl_opts['quiet'] = ''
 
 
-# Search a youtube video and return both the future name and the url
-def prepare_video(name):
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info("ytsearch:" + name, download=False)
-    # Fix for prepare_filename inconsistency from youtube-dl
-    return [
-            "downloads/" + info['entries'][0]['id'] + ".mp4", 
-            info['entries'][0]['webpage_url']
-            ]
-
-
 # Plays the video until a new song is found
 def play_video(player):
-    global player_run
     while True:
         name = player.format_name()
 
+        # Counts seconds to add a delay and sync the start
+        start_time = datetime.now()
         # Downloading the video
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download(["ytsearch:" + name])
+            info = ydl.extract_info("ytsearch:" + name, download=False)
+        url = info['entries'][0]['url']
+
+        offset = int((datetime.now() - start_time).total_seconds() * 1000) # In milliseconds
+        player.start_video(url, offset)
+        
+        # Lyrics
+        print("\033[4m" + name + "\033[0m")
+        print(player.get_lyrics() + "\n")
 
         # Waiting for the song to finish
         player.wait()
-        player_run = False
 
 
 # Player initialization and starting the main function
 def main():
-    global player
+    p = player.Player(
+            dbus.SessionBus(),
+            "org.mpris.MediaPlayer2.spotify",
+            debug = args.debug
+    )
     if args.debug:
-        play_video(player)
+        play_video(p)
     else:
         with stderr_redirected(os.devnull):
-            play_video(player)
+            play_video(p)
 
 
 if __name__ == '__main__':
