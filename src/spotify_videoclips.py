@@ -66,7 +66,11 @@ class Player:
         # VLC Instance
         if debug: _args = ""
         else: _args = "--quiet"
-        self._instance = vlc.Instance(_args)
+        try:
+            self._instance = vlc.Instance(_args)
+        except NameError:
+            error("VLC is not installed")
+            quit()
         self.video_player = self._instance.media_player_new()
 
         # DBus internal properties
