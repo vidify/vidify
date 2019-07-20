@@ -78,9 +78,6 @@ def play_video(player):
         name = player.format_name()
 
         # Downloading the video
-#         url = prepare_video(name)
-#         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-#             ydl.download([url])
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             ydl.download(["ytsearch:" + name])
 

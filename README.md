@@ -26,10 +26,6 @@ Then you can execute the script with python as you like.
 
 ---
 
-## TODO
-
-* Find a better cache for the videos to load them faster
-
 ## Current limitations:
 * Spotify doesn't currently (15/07/19) support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough
 
