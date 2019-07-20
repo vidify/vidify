@@ -18,7 +18,6 @@ class Player:
         }
         self.status = 'stopped'
         self.debug = debug
-        self.videos = {}
 
         # VLC Instance
         if self.debug: _args = "--verbose 1"
@@ -48,8 +47,8 @@ class Player:
         self._loop = GLib.MainLoop()
         self._signals = {}
 
-        self.refresh_status()
-        self.refresh_metadata()
+        self._refresh_status()
+        self._refresh_metadata()
         if self._connect: self.do_connect()
     
     # Connects to the dbus signals
@@ -58,8 +57,8 @@ class Player:
         if self._disconnecting is False:
             introspect_xml = self._introspect(self._bus_name, '/')
             if 'TrackMetadataChanged' in introspect_xml:
-                self._signals['track_metadata_changed'] = self._session_bus.add_signal_receiver(self.refresh_metadata, 'TrackMetadataChanged', self._bus_name)
-            self._properties_interface.connect_to_signal('PropertiesChanged', self.on_properties_changed)
+                self._signals['track_metadata_changed'] = self._session_bus.add_signal_receiver(self._refresh_metadata, 'TrackMetadataChanged', self._bus_name)
+            self._properties_interface.connect_to_signal('PropertiesChanged', self._on_properties_changed)
 
     # Disconnects from the dbus signals
     def do_disconnect(self):
@@ -72,15 +71,10 @@ class Player:
     # Waits for changes in dbus properties
     def wait(self):
         self._log("Starting loop")
-        try:
-            self._loop.run()
-        except KeyboardInterrupt:
-            self._log("Removing cache...")
-            os.system("rm downloads/* &>/dev/null")
-            exit()
+        self._loop.run()
 
     # Refreshes the status of the player (play/pause)
-    def refresh_status(self):
+    def _refresh_status(self):
         # Some clients (VLC) will momentarily create a new player before removing it again
         # so we can't be sure the interface still exists
         try:
@@ -90,7 +84,7 @@ class Player:
             self.do_disconnect()
 
     # Refreshes the metadata of the player (artist, title)
-    def refresh_metadata(self):
+    def _refresh_metadata(self):
         # Some clients (VLC) will momentarily create a new player before removing it again
         # so we can't be sure the interface still exists
         try:
@@ -102,10 +96,10 @@ class Player:
     # Assigns the new metadata to the class's properties
     def _assign_metadata(self):
         _metadata = self._properties_interface.Get("org.mpris.MediaPlayer2.Player", "Metadata")
-        self.metadata = self._format_metadata(_metadata)
+        self.metadata = self._formatted_metadata(_metadata)
 
     # Returns a formatted object from raw metadata
-    def _format_metadata(self, metadata):
+    def _formatted_metadata(self, metadata):
         return { 'artist' : metadata['xesam:artist'][0], 'title' : metadata['xesam:title'] }
 
     # Returns a formatted name with the artist and the title 
@@ -113,14 +107,15 @@ class Player:
         return self.metadata['artist'] + " - " + self.metadata['title']
 
     # Function called asynchronously from dbus on property changes
-    def on_properties_changed(self, interface, properties, signature):
+    def _on_properties_changed(self, interface, properties, signature):
         # Format the new metadata. If it's different, break the loop
         if dbus.String('Metadata') in properties:
-            _new_metadata = self._format_metadata(properties[dbus.String('Metadata')])
+            _new_metadata = self._formatted_metadata(properties[dbus.String('Metadata')])
             if _new_metadata != self.metadata:
                 self._log("New video")
                 self._assign_metadata()
                 self._loop.quit()
+
         # Paused/Played
         if dbus.String('PlaybackStatus') in properties:
             status = str(properties[dbus.String('PlaybackStatus')]).lower()
@@ -137,8 +132,8 @@ class Player:
             self.video_player.play()
 
     # Starts a new video on the VLC player
-    def start_video(self, filename):
-        self._log("Starting video")
+    def start_video(self, filename, offset = 0):
+        self._log("Starting video with offset " + str(offset))
         # Media instance
         Media = self._instance.media_new(filename)
         Media.get_mrl()
@@ -146,6 +141,7 @@ class Player:
         self.video_player.set_media(Media)
         if self.status == "playing":
             self.video_player.play()
+        self.video_player.set_time(offset)
 
     # Returns the song lyrics
     def get_lyrics(self):
