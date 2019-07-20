@@ -17,7 +17,7 @@ setup(
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
     classifiers=[
-        'Development Status :: 5 - Stable',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users',
         'Topic :: Multimedia :: Sound/Audio :: Players',
         'License :: OSI Approved :: MIT License',
