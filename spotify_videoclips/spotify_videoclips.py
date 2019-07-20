@@ -5,7 +5,7 @@ import youtube_dl
 import dbus
 from datetime import datetime
 from contextlib import contextmanager
-import player
+from . import player
 
 
 # ARGUMENT PARSING
@@ -74,11 +74,10 @@ def play_video(player):
 
 # Player initialization and starting the main function
 def main():
-    p = player.Player(
-            dbus.SessionBus(),
-            "org.mpris.MediaPlayer2.spotify",
+    p = player.dbusPlayer(
             debug = args.debug,
-            vlc_args = args.vlc_args
+            vlc_args = args.vlc_args,
+            fullscreen = args.fullscreen
     )
     if args.debug:
         play_video(p)
