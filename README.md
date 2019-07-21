@@ -6,7 +6,11 @@ A simple tool to show Youtube **videoclips** and **lyrics** for the currently pl
 
 ## How to install
 
-Download the latest [release](https://github.com/marioortizmanero/spotify-videoclips/releases). Uncompress the .tar.gz file and run inside the folder:
+You can use pip to install it easily:
+
+`pip3 install spotify-videoclips`
+
+Or download the latest [release](https://github.com/marioortizmanero/spotify-videoclips/releases). Uncompress the .tar.gz file and run inside the folder:
 
 `python ./setup.py install`
 
@@ -29,7 +33,7 @@ Then you can execute the script with python as you like.
 You can use these flags to modify the behavior of the program:
 
 ```
-usage: spotify_videoclips.py [-h] [-d] [-n] [-f] [-a VLC_ARGS]
+usage: spotify-videoclips [-h] [-d] [-n] [-f] [-a VLC_ARGS]
 
 optional arguments:
   -h, --help            show this help message and exit
