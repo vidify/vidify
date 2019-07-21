@@ -17,16 +17,6 @@ Or download the latest [release](https://github.com/marioortizmanero/spotify-vid
 *Note: you can add the --user flag to install it locally.*
 *Also, it's based on DBus so it only works on Linux.*
 
-### Manually:
-
-Install the latest version of `youtube-dl`, `python-vlc` and `lyricwikia`. With pip:
-
-* `pip install --user youtube-dl; pip install --user python-vlc; pip install --user lyricwikia`
-
-Then you can execute the script with python as you like.
-
-*Note that they're avaliable on the AUR too: [youtube-dl](https://www.archlinux.org/packages/community/any/youtube-dl/), [python-vlc](https://aur.archlinux.org/packages/python-vlc/)*.
-
 
 ## How to use
 
