@@ -56,7 +56,7 @@ class Player:
     
     # Connects to the dbus signals
     def do_connect(self):
-
+        self._log("Connecting")
         if self._disconnecting is False:
             introspect_xml = self._introspect(self._bus_name, '/')
             if 'TrackMetadataChanged' in introspect_xml:
@@ -149,7 +149,6 @@ class Player:
 
     # Returns the song lyrics
     def get_lyrics(self):
-        # First tries using lyricwikia
         try:
             return lyricwikia.get_lyrics(self.metadata['artist'], self.metadata['title'])
         except lyricwikia.LyricsNotFound:
