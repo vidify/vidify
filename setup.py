@@ -29,7 +29,8 @@ setup(
     install_requires=[
         'youtube-dl',
         'python-vlc',
-        'lyricwikia'
+        'lyricwikia',
+        'dbus-python'
         ],
     entry_points={
         'console_scripts' : [ 'spotify-videoclips = src.spotify_videoclips:main' ]

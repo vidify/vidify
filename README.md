@@ -17,16 +17,6 @@ Or download the latest [release](https://github.com/marioortizmanero/spotify-vid
 *Note: you can add the --user flag to install it locally.*
 *Also, it's based on DBus so it only works on Linux.*
 
-### Manually:
-
-Install the latest version of `youtube-dl`, `python-vlc` and `lyricwikia`. With pip:
-
-* `pip install --user youtube-dl; pip install --user python-vlc; pip install --user lyricwikia`
-
-Then you can execute the script with python as you like.
-
-*Note that they're avaliable on the AUR too: [youtube-dl](https://www.archlinux.org/packages/community/any/youtube-dl/), [python-vlc](https://aur.archlinux.org/packages/python-vlc/)*.
-
 
 ## How to use
 
@@ -49,6 +39,16 @@ optional arguments:
 
 ## Current limitations:
 * Spotify doesn't currently (15/07/19) support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough
+
+
+## TODO
+
+* Check native toggle pause/play with vlc API
+* Argument to configure the size of the wkndow (vlc) or the quality (youtube-db)
+* Check if `if _status != self.status` is necessary inside property_change
+* Fullscreen args when the player is created
+* Support for Web Api with spotipy: detect non-linux automatically and add args
+
 
 ## Documentation
 
