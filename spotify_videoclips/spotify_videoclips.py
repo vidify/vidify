@@ -5,7 +5,7 @@ import youtube_dl
 import dbus
 from datetime import datetime
 from contextlib import contextmanager
-from .player import Player
+import player
 
 
 # ARGUMENT PARSING
@@ -74,7 +74,7 @@ def play_video(player):
 
 # Player initialization and starting the main function
 def main():
-    p = Player(
+    p = player.dbusPlayer(
             dbus.SessionBus(),
             "org.mpris.MediaPlayer2.spotify",
             debug = args.debug,

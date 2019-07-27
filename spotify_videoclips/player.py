@@ -9,9 +9,8 @@ DBusGMainLoop(set_as_default=True)
 
 
 # PLAYER CLASS WITH VLC AND DBUS PROPERTIES
-class Player:
-    def __init__(self, session_bus, bus_name, connect = True,
-            debug = False, vlc_args = "", fullscreen = False):
+class dbusPlayer:
+    def __init__(self,  debug = False, vlc_args = "", fullscreen = False):
         # Main player properties
         self.metadata = {
                 'artist' : '',
@@ -33,8 +32,8 @@ class Player:
         self.video_player = self._instance.media_player_new()
 
         # DBus internal properties
-        self._session_bus = session_bus
-        self._bus_name = bus_name
+        self._session_bus = dbus.SessionBus()
+        self._bus_name = "org.mpris.MediaPlayer2.spotify"
         self._disconnecting = False
         self._connect = connect
         try:
@@ -99,11 +98,16 @@ class Player:
     # Assigns the new metadata to the class's properties
     def _assign_metadata(self):
         _metadata = self._properties_interface.Get("org.mpris.MediaPlayer2.Player", "Metadata")
-        self.metadata = self._formatted_metadata(_metadata)
+        try:
+            self.metadata = self._formatted_metadata(_metadata)
+        except IndexError:
+            self._error("No song currently playing")
+            self.do_disconnect()
 
     # Returns a formatted object from raw metadata
     def _formatted_metadata(self, metadata):
-        return { 'artist' : metadata['xesam:artist'][0], 'title' : metadata['xesam:title'] }
+        return { 'artist' : 'fuck', 'title' : 'you' }
+#         return { 'artist' : metadata['xesam:artist'][0], 'title' : metadata['xesam:title'] }
 
     # Returns a formatted name with the artist and the title 
     def format_name(self):
