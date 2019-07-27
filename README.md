@@ -38,15 +38,14 @@ optional arguments:
 ---
 
 ## Current limitations:
-* Spotify doesn't currently (15/07/19) support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough
+* Spotify doesn't currently (15/07/19) support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
+* To configure the maximum size of VLC's window a GUI would need to be implemented, like tkinter. The project would be much less minimal that way, but more features could be implemented, like lyrics inside the GUI.
 
 
 ## TODO
 
 * Check native toggle pause/play with vlc API
-* Argument to configure the size of the wkndow (vlc) or the quality (youtube-db)
 * Check if `if _status != self.status` is necessary inside property_change
-* Fullscreen args when the player is created
 * Support for Web Api with spotipy: detect non-linux automatically and add args
 
 

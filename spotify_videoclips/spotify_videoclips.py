@@ -76,7 +76,8 @@ def play_video(player):
 def main():
     p = player.dbusPlayer(
             debug = args.debug,
-            vlc_args = args.vlc_args
+            vlc_args = args.vlc_args,
+            fullscreen = args.fullscreen
     )
     if args.debug:
         play_video(p)
