@@ -15,7 +15,16 @@ Or download the latest [release](https://github.com/marioortizmanero/spotify-vid
 `python ./setup.py install`
 
 *Note: you can add the --user flag to install it locally.*
-*Also, it's based on DBus so it only works on Linux.*
+
+
+## Compatibility
+
+For Windows and Mac users, the Spotify Web API will be used. This means that:
+    * You have to sign in
+    * Only Spotify Premium users are able to use it
+    * API calls are limited to 1 per second so there is more lag
+
+On the contrary, the API is more solid and future-proof. For example, it's easier to sync the videos with the songs with it.
 
 
 ## How to use
@@ -44,9 +53,7 @@ optional arguments:
 
 ## TODO
 
-* Check native toggle pause/play with vlc API
 * Check if `if _status != self.status` is necessary inside property_change
-* Support for Web Api with spotipy: detect non-linux automatically and add args
 
 
 ## Documentation

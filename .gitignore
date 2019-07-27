@@ -4,4 +4,6 @@ dist/*
 build/*
 spotify_videoclips.egg-info/*
 */*.pyc
+*/.cache-*
+.cache-*
 
