@@ -82,7 +82,7 @@ class DbusPlayer:
         # Main player properties
         self.artist = ""
         self.title = ""
-        self.status = 'stopped'
+        self.is_playing = False
         self._debug = debug
         self.player = VLCWindow(
                 debug = debug,
@@ -106,7 +106,6 @@ class DbusPlayer:
         self._loop = GLib.MainLoop()
         self._signals = {}
 
-        self._refresh_status()
         self._refresh_metadata()
         self.do_connect()
     
@@ -132,22 +131,12 @@ class DbusPlayer:
         log("Starting loop", self._debug)
         self._loop.run()
 
-    # Refreshes the status of the player (play/pause)
-    def _refresh_status(self):
-        # Some clients (VLC) will momentarily create a new player before removing it again
-        # so we can't be sure the interface still exists
-        try:
-            self.status = str(self._properties_interface.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus')).lower()
-        except dbus.exceptions.DBusException as e:
-            error(e)
-            self.do_disconnect()
-
     # Returns the artist and title out of a raw metadata object
     def _formatted_metadata(self, metadata):
         return metadata['xesam:artist'][0], metadata['xesam:title']
 
-    # Assigns the new metadata to the class's properties
-    def _assign_metadata(self):
+    # Refreshes the metadata and status of the player (artist, title)
+    def _refresh_metadata(self):
         _metadata = self._properties_interface.Get("org.mpris.MediaPlayer2.Player", "Metadata")
         try:
             self.artist, self.title = self._formatted_metadata(_metadata)
@@ -155,15 +144,10 @@ class DbusPlayer:
             error("No song currently playing")
             self.do_disconnect()
 
-    # Refreshes the metadata of the player (artist, title)
-    def _refresh_metadata(self):
-        # Some clients (VLC) will momentarily create a new player before removing it again
-        # so we can't be sure the interface still exists
-        try:
-            self._assign_metadata()
-        except dbus.exceptions.DBusException as e:
-            error(e)
-            self.do_disconnect()
+        _status = str(self._properties_interface.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus')).lower()
+        # Consistency with the web API status variable and ease of use
+        if _status == "stopped": self.is_playing = False
+        else: self.is_playing = True
 
     # Function called asynchronously from dbus on property changes
     def _on_properties_changed(self, interface, properties, signature):
@@ -172,15 +156,17 @@ class DbusPlayer:
             _artist, _title = self._formatted_metadata(properties[dbus.String('Metadata')])
             if _artist != self.artist or _title != self.title:
                 log("New video", self._debug)
-                self._assign_metadata()
+                self._refresh_metadata()
                 self._loop.quit()
 
         # Paused/Played
         if dbus.String('PlaybackStatus') in properties:
-            status = str(properties[dbus.String('PlaybackStatus')]).lower()
-            if status != self.status:
+            _status = str(properties[dbus.String('PlaybackStatus')]).lower()
+            if _status == "stopped": _status = False
+            else: _status = True
+            if _status != self.is_playing:
                 log("Paused/Played video", self._debug)
-                self.status = status
+                self.is_playing = _status
                 self.player.toggle_pause()
 
 
@@ -191,7 +177,7 @@ class WebPlayer:
         self.artist = ""
         self.title = ""
         self.position = 0
-        self.status = 'stopped'
+        self.is_playing = False
         self._debug = debug
         self.player = VLCWindow(
                 debug = debug,
@@ -229,17 +215,14 @@ class WebPlayer:
     def _refresh_metadata(self):
         _metadata = self._spotify.current_user_playing_track()
         self.artist, self.title, self.position = self._formatted_metadata(_metadata)
-        # Consistency with the status variable
-        is_playing = _metadata['is_playing']
-        if is_playing: self.status = "playing"
-        else: self.status = "stopped"
+        self.is_playing = _metadata['is_playing']
 
     # Returns the position of the player
     def get_position(self):
         self._refresh_metadata()
         return self.position
 
-    # Loop that waits until a new song is played
+    # Loop that waits until a new song is played, and that checks for changes in playback
     def wait(self):
         while True:
             time.sleep(1)
@@ -248,14 +231,17 @@ class WebPlayer:
             _status = self.status
             _position = self.position
             self._refresh_metadata()
+
             if self.status != _status:
                 log("Paused/Played video", self._debug)
                 self.player.toggle_pause()
-            # Changes position if it's more than 3 seconds (1 with margin) or less than 0
+
+            # Changes position if it's more than 3 seconds or less than 0
             diff = self.position - _position
             if diff >= 3000 or diff < 0:
                 log("Position changed", self._debug)
                 self.player.set_position(self.position)
+
             if self.artist != _artist or self.title != _title:
                 log("Song changed", self._debug)
                 break
