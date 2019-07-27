@@ -1,4 +1,5 @@
 import os
+import sys
 import vlc
 import dbus
 import lyricwikia
@@ -28,19 +29,16 @@ class dbusPlayer:
             self._instance = vlc.Instance(_args)
         except NameError:
             self._error("VLC is not installed")
-            quit()
         self.video_player = self._instance.media_player_new()
 
         # DBus internal properties
         self._session_bus = dbus.SessionBus()
         self._bus_name = "org.mpris.MediaPlayer2.spotify"
         self._disconnecting = False
-        self._connect = connect
         try:
             self._obj = self._session_bus.get_object(self._bus_name, '/org/mpris/MediaPlayer2')
         except dbus.exceptions.DBusException as e:
             self._error("No spotify session running")
-            exit()
         self._properties_interface = dbus.Interface(self._obj, dbus_interface="org.freedesktop.DBus.Properties")
         self._introspect_interface = dbus.Interface(self._obj, dbus_interface="org.freedesktop.DBus.Introspectable")
         self._media_interface      = dbus.Interface(self._obj, dbus_interface='org.mpris.MediaPlayer2')
@@ -51,7 +49,7 @@ class dbusPlayer:
 
         self._refresh_status()
         self._refresh_metadata()
-        if self._connect: self.do_connect()
+        self.do_connect()
     
     # Connects to the dbus signals
     def do_connect(self):
@@ -106,8 +104,7 @@ class dbusPlayer:
 
     # Returns a formatted object from raw metadata
     def _formatted_metadata(self, metadata):
-        return { 'artist' : 'fuck', 'title' : 'you' }
-#         return { 'artist' : metadata['xesam:artist'][0], 'title' : metadata['xesam:title'] }
+        return { 'artist' : metadata['xesam:artist'][0], 'title' : metadata['xesam:title'] }
 
     # Returns a formatted name with the artist and the title 
     def format_name(self):
@@ -166,4 +163,5 @@ class dbusPlayer:
     # Prints formatted errors to the console
     def _error(self, msg):
         print("\033[91m[ERROR]: " + msg + "\033[0m")
+        sys.exit(1)
 

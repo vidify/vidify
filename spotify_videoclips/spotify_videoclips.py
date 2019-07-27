@@ -75,8 +75,6 @@ def play_video(player):
 # Player initialization and starting the main function
 def main():
     p = player.dbusPlayer(
-            dbus.SessionBus(),
-            "org.mpris.MediaPlayer2.spotify",
             debug = args.debug,
             vlc_args = args.vlc_args
     )
