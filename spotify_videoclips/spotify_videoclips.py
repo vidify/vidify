@@ -86,7 +86,7 @@ def play_videos_dbus(player, spotify):
         player.start_video(url)
         offset = int((datetime.now() - start_time).total_seconds() * 1000)
         player.set_position(offset)
-        if spotify.status == "playing":
+        if spotify.is_playing:
             player.play()
 
         print_lyrics(spotify)
@@ -105,7 +105,7 @@ def play_videos_web(player, spotify):
         player.start_video(url)
         offset = spotify.get_position()
         player.set_position(offset)
-        if spotify.status == "playing":
+        if spotify.is_playing:
             player.play()
         
         print_lyrics(spotify)
