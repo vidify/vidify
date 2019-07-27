@@ -29,5 +29,8 @@ setup(
         'python-vlc',
         'lyricwikia',
         'dbus-python'
-        ]
+        ],
+    entry_points={
+        'console_scripts' : [ 'spotify-videoclips = spotify_videoclips.spotify_videoclips:main' ]
+    }
 )

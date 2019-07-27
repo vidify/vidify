@@ -5,7 +5,7 @@ import youtube_dl
 import dbus
 from datetime import datetime
 from contextlib import contextmanager
-import player
+from . import player
 
 
 # ARGUMENT PARSING
