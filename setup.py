@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='spotify-videoclips',
-    version='1.2.2',
+    version='1.3',
     packages=find_packages(),
     description='Simple tool to show Youtube videoclips and lyrics for the playing Spotify songs',
     url='https://github.com/marioortizmanero/spotify-videoclips',
@@ -28,7 +28,8 @@ setup(
         'youtube-dl',
         'python-vlc',
         'lyricwikia',
-        'dbus-python'
+        'dbus-python',
+        'spotipy'
         ],
     entry_points={
         'console_scripts' : [ 'spotify-videoclips = spotify_videoclips.spotify_videoclips:main' ]
