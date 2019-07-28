@@ -170,7 +170,6 @@ class DbusPlayer:
                 self.player.toggle_pause()
 
 
-
 class WebPlayer:
     def __init__(self, username, client_id, client_secret, redirect_uri, debug = False, vlc_args = "", fullscreen = False):
         # Main player properties
@@ -186,9 +185,9 @@ class WebPlayer:
         )
 
         # Checking that all parameters are passed
-        if not username: error("You must pass your username as an argument. Example: --username='yourname'")
-        if not client_id: error("You must pass your client ID as an argument. Example: --client-id='TODO'")
-        if not client_secret: error("You must pass your client secret as an argument. Example: --client-secret='TODO'")
+        if not username: error("You must pass your username as an argument. Run `spotify-videoclips --help` for more info.")
+        if not client_id: error("You must pass your client ID as an argument. Run `spotify-videoclips --help` for more info.")
+        if not client_secret: error("You must pass your client secret as an argument. Run `spotify-videoclips --help` for more info.")
 
         # Creation of the Spotify token
         self._token = spotipy.util.prompt_for_user_token(
@@ -199,6 +198,7 @@ class WebPlayer:
                 redirect_uri = redirect_uri
         )
         if self._token:
+            log("Authorized correctly", self._debug)
             self._spotify = spotipy.Spotify(auth = self._token)
         else:
             error("Can't get token for " + username)
@@ -228,15 +228,15 @@ class WebPlayer:
             time.sleep(1)
             _artist = self.artist
             _title = self.title
-            _status = self.status
+            _is_playing = self.is_playing
             _position = self.position
             self._refresh_metadata()
 
-            if self.status != _status:
+            if self.is_playing != _is_playing:
                 log("Paused/Played video", self._debug)
                 self.player.toggle_pause()
 
-            # Changes position if it's more than 3 seconds or less than 0
+            # Changes position if the difference is more than 3 seconds or less than 0
             diff = self.position - _position
             if diff >= 3000 or diff < 0:
                 log("Position changed", self._debug)
