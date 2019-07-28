@@ -1,34 +1,38 @@
 import os
 import sys
 import platform
+
 import argparse
 import lyricwikia
 from datetime import datetime
 from contextlib import contextmanager
-from .player import VLCWindow
 
 
 # Argument parsing
-parser = argparse.ArgumentParser()
-parser.add_argument("-d", "--debug", action="store_true", dest="debug",
-        default=False, help="turn on debug mode")
+parser = argparse.ArgumentParser(
+        description = "Windows and Mac users must pass --username, --client-id and --client-secret to use the web API. Read more about how to obtain them in the README (https://github.com/marioortizmanero/spotify-videoclips).",
+)
+parser.add_argument('-v', '--version', action='version',
+        version='%(prog)s 1.3', help="show program's version number and exit.")
+parser.add_argument("--debug", action="store_true", dest="debug",
+        default=False, help="display debug messages")
 parser.add_argument("-n", "--no-lyrics", action="store_false", dest="lyrics",
-        default=True, help="do not display lyrics")
+        default=True, help="do not print lyrics")
 parser.add_argument("-f", "--fullscreen", action="store_true", dest="fullscreen",
         default=False, help="play videos in fullscreen mode")
 parser.add_argument("-a", "--args", action="store", dest="vlc_args",
         default="", help="other arguments used when opening VLC. Note that some like args='--fullscreen' won't work in here")
 
 parser.add_argument("-w", "--use-web-api", action="store_true", dest="use_web_api",
-        default=False, help="use Spotify's web API (only Linux doesn't use it by default)")
+        default=False, help="forcefully use Spotify's web API")
 parser.add_argument("--username", action="store", dest="username",
-        default="", help="your Spotify username. Mandatory if the web API is being used")
+        default="", help="your Spotify username. Mandatory if the web API is being used. Example: --username='yourname'")
 parser.add_argument("--client-id", action="store", dest="client_id",
-        default="", help="your client ID. Mandatory if the web API is being used. Check the README to see how to obtain yours")
+        default="", help="your client ID. Mandatory if the web API is being used. Check the README to see how to obtain yours. Example: --client-id='5fe01282e44241328a84e7c5cc169165'")
 parser.add_argument("--client-secret", action="store", dest="client_secret",
-        default="", help="your client secret ID. Mandatory if the web API is being used. Check the README to see how to obtain yours")
+        default="", help="your client secret ID. Mandatory if the web API is being used. Check the README to see how to obtain yours. Example: --client-secret='2665f6d143be47c1bc9ff284e9dfb350'")
 parser.add_argument("--redirect-uri", action="store", dest="redirect_uri",
-        default="http://localhost:8888/callback/", help="the redirect URI. Not necessary as it defaults to 'http://localhost:8888/callback/'")
+        default="http://localhost:8888/callback/", help="the redirect URI for the web API. Not necessary as it defaults to 'http://localhost:8888/callback/'")
 
 args = parser.parse_args()
 
