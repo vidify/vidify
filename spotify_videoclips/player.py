@@ -58,7 +58,6 @@ class VLCWindow:
     def get_url(self, name, ydl_opts):
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info("ytsearch:" + name, download=False)
-        log(info['entries'][0]['url'])
         return info['entries'][0]['url']
 
     # Starts a new video on the VLC player
@@ -145,13 +144,13 @@ class DbusPlayer:
             self.do_disconnect()
 
         _status = str(self._properties_interface.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus')).lower()
-        # Consistency with the web API status variable and ease of use
+        # Consistency with the web API status variable and ease of use using booleans
         if _status == "stopped": self.is_playing = False
         else: self.is_playing = True
 
-    # Function called asynchronously from dbus on property changes
+    # Function called from dbus on property changes
     def _on_properties_changed(self, interface, properties, signature):
-        # Format the new metadata. If it's different, break the loop
+        # If the song is different, break the loop
         if dbus.String('Metadata') in properties:
             _artist, _title = self._formatted_metadata(properties[dbus.String('Metadata')])
             if _artist != self.artist or _title != self.title:
@@ -159,7 +158,7 @@ class DbusPlayer:
                 self._refresh_metadata()
                 self._loop.quit()
 
-        # Paused/Played
+        # The song was Paused/Played
         if dbus.String('PlaybackStatus') in properties:
             _status = str(properties[dbus.String('PlaybackStatus')]).lower()
             if _status == "stopped": _status = False
@@ -203,7 +202,6 @@ class WebPlayer:
         else:
             error("Can't get token for " + username)
 
-        # Initializes variables
         self._spotify.trace = False
         self._refresh_metadata()
 
@@ -222,7 +220,7 @@ class WebPlayer:
         self._refresh_metadata()
         return self.position
 
-    # Loop that waits until a new song is played, and that checks for changes in playback
+    # Loop that waits until a new song is played, and that checks for changes in playback every second
     def wait(self):
         while True:
             time.sleep(1)
