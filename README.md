@@ -10,6 +10,10 @@ You can use pip to install it easily:
 
 `pip3 install spotify-videoclips`
 
+You might have to install spotipy manually if you see an `AtributeError`, since their PyPi package is outdated currently:
+
+`pip3 install git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4`
+
 Or download the latest [release](https://github.com/marioortizmanero/spotify-videoclips/releases). Uncompress the .tar.gz file and run inside the folder:
 
 `python ./setup.py install`

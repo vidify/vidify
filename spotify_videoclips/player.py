@@ -1,18 +1,13 @@
 import os
 import sys
 import time
-
 import vlc
-import dbus
 import youtube_dl
 import spotipy
 import spotipy.util
-
-# Asynchronous calls to dbus loops
+import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
-DBusGMainLoop(set_as_default=True)
-
 
 # Prints formatted logs to the console if debug is True
 def log(msg, debug = True):
@@ -78,6 +73,9 @@ class VLCWindow:
 # Dbus player with the Spotify properties (on Linux)
 class DbusPlayer:
     def __init__(self, debug = False, vlc_args = "", fullscreen = False):
+        # Configuring loop
+        DBusGMainLoop(set_as_default=True)
+
         # Main player properties
         self.artist = ""
         self.title = ""
@@ -94,19 +92,31 @@ class DbusPlayer:
         self._bus_name = "org.mpris.MediaPlayer2.spotify"
         self._disconnecting = False
         try:
-            self._obj = self._session_bus.get_object(self._bus_name, '/org/mpris/MediaPlayer2')
+            self._obj = self._session_bus.get_object(
+                    self._bus_name,
+                    '/org/mpris/MediaPlayer2')
         except dbus.exceptions.DBusException as e:
             error("No spotify session running")
-        self._properties_interface = dbus.Interface(self._obj, dbus_interface="org.freedesktop.DBus.Properties")
-        self._introspect_interface = dbus.Interface(self._obj, dbus_interface="org.freedesktop.DBus.Introspectable")
-        self._media_interface      = dbus.Interface(self._obj, dbus_interface='org.mpris.MediaPlayer2')
-        self._player_interface     = dbus.Interface(self._obj, dbus_interface='org.mpris.MediaPlayer2.Player')
-        self._introspect = self._introspect_interface.get_dbus_method('Introspect', dbus_interface=None)
+        self._properties_interface = dbus.Interface(
+                self._obj,
+                dbus_interface="org.freedesktop.DBus.Properties")
+        self._introspect_interface = dbus.Interface(
+                self._obj,
+                dbus_interface="org.freedesktop.DBus.Introspectable")
+        self._media_interface = dbus.Interface(
+                self._obj,
+                dbus_interface='org.mpris.MediaPlayer2')
+        self._player_interface = dbus.Interface(
+                self._obj,
+                dbus_interface='org.mpris.MediaPlayer2.Player')
+        self._introspect = self._introspect_interface.get_dbus_method(
+                'Introspect',
+                dbus_interface=None)
         self._loop = GLib.MainLoop()
         self._signals = {}
 
-        self._refresh_metadata()
         self.do_connect()
+        self._refresh_metadata()
     
     # Connects to the dbus signals
     def do_connect(self):
@@ -114,8 +124,13 @@ class DbusPlayer:
         if self._disconnecting is False:
             introspect_xml = self._introspect(self._bus_name, '/')
             if 'TrackMetadataChanged' in introspect_xml:
-                self._signals['track_metadata_changed'] = self._session_bus.add_signal_receiver(self._refresh_metadata, 'TrackMetadataChanged', self._bus_name)
-            self._properties_interface.connect_to_signal('PropertiesChanged', self._on_properties_changed)
+                self._signals['track_metadata_changed'] = self._session_bus.add_signal_receiver(
+                        self._refresh_metadata,
+                        'TrackMetadataChanged',
+                        self._bus_name)
+            self._properties_interface.connect_to_signal(
+                    'PropertiesChanged',
+                    self._on_properties_changed)
 
     # Disconnects from the dbus signals
     def do_disconnect(self):
@@ -136,14 +151,19 @@ class DbusPlayer:
 
     # Refreshes the metadata and status of the player (artist, title)
     def _refresh_metadata(self):
-        _metadata = self._properties_interface.Get("org.mpris.MediaPlayer2.Player", "Metadata")
+        _metadata = self._properties_interface.Get(
+                "org.mpris.MediaPlayer2.Player",
+                "Metadata"
+        )
         try:
             self.artist, self.title = self._formatted_metadata(_metadata)
         except IndexError:
             error("No song currently playing")
             self.do_disconnect()
 
-        _status = str(self._properties_interface.Get('org.mpris.MediaPlayer2.Player', 'PlaybackStatus')).lower()
+        _status = str(self._properties_interface.Get(
+            'org.mpris.MediaPlayer2.Player',
+            'PlaybackStatus')).lower()
         # Consistency with the web API status variable and ease of use using booleans
         if _status == "stopped": self.is_playing = False
         else: self.is_playing = True
@@ -170,7 +190,8 @@ class DbusPlayer:
 
 
 class WebPlayer:
-    def __init__(self, username, client_id, client_secret, redirect_uri, debug = False, vlc_args = "", fullscreen = False):
+    def __init__(self, username, client_id, client_secret, redirect_uri,
+            debug = False, vlc_args = "", fullscreen = False):
         # Main player properties
         self.artist = ""
         self.title = ""
@@ -184,9 +205,15 @@ class WebPlayer:
         )
 
         # Checking that all parameters are passed
-        if not username: error("You must pass your username as an argument. Run `spotify-videoclips --help` for more info.")
-        if not client_id: error("You must pass your client ID as an argument. Run `spotify-videoclips --help` for more info.")
-        if not client_secret: error("You must pass your client secret as an argument. Run `spotify-videoclips --help` for more info.")
+        if not username: error(
+                "You must pass your username as an argument."
+                "Run `spotify-videoclips --help` for more info.")
+        if not client_id: error(
+                "You must pass your client ID as an argument."
+                "Run `spotify-videoclips --help` for more info.")
+        if not client_secret: error(
+                "You must pass your client secret as an argument."
+                "Run `spotify-videoclips --help` for more info.")
 
         # Creation of the Spotify token
         self._token = spotipy.util.prompt_for_user_token(
@@ -207,11 +234,17 @@ class WebPlayer:
 
     # Returns the artist and title out of a raw metadata object
     def _formatted_metadata(self, metadata):
-        return metadata['item']['artists'][0]['name'], metadata['item']['name'], metadata['progress_ms']
+        return metadata['item']['artists'][0]['name'],
+               metadata['item']['name'],
+               metadata['progress_ms']
 
     # Refreshes the metadata and status of the player (artist, title, position)
     def _refresh_metadata(self):
-        _metadata = self._spotify.current_user_playing_track()
+        try:
+            _metadata = self._spotify.current_user_playing_track()
+        except AttributeError:
+            error("Your spotipy version is outdated."
+                    "Please run `pip3 install git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4` to install the latest version.")
         self.artist, self.title, self.position = self._formatted_metadata(_metadata)
         self.is_playing = _metadata['is_playing']
 
@@ -220,7 +253,7 @@ class WebPlayer:
         self._refresh_metadata()
         return self.position
 
-    # Loop that waits until a new song is played, and that checks for changes in playback every second
+    # Waits until a new song is played, checking for changes every second
     def wait(self):
         while True:
             time.sleep(1)
