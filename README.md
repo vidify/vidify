@@ -20,18 +20,19 @@ Or download the latest [release](https://github.com/marioortizmanero/spotify-vid
 ## Compatibility
 
 For Windows and Mac users, the Spotify Web API will be used. This means that:
-    * You have to sign in and set it up manually
-    * Only Spotify Premium users are able to use some functions
-    * API calls are limited to 1 per second so there is more lag
+
+* You have to sign in and set it up manually
+* Only Spotify Premium users are able to use some functions
+* API calls are limited to 1 per second so there is more lag
 
 **How to obtain your client ID and your client secret:**
 
-    1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
-    2. Create a new client ID. You can fill the descriptions as you like.
-    3. Click `No` when asked if it's a commercial integration and accept the terms in the next step.
-    4. Go to `Edit Settings` and type `http://localhost:8888/callback/` in the Redirect URIs field.
-    5. You can now copy your Client ID and Client Secret and add them when you call `spotify-videoclips`:
-        * `spotify-videoclips --username your_username --client-id your_client_id --client-secret your_client_secret`
+1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
+2. Create a new client ID. You can fill the descriptions as you like.
+3. Click `No` when asked if it's a commercial integration and accept the terms in the next step.
+4. Go to `Edit Settings` and type `http://localhost:8888/callback/` in the Redirect URIs field.
+5. You can now copy your Client ID and Client Secret and add them when you call `spotify-videoclips`:
+    * `spotify-videoclips --username your_username --client-id your_client_id --client-secret your_client_secret`
 
 You may be prompted to paste the resulting link that was opened in your browser into the program. After doing it, the authorization process will be complete.
 
