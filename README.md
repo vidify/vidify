@@ -42,7 +42,8 @@ You may be prompted to paste the resulting link that was opened in your browser 
 You can use these flags to modify the behavior of the program:
 
 ```
-usage: spotify-videoclips [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS] [-w]
+usage: spotify-videoclips [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
+                          [--width MAX_WIDTH] [--height MAX_HEIGHT] [-w]
                           [--username USERNAME] [--client-id CLIENT_ID]
                           [--client-secret CLIENT_SECRET]
                           [--redirect-uri REDIRECT_URI]
@@ -60,6 +61,8 @@ optional arguments:
   -a VLC_ARGS, --args VLC_ARGS
                         other arguments used when opening VLC. Note that some
                         like args='--fullscreen' won't work in here
+  --width MAX_WIDTH     set the maximum width for the played videos
+  --height MAX_HEIGHT   set the maximum height for the played videos
   -w, --use-web-api     forcefully use Spotify's web API
   --username USERNAME   your Spotify username. Mandatory if the web API is
                         being used. Example: --username='yourname'

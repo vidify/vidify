@@ -22,6 +22,10 @@ parser.add_argument("-f", "--fullscreen", action="store_true", dest="fullscreen"
         default=False, help="play videos in fullscreen mode")
 parser.add_argument("-a", "--args", action="store", dest="vlc_args",
         default="", help="other arguments used when opening VLC. Note that some like args='--fullscreen' won't work in here")
+parser.add_argument("--width", action="store", dest="max_width",
+        default="", help="set the maximum width for the played videos")
+parser.add_argument("--height", action="store", dest="max_height",
+        default="", help="set the maximum height for the played videos")
 
 parser.add_argument("-w", "--use-web-api", action="store_true", dest="use_web_api",
         default=False, help="forcefully use Spotify's web API")
@@ -62,6 +66,8 @@ ydl_opts = {
     'quiet'  : True
 }
 if args.debug: ydl_opts['quiet'] = False
+if args.max_width: ydl_opts['format'] += "[width<=" + args.max_width + "]"
+if args.max_height: ydl_opts['format'] += "[height<=" + args.max_height + "]"
 
 
 # Returns a formatted name with the artist and the title
