@@ -1,8 +1,8 @@
 import os
 import sys
 import platform
-
 import argparse
+
 import lyricwikia
 from datetime import datetime
 from contextlib import contextmanager
