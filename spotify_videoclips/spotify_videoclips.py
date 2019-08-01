@@ -2,10 +2,10 @@ import os
 import sys
 import platform
 import argparse
-
 import lyricwikia
 from datetime import datetime
 from contextlib import contextmanager
+from .player import WebPlayer, DbusPlayer
 
 
 # Argument parsing
@@ -126,7 +126,6 @@ def play_videos_web(player, spotify):
 
 def choose_platform():
     if platform.system() == "Linux" and not args.use_web_api:
-        from .player import DbusPlayer
         spotify = DbusPlayer(
                 debug = args.debug,
                 vlc_args = args.vlc_args,
@@ -134,7 +133,6 @@ def choose_platform():
         )
         play_videos_dbus(spotify.player, spotify)
     else:
-        from .player import WebPlayer
         spotify = WebPlayer(
                 debug = args.debug,
                 username = args.username,
