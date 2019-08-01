@@ -29,7 +29,8 @@ setup(
         'python-vlc',
         'lyricwikia',
         'dbus-python',
-        'spotipy==2.4.4'
+        'spotipy==2.4.4',
+        'PyGObject'
     ],
     dependency_links=[
         'git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4' # Fix for https://github.com/plamere/spotipy/issues/211
