@@ -247,8 +247,8 @@ class WebPlayer:
         try:
             _metadata = self._spotify.current_user_playing_track()
         except AttributeError:
-            error("Your spotipy version is outdated."
-                    "Please run `pip3 install git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4` to install the latest version.")
+            error("Your spotipy version is outdated. "
+                  "Please run `pip3 install git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4` to install the latest version.")
         self.artist, self.title, self.position = self._formatted_metadata(_metadata)
         self.is_playing = _metadata['is_playing']
 

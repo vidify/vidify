@@ -10,10 +10,6 @@ You can use pip to install it easily:
 
 `pip3 install spotify-videoclips`
 
-You might have to install spotipy manually if you see an `AtributeError`, since their PyPi package is outdated currently:
-
-`pip3 install git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4`
-
 Or download the latest [release](https://github.com/marioortizmanero/spotify-videoclips/releases). Uncompress the .tar.gz file and run inside the folder:
 
 `python ./setup.py install`
@@ -38,7 +34,7 @@ For Windows and Mac users, the Spotify Web API will be used. This means that:
 5. You can now copy your Client ID and Client Secret and add them when you call `spotify-videoclips`:
     * `spotify-videoclips --username your_username --client-id your_client_id --client-secret your_client_secret`
 
-You may be prompted to paste the resulting link that was opened in your browser into the program. After doing it, the authorization process will be complete.
+You may be prompted to paste the resulting link that was opened in your browser into the program. After doing it, the authorization process will be complete. The auth info should be kept in a cache file named `.cache-[your_username]`
 
 
 ## How to use
