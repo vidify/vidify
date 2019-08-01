@@ -164,9 +164,14 @@ class DbusPlayer:
         _status = str(self._properties_interface.Get(
             'org.mpris.MediaPlayer2.Player',
             'PlaybackStatus')).lower()
-        # Consistency with the web API status variable and ease of use using booleans
-        if _status == "stopped": self.is_playing = False
-        else: self.is_playing = True
+        self.is_playing = self.bool_status(_status)
+
+    # Consistency with the web API status variable and ease of use using booleans
+    def bool_status(self, status):
+        if status == 'stopped' or status == 'paused':
+            return False
+        else:
+            return True
 
     # Function called from dbus on property changes
     def _on_properties_changed(self, interface, properties, signature):
@@ -181,8 +186,7 @@ class DbusPlayer:
         # The song was Paused/Played
         if dbus.String('PlaybackStatus') in properties:
             _status = str(properties[dbus.String('PlaybackStatus')]).lower()
-            if _status == "stopped": _status = False
-            else: _status = True
+            _status = self.bool_status(_status)
             if _status != self.is_playing:
                 log("Paused/Played video", self._debug)
                 self.is_playing = _status
@@ -234,8 +238,8 @@ class WebPlayer:
 
     # Returns the artist and title out of a raw metadata object
     def _formatted_metadata(self, metadata):
-        return metadata['item']['artists'][0]['name'],
-               metadata['item']['name'],
+        return metadata['item']['artists'][0]['name'], \
+               metadata['item']['name'], \
                metadata['progress_ms']
 
     # Refreshes the metadata and status of the player (artist, title, position)
