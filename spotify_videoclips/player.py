@@ -60,8 +60,6 @@ class VLCWindow:
         log("Starting video", self._debug)
         # Media instance
         Media = self._instance.media_new(url)
-        Media.get_mrl()
-        # Player instance
         self.video_player.set_media(Media)
         self.video_player.set_fullscreen(self._fullscreen)
 
