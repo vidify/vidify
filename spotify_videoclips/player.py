@@ -9,21 +9,25 @@ import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
 
+from typing import Tuple
+
+
 # Prints formatted logs to the console if debug is True
-def log(msg, debug = True):
+def log(msg: str, debug: bool = True) -> None:
     if debug:
         print("\033[92m>> " + msg + "\033[0m")
 
 
 # Prints formatted errors to the console
-def error(msg):
+def error(msg: str) -> None:
     print("\033[91m[ERROR]: " + msg + "\033[0m")
     sys.exit(1)
 
 
 # VLC window playing the videos
 class VLCWindow:
-    def __init__(self, debug = False, vlc_args = "", fullscreen = False):
+    def __init__(self, debug: bool = False, vlc_args: str = "",
+            fullscreen: bool = False) -> None:
         self._debug = debug
         self._fullscreen = fullscreen
 
@@ -37,26 +41,26 @@ class VLCWindow:
         self.video_player = self._instance.media_player_new()
 
     # Plays/Pauses the VLC player
-    def play(self):
+    def play(self) -> None:
         self.video_player.play()
 
-    def pause(self):
+    def pause(self) -> None:
         self.video_player.pause()
 
-    def toggle_pause(self):
+    def toggle_pause(self) -> None:
         if self.video_player.is_playing():
             self.pause()
         else:
             self.play()
 
     # Getting the video url with youtube-dl for VLC to play
-    def get_url(self, name, ydl_opts):
+    def get_url(self, name: str, ydl_opts: dict) -> str:
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info("ytsearch:" + name, download=False)
         return info['entries'][0]['url']
 
     # Starts a new video on the VLC player
-    def start_video(self, url):
+    def start_video(self, url: str) -> None:
         log("Starting video", self._debug)
         # Media instance
         Media = self._instance.media_new(url)
@@ -64,13 +68,13 @@ class VLCWindow:
         self.video_player.set_fullscreen(self._fullscreen)
 
     # Set the position of the VLC media playing
-    def set_position(self, ms):
+    def set_position(self, ms: int) -> None:
         self.video_player.set_time(ms)
 
 
-# Dbus player with the Spotify properties (on Linux)
+# Dbus player with the Spotify properties (for Linux)
 class DbusPlayer:
-    def __init__(self, debug = False, vlc_args = "", fullscreen = False):
+    def __init__(self, player: VLCWindow, debug: bool = False) -> None:
         # Configuring loop
         DBusGMainLoop(set_as_default=True)
 
@@ -79,11 +83,7 @@ class DbusPlayer:
         self.title = ""
         self.is_playing = False
         self._debug = debug
-        self.player = VLCWindow(
-                debug = debug,
-                vlc_args = vlc_args,
-                fullscreen = fullscreen
-        )
+        self.player = player
 
         # DBus internal properties
         self._session_bus = dbus.SessionBus()
@@ -118,11 +118,11 @@ class DbusPlayer:
         self._refresh_metadata()
 
     # Proper disconnect when the program ends
-    def __del__(self):
+    def __del__(self) -> None:
         self.do_disconnect()
     
     # Connects to the dbus signals
-    def do_connect(self):
+    def do_connect(self) -> None:
         log("Connecting", self._debug)
         if self._disconnecting is False:
             introspect_xml = self._introspect(self._bus_name, '/')
@@ -136,7 +136,7 @@ class DbusPlayer:
                     self._on_properties_changed)
 
     # Disconnects from the dbus signals
-    def do_disconnect(self):
+    def do_disconnect(self) -> None:
         log("Disconnecting", self._debug)
         self._disconnecting = True
         for signal_name, signal_handler in list(self._signals.items()):
@@ -144,7 +144,7 @@ class DbusPlayer:
             del self._signals[signal_name]
 
     # Waits for changes in dbus properties, exits with Ctrl+C
-    def wait(self):
+    def wait(self) -> None:
         log("Starting loop", self._debug)
         try:
             self._loop.run()
@@ -154,11 +154,11 @@ class DbusPlayer:
             sys.exit(0)
 
     # Returns the artist and title out of a raw metadata object
-    def _formatted_metadata(self, metadata):
+    def _formatted_metadata(self, metadata: dict) -> Tuple[str,str]:
         return metadata['xesam:artist'][0], metadata['xesam:title']
 
     # Refreshes the metadata and status of the player (artist, title)
-    def _refresh_metadata(self):
+    def _refresh_metadata(self) -> None:
         _metadata = self._properties_interface.Get(
                 "org.mpris.MediaPlayer2.Player",
                 "Metadata"
@@ -175,14 +175,15 @@ class DbusPlayer:
         self.is_playing = self.bool_status(_status)
 
     # Consistency with the web API status variable and ease of use using booleans
-    def bool_status(self, status):
+    def bool_status(self, status: str) -> bool:
         if status == 'stopped' or status == 'paused':
             return False
         else:
             return True
 
     # Function called from dbus on property changes
-    def _on_properties_changed(self, interface, properties, signature):
+    def _on_properties_changed(self, interface: dbus.String,
+            properties: dbus.Dictionary, signature: dbus.Array) -> None:
         # If the song is different, break the loop
         if dbus.String('Metadata') in properties:
             _metadata = properties[dbus.String('Metadata')]
@@ -202,20 +203,17 @@ class DbusPlayer:
                 self.player.toggle_pause()
 
 
+# Web player with the Spotify properties (other OS than Linux)
 class WebPlayer:
-    def __init__(self, username, client_id, client_secret, redirect_uri,
-            debug = False, vlc_args = "", fullscreen = False):
+    def __init__(self, player: VLCWindow, username: str, client_id: str,
+            client_secret: str, redirect_uri: str, debug: bool = False) -> None:
         # Main player properties
         self.artist = ""
         self.title = ""
         self.position = 0
         self.is_playing = False
         self._debug = debug
-        self.player = VLCWindow(
-                debug = debug,
-                vlc_args = vlc_args,
-                fullscreen = fullscreen
-        )
+        self.player = player
 
         # Checking that all parameters are passed
         if not username: error(
@@ -245,14 +243,14 @@ class WebPlayer:
         self._spotify.trace = False
         self._refresh_metadata()
 
-    # Returns the artist and title out of a raw metadata object
-    def _formatted_metadata(self, metadata):
+    # Returns the artist, title and position from raw metadata
+    def _formatted_metadata(self, metadata: dict) -> Tuple[str,str,int]:
         return metadata['item']['artists'][0]['name'], \
                metadata['item']['name'], \
                metadata['progress_ms']
 
     # Refreshes the metadata and status of the player (artist, title, position)
-    def _refresh_metadata(self):
+    def _refresh_metadata(self) -> None:
         try:
             _metadata = self._spotify.current_user_playing_track()
         except AttributeError:
@@ -261,33 +259,37 @@ class WebPlayer:
         self.artist, self.title, self.position = self._formatted_metadata(_metadata)
         self.is_playing = _metadata['is_playing']
 
-    # Returns the position of the player
-    def get_position(self):
+    # Returns the position in milliseconds of the player
+    def get_position(self) -> int:
         self._refresh_metadata()
         return self.position
 
     # Waits until a new song is played, checking for changes every second
-    def wait(self):
-        while True:
-            time.sleep(1)
-            _artist = self.artist
-            _title = self.title
-            _is_playing = self.is_playing
-            _position = self.position
-            self._refresh_metadata()
+    def wait(self) -> None:
+        try:
+            while True:
+                time.sleep(1)
+                _artist = self.artist
+                _title = self.title
+                _is_playing = self.is_playing
+                _position = self.position
+                self._refresh_metadata()
 
-            if self.is_playing != _is_playing:
-                log("Paused/Played video", self._debug)
-                self.player.toggle_pause()
+                if self.is_playing != _is_playing:
+                    log("Paused/Played video", self._debug)
+                    self.player.toggle_pause()
 
-            # Changes position if the difference is considered
-            # enough to be a manual skip (>= 3secs, <0 secs)
-            diff = self.position - _position
-            if diff >= 3000 or diff < 0:
-                log("Position changed", self._debug)
-                self.player.set_position(self.position)
+                # Changes position if the difference is considered
+                # enough to be a manual skip (>= 3secs, <0 secs)
+                diff = self.position - _position
+                if diff >= 3000 or diff < 0:
+                    log("Position changed", self._debug)
+                    self.player.set_position(self.position)
 
-            if self.artist != _artist or self.title != _title:
-                log("Song changed", self._debug)
-                break
+                if self.artist != _artist or self.title != _title:
+                    log("Song changed", self._debug)
+                    break
+        except KeyboardInterrupt:
+            log("Quitting from web player loop", self._debug)
+            sys.exit(0)
 

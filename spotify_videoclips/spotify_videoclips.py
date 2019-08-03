@@ -5,7 +5,7 @@ import argparse
 import lyricwikia
 from datetime import datetime
 from contextlib import contextmanager
-from .player import WebPlayer, DbusPlayer
+from .player import WebPlayer, DbusPlayer, VLCWindow
 
 
 # Argument parsing
@@ -43,7 +43,7 @@ args = parser.parse_args()
 
 # Hiding stderr without leaks
 @contextmanager
-def stderr_redirected(to=os.devnull):
+def stderr_redirected(to: str = os.devnull) -> None:
     fd = sys.stderr.fileno()
 
     def _redirect_stderr(to):
@@ -70,25 +70,20 @@ if args.max_width: ydl_opts['format'] += "[width<=" + args.max_width + "]"
 if args.max_height: ydl_opts['format'] += "[height<=" + args.max_height + "]"
 
 
-# Returns a formatted name with the artist and the title
-def format_name(spotify):
-    return spotify.artist + " - " + spotify.title
-
-
 # Prints the current song lyrics
-def print_lyrics(spotify):
+def print_lyrics(artist: str, title: str) -> None:
     if args.lyrics:
-        print("\033[4m" + format_name(spotify) + "\033[0m")
+        print("\033[4m{} - {}\033[0m".format(artist, title))
         try:
-            print(lyricwikia.get_lyrics(spotify.artist, spotify.title) + "\n")
+            print(lyricwikia.get_lyrics(artist, title) + "\n")
         except lyricwikia.LyricsNotFound:
             print("No lyrics found" + "\n")
 
 
 # Plays the videos with the dbus API (Linux)
-def play_videos_dbus(player, spotify):
+def play_videos_dbus(player: VLCWindow, spotify: DbusPlayer) -> None:
     while True:
-        name = format_name(spotify)
+        name = spotify.artist + " - " + spotify.title
 
         # Counts milliseconds to add a delay and sync the start
         start_time = datetime.now()
@@ -99,16 +94,16 @@ def play_videos_dbus(player, spotify):
         if spotify.is_playing:
             player.play()
 
-        print_lyrics(spotify)
+        print_lyrics(spotify.artist, spotify.title)
 
         # Waiting for the current song to change
         spotify.wait()
 
 
 # Plays the videos with the web API (Other OS)
-def play_videos_web(player, spotify):
+def play_videos_web(player: VLCWindow, spotify: WebPlayer) -> None:
     while True:
-        name = format_name(spotify)
+        name = spotify.artist + " - " + spotify.title
 
         # Starts video at exact position
         url = player.get_url(name, ydl_opts)
@@ -118,34 +113,35 @@ def play_videos_web(player, spotify):
         if spotify.is_playing:
             player.play()
         
-        print_lyrics(spotify)
+        print_lyrics(spotify.artist, spotify.title)
 
         # Waiting for the current song to change
         spotify.wait()
 
 
-def choose_platform():
-    if platform.system() == "Linux" and not args.use_web_api:
-        spotify = DbusPlayer(
+def choose_platform() -> None:
+    player = VLCWindow(
                 debug = args.debug,
                 vlc_args = args.vlc_args,
-                fullscreen = args.fullscreen
-        )
+                fullscreen = args.fullscreen)
+
+    if platform.system() == "Linux" and not args.use_web_api:
+        spotify = DbusPlayer(
+                player,
+                debug = args.debug)
         play_videos_dbus(spotify.player, spotify)
     else:
         spotify = WebPlayer(
+                player,
                 debug = args.debug,
                 username = args.username,
                 client_id = args.client_id,
                 client_secret = args.client_secret,
-                redirect_uri = args.redirect_uri,
-                vlc_args = args.vlc_args,
-                fullscreen = args.fullscreen
-        )
+                redirect_uri = args.redirect_uri)
         play_videos_web(spotify.player, spotify)
 
 
-def main():
+def main() -> None:
     if args.debug:
         choose_platform()
     else:
