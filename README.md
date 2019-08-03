@@ -1,6 +1,6 @@
-# Spotify Videoclips
+# Spotify Music Videos
 
-A simple tool to show Youtube **videoclips** and **lyrics** for the currently playing Spotify songs with VLC.
+A simple tool to show Youtube **music videos** and **lyrics** for the currently playing Spotify songs with VLC.
 
 ![example](screenshots/screenshot.png)
 
@@ -8,9 +8,9 @@ A simple tool to show Youtube **videoclips** and **lyrics** for the currently pl
 
 You can use pip to install it easily:
 
-`pip3 install spotify-videoclips`
+`pip3 install spotify-videos`
 
-Or download the latest [release](https://github.com/marioortizmanero/spotify-videoclips/releases). Uncompress the .tar.gz file and run inside the folder:
+Or download the latest [release](https://github.com/marioortizmanero/spotify-music-videos/releases). Uncompress the .tar.gz file and run inside the folder:
 
 `python ./setup.py install`
 
@@ -31,8 +31,8 @@ For Windows and Mac users, the Spotify Web API will be used. This means that:
 2. Create a new client ID. You can fill the descriptions as you like.
 3. Click `No` when asked if it's a commercial integration and accept the terms in the next step.
 4. Go to `Edit Settings` and type `http://localhost:8888/callback/` in the Redirect URIs field.
-5. You can now copy your Client ID and Client Secret and add them when you call `spotify-videoclips`:
-    * `spotify-videoclips --username your_username --client-id your_client_id --client-secret your_client_secret`
+5. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos`:
+    * `spotify-videos --username your_username --client-id your_client_id --client-secret your_client_secret`
 
 You may be prompted to paste the resulting link that was opened in your browser into the program. After doing it, the authorization process will be complete. The auth info should be kept in a cache file named `.cache-[your_username]`
 
@@ -42,7 +42,7 @@ You may be prompted to paste the resulting link that was opened in your browser 
 You can use these flags to modify the behavior of the program:
 
 ```
-usage: spotify-videoclips [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
+usage: spotify-videos [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
                           [--width MAX_WIDTH] [--height MAX_HEIGHT] [-w]
                           [--username USERNAME] [--client-id CLIENT_ID]
                           [--client-secret CLIENT_SECRET]
@@ -50,7 +50,7 @@ usage: spotify-videoclips [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
 
 Windows and Mac users must pass --username, --client-id and --client-secret to
 use the web API. Read more about how to obtain them in the README
-(https://github.com/marioortizmanero/spotify-videoclips).
+(https://github.com/marioortizmanero/spotify-music-videos).
 
 optional arguments:
   -h, --help            show this help message and exit
