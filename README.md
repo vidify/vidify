@@ -4,9 +4,21 @@ A simple tool to show Youtube **music videos** and **lyrics** for the currently 
 
 ![example](screenshots/screenshot.png)
 
+
+## Requirements
+
+* Python 3.5+
+
+For **Linux** users (you probaby have them installed already):
+
+* [PyGI](https://pygobject.readthedocs.io/en/latest/) (not packaged on PyPi, you need to install it from your distribution's repository - it's usually called python-gi, python-gobject or pygobject). Here's a quick [tutorial](https://pygobject.readthedocs.io/en/latest/getting_started.html) on how to install on most systems.
+
+* [Glib](https://developer.gnome.org/glib/)
+
+
 ## How to install
 
-You can use pip to install it easily:
+You can use pip to install it:
 
 `pip3 install spotify-videos`
 

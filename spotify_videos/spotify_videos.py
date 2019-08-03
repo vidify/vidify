@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(
         description = "Windows and Mac users must pass --username, --client-id and --client-secret to use the web API. Read more about how to obtain them in the README (https://github.com/marioortizmanero/spotify-music-videos).",
 )
 parser.add_argument('-v', '--version', action='version',
-        version='%(prog)s 1.4.1', help="show program's version number and exit.")
+        version='%(prog)s 1.4.2', help="show program's version number and exit.")
 parser.add_argument("--debug", action="store_true", dest="debug",
         default=False, help="display debug messages")
 parser.add_argument("-n", "--no-lyrics", action="store_false", dest="lyrics",
