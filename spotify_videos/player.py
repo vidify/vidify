@@ -3,8 +3,8 @@ import sys
 import time
 import vlc
 import youtube_dl
-import spotipy
-import spotipy.util
+from . import spotipy
+from .spotipy import util
 import dbus
 from dbus.mainloop.glib import DBusGMainLoop
 from gi.repository import GLib
@@ -65,6 +65,7 @@ class VLCWindow:
         # Media instance
         Media = self._instance.media_new(url)
         self.video_player.set_media(Media)
+        self.video_player.audio_set_mute(True)
         self.video_player.set_fullscreen(self._fullscreen)
 
     # Set the position of the VLC media playing
@@ -120,6 +121,7 @@ class DbusPlayer:
     # Proper disconnect when the program ends
     def __del__(self) -> None:
         self.do_disconnect()
+
     
     # Connects to the dbus signals
     def do_connect(self) -> None:
@@ -139,9 +141,12 @@ class DbusPlayer:
     def do_disconnect(self) -> None:
         log("Disconnecting", self._debug)
         self._disconnecting = True
-        for signal_name, signal_handler in list(self._signals.items()):
-            signal_handler.remove()
-            del self._signals[signal_name]
+        try:
+            for signal_name, signal_handler in list(self._signals.items()):
+                signal_handler.remove()
+                del self._signals[signal_name]
+        except AttributeError:
+            pass
 
     # Waits for changes in dbus properties, exits with Ctrl+C
     def wait(self) -> None:
@@ -227,7 +232,7 @@ class WebPlayer:
                 "Run `spotify-videos --help` for more info.")
 
         # Creation of the Spotify token
-        self._token = spotipy.util.prompt_for_user_token(
+        self._token = util.prompt_for_user_token(
                 username,
                 scope = 'user-read-currently-playing',
                 client_id = client_id,
@@ -253,11 +258,10 @@ class WebPlayer:
     def _refresh_metadata(self) -> None:
         try:
             _metadata = self._spotify.current_user_playing_track()
-        except AttributeError:
-            error("Your spotipy version is outdated. "
-                  "Please run `pip3 install git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4` to install the latest version.")
-        self.artist, self.title, self.position = self._formatted_metadata(_metadata)
-        self.is_playing = _metadata['is_playing']
+            self.artist, self.title, self.position = self._formatted_metadata(_metadata)
+            self.is_playing = _metadata['is_playing']
+        except TypeError:
+            error("No spotify session running")
 
     # Returns the position in milliseconds of the player
     def get_position(self) -> int:

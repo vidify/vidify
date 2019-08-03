@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(
         description = "Windows and Mac users must pass --username, --client-id and --client-secret to use the web API. Read more about how to obtain them in the README (https://github.com/marioortizmanero/spotify-music-videos).",
 )
 parser.add_argument('-v', '--version', action='version',
-        version='%(prog)s 1.4', help="show program's version number and exit.")
+        version='%(prog)s 1.4.4', help="show program's version number and exit.")
 parser.add_argument("--debug", action="store_true", dest="debug",
         default=False, help="display debug messages")
 parser.add_argument("-n", "--no-lyrics", action="store_false", dest="lyrics",
@@ -83,16 +83,17 @@ def print_lyrics(artist: str, title: str) -> None:
 # Plays the videos with the dbus API (Linux)
 def play_videos_dbus(player: VLCWindow, spotify: DbusPlayer) -> None:
     while True:
-        name = spotify.artist + " - " + spotify.title
-
         # Counts milliseconds to add a delay and sync the start
         start_time = datetime.now()
-        url = player.get_url(name, ydl_opts)
+        name = spotify.artist + " - " + spotify.title
+
+        # Downloads and plays the video with the offset
+        url = player.get_url(name + " Official Video", ydl_opts)
         player.start_video(url)
-        offset = int((datetime.now() - start_time).total_seconds() * 1000)
-        player.set_position(offset)
         if spotify.is_playing:
             player.play()
+        offset = int((datetime.now() - start_time).total_seconds() * 1000)
+        player.set_position(offset + 400) # ~400 ms extra to sync perfectly
 
         print_lyrics(spotify.artist, spotify.title)
 
@@ -108,10 +109,10 @@ def play_videos_web(player: VLCWindow, spotify: WebPlayer) -> None:
         # Starts video at exact position
         url = player.get_url(name, ydl_opts)
         player.start_video(url)
-        offset = spotify.get_position()
-        player.set_position(offset)
         if spotify.is_playing:
             player.play()
+        offset = spotify.get_position()
+        player.set_position(offset)
         
         print_lyrics(spotify.artist, spotify.title)
 
