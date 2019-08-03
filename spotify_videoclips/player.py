@@ -89,11 +89,12 @@ class DbusPlayer:
         self._session_bus = dbus.SessionBus()
         self._bus_name = "org.mpris.MediaPlayer2.spotify"
         self._disconnecting = False
+
         try:
             self._obj = self._session_bus.get_object(
                     self._bus_name,
                     '/org/mpris/MediaPlayer2')
-        except dbus.exceptions.DBusException as e:
+        except dbus.exceptions.DBusException:
             error("No spotify session running")
         self._properties_interface = dbus.Interface(
                 self._obj,
@@ -115,6 +116,10 @@ class DbusPlayer:
 
         self.do_connect()
         self._refresh_metadata()
+
+    # Proper disconnect when the program ends
+    def __del__(self):
+        self.do_disconnect()
     
     # Connects to the dbus signals
     def do_connect(self):
@@ -138,10 +143,15 @@ class DbusPlayer:
             signal_handler.remove()
             del self._signals[signal_name]
 
-    # Waits for changes in dbus properties
+    # Waits for changes in dbus properties, exits with Ctrl+C
     def wait(self):
         log("Starting loop", self._debug)
-        self._loop.run()
+        try:
+            self._loop.run()
+        except KeyboardInterrupt:
+            log("Quitting main loop", self._debug)
+            self._loop.quit()
+            sys.exit(0)
 
     # Returns the artist and title out of a raw metadata object
     def _formatted_metadata(self, metadata):
@@ -175,7 +185,8 @@ class DbusPlayer:
     def _on_properties_changed(self, interface, properties, signature):
         # If the song is different, break the loop
         if dbus.String('Metadata') in properties:
-            _artist, _title = self._formatted_metadata(properties[dbus.String('Metadata')])
+            _metadata = properties[dbus.String('Metadata')]
+            _artist, _title = self._formatted_metadata(_metadata)
             if _artist != self.artist or _title != self.title:
                 log("New video", self._debug)
                 self._refresh_metadata()
@@ -208,13 +219,13 @@ class WebPlayer:
 
         # Checking that all parameters are passed
         if not username: error(
-                "You must pass your username as an argument."
+                "You must pass your username as an argument. "
                 "Run `spotify-videoclips --help` for more info.")
         if not client_id: error(
-                "You must pass your client ID as an argument."
+                "You must pass your client ID as an argument. "
                 "Run `spotify-videoclips --help` for more info.")
         if not client_secret: error(
-                "You must pass your client secret as an argument."
+                "You must pass your client secret as an argument. "
                 "Run `spotify-videoclips --help` for more info.")
 
         # Creation of the Spotify token
@@ -269,7 +280,8 @@ class WebPlayer:
                 log("Paused/Played video", self._debug)
                 self.player.toggle_pause()
 
-            # Changes position if the difference is more than 3 seconds or less than 0
+            # Changes position if the difference is considered
+            # enough to be a manual skip (>= 3secs, <0 secs)
             diff = self.position - _position
             if diff >= 3000 or diff < 0:
                 log("Position changed", self._debug)
