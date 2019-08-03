@@ -218,13 +218,13 @@ class WebPlayer:
         # Checking that all parameters are passed
         if not username: error(
                 "You must pass your username as an argument. "
-                "Run `spotify-videoclips --help` for more info.")
+                "Run `spotify-videos --help` for more info.")
         if not client_id: error(
                 "You must pass your client ID as an argument. "
-                "Run `spotify-videoclips --help` for more info.")
+                "Run `spotify-videos --help` for more info.")
         if not client_secret: error(
                 "You must pass your client secret as an argument. "
-                "Run `spotify-videoclips --help` for more info.")
+                "Run `spotify-videos --help` for more info.")
 
         # Creation of the Spotify token
         self._token = spotipy.util.prompt_for_user_token(
