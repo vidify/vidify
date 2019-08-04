@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 
+print(find_packages())
+
 setup(
     name='spotify-videos',
-    version='1.4.2',
+    version='1.4.3',
     packages=find_packages(),
     description='Simple tool to show Youtube music videos and lyrics for the playing Spotify songs',
     url='https://github.com/marioortizmanero/spotify-music-videos',
@@ -29,7 +31,6 @@ setup(
         'python-vlc',
         'lyricwikia',
         'dbus-python',
-        'spotipy==2.4.4',
         'requests>=2.3.0', # spotipy
         'six>=1.10.0' #spotipy
     ],
