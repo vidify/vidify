@@ -93,7 +93,7 @@ def play_videos_dbus(player: VLCWindow, spotify: DbusPlayer) -> None:
         if spotify.is_playing:
             player.play()
         offset = int((datetime.now() - start_time).total_seconds() * 1000)
-        player.set_position(offset + 300) # ~300 ms extra to sync perfectly
+        player.set_position(offset + 400) # ~400 ms extra to sync perfectly
 
         print_lyrics(spotify.artist, spotify.title)
 
