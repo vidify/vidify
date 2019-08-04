@@ -121,6 +121,7 @@ class DbusPlayer:
     # Proper disconnect when the program ends
     def __del__(self) -> None:
         self.do_disconnect()
+
     
     # Connects to the dbus signals
     def do_connect(self) -> None:
@@ -140,9 +141,12 @@ class DbusPlayer:
     def do_disconnect(self) -> None:
         log("Disconnecting", self._debug)
         self._disconnecting = True
-        for signal_name, signal_handler in list(self._signals.items()):
-            signal_handler.remove()
-            del self._signals[signal_name]
+        try:
+            for signal_name, signal_handler in list(self._signals.items()):
+                signal_handler.remove()
+                del self._signals[signal_name]
+        except AttributeError:
+            pass
 
     # Waits for changes in dbus properties, exits with Ctrl+C
     def wait(self) -> None:
