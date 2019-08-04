@@ -65,6 +65,7 @@ class VLCWindow:
         # Media instance
         Media = self._instance.media_new(url)
         self.video_player.set_media(Media)
+        self.video_player.audio_set_mute(True)
         self.video_player.set_fullscreen(self._fullscreen)
 
     # Set the position of the VLC media playing
