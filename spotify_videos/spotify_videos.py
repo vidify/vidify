@@ -1,11 +1,11 @@
 import os
 import sys
+import time
 import platform
 import argparse
 import lyricwikia
-from datetime import datetime
 from contextlib import contextmanager
-from .player import WebPlayer, DbusPlayer, VLCWindow
+from .player import WebPlayer, DBusPlayer, VLCWindow
 
 
 # Argument parsing
@@ -66,49 +66,54 @@ ydl_opts = {
     'quiet'  : True
 }
 if args.debug: ydl_opts['quiet'] = False
-if args.max_width: ydl_opts['format'] += "[width<=" + args.max_width + "]"
-if args.max_height: ydl_opts['format'] += "[height<=" + args.max_height + "]"
+if args.max_width: ydl_opts['format'] += f"[width<={args.max_width}]"
+if args.max_height: ydl_opts['format'] += f"[height<={args.max_height}]"
 
 
 # Prints the current song lyrics
 def print_lyrics(artist: str, title: str) -> None:
     if args.lyrics:
-        print("\033[4m{} - {}\033[0m".format(artist, title))
+        print(f"\033[4m{artist} - {title}\033[0m")
         try:
             print(lyricwikia.get_lyrics(artist, title) + "\n")
         except lyricwikia.LyricsNotFound:
-            print("No lyrics found" + "\n")
+            print("No lyrics found\n")
 
 
-# Plays the videos with the dbus API (Linux)
-def play_videos_dbus(player: VLCWindow, spotify: DbusPlayer) -> None:
+# Plays the videos with the DBus API (Linux)
+def play_videos_dbus(player: VLCWindow, spotify: DBusPlayer) -> None:
     while True:
-        # Counts milliseconds to add a delay and sync the start
-        start_time = datetime.now()
-        name = spotify.artist + " - " + spotify.title
+        start_time = time.time()
 
         # Downloads and plays the video with the offset
-        url = player.get_url(name + " Official Video", ydl_opts)
+        url = player.get_url(
+                f"{spotify.artist} - {spotify.title} Official Video",
+                ydl_opts)
         player.start_video(url)
+
         if spotify.is_playing:
             player.play()
-        offset = int((datetime.now() - start_time).total_seconds() * 1000)
-        player.set_position(offset + 400) # ~400 ms extra to sync perfectly
+            # Waits until VLC actually plays the video to set the offset in sync
+            while player.get_position() == 0:
+                pass
+            offset = int((time.time() - start_time) * 1000)
+            player.set_position(offset)
 
         print_lyrics(spotify.artist, spotify.title)
 
-        # Waiting for the current song to change
+        # Waiting for Spotify events
         spotify.wait()
 
 
 # Plays the videos with the web API (Other OS)
 def play_videos_web(player: VLCWindow, spotify: WebPlayer) -> None:
     while True:
-        name = spotify.artist + " - " + spotify.title
-
         # Starts video at exact position
-        url = player.get_url(name, ydl_opts)
+        url = player.get_url(
+                f"{spotify.artist} - {spotify.title} Official Video",
+                ydl_opts)
         player.start_video(url)
+
         if spotify.is_playing:
             player.play()
         offset = spotify.get_position()
@@ -127,7 +132,7 @@ def choose_platform() -> None:
                 fullscreen = args.fullscreen)
 
     if platform.system() == "Linux" and not args.use_web_api:
-        spotify = DbusPlayer(
+        spotify = DBusPlayer(
                 player,
                 debug = args.debug)
         play_videos_dbus(spotify.player, spotify)

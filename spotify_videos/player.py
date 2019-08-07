@@ -15,12 +15,12 @@ from typing import Tuple
 # Prints formatted logs to the console if debug is True
 def log(msg: str, debug: bool = True) -> None:
     if debug:
-        print("\033[92m>> " + msg + "\033[0m")
+        print(f"\033[92m>> {msg}\033[0m")
 
 
 # Prints formatted errors to the console
 def error(msg: str) -> None:
-    print("\033[91m[ERROR]: " + msg + "\033[0m")
+    print(f"\033[91m[ERROR]: {msg}\033[0m")
     sys.exit(1)
 
 
@@ -38,17 +38,17 @@ class VLCWindow:
             self._instance = vlc.Instance(vlc_args)
         except NameError:
             error("VLC is not installed")
-        self.video_player = self._instance.media_player_new()
+        self._video_player = self._instance.media_player_new()
 
     # Plays/Pauses the VLC player
     def play(self) -> None:
-        self.video_player.play()
+        self._video_player.play()
 
     def pause(self) -> None:
-        self.video_player.pause()
+        self._video_player.pause()
 
     def toggle_pause(self) -> None:
-        if self.video_player.is_playing():
+        if self._video_player.is_playing():
             self.pause()
         else:
             self.play()
@@ -61,20 +61,24 @@ class VLCWindow:
 
     # Starts a new video on the VLC player
     def start_video(self, url: str) -> None:
-        log("Starting video", self._debug)
-        # Media instance
-        Media = self._instance.media_new(url)
-        self.video_player.set_media(Media)
-        self.video_player.audio_set_mute(True)
-        self.video_player.set_fullscreen(self._fullscreen)
+        log("Starting new video", self._debug)
+        # Media instance, sets fullscreen and mute
+        media = self._instance.media_new(url)
+        self._video_player.set_media(media)
+        self._video_player.audio_set_mute(True)
+        self._video_player.set_fullscreen(self._fullscreen)
 
-    # Set the position of the VLC media playing
+    # Set the position of the VLC media playing in ms
     def set_position(self, ms: int) -> None:
-        self.video_player.set_time(ms)
+        self._video_player.set_time(ms)
+
+    # Get the position of the VLC media playing in ms
+    def get_position(self) -> int:
+        return self._video_player.get_time()
 
 
-# Dbus player with the Spotify properties (for Linux)
-class DbusPlayer:
+# DBus player with the Spotify properties (for Linux)
+class DBusPlayer:
     def __init__(self, player: VLCWindow, debug: bool = False) -> None:
         # Configuring loop
         DBusGMainLoop(set_as_default=True)
@@ -91,12 +95,19 @@ class DbusPlayer:
         self._bus_name = "org.mpris.MediaPlayer2.spotify"
         self._disconnecting = False
 
-        try:
-            self._obj = self._session_bus.get_object(
-                    self._bus_name,
-                    '/org/mpris/MediaPlayer2')
-        except dbus.exceptions.DBusException:
-            error("No spotify session running")
+        # Waiting for the user to open Spotify
+        first_msg = True
+        while True:
+            try:
+                self._obj = self._session_bus.get_object(
+                        self._bus_name,
+                        '/org/mpris/MediaPlayer2')
+                break
+            except dbus.exceptions.DBusException:
+                if first_msg:
+                    print("Waiting for the Spotify session to start...")
+                    first_msg = False
+
         self._properties_interface = dbus.Interface(
                 self._obj,
                 dbus_interface="org.freedesktop.DBus.Properties")
@@ -116,14 +127,23 @@ class DbusPlayer:
         self._signals = {}
 
         self.do_connect()
-        self._refresh_metadata()
+
+        # Waiting for a song to start
+        first_msg = True
+        while True:
+            try:
+                self._refresh_metadata()
+                break
+            except IndexError:
+                if first_msg:
+                    print("Waiting for a Spotify song to play...")
+                    first_msg = False
 
     # Proper disconnect when the program ends
     def __del__(self) -> None:
         self.do_disconnect()
-
     
-    # Connects to the dbus signals
+    # Connects to the DBus signals
     def do_connect(self) -> None:
         log("Connecting", self._debug)
         if self._disconnecting is False:
@@ -137,7 +157,7 @@ class DbusPlayer:
                     'PropertiesChanged',
                     self._on_properties_changed)
 
-    # Disconnects from the dbus signals
+    # Disconnects from the DBus signals
     def do_disconnect(self) -> None:
         log("Disconnecting", self._debug)
         self._disconnecting = True
@@ -148,7 +168,7 @@ class DbusPlayer:
         except AttributeError:
             pass
 
-    # Waits for changes in dbus properties, exits with Ctrl+C
+    # Waits for changes in DBus properties, exits with Ctrl+C
     def wait(self) -> None:
         log("Starting loop", self._debug)
         try:
@@ -168,25 +188,21 @@ class DbusPlayer:
                 "org.mpris.MediaPlayer2.Player",
                 "Metadata"
         )
-        try:
-            self.artist, self.title = self._formatted_metadata(_metadata)
-        except IndexError:
-            error("No song currently playing")
-            self.do_disconnect()
+        self.artist, self.title = self._formatted_metadata(_metadata)
 
         _status = str(self._properties_interface.Get(
             'org.mpris.MediaPlayer2.Player',
-            'PlaybackStatus')).lower()
-        self.is_playing = self.bool_status(_status)
+            'PlaybackStatus'))
+        self.is_playing = self._bool_status(_status)
 
     # Consistency with the web API status variable and ease of use using booleans
-    def bool_status(self, status: str) -> bool:
-        if status == 'stopped' or status == 'paused':
+    def _bool_status(self, status: str) -> bool:
+        if status.lower() in ('stopped', 'paused'):
             return False
         else:
             return True
 
-    # Function called from dbus on property changes
+    # Function called from DBus on property changes
     def _on_properties_changed(self, interface: dbus.String,
             properties: dbus.Dictionary, signature: dbus.Array) -> None:
         # If the song is different, break the loop
@@ -194,14 +210,15 @@ class DbusPlayer:
             _metadata = properties[dbus.String('Metadata')]
             _artist, _title = self._formatted_metadata(_metadata)
             if _artist != self.artist or _title != self.title:
+                self.artist = _artist
+                self.title = _title
                 log("New video", self._debug)
-                self._refresh_metadata()
                 self._loop.quit()
 
         # The song was Paused/Played
         if dbus.String('PlaybackStatus') in properties:
-            _status = str(properties[dbus.String('PlaybackStatus')]).lower()
-            _status = self.bool_status(_status)
+            _status = str(properties[dbus.String('PlaybackStatus')])
+            _status = self._bool_status(_status)
             if _status != self.is_playing:
                 log("Paused/Played video", self._debug)
                 self.is_playing = _status
@@ -220,17 +237,6 @@ class WebPlayer:
         self._debug = debug
         self.player = player
 
-        # Checking that all parameters are passed
-        if not username: error(
-                "You must pass your username as an argument. "
-                "Run `spotify-videos --help` for more info.")
-        if not client_id: error(
-                "You must pass your client ID as an argument. "
-                "Run `spotify-videos --help` for more info.")
-        if not client_secret: error(
-                "You must pass your client secret as an argument. "
-                "Run `spotify-videos --help` for more info.")
-
         # Creation of the Spotify token
         self._token = util.prompt_for_user_token(
                 username,
@@ -243,7 +249,8 @@ class WebPlayer:
             log("Authorized correctly", self._debug)
             self._spotify = spotipy.Spotify(auth = self._token)
         else:
-            error("Can't get token for " + username)
+            error(f"Can't get token for {username}. "
+                   "Please check the README for more.")
 
         self._spotify.trace = False
         self._refresh_metadata()
@@ -256,12 +263,9 @@ class WebPlayer:
 
     # Refreshes the metadata and status of the player (artist, title, position)
     def _refresh_metadata(self) -> None:
-        try:
-            _metadata = self._spotify.current_user_playing_track()
-            self.artist, self.title, self.position = self._formatted_metadata(_metadata)
-            self.is_playing = _metadata['is_playing']
-        except TypeError:
-            error("No spotify session running")
+        _metadata = self._spotify.current_user_playing_track()
+        self.artist, self.title, self.position = self._formatted_metadata(_metadata)
+        self.is_playing = _metadata['is_playing']
 
     # Returns the position in milliseconds of the player
     def get_position(self) -> int:
