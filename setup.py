@@ -1,8 +1,13 @@
 from setuptools import setup, find_packages
 
+
+# Get version inside spotify_videos/version.py without importing the package
+exec(compile(open('spotify_videos/version.py').read(),
+             'spotify_videos/version.py', 'exec'))
+
 setup(
     name='spotify-videos',
-    version='1.6',
+    version=__version__,
     packages=find_packages(),
     description='Simple tool to show Youtube music videos and lyrics for the playing Spotify songs',
     url='https://github.com/marioortizmanero/spotify-music-videos',

@@ -1,4 +1,5 @@
 import argparse
+from .version import __version__
 
 
 class Parser:
@@ -12,7 +13,7 @@ class Parser:
         self._parser.add_argument(
                 '-v', '--version',
                 action='version',
-                version='%(prog)s 1.6',
+                version=f'%(prog)s {__version__}',
                 help="show program's version number and exit")
 
         self._parser.add_argument(
