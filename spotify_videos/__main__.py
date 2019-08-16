@@ -62,7 +62,7 @@ def print_lyrics(artist: str, title: str) -> None:
 
 def format_name(artist: str, title: str):
     # Some local files don't have artist names
-    if artist is None:
+    if artist is None or artist == "":
         return f"{title} Official Video"
     else:
         return f"{artist} - {title} Official Video"

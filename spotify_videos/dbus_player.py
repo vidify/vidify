@@ -51,6 +51,8 @@ class DBusPlayer:
                 if first_msg:
                     print("Waiting for the Spotify session to start...")
                     first_msg = False
+            except KeyboardInterrupt:
+                sys.exit(0)
 
         self._properties_interface = dbus.Interface(
                 self._obj,
@@ -78,14 +80,19 @@ class DBusPlayer:
             try:
                 self._refresh_metadata()
                 break
-            except:
+            except IndexError:
                 if first_msg:
                     print("Waiting for a Spotify song to play...")
                     first_msg = False
+            except KeyboardInterrupt:
+                sys.exit(0)
 
     # Proper disconnect when the program ends
     def __del__(self) -> None:
-        self._loop.quit()
+        try:
+            self._loop.quit()
+        except AttributeError:
+            pass
         self.do_disconnect()
     
     # Connects to the DBus signals

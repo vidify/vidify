@@ -50,22 +50,22 @@ class WebPlayer:
             sys.exit(1)
 
         self._spotify.trace = False
-        self._refresh_metadata()
 
-    # Refreshes the metadata and status of the player (artist, title, position)
-    def _refresh_metadata(self) -> None:
         # Waiting for a song to start
         first_msg = True
         while True:
-            metadata = self._spotify.current_user_playing_track()
+            try:
+                self._refresh_metadata()
+            except TypeError:
+                if first_msg:
+                    print("Waiting for a Spotify song to play...")
+                    first_msg = False
+            except KeyboardInterrupt:
+                sys.exit(0)
 
-            if metadata is not None:
-                break
-
-            if first_msg:
-                print("No song currently playing.")
-                first_msg = False
-
+    # Refreshes the metadata and status of the player (artist, title, position)
+    def _refresh_metadata(self) -> None:
+        metadata = self._spotify.current_user_playing_track()
         self.artist = metadata['item']['artists'][0]['name']
         self.title = metadata['item']['name']
 

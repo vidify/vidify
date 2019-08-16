@@ -21,9 +21,13 @@ You can use pip to install it:
 
 Or download the latest [release](https://github.com/marioortizmanero/spotify-music-videos/releases). Uncompress the .tar.gz file and run inside the folder:
 
-`python ./setup.py install`
+`python3 ./setup.py install`
 
 *Note: you can add the --user flag to install it locally.*
+
+Or you can just run it without installing it with:
+
+`python3 -m spotify_videos`
 
 
 ## Compatibility
