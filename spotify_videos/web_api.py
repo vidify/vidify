@@ -22,7 +22,7 @@ class WebAPI:
     """
 
     def __init__(self, player: VLCPlayer, logger: 'logging.Logger',
-            username: str, client_id: str, client_secret: str) -> None:
+                 username: str, client_id: str, client_secret: str) -> None:
         """
         The parameters are saved in the class and the main song properties
         are created.
@@ -30,12 +30,12 @@ class WebAPI:
         Handles the Spotipy authentication.
         The Spotipy trace is disabled even in debug mode because it outputs
         too much unnecessary information.
-        
+
         The auth scope is the least needed to access the currently playing song
         and the redirect uri is always on localhost, since it's an offline
         application.
         """
-        
+
         self._logger = logger
         self.player = player
 
@@ -46,18 +46,17 @@ class WebAPI:
 
         scope = 'user-read-currently-playing'
         redirect_uri = 'http://localhost:8888/callback/'
-        self._token = util.prompt_for_user_token(username, scope,
-                client_id, client_secret, redirect_uri)
+        self._token = util.prompt_for_user_token(
+            username, scope, client_id, client_secret, redirect_uri)
 
         if self._token:
             self._logger.info("Authorized correctly")
-            self._spotify = spotipy.Spotify(auth = self._token)
+            self._spotify = spotipy.Spotify(auth=self._token)
         else:
             raise Exception(f"Can't get token for {username}. "
                             "Please check the README for more info.")
 
         self._spotify.trace = False
-
 
     def do_connect(self) -> None:
         """
@@ -74,7 +73,7 @@ class WebAPI:
         """
         Refreshes the metadata and status of the player: artist,
         title and current position.
-        
+
         Some local songs don't have an artist name so `split_title`
         is called in an attempt to manually get it from the title.
         """
@@ -101,12 +100,12 @@ class WebAPI:
         """
         Waits until a new song is played. The API doesn't currently have an
         asynchronous way to recieve events like pausing the video or changing
-        the position, so the wait function has to manually refresh every 
+        the position, so the wait function has to manually refresh every
         second and may be a bit inaccurate.
 
         It checks if the playback status changed (playing/paused), the
         song position, which will be ignored unless the difference
-        is larger than 3 seconds or backward, and the song itself 
+        is larger than 3 seconds or backward, and the song itself
         to break the loop. Said loop is also broken with a
         KeyboardInterrupt from the user.
         """
@@ -135,4 +134,3 @@ class WebAPI:
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
             sys.exit(0)
-

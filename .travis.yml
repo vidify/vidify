@@ -1,0 +1,24 @@
+sudo: required
+
+language: python
+python:
+    - '3.6'
+    - '3.7'
+
+# Install PEP8 linter and dependencies
+before_install:
+    - sudo apt-get update
+    - sudo apt-get -y install python3-pip
+    - sudo pip3 install --upgrade pip
+    - pip3 install pycodestyle
+    - sudo apt-get -y install libdbus-glib-1-dev libcairo2-dev libglib2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 vlc libvlc-dev
+    - pip3 install dbus-python
+    - pip3 install pygobject
+install:
+    - python setup.py install
+
+# Lint with PEP8 (skipping spotipy) and do tests
+script: 
+    - find . -path './*/spotipy' -prune -o -name '*.py' -exec pycodestyle --ignore=E402 --ignore=W503 {} +
+    - python -m unittest
+

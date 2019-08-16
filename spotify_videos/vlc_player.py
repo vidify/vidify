@@ -5,7 +5,7 @@ import vlc
 
 class VLCPlayer:
     def __init__(self, logger: 'logging.Logger', vlc_args: str = "",
-            fullscreen: bool = False) -> None:
+                 fullscreen: bool = False) -> None:
         """
         This VLC player is the VLC instance where media should play.
 
@@ -23,8 +23,7 @@ class VLCPlayer:
         try:
             self._instance = vlc.Instance(vlc_args)
         except NameError:
-            logger.error("ERROR: VLC is not installed")
-            sys.exit(1)
+            raise Exception("ERROR: VLC is not installed")
         self._video_player = self._instance.media_player_new()
 
     def play(self) -> None:
@@ -68,4 +67,3 @@ class VLCPlayer:
         """
 
         return self._video_player.get_time()
-

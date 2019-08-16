@@ -9,7 +9,8 @@ setup(
     name='spotify-videos',
     version=__version__,
     packages=find_packages(),
-    description='Simple tool to show Youtube music videos and lyrics for the playing Spotify songs',
+    description='Simple tool to show Youtube music videos and lyrics'
+                ' for the playing Spotify songs',
     url='https://github.com/marioortizmanero/spotify-music-videos',
     license='MIT',
     long_description=open('README.md', 'r').read(),
@@ -32,10 +33,10 @@ setup(
         'python-vlc',
         'lyricwikia',
         'dbus-python',
-        'requests>=2.3.0', # spotipy
-        'six>=1.10.0' #spotipy
+        'requests>=2.3.0',  # spotipy
+        'six>=1.10.0'  # spotipy
     ],
     entry_points={
-        'console_scripts' : [ 'spotify-videos = spotify_videos.__main__:main' ]
+        'console_scripts': ['spotify-videos = spotify_videos.__main__:main']
     }
 )

@@ -1,4 +1,6 @@
 # Spotify Music Videos
+![travis](https://travis-ci.com/marioortizmanero/spotify-music-videos.svg?branch=master)
+
 A simple tool to show Youtube **music videos** and **lyrics** for the currently playing Spotify songs with VLC.
 
 ![example](screenshots/screenshot.png)

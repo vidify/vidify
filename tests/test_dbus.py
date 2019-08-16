@@ -21,34 +21,39 @@ class DBusTest(unittest.TestCase):
 
     def test_formatted_metadata(self):
         metadata = {
-            'xesam:artist': [ '' ], 
+            'xesam:artist': [''],
             'xesam:title': 'Rick Astley - Never Gonna Give You Up'
         }
         artist, title = self.player._formatted_metadata(metadata)
-        self.assertTrue(artist == "Rick Astley" and \
-                        title == "Never Gonna Give You Up")
+        self.assertTrue(artist == "Rick Astley"
+                        and title == "Never Gonna Give You Up")
 
         metadata['xesam:title'] = "Rick Astley: Never Gonna Give You Up"
         artist, title = self.player._formatted_metadata(metadata)
-        self.assertTrue(artist == "Rick Astley" and \
-                        title == "Never Gonna Give You Up")
+        self.assertTrue(artist == "Rick Astley"
+                        and title == "Never Gonna Give You Up")
 
         metadata['xesam:title'] = "Rick Astley : Never Gonna Give You Up"
         artist, title = self.player._formatted_metadata(metadata)
-        self.assertTrue(artist == "Rick Astley" and \
-                        title == "Never Gonna Give You Up")
+        self.assertTrue(artist == "Rick Astley"
+                        and title == "Never Gonna Give You Up")
 
         metadata['xesam:title'] = "Rick Astley Never Gonna Give You Up"
         artist, title = self.player._formatted_metadata(metadata)
-        self.assertTrue(artist == "" and \
-                        title == "Rick Astley Never Gonna Give You Up")
+        self.assertTrue(artist == ""
+                        and title == "Rick Astley Never Gonna Give You Up")
+
+        metadata['xesam:title'] = "Rick - Astley - Never Gonna Give You Up"
+        artist, title = self.player._formatted_metadata(metadata)
+        self.assertTrue(artist == "Rick"
+                        and title == "Astley - Never Gonna Give You Up")
 
         metadata['xesam:artist'][0] = "Rick Astley"
         metadata['xesam:title'] = "Never Gonna - Give You Up"
         artist, title = self.player._formatted_metadata(metadata)
-        self.assertTrue(artist == "Rick Astley" and \
-                        title == "Never Gonna - Give You Up")
+        self.assertTrue(artist == "Rick Astley"
+                        and title == "Never Gonna - Give You Up")
+
 
 if __name__ == '__main__':
     unittest.main()
-

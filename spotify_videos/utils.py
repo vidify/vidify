@@ -12,7 +12,8 @@ both player classes and some other generic utilities
 
 SPLIT_ARTIST_REGEX = "(.+?)(?:(?:: )|(?: : )|(?: - ))(.+)"
 
-def split_title(title: str) -> Tuple[str,str]:
+
+def split_title(title: str) -> Tuple[str, str]:
     """
     Some local songs don't have an artist, so they are attempted
     to be split from the title manually with regex.
@@ -52,15 +53,16 @@ def stderr_redirected(to: str = os.devnull) -> None:
     fd = sys.stderr.fileno()
 
     def _redirect_stderr(to):
-        sys.stderr.close() # + implicit flush()
-        os.dup2(to.fileno(), fd) # fd writes to 'to' file
-        sys.stderr = os.fdopen(fd, 'w') # Python writes to fd
+        sys.stderr.close()  # + implicit flush()
+        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
+        sys.stderr = os.fdopen(fd, 'w')  # Python writes to fd
 
     with os.fdopen(os.dup(fd), 'w') as old_stderr:
         with open(to, 'w') as file:
             _redirect_stderr(to=file)
         try:
-            yield # Allow code to be run with the redirected stderr
+            # Allow code to be run with the redirected stderr
+            yield
         finally:
-            _redirect_stderr(to=old_stderr) # Restore stderr. Some flags may change
-
+            # Restore stderr. Some flags may change
+            _redirect_stderr(to=old_stderr)

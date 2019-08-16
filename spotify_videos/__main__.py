@@ -20,14 +20,15 @@ args = parser.parse()
 # Logger initialzation with precise milliseconds handler
 logger = logging.getLogger()
 handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s", datefmt="%H:%M:%S")
+formatter = logging.Formatter("[%(asctime)s.%(msecs)03d]"
+                              "%(levelname)s: %(message)s", datefmt="%H:%M:%S")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 # Youtube-dl config
 ydl_opts = {
-    'format' : 'bestvideo',
-    'quiet'  : True
+    'format': 'bestvideo',
+    'quiet': True
 }
 
 if args.max_width is not None:
@@ -63,12 +64,12 @@ def get_url(artist: str, title: str) -> str:
     """
     Getting the youtube direct link to play it directly with VLC.
     """
-    
+
     name = format_name(artist, title)
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f"ytsearch:'{name} Official Video'", download=False)
-        print(info)
+        info = ydl.extract_info(f"ytsearch:'{name} Official Video'",
+                                download=False)
     return info['entries'][0]['url']
 
 
@@ -141,7 +142,7 @@ def play_videos_web(player: VLCPlayer, spotify: WebAPI) -> None:
 
 
 def wait_for_connection(connect: Callable, msg: str,
-        attempts: int = 30) -> bool:
+                        attempts: int = 30) -> bool:
     """
     Waits for a Spotify session to be opened or for a song to play.
     Times out after <attempts> seconds to avoid infinite loops and to
@@ -181,20 +182,18 @@ def choose_platform() -> None:
 
     if platform.system() == "Linux" and not args.use_web_api:
         dbus_spotify = DBusAPI(player, logger)
-        success = wait_for_connection(
-                dbus_spotify.do_connect,
-                "Waiting for a Spotify session to be ready...")
 
-        if success:
+        if wait_for_connection(
+                dbus_spotify.do_connect,
+                "Waiting for a Spotify session to be ready..."):
             play_videos_dbus(dbus_spotify.player, dbus_spotify)
     else:
         web_spotify = WebAPI(player, logger, args.username,
-                                args.client_id, args.client_secret)
-        success = wait_for_connection(
-                web_spotify.do_connect,
-                "Waiting for a Spotify song to play...")
+                             args.client_id, args.client_secret)
 
-        if success:
+        if wait_for_connection(
+                web_spotify.do_connect,
+                "Waiting for a Spotify song to play..."):
             play_videos_web(web_spotify.player, web_spotify)
 
 
@@ -214,4 +213,3 @@ def main() -> None:
 
 if __name__ == '__main__':
     main()
-
