@@ -1,17 +1,15 @@
 import logging
 import unittest
 
-from spotify_videos.vlc import VLCWindow
-from spotify_videos.dbus_player import DBusPlayer
+from spotify_videos.vlc_player import VLCPlayer
+from spotify_videos.dbus_api import DBusAPI
 
 
 class DBusTest(unittest.TestCase):
     def setUp(self):
         logger = logging.getLogger()
 
-        self.player = DBusPlayer(
-                VLCWindow(logger),
-                logger)
+        self.player = DBusAPI(VLCPlayer(logger), logger)
 
     def test_bool_status(self):
         self.assertFalse(self.player._bool_status("stopped"))

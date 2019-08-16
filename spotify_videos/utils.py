@@ -1,19 +1,30 @@
 import re
 import os
 import sys
+from typing import Tuple
 from contextlib import contextmanager
 
+"""
+The utils module contains functions that can be used from
+both player classes and some other generic utilities
+"""
 
-# Matches the following:
-#     Rick Astley - Never Gonna Give You Up
-#     Rick Astley: Never Gonna Give You Up
-#     Rick Astley : Never Gonna Give You Up
+
 SPLIT_ARTIST_REGEX = "(.+?)(?:(?:: )|(?: : )|(?: - ))(.+)"
 
-# Some local songs don't have an artist, so they are
-# tried to be split from the title manually with regex
-# Return order is <artist>, <title>
-def split_title(title):
+def split_title(title: str) -> Tuple[str,str]:
+    """
+    Some local songs don't have an artist, so they are attempted
+    to be split from the title manually with regex.
+
+    The return is a tuple, with the order being: artist, title.
+
+    The regex works with the following structures:
+        Rick Astley - Never Gonna Give You Up
+        Rick Astley: Never Gonna Give You Up
+        Rick Astley : Never Gonna Give You Up
+    """
+
     match = re.match(SPLIT_ARTIST_REGEX, title)
     if match is not None:
         if None not in (match.group(1), match.group(2)):
@@ -22,9 +33,22 @@ def split_title(title):
     return "", title
 
 
-# Redirecting/hiding stderr without leaks
+class ConnectionNotReady(Exception):
+    """
+    This error is called when no Spotify session is open or when
+    no songs are currently playing, since it is better to catch them
+    outside of the init function.
+    """
+
+    pass
+
+
 @contextmanager
 def stderr_redirected(to: str = os.devnull) -> None:
+    """
+    Redirecting stderr without leaks.
+    """
+
     fd = sys.stderr.fileno()
 
     def _redirect_stderr(to):

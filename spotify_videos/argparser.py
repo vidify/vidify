@@ -4,12 +4,21 @@ from .version import __version__
 
 class Parser:
     def __init__(self) -> None:
+        """
+        Initializing the parser with info about the program
+        """
+
         self._parser = argparse.ArgumentParser(
                 prog = "spotify-videos",
                 description = "Windows and Mac users must pass --username, --client-id and --client-secret to use the web API. Read more about how to obtain them in the README (https://github.com/marioortizmanero/spotify-music-videos).")
         self._add_arguments()
 
     def _add_arguments(self) -> None:
+        """
+        Adding all the arguments. The version is single sourced from the
+        version.py file.
+        """
+
         self._parser.add_argument(
                 '-v', '--version',
                 action='version',

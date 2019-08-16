@@ -1,21 +1,28 @@
 import time
 import platform
 import logging
+from typing import Callable
 
 import youtube_dl
 import lyricwikia
 
-from .web_player import WebPlayer
-from .dbus_player import DBusPlayer
-from .vlc import VLCWindow
+from .web_api import WebAPI
+from .dbus_api import DBusAPI
+from .vlc_player import VLCPlayer
 from .argparser import Parser
-from .utils import stderr_redirected
+from .utils import stderr_redirected, ConnectionNotReady
 
 
 # Argument parser initialization
 parser = Parser()
 args = parser.parse()
 
+# Logger initialzation with precise milliseconds handler
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter("[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s", datefmt="%H:%M:%S")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 # Youtube-dl config
 ydl_opts = {
@@ -29,19 +36,8 @@ if args.max_width is not None:
 if args.max_height is not None:
     ydl_opts['format'] += f"[height<={args.max_height}]"
 
-def get_url(name: str) -> str:
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info("ytsearch:" + name, download=False)
-    return info['entries'][0]['url']
-
-
-# Logger initialzation with precise handler
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s", datefmt="%H:%M:%S")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
+# Turning on debug modes for VLC and youtube-dl if the
+# debug argument was passed
 if args.debug:
     logger.setLevel(logging.DEBUG)
     args.vlc_args += " --verbose 1"
@@ -51,36 +47,65 @@ else:
     args.vlc_args += " --quiet"
 
 
-# Using lyricwikia to get the song's lyrics
+def format_name(artist: str, title: str) -> str:
+    """
+    Some local songs may not have an artist name so the formatting
+    has to be different. Also, "Official Video" is added to the query
+    to get more accurate results.
+    """
+    if artist is None or artist == "":
+        return f"{title}"
+    else:
+        return f"{artist} - {title}"
+
+
+def get_url(artist: str, title: str) -> str:
+    """
+    Getting the youtube direct link to play it directly with VLC.
+    """
+    
+    name = format_name(artist, title)
+
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(f"ytsearch:'{name} Official Video'", download=False)
+        print(info)
+    return info['entries'][0]['url']
+
+
 def print_lyrics(artist: str, title: str) -> None:
-    print(f"\033[4m{artist} - {title}\033[0m")
+    """
+    Using lyricwikia to get lyrics
+    """
+
+    name = format_name(artist, title)
+
+    print(f"\033[4m{name}\033[0m")
     try:
         print(lyricwikia.get_lyrics(artist, title) + "\n")
     except (lyricwikia.LyricsNotFound, AttributeError):
         print("No lyrics found\n")
 
 
-def format_name(artist: str, title: str):
-    # Some local files don't have artist names
-    if artist is None or artist == "":
-        return f"{title} Official Video"
-    else:
-        return f"{artist} - {title} Official Video"
+def play_videos_dbus(player: VLCPlayer, spotify: DBusAPI) -> None:
+    """
+    Playing videos with the DBus API (Linux).
 
+    Spotify doesn't currently support the MPRIS property `Position`
+    so the starting offset is calculated manually and may be a bit rough.
 
-# Plays the videos with the DBus API (Linux)
-def play_videos_dbus(player: VLCWindow, spotify: DBusPlayer) -> None:
+    After playing the video, the player waits for DBus events like
+    pausing the video.
+    """
+
     while True:
         start_time = time.time()
 
-        # Downloads and plays the video with the offset
-        name = format_name(spotify.artist, spotify.title)
-        url = get_url(name)
+        url = get_url(spotify.artist, spotify.title)
         player.start_video(url)
 
         if spotify.is_playing:
             player.play()
-            # Waits until VLC actually plays the video to set the offset in sync
+            # Waits until VLC actually plays the video to set the offset
             while player.get_position() == 0:
                 pass
             offset = int((time.time() - start_time) * 1000)
@@ -90,16 +115,18 @@ def play_videos_dbus(player: VLCWindow, spotify: DBusPlayer) -> None:
         if args.lyrics:
             print_lyrics(spotify.artist, spotify.title)
 
-        # Waiting for Spotify events
         spotify.wait()
 
 
-# Plays the videos with the web API (other OS)
-def play_videos_web(player: VLCWindow, spotify: WebPlayer) -> None:
+def play_videos_web(player: VLCPlayer, spotify: WebAPI) -> None:
+    """
+    Playing videos with the Web API (macOS, Windows).
+
+    Unlike the DBus API, the position can be requested and synced easily.
+    """
+
     while True:
-        # Starts video at exact position
-        name = format_name(spotify.artist, spotify.title)
-        url = get_url(name)
+        url = get_url(spotify.artist, spotify.title)
         player.start_video(url)
 
         if spotify.is_playing:
@@ -110,32 +137,74 @@ def play_videos_web(player: VLCWindow, spotify: WebPlayer) -> None:
         if args.lyrics:
             print_lyrics(spotify.artist, spotify.title)
 
-        # Waiting for the current song to change
         spotify.wait()
 
 
+def wait_for_connection(connect: Callable, msg: str,
+        attempts: int = 30) -> bool:
+    """
+    Waits for a Spotify session to be opened or for a song to play.
+    Times out after <attempts> seconds to avoid infinite loops and to
+    avoid too many API/process requests.
+
+    Returns True if the connect was succesfull and False otherwise.
+    """
+
+    counter = 0
+    while counter < attempts:
+        try:
+            connect()
+        except ConnectionNotReady:
+            if counter == 0:
+                print(msg)
+            counter += 1
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                break
+        else:
+            return True
+    else:
+        print("Timed out")
+
+    return False
+
+
 def choose_platform() -> None:
-    player = VLCWindow(
-                logger,
-                vlc_args = args.vlc_args,
-                fullscreen = args.fullscreen)
+    """
+    Chooses a platform, waits for the API to be ready and starts
+    playing videos. Linux will use the DBus API unless the
+    --use-web-api flag was passed.
+    """
+
+    player = VLCPlayer(logger, args.vlc_args, args.fullscreen)
 
     if platform.system() == "Linux" and not args.use_web_api:
-        spotify = DBusPlayer(
-                player,
-                logger)
-        play_videos_dbus(spotify.player, spotify)
+        dbus_spotify = DBusAPI(player, logger)
+        success = wait_for_connection(
+                dbus_spotify.do_connect,
+                "Waiting for a Spotify session to be ready...")
+
+        if success:
+            play_videos_dbus(dbus_spotify.player, dbus_spotify)
     else:
-        spotify = WebPlayer(
-                player,
-                logger,
-                username = args.username,
-                client_id = args.client_id,
-                client_secret = args.client_secret)
-        play_videos_web(spotify.player, spotify)
+        web_spotify = WebAPI(player, logger, args.username,
+                                args.client_id, args.client_secret)
+        success = wait_for_connection(
+                web_spotify.do_connect,
+                "Waiting for a Spotify song to play...")
+
+        if success:
+            play_videos_web(web_spotify.player, web_spotify)
 
 
 def main() -> None:
+    """
+    Redirects stderr to /dev/null if debug is turned off, since
+    sometimes VLC will throw non-fatal errors even when configured
+    to be quiet.
+    """
+
     if args.debug:
         choose_platform()
     else:
