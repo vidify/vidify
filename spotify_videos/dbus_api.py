@@ -148,7 +148,6 @@ class DBusAPI:
         first the artist and then the title.
         """
 
-        first_msg = True
         metadata = self._properties_interface.Get(
             "org.mpris.MediaPlayer2.Player",
             "Metadata")
