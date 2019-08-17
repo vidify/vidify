@@ -7,7 +7,7 @@ class VLCPlayer:
     def __init__(self, logger: 'logging.Logger', vlc_args: str = "",
                  fullscreen: bool = False) -> None:
         """
-        This VLC player is the VLC instance where media should play.
+        This VLC player is the instance where media should play.
 
         The logger is an instance from the logging module, configured
         to show debug or error messages.
@@ -19,7 +19,6 @@ class VLCPlayer:
         self._logger = logger
         self._fullscreen = fullscreen
 
-        # VLC Instance
         try:
             self._instance = vlc.Instance(vlc_args)
         except NameError:
@@ -60,7 +59,6 @@ class VLCPlayer:
 
         self._video_player.set_time(ms)
 
-    # Get the position of the VLC media playing in ms
     def get_position(self) -> int:
         """
         Getting the position of the VLC player in milliseconds

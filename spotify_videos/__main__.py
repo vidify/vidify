@@ -6,8 +6,6 @@ from typing import Callable
 import youtube_dl
 import lyricwikia
 
-from .web_api import WebAPI
-from .dbus_api import DBusAPI
 from .vlc_player import VLCPlayer
 from .argparser import Parser
 from .utils import stderr_redirected, ConnectionNotReady
@@ -87,7 +85,7 @@ def print_lyrics(artist: str, title: str) -> None:
         print("No lyrics found\n")
 
 
-def play_videos_dbus(player: VLCPlayer, spotify: DBusAPI) -> None:
+def play_videos_dbus(player: VLCPlayer, spotify: 'DBusAPI') -> None:
     """
     Playing videos with the DBus API (Linux).
 
@@ -119,7 +117,7 @@ def play_videos_dbus(player: VLCPlayer, spotify: DBusAPI) -> None:
         spotify.wait()
 
 
-def play_videos_web(player: VLCPlayer, spotify: WebAPI) -> None:
+def play_videos_web(player: VLCPlayer, spotify: 'WebAPI') -> None:
     """
     Playing videos with the Web API (macOS, Windows).
 
@@ -181,6 +179,7 @@ def choose_platform() -> None:
     player = VLCPlayer(logger, args.vlc_args, args.fullscreen)
 
     if platform.system() == "Linux" and not args.use_web_api:
+        from .dbus_api import DBusAPI
         dbus_spotify = DBusAPI(player, logger)
 
         if wait_for_connection(
@@ -188,6 +187,7 @@ def choose_platform() -> None:
                 "Waiting for a Spotify session to be ready..."):
             play_videos_dbus(dbus_spotify.player, dbus_spotify)
     else:
+        from .web_api import WebAPI
         web_spotify = WebAPI(player, logger, args.username,
                              args.client_id, args.client_secret)
 

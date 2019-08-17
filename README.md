@@ -8,6 +8,7 @@ A simple tool to show Youtube **music videos** and **lyrics** for the currently 
 
 ## Requirements
 * Python 3.6+
+* VLC
 
 For **Linux** users:
 

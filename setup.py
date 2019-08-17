@@ -1,4 +1,18 @@
 from setuptools import setup, find_packages
+import platform
+
+
+dependencies = [
+    'youtube-dl',
+    'python-vlc',
+    'lyricwikia',
+    'requests>=2.3.0',  # spotipy
+    'six>=1.10.0'  # spotipy
+]
+
+# DBus is only needed on Linux
+if platform.system() == 'Linux':
+    dependencies.append('dbus-python')
 
 
 # Get version inside spotify_videos/version.py without importing the package
@@ -28,14 +42,7 @@ setup(
     ],
     keywords='spotify music video videos lyrics',
     python_requires='>=3.6',
-    install_requires=[
-        'youtube-dl',
-        'python-vlc',
-        'lyricwikia',
-        'dbus-python',
-        'requests>=2.3.0',  # spotipy
-        'six>=1.10.0'  # spotipy
-    ],
+    install_requires=dependencies,
     entry_points={
         'console_scripts': ['spotify-videos = spotify_videos.__main__:main']
     }
