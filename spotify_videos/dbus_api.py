@@ -1,4 +1,5 @@
 import sys
+import logging
 from typing import Tuple
 
 import dbus
@@ -21,7 +22,7 @@ class DBusAPI:
     pausing/playing when the API detects it.
     """
 
-    def __init__(self, player: VLCPlayer, logger: 'logging.Logger') -> None:
+    def __init__(self, player: VLCPlayer, logger: logging.Logger) -> None:
         """
         The parameters are saved inside the object and the DBus main loop
         is configured to be ran later.

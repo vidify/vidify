@@ -1,4 +1,5 @@
 import sys
+import logging
 import time
 
 from . import spotipy
@@ -21,7 +22,7 @@ class WebAPI:
     pausing/playing/skipping when the API detects it.
     """
 
-    def __init__(self, player: VLCPlayer, logger: 'logging.Logger',
+    def __init__(self, player: VLCPlayer, logger: logging.Logger,
                  username: str, client_id: str, client_secret: str) -> None:
         """
         The parameters are saved in the class and the main song properties

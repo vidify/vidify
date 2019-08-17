@@ -3,7 +3,7 @@ import vlc
 
 
 class VLCPlayer:
-    def __init__(self, logger: 'logging.Logger', vlc_args: str = "",
+    def __init__(self, logger: logging.Logger, vlc_args: str = "",
                  fullscreen: bool = False) -> None:
         """
         This VLC player is the instance where media should play.

@@ -28,10 +28,6 @@ Or download the latest [release](https://github.com/marioortizmanero/spotify-mus
 
 *Note: you can add the --user flag to install it locally.*
 
-Or you can just run it without installing it with:
-
-`python3 -m spotify_videos`
-
 
 ## Compatibility
 
