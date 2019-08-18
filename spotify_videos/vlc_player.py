@@ -2,7 +2,7 @@ import logging
 import vlc
 
 
-class VLCPlayer:
+class VLCPlayer(object):
     def __init__(self, logger: logging.Logger, vlc_args: str = "",
                  fullscreen: bool = False) -> None:
         """

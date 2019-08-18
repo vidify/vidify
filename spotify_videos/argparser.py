@@ -2,7 +2,7 @@ import argparse
 from .version import __version__
 
 
-class Parser:
+class Parser(object):
     def __init__(self) -> None:
         """
         Initializing the parser with info about the program

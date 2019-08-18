@@ -78,7 +78,11 @@ def print_lyrics(artist: str, title: str) -> None:
 
     name = format_name(artist, title)
 
-    print(f"\033[4m{name}\033[0m")
+    if platform.system() == 'Windows':
+        print(f">> {name}")
+    else:
+        print(f"\033[4m{name}\033[0m")
+
     try:
         print(lyricwikia.get_lyrics(artist, title) + "\n")
     except (lyricwikia.LyricsNotFound, AttributeError):
@@ -178,7 +182,7 @@ def choose_platform() -> None:
 
     player = VLCPlayer(logger, args.vlc_args, args.fullscreen)
 
-    if platform.system() == "Linux" and not args.use_web_api:
+    if platform.system() == 'Linux' and not args.use_web_api:
         from .dbus_api import DBusAPI
         dbus_spotify = DBusAPI(player, logger)
 

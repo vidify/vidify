@@ -1,5 +1,5 @@
 # Spotify Music Videos
-![travis](https://travis-ci.com/marioortizmanero/spotify-music-videos.svg?branch=master)
+![travis](https://travis-ci.com/marioortizmanero/spotify-music-videos.svg?branch=master) ![pypi](https://img.shields.io/pypi/v/spotify-videos) ![aur](https://img.shields.io/aur/version/spotify-videos)
 
 A simple tool to show Youtube **music videos** and **lyrics** for the currently playing Spotify songs with VLC.
 
@@ -18,15 +18,11 @@ For **Linux** users:
 
 
 ## How to install
-You can use pip to install it:
+* You can use pip to install it: `pip3 install spotify-videos --user`
 
-`pip3 install spotify-videos`
+* If you're on Arch Linux, you can install it from the AUR: `spotify-videos`
 
-Or download the latest [release](https://github.com/marioortizmanero/spotify-music-videos/releases). Uncompress the .tar.gz file and run inside the folder:
-
-`python3 ./setup.py install`
-
-*Note: you can add the --user flag to install it locally.*
+* You can also download the latest [release](https://github.com/marioortizmanero/spotify-music-videos/releases). Uncompress the `spotify-videos-X.Y.Z.tar.gz` file and run inside the folder: `python3 setup.py install --user`
 
 
 ## Compatibility

@@ -9,8 +9,7 @@ from .vlc_player import VLCPlayer
 from .utils import split_title, ConnectionNotReady
 
 
-# Web player with the Spotify properties (other OS than Linux)
-class WebAPI:
+class WebAPI(object):
     """
     The Web API class, containing all information from the web API.
 
@@ -72,8 +71,8 @@ class WebAPI:
 
     def _refresh_metadata(self) -> None:
         """
-        Refreshes the metadata and status of the player: artist,
-        title and current position.
+        Refreshes the metadata of the player: artist, title, whether
+        it's playing or not, and the current position.
 
         Some local songs don't have an artist name so `split_title`
         is called in an attempt to manually get it from the title.

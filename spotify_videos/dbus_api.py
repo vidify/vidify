@@ -10,7 +10,7 @@ from .vlc_player import VLCPlayer
 from .utils import split_title, ConnectionNotReady
 
 
-class DBusAPI:
+class DBusAPI(object):
     """
     The DBus API class contains all information obtained from the DBus API.
 
