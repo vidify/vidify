@@ -187,7 +187,7 @@ def choose_platform() -> None:
         dbus_spotify = DBusAPI(player, logger)
 
         if wait_for_connection(
-                dbus_spotify.do_connect,
+                dbus_spotify.connect,
                 "Waiting for a Spotify session to be ready..."):
             play_videos_dbus(dbus_spotify.player, dbus_spotify)
     else:
@@ -196,7 +196,7 @@ def choose_platform() -> None:
                              args.client_id, args.client_secret)
 
         if wait_for_connection(
-                web_spotify.do_connect,
+                web_spotify.connect,
                 "Waiting for a Spotify song to play..."):
             play_videos_web(web_spotify.player, web_spotify)
 

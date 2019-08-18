@@ -12,7 +12,6 @@ before_install:
     - sudo pip3 install --upgrade pip
     - pip3 install flake8
     - sudo apt-get -y install libdbus-glib-1-dev libcairo2-dev libglib2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 vlc libvlc-dev
-    - pip3 install dbus-python
     - pip3 install pygobject
 install:
     - python setup.py install

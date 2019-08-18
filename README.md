@@ -92,7 +92,7 @@ optional arguments:
 
 ## Documentation
 Helpful documentation links for contributing:
-* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [DBus python module](https://dbus.freedesktop.org/doc/dbus-python/tutorial.html)
+* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus)
 * [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/)
 

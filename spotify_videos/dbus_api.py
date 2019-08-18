@@ -2,8 +2,7 @@ import sys
 import logging
 from typing import Tuple
 
-import dbus
-from dbus.mainloop.glib import DBusGMainLoop
+import pydbus
 from gi.repository import GLib
 
 from .vlc_player import VLCPlayer
@@ -15,7 +14,7 @@ class DBusAPI(object):
     The DBus API class contains all information obtained from the DBus API.
 
     The logger is an instance from the logging module, configured
-    to show debug or error messages.
+    to show info or error messages.
 
     It includes `player`, the VLC window, so that some actions can
     be controlled from the API more intuitively, like automatic
@@ -24,8 +23,7 @@ class DBusAPI(object):
 
     def __init__(self, player: VLCPlayer, logger: logging.Logger) -> None:
         """
-        The parameters are saved inside the object and the DBus main loop
-        is configured to be ran later.
+        Initialization of parameters and principal metadata attributes.
         """
 
         self._logger = logger
@@ -35,83 +33,46 @@ class DBusAPI(object):
         self.title = ""
         self.is_playing = False
 
-        DBusGMainLoop(set_as_default=True)
-
-    def __del__(self) -> None:
+    def connect(self) -> None:
         """
-        Safely disconnects from the bus and removes all signals
-        """
-
-        try:
-            self._loop.quit()
-        except AttributeError:
-            pass
-
-        self._logger.info("Disconnecting")
-        self._disconnecting = True
-        try:
-            for signal_name, signal_handler in list(self._signals.items()):
-                signal_handler.remove()
-                del self._signals[signal_name]
-        except AttributeError:
-            pass
-
-    def do_connect(self) -> None:
-        """
-        Connects to the DBus session bus and loads different interfaces
-        to later get signals from it like the status of the media
-        (playing/paused) or the song attributes.
+        Connects to the DBus session. Tries to access the proxy object
+        and configures the call on property changes.
 
         A `ConnectionNotReady` exception is thrown if no Spotify bus
         exists or if no song is playing.
         """
 
-        self._session_bus = dbus.SessionBus()
-        self._bus_name = "org.mpris.MediaPlayer2.spotify"
-        self._disconnecting = False
+        self._logger.info("Connecting")
+        self._bus = pydbus.SessionBus()
 
         try:
-            self._obj = self._session_bus.get_object(
-                self._bus_name,
-                '/org/mpris/MediaPlayer2')
-        except dbus.exceptions.DBusException:
+            self._obj = self._bus.get('org.mpris.MediaPlayer2.spotify',
+                                      '/org/mpris/MediaPlayer2')
+        except GLib.Error:
             raise ConnectionNotReady("No Spotify session currently running")
 
-        self._properties_interface = dbus.Interface(
-            self._obj,
-            dbus_interface="org.freedesktop.DBus.Properties")
-        self._introspect_interface = dbus.Interface(
-            self._obj,
-            dbus_interface="org.freedesktop.DBus.Introspectable")
-        self._media_interface = dbus.Interface(
-            self._obj,
-            dbus_interface='org.mpris.MediaPlayer2')
-        self._player_interface = dbus.Interface(
-            self._obj,
-            dbus_interface='org.mpris.MediaPlayer2.Player')
-        self._introspect = self._introspect_interface.get_dbus_method(
-            'Introspect',
-            dbus_interface=None)
         self._loop = GLib.MainLoop()
-        self._signals = {}
-        self._logger.info("Connecting")
 
-        if not self._disconnecting:
-            introspect_xml = self._introspect(self._bus_name, '/')
-            if 'TrackMetadataChanged' in introspect_xml:
-                key = 'track_metadata_changed'
-                self._signals[key] = self._session_bus.add_signal_receiver(
-                    self._refresh_metadata,
-                    'TrackMetadataChanged',
-                    self._bus_name)
-            self._properties_interface.connect_to_signal(
-                'PropertiesChanged',
-                self._on_properties_changed)
+        self._disconnect_obj = self._obj.PropertiesChanged.connect(
+            self._on_properties_changed)
 
         try:
             self._refresh_metadata()
         except IndexError:
             raise ConnectionNotReady("No song is currently playing")
+
+    def disconnect(self) -> None:
+        """
+        Safely disconnects from the bus and loop.
+        """
+
+        self._logger.info("Disconnecting")
+
+        try:
+            self._disconnect_obj.disconnect()
+            self._loop.quit()
+        except AttributeError:
+            pass
 
     def wait(self) -> None:
         """
@@ -123,7 +84,7 @@ class DBusAPI(object):
         try:
             self._loop.run()
         except KeyboardInterrupt:
-            self._logger.info("Quitting main loop")
+            self.disconnect()
             sys.exit(0)
 
     def _formatted_metadata(self, metadata: dict) -> Tuple[str, str]:
@@ -149,14 +110,11 @@ class DBusAPI(object):
         first the artist and then the title.
         """
 
-        metadata = self._properties_interface.Get(
-            "org.mpris.MediaPlayer2.Player",
-            "Metadata")
+        player_interface = self._obj['org.mpris.MediaPlayer2.Player']
+        metadata = player_interface.Metadata
         self.artist, self.title = self._formatted_metadata(metadata)
 
-        status = str(self._properties_interface.Get(
-            'org.mpris.MediaPlayer2.Player',
-            'PlaybackStatus'))
+        status = str(player_interface.PlaybackStatus)
         self.is_playing = self._bool_status(status)
 
     def _bool_status(self, status: str) -> bool:
@@ -171,9 +129,8 @@ class DBusAPI(object):
         else:
             return True
 
-    def _on_properties_changed(
-            self, interface: dbus.String,
-            properties: dbus.Dictionary, signature: dbus.Array) -> None:
+    def _on_properties_changed(self, interface: str, properties: dict,
+                               signature: list) -> None:
         """
         Function called from DBus on events from the main loop.
 
@@ -182,17 +139,17 @@ class DBusAPI(object):
         the VLC player.
         """
 
-        if dbus.String('Metadata') in properties:
-            metadata = properties[dbus.String('Metadata')]
+        if 'Metadata' in properties:
+            metadata = properties['Metadata']
             artist, title = self._formatted_metadata(metadata)
             if artist != self.artist or title != self.title:
+                self._logger.info("New video detected")
                 self.artist = artist
                 self.title = title
-                self._logger.info("New video detected")
                 self._loop.quit()
 
-        if dbus.String('PlaybackStatus') in properties:
-            status = str(properties[dbus.String('PlaybackStatus')])
+        if 'PlaybackStatus' in properties:
+            status = str(properties['PlaybackStatus'])
             status = self._bool_status(status)
             if status != self.is_playing:
                 self._logger.info("Paused/Played video")

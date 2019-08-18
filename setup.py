@@ -12,7 +12,7 @@ dependencies = [
 
 # DBus is only needed on Linux
 if platform.system() == 'Linux':
-    dependencies.append('dbus-python')
+    dependencies.append('pydbus')
 
 
 # Get version inside spotify_videos/version.py without importing the package

@@ -58,7 +58,7 @@ class WebAPI(object):
 
         self._spotify.trace = False
 
-    def do_connect(self) -> None:
+    def connect(self) -> None:
         """
         An initial metadata refresh is run. It throws a `ConnectionNotReady`
         exception if no songs are playing in that moment.
