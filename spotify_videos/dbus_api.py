@@ -67,7 +67,6 @@ class DBusAPI(object):
         """
 
         self._logger.info("Disconnecting")
-
         try:
             self._disconnect_obj.disconnect()
             self._loop.quit()
