@@ -51,16 +51,18 @@ class VLCPlayer(object):
         self._video_player.audio_set_mute(True)
         self._video_player.set_fullscreen(self._fullscreen)
 
-    def set_position(self, ms: int) -> None:
-        """
-        Setting the position in milliseconds
-        """
-
-        self._video_player.set_time(ms)
-
-    def get_position(self) -> int:
+    @property
+    def position(self) -> int:
         """
         Getting the position of the VLC player in milliseconds
         """
 
         return self._video_player.get_time()
+
+    @position.setter
+    def position(self, ms: int) -> None:
+        """
+        Setting the position in milliseconds
+        """
+
+        self._video_player.set_time(ms)

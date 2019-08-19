@@ -41,7 +41,7 @@ class WebAPI(object):
 
         self.artist = ""
         self.title = ""
-        self.position = 0
+        self._position = 0
         self.is_playing = False
 
         scope = 'user-read-currently-playing'
@@ -85,16 +85,17 @@ class WebAPI(object):
         if self.artist == "":
             self.artist, self.title = split_title(self.title)
 
-        self.position = metadata['progress_ms']
+        self._position = metadata['progress_ms']
         self.is_playing = metadata['is_playing']
 
-    def get_position(self) -> int:
+    @property
+    def position(self) -> int:
         """
         Returns the position in milliseconds of the player.
         """
 
         self._refresh_metadata()
-        return self.position
+        return self._position
 
     def wait(self) -> None:
         """
@@ -116,17 +117,17 @@ class WebAPI(object):
                 artist = self.artist
                 title = self.title
                 is_playing = self.is_playing
-                position = self.position
+                position = self._position
                 self._refresh_metadata()
 
                 if self.is_playing != is_playing:
                     self._logger.info("Paused/Played video")
                     self.player.toggle_pause()
 
-                diff = self.position - position
+                diff = self._position - position
                 if diff >= 3000 or diff < 0:
                     self._logger.info("Position changed")
-                    self.player.set_position(self.position)
+                    self.player.position = self._position
 
                 if self.artist != artist or self.title != title:
                     self._logger.info("Song changed")

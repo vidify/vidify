@@ -18,7 +18,7 @@ args = parser.parse()
 # Logger initialzation with precise milliseconds handler
 logger = logging.getLogger()
 handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(asctime)s.%(msecs)03d]"
+formatter = logging.Formatter("[%(asctime)s.%(msecs)03d] "
                               "%(levelname)s: %(message)s", datefmt="%H:%M:%S")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
@@ -109,10 +109,10 @@ def play_videos_dbus(player: VLCPlayer, spotify: 'DBusAPI') -> None:
         if spotify.is_playing:
             player.play()
             # Waits until VLC actually plays the video to set the offset
-            while player.get_position() == 0:
+            while player.position == 0:
                 pass
             offset = int((time.time() - start_time) * 1000)
-            player.set_position(offset)
+            player.position = offset
             logging.debug(f"Starting offset is {offset}")
 
         if args.lyrics:
@@ -134,8 +134,8 @@ def play_videos_web(player: VLCPlayer, spotify: 'WebAPI') -> None:
 
         if spotify.is_playing:
             player.play()
-        offset = spotify.get_position()
-        player.set_position(offset)
+        offset = spotify.position
+        player.position = offset
 
         if args.lyrics:
             print_lyrics(spotify.artist, spotify.title)
