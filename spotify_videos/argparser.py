@@ -46,7 +46,7 @@ class Parser(object):
         self._parser.add_argument(
             "-a", "--args",
             action="store", dest="vlc_args", default="",
-            help="other arguments used when opening VLC."
+            help="custom arguments used when opening VLC."
             " Note that some like args='--fullscreen' won't work in here")
 
         self._parser.add_argument(
@@ -75,7 +75,7 @@ class Parser(object):
             "--client-id",
             action="store", dest="client_id", default=None,
             help="your client ID. Mandatory if the web API is being used."
-            " Check the README to see how to obtain yours."
+            " Check the README to learn how to obtain yours."
             " Example: --client-id='5fe01282e44241328a84e7c5cc169165'")
 
         self._parser.add_argument(
@@ -83,7 +83,7 @@ class Parser(object):
             action="store", dest="client_secret", default=None,
             help="your client secret ID."
             " Mandatory if the web API is being used."
-            " Check the README to see how to obtain yours."
+            " Check the README to learn how to obtain yours."
             " Example: --client-secret='2665f6d143be47c1bc9ff284e9dfb350'")
 
     def parse(self) -> dict:
