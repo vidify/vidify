@@ -59,7 +59,7 @@ usage: spotify-videos [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
 |----------------------------------|---------------------|
 | `-n`, `--no-lyrics`              | do not print lyrics |
 | `-f`, `--fullscreen`             | play videos in fullscreen mode |
-| `-a VLC_ARGS`, `--args VLC_ARGS` | other arguments used when opening VLC. Note that some like args='--fullscreen' won't work in here |
+| `-a VLC_ARGS`, `--args VLC_ARGS` | custom arguments used when opening VLC. Note that some like `args='--fullscreen'` won't work in here |
 | `--width MAX_WIDTH`              | set the maximum width for the played videos |
 | `--height MAX_HEIGHT`            | set the maximum height for the played videos |
 | `-w, --use-web-api`              | forcefully use Spotify's web API |
