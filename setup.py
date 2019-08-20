@@ -6,8 +6,7 @@ dependencies = [
     'youtube-dl',
     'python-vlc',
     'lyricwikia',
-    'requests>=2.3.0',  # spotipy
-    'six>=1.10.0'  # spotipy
+    'spotipy==2.4.4'
 ]
 
 # DBus is only needed on Linux
@@ -43,6 +42,7 @@ setup(
     keywords='spotify music video videos lyrics',
     python_requires='>=3.6',
     install_requires=dependencies,
+    dependency_links=["git+https://git@github.com/plamere/spotipy.git@master#egg=spotipy-2.4.4"],
     entry_points={
         'console_scripts': ['spotify-videos = spotify_videos.__main__:main']
     }
