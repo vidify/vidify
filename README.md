@@ -45,43 +45,29 @@ You may be prompted to paste the resulting link that was opened in your browser 
 
 
 ## How to use
-You can use these flags to modify the behavior of the program:
 
 ```
 usage: spotify-videos [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
                       [--width MAX_WIDTH] [--height MAX_HEIGHT] [-w]
                       [--username USERNAME] [--client-id CLIENT_ID]
                       [--client-secret CLIENT_SECRET]
-
-Windows and Mac users must pass --username, --client-id and --client-secret to
-use the web API. Read more about how to obtain them in the README
-(https://github.com/marioortizmanero/spotify-music-videos).
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -v, --version         show program's version number and exit
-  --debug               display debug messages
-  -n, --no-lyrics       do not print lyrics
-  -f, --fullscreen      play videos in fullscreen mode
-  -a VLC_ARGS, --args VLC_ARGS
-                        other arguments used when opening VLC. Note that some
-                        like args='--fullscreen' won't work in here
-  --width MAX_WIDTH     set the maximum width for the played videos
-  --height MAX_HEIGHT   set the maximum height for the played videos
-  -w, --use-web-api     forcefully use Spotify's web API
-  --username USERNAME   your Spotify username. Mandatory if the web API is
-                        being used. Example: --username='yourname'
-  --client-id CLIENT_ID
-                        your client ID. Mandatory if the web API is being
-                        used. Check the README to see how to obtain yours.
-                        Example: --client-
-                        id='5fe01282e44241328a84e7c5cc169165'
-  --client-secret CLIENT_SECRET
-                        your client secret ID. Mandatory if the web API is
-                        being used. Check the README to see how to obtain
-                        yours. Example: --client-
-                        secret='2665f6d143be47c1bc9ff284e9dfb350'
 ```
+
+Windows and macOS users must pass `--username`, `--client-id` and `--client-secret` to use the web API. Read more about how to obtain them in the [compatibility section](#compatibility).
+
+**Options:**
+
+| Option                           | Description         |
+|----------------------------------|---------------------|
+| `-n`, `--no-lyrics`              | do not print lyrics |
+| `-f`, `--fullscreen`             | play videos in fullscreen mode |
+| `-a VLC_ARGS`, `--args VLC_ARGS` | other arguments used when opening VLC. Note that some like args='--fullscreen' won't work in here |
+| `--width MAX_WIDTH`              | set the maximum width for the played videos |
+| `--height MAX_HEIGHT`            | set the maximum height for the played videos |
+| `-w, --use-web-api`              | forcefully use Spotify's web API |
+| `--username USERNAME`            | your Spotify username. Mandatory if the web API is being used. Example: --username='yourname' |
+| `--client-id CLIENT_ID`          | your client ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: --client-id='5fe01282e44241328a84e7c5cc169165' |
+| `--client-secret CLIENT_SECRET`  | your client secret ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: --client-secret='2665f6d143be47c1bc9ff284e9dfb350' |
 
 ---
 
