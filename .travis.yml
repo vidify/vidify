@@ -16,9 +16,9 @@ before_install:
 install:
     - python setup.py install
 
-# Lint with PEP8 and do tests
+# Lint with PEP8 (skipping spotipy) and do tests
 script: 
-    - flake8 . --exclude 'setup.py' --ignore='F821,W503'
+    - flake8 . --exclude 'spotipy' --ignore='F821,W503'
     - python -m unittest
 
 notifications:

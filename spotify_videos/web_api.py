@@ -2,8 +2,8 @@ import sys
 import logging
 import time
 
-import spotipy
-from spotipy import util
+from . import spotipy
+from .spotipy import util
 
 from .vlc_player import VLCPlayer
 from .utils import split_title, ConnectionNotReady
