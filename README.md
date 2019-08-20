@@ -46,16 +46,14 @@ You may be prompted to paste the resulting link that was opened in your browser 
 
 ## How to use
 
+Windows and macOS users must pass `--username`, `--client-id` and `--client-secret` to use the web API. Read more about how to obtain them in the [compatibility section](#compatibility).
+
 ```
 usage: spotify-videos [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
                       [--width MAX_WIDTH] [--height MAX_HEIGHT] [-w]
                       [--username USERNAME] [--client-id CLIENT_ID]
                       [--client-secret CLIENT_SECRET]
 ```
-
-Windows and macOS users must pass `--username`, `--client-id` and `--client-secret` to use the web API. Read more about how to obtain them in the [compatibility section](#compatibility).
-
-**Options:**
 
 | Option                           | Description         |
 |----------------------------------|---------------------|
@@ -65,9 +63,9 @@ Windows and macOS users must pass `--username`, `--client-id` and `--client-secr
 | `--width MAX_WIDTH`              | set the maximum width for the played videos |
 | `--height MAX_HEIGHT`            | set the maximum height for the played videos |
 | `-w, --use-web-api`              | forcefully use Spotify's web API |
-| `--username USERNAME`            | your Spotify username. Mandatory if the web API is being used. Example: --username='yourname' |
-| `--client-id CLIENT_ID`          | your client ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: --client-id='5fe01282e44241328a84e7c5cc169165' |
-| `--client-secret CLIENT_SECRET`  | your client secret ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: --client-secret='2665f6d143be47c1bc9ff284e9dfb350' |
+| `--username USERNAME`            | your Spotify username. Mandatory if the web API is being used. Example: `--username='yourname'` |
+| `--client-id CLIENT_ID`          | your client ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |
+| `--client-secret CLIENT_SECRET`  | your client secret ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: `--client-secret='2665f6d143be47c1bc9ff284e9dfb350'` |
 
 ---
 
