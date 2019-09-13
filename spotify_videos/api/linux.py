@@ -1,12 +1,13 @@
 import sys
 import logging
-from typing import Tuple
+from typing import Tuple, Union
 
 import pydbus
 from gi.repository import GLib
 
-from .vlc_player import VLCPlayer
-from .utils import split_title, ConnectionNotReady
+from ..player.vlc import VLCPlayer
+from ..player.mpv import MpvPlayer
+from ..utils import split_title, ConnectionNotReady
 
 
 class DBusAPI(object):
@@ -16,15 +17,13 @@ class DBusAPI(object):
     The logger is an instance from the logging module, configured
     to show info or error messages.
 
-    It includes `player`, the VLC window, so that some actions can
+    It includes `player`, the VLC or mpv window, so that some actions can
     be controlled from the API more intuitively, like automatic
     pausing/playing when the API detects it.
     """
 
-    def __init__(self, player: VLCPlayer, logger: logging.Logger) -> None:
-        """
-        Initialization of parameters and principal metadata attributes.
-        """
+    def __init__(self, player: Union[VLCPlayer, MpvPlayer],
+                 logger: logging.Logger) -> None:
 
         self._logger = logger
         self.player = player

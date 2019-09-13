@@ -6,8 +6,7 @@ dependencies = [
     'youtube-dl',
     'python-vlc',
     'lyricwikia',
-    'requests>=2.3.0',  # spotipy
-    'six>=1.10.0'  # spotipy
+    'spotipy'  # TODO
 ]
 
 # DBus is only needed on Linux
@@ -23,14 +22,17 @@ setup(
     name='spotify-videos',
     version=__version__,
     packages=find_packages(),
-    description='Simple tool to show Youtube music videos and lyrics'
-                ' for the playing Spotify songs',
-    url='https://github.com/marioortizmanero/spotify-music-videos',
-    license='MIT',
+    description='Simple tool to show Youtube music videos and lyrics',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
+    url='https://github.com/marioortizmanero/spotify-music-videos',
+    license='MIT',
+
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
+    maintainer='Mario O.M.',
+    maintainer_email='marioortizmanero@gmail.com',
+
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users/Desktop',
@@ -43,6 +45,11 @@ setup(
     keywords='spotify music video videos lyrics',
     python_requires='>=3.6',
     install_requires=dependencies,
+    extras_require={
+        'dev': [
+            'flake8'
+        ]
+    },
     entry_points={
         'console_scripts': ['spotify-videos = spotify_videos.__main__:main']
     }

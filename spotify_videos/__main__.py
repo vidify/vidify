@@ -1,19 +1,18 @@
 import time
 import platform
 import logging
-from typing import Callable
+from typing import Callable, Union
 
 import youtube_dl
 import lyricwikia
 
-from .vlc_player import VLCPlayer
-from .argparser import Parser
+from .player.vlc import VLCPlayer
+from .player.mpv import MpvPlayer
+from .config import Config
 from .utils import stderr_redirected, ConnectionNotReady
 
 
-# Argument parser initialization
-parser = Parser()
-args = parser.parse()
+config = Config()
 
 # Logger initialzation with precise milliseconds handler
 logger = logging.getLogger()
@@ -29,30 +28,31 @@ ydl_opts = {
     'quiet': True
 }
 
-if args.max_width is not None:
-    ydl_opts['format'] += f"[width<={args.max_width}]"
+if config.max_width is not None:
+    ydl_opts['format'] += f"[width<={config.max_width}]"
 
-if args.max_height is not None:
-    ydl_opts['format'] += f"[height<={args.max_height}]"
+if config.max_height is not None:
+    ydl_opts['format'] += f"[height<={config.max_height}]"
 
-# Turning on debug modes for VLC and youtube-dl if the
-# debug argument was passed
-if args.debug:
+if config.vlc_args is None:
+    config.vlc_args = ""
+
+if config.debug:
     logger.setLevel(logging.DEBUG)
-    args.vlc_args += " --verbose 1"
+    config.vlc_args += " --verbose 1"
     ydl_opts['quiet'] = False
 else:
     logger.setLevel(logging.ERROR)
-    args.vlc_args += " --quiet"
+    config.vlc_args += " --quiet"
 
 
 def format_name(artist: str, title: str) -> str:
     """
     Some local songs may not have an artist name so the formatting
-    has to be different. Also, "Official Video" is added to the query
-    to get more accurate results.
+    has to be different.
     """
-    if artist is None or artist == "":
+
+    if artist is (None, ""):
         return f"{title}"
     else:
         return f"{artist} - {title}"
@@ -63,17 +63,20 @@ def get_url(artist: str, title: str) -> str:
     Getting the youtube direct link to play it directly with VLC.
     """
 
-    name = format_name(artist, title)
+    name = f"ytsearch:'{format_name(artist, title)} Official Video'"
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(f"ytsearch:'{name} Official Video'",
-                                download=False)
+        info = ydl.extract_info(name, download=False)
+
     return info['entries'][0]['url']
 
 
 def print_lyrics(artist: str, title: str) -> None:
     """
-    Using lyricwikia to get lyrics
+    Using lyricwikia to get lyrics.
+
+    Colors are not displayed on Windows because it doesn't support ANSI
+    escape codes and importing colorama isn't worth it currently.
     """
 
     name = format_name(artist, title)
@@ -89,7 +92,8 @@ def print_lyrics(artist: str, title: str) -> None:
         print("No lyrics found\n")
 
 
-def play_videos_dbus(player: VLCPlayer, spotify: 'DBusAPI') -> None:
+def play_videos_dbus(player: Union[VLCPlayer, MpvPlayer],
+                     spotify: 'DBusAPI') -> None:
     """
     Playing videos with the DBus API (Linux).
 
@@ -115,13 +119,14 @@ def play_videos_dbus(player: VLCPlayer, spotify: 'DBusAPI') -> None:
             player.position = offset
             logging.debug(f"Starting offset is {offset}")
 
-        if args.lyrics:
+        if config.lyrics:
             print_lyrics(spotify.artist, spotify.title)
 
         spotify.wait()
 
 
-def play_videos_web(player: VLCPlayer, spotify: 'WebAPI') -> None:
+def play_videos_web(player: Union[VLCPlayer, MpvPlayer],
+                    spotify: 'WebAPI') -> None:
     """
     Playing videos with the Web API (macOS, Windows).
 
@@ -137,7 +142,7 @@ def play_videos_web(player: VLCPlayer, spotify: 'WebAPI') -> None:
         offset = spotify.position
         player.position = offset
 
-        if args.lyrics:
+        if config.lyrics:
             print_lyrics(spotify.artist, spotify.title)
 
         spotify.wait()
@@ -175,15 +180,17 @@ def wait_for_connection(connect: Callable, msg: str,
 
 def choose_platform() -> None:
     """
-    Chooses a platform, waits for the API to be ready and starts
-    playing videos. Linux will use the DBus API unless the
-    --use-web-api flag was passed.
+    Chooses a platform and player, waits for the API to be ready and starts
+    playing videos.
     """
 
-    player = VLCPlayer(logger, args.vlc_args, args.fullscreen)
+    if config.use_mpv:
+        player = MpvPlayer(logger, config.fullscreen)
+    else:
+        player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
 
-    if platform.system() == 'Linux' and not args.use_web_api:
-        from .dbus_api import DBusAPI
+    if platform.system() == 'Linux' and not config.use_web_api:
+        from .api.linux import DBusAPI
         dbus_spotify = DBusAPI(player, logger)
 
         if wait_for_connection(
@@ -191,9 +198,10 @@ def choose_platform() -> None:
                 "Waiting for a Spotify session to be ready..."):
             play_videos_dbus(dbus_spotify.player, dbus_spotify)
     else:
-        from .web_api import WebAPI
-        web_spotify = WebAPI(player, logger, args.username,
-                             args.client_id, args.client_secret)
+        from .api.web import WebAPI
+        web_spotify = WebAPI(player, logger, config.client_id,
+                             config.client_secret, config.redirect_uri,
+                             config.access_key)
 
         if wait_for_connection(
                 web_spotify.connect,
@@ -208,7 +216,7 @@ def main() -> None:
     to be quiet.
     """
 
-    if args.debug:
+    if config.debug:
         choose_platform()
     else:
         with stderr_redirected():

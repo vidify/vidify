@@ -1,4 +1,5 @@
 import logging
+
 import vlc
 
 
@@ -10,9 +11,6 @@ class VLCPlayer(object):
 
         The logger is an instance from the logging module, configured
         to show debug or error messages.
-
-        It includes functions to get information from the instance
-        or to control the player.
         """
 
         self._logger = logger
