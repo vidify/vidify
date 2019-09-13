@@ -1,14 +1,14 @@
 # Spotify Music Videos
 ![travis](https://travis-ci.com/marioortizmanero/spotify-music-videos.svg?branch=master) ![pypi](https://img.shields.io/pypi/v/spotify-videos) ![aur](https://img.shields.io/aur/version/spotify-videos)
 
-A simple tool to show Youtube **music videos** and **lyrics** for the currently playing Spotify songs with VLC.
+A simple tool to show Youtube **music videos** and **lyrics** for the currently playing Spotify songs. Check the [wiki](https://github.com/marioortizmanero/spotify-music-videos/wiki) for more.
 
-![example](screenshots/screenshot.png)
+![example](images/screenshot.png)
 
 
 ## Requirements
 * Python 3.6+
-* VLC
+* VLC or mpv to play the videos
 
 For **Linux** users:
 
@@ -22,69 +22,8 @@ For **Linux** users:
 
 * If you're on Arch Linux, you can install it from the AUR: [`spotify-videos`](https://aur.archlinux.org/packages/spotify-videos/)
 
-* You can also download the latest [release](https://github.com/marioortizmanero/spotify-music-videos/releases). Uncompress the `spotify-videos-X.Y.Z.tar.gz` file and run inside the folder: `python3 setup.py install --user`
-
-
-## Compatibility
-
-For Windows and Mac users, the Spotify Web API will be used. This means that:
-
-* You have to sign in and set it up manually
-* Only Spotify Premium users are able to use some functions
-* API calls are limited to 1 per second so there is more lag
-
-**How to obtain your client ID and your client secret:**
-1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
-2. Create a new client ID. You can fill the descriptions as you like. Click `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
-3. Go to `Edit Settings` and type `http://localhost:8888/callback/` in the Redirect URIs field.
-4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by passing them as arguments or by exporting the enviroment variables so that you don't have to type them again:
-     * `spotify-videos --username your_username --client-id your_client_id --client-secret your_client_secret`
-     * `export SPOTIPY_CLIENT_ID='your-spotify-client-id'; export SPOTIPY_CLIENT_SECRET='your-spotify-client-secret'`
-
-You may be prompted to paste the resulting link that was opened in your browser into the program. After doing it, the authorization process will be complete. The auth info should be kept in a cache file named `.cache-[your_username]`
+* You can also download the latest [release](https://github.com/marioortizmanero/spotify-music-videos/releases). Uncompress the `spotify-videos-X.Y.Z.tar.gz` file and run inside the folder: `pip3 install .[dev] --user`
 
 
 ## How to use
-
-Windows and macOS users must pass `--username`, `--client-id` and `--client-secret` to use the web API. Read more about how to obtain them in the [compatibility section](#compatibility).
-
-```
-usage: spotify-videos [-h] [-v] [--debug] [-n] [-f] [-a VLC_ARGS]
-                      [--width MAX_WIDTH] [--height MAX_HEIGHT] [-w]
-                      [--username USERNAME] [--client-id CLIENT_ID]
-                      [--client-secret CLIENT_SECRET]
-```
-
-| Option                           | Description         |
-|----------------------------------|---------------------|
-| `-n`, `--no-lyrics`              | do not print lyrics |
-| `-f`, `--fullscreen`             | play videos in fullscreen mode |
-| `-a VLC_ARGS`, `--args VLC_ARGS` | custom arguments used when opening VLC. Note that some like `args='--fullscreen'` won't work in here |
-| `--width MAX_WIDTH`              | set the maximum width for the played videos |
-| `--height MAX_HEIGHT`            | set the maximum height for the played videos |
-| `-w, --use-web-api`              | forcefully use Spotify's web API |
-| `--username USERNAME`            | your Spotify username. Mandatory if the web API is being used. Example: `--username='yourname'` |
-| `--client-id CLIENT_ID`          | your client ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |
-| `--client-secret CLIENT_SECRET`  | your client secret ID. Mandatory if the web API is being used. Check the [compatibility section](#compatibility) to learn how to obtain yours. Example: `--client-secret='2665f6d143be47c1bc9ff284e9dfb350'` |
-
----
-
-## Current limitations:
-* Spotify doesn't currently (15/07/19) support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
-* Spotify's Web API doesn't allow function calls on updates like DBus, meaning that the metadata has to be manually updated every second and checked in case of changes.
-
-
-## Documentation
-Helpful documentation links for contributing:
-* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus)
-* [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
-* [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/)
-
-Running module locally:
-
-`python -m spotify_videos`
-
-Running tests with unittest:
-
-`python -m unittest` or `python -m unittest discover -s tests`
-
+All usage and configuration info can be found inside [this wiki's article](https://github.com/marioortizmanero/spotify-music-videos/wiki/Configuration-and-usage).

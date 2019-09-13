@@ -1,12 +1,14 @@
 import sys
-import logging
 import time
+import logging
+from typing import Union
 
-from . import spotipy
-from .spotipy import util
+from spotipy import Spotify, Credentials, Scope, scopes
+from spotipy.util import prompt_for_user_token
 
-from .vlc_player import VLCPlayer
-from .utils import split_title, ConnectionNotReady
+from ..player.vlc import VLCPlayer
+from ..player.mpv import MpvPlayer
+from ..utils import split_title, ConnectionNotReady
 
 
 class WebAPI(object):
@@ -16,20 +18,19 @@ class WebAPI(object):
     The logger is an instance from the logging module, configured
     to show debug or error messages.
 
-    It includes `player`, the VLC window, so that some actions can
+    It includes `player`, the VLC or mpv window, so that some actions can
     be controlled from the API more intuitively, like automatic
     pausing/playing/skipping when the API detects it.
     """
 
-    def __init__(self, player: VLCPlayer, logger: logging.Logger,
-                 username: str, client_id: str, client_secret: str) -> None:
+    def __init__(self, player: Union[VLCPlayer, MpvPlayer],
+                 logger: logging.Logger, client_id: str, client_secret: str,
+                 redirect_uri: str, auth_token: str) -> None:
         """
         The parameters are saved in the class and the main song properties
         are created.
 
         Handles the Spotipy authentication.
-        The Spotipy trace is disabled even in debug mode because it outputs
-        too much unnecessary information.
 
         The auth scope is the least needed to access the currently playing song
         and the redirect uri is always on localhost, since it's an offline
@@ -44,19 +45,26 @@ class WebAPI(object):
         self._position = 0
         self.is_playing = False
 
-        scope = 'user-read-currently-playing'
-        redirect_uri = 'http://localhost:8888/callback/'
-        self._token = util.prompt_for_user_token(
-            username, scope, client_id, client_secret, redirect_uri)
-
-        if self._token:
-            self._logger.info("Authorized correctly")
-            self._spotify = spotipy.Spotify(auth=self._token)
+        # Trying to use the config auth token
+        if auth_token in (None, ""):
+            pass
+            # TODO
         else:
-            raise Exception(f"Can't get token for {username}. "
-                            "Please check the README for more info.")
+            scope = Scope(scopes.user_read_currently_playing)
+            print("To authorize the Spotify API, you'll have to log-in"
+                  " in the new tab that is going to open in your browser.\n"
+                  "Afterwards, just paste the contents of the URL you have"
+                  " been redirected to, something like"
+                  " 'http://localhost:8888/callback/?code=AQAa5v...'")
+            self._token = prompt_for_user_token(
+                client_id, client_secret, redirect_uri, scope)
 
-        self._spotify.trace = False
+            if self._token:
+                print("Authorized correctly")
+                self._spotify = Spotify(self._token.access_token)
+            else:
+                raise Exception(f"Couldn't get token."
+                                " Please check the README for more info.")
 
     def connect(self) -> None:
         """
@@ -66,7 +74,7 @@ class WebAPI(object):
 
         try:
             self._refresh_metadata()
-        except TypeError:
+        except AttributeError:
             raise ConnectionNotReady("No song currently playing")
 
     def _refresh_metadata(self) -> None:
@@ -78,7 +86,7 @@ class WebAPI(object):
         is called in an attempt to manually get it from the title.
         """
 
-        metadata = self._spotify.current_user_playing_track()
+        metadata = self._spotify.playback_currently_playing()
         self.artist = metadata['item']['artists'][0]['name']
         self.title = metadata['item']['name']
 
