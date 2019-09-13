@@ -126,3 +126,4 @@ dmypy.json
 # Custom
 .cache-*
 .vim/
+test.ini
