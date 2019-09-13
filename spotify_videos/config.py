@@ -138,7 +138,7 @@ class Config(object):
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
-    def parse(self, config_path: str, args: list = []):
+    def parse(self, config_path: str = None, args: list = []):
         """
         Save the configuration from all sources in the correct order
         (arguments > config file > defaults)

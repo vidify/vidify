@@ -12,11 +12,11 @@ before_install:
     - pip3 install pygobject
 
 install:
-    - pip3 install .[dev]
+    - pip3 install '.[mpv, dev]'
 
 # Lint with PEP8 and run tests
 script: 
-    - flake8 . --exclude 'spotipy' --ignore='F821,W503'
+    - flake8 . --ignore='F821,W503'
     - python -m unittest
 
 notifications:
