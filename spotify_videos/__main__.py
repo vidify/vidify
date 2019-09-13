@@ -185,8 +185,10 @@ def choose_platform() -> None:
     """
 
     if config.use_mpv:
+        from .player.mpv import MpvPlayer
         player = MpvPlayer(logger, config.fullscreen)
     else:
+        from .player.vlc import VLCPlayer
         player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
 
     if platform.system() == 'Linux' and not config.use_web_api:

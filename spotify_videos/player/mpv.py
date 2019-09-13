@@ -28,11 +28,11 @@ class MpvPlayer(object):
         except AttributeError:
             pass
 
-    def pause(self):
-        self._instance.pause = True
-
     def play(self):
         self._instance.pause = False
+
+    def pause(self):
+        self._instance.pause = True
 
     def toggle_pause(self):
         if self._instance.pause:
@@ -42,12 +42,19 @@ class MpvPlayer(object):
 
     @property
     def position(self):
-        print(self._instance.playback_time)
-        # TODO
+        """
+        Getting the position of the VLC player in milliseconds
+        """
+
+        print(self._instance.playback_time)  # TODO
 
     @position.setter
     def position(self, ms: int):
-        pass
+        """
+        Setting the position in milliseconds
+        """
+
+        self._instance.seek(ms / 1000, reference='absolute')
 
     def start_video(self, url: str) -> None:
         """

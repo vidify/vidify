@@ -16,7 +16,7 @@ install:
 
 # Lint with PEP8 and run tests
 script: 
-    - flake8 . --exclude 'spotipy' --ignore='F821,W503'
+    - flake8 . --ignore='F821,W503'
     - python -m unittest
 
 notifications:
