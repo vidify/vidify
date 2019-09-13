@@ -12,7 +12,7 @@ before_install:
     - pip3 install pygobject
 
 install:
-    - pip3 install .[dev]
+    - pip3 install .[mpv, dev]
 
 # Lint with PEP8 and run tests
 script: 

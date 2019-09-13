@@ -6,8 +6,6 @@ from typing import Union
 from spotipy import Spotify, Scope, scopes
 from spotipy.util import prompt_for_user_token
 
-from ..player.vlc import VLCPlayer
-from ..player.mpv import MpvPlayer
 from ..utils import split_title, ConnectionNotReady
 
 
@@ -23,7 +21,7 @@ class WebAPI(object):
     pausing/playing/skipping when the API detects it.
     """
 
-    def __init__(self, player: Union[VLCPlayer, MpvPlayer],
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  logger: logging.Logger, client_id: str, client_secret: str,
                  redirect_uri: str, auth_token: str) -> None:
         """

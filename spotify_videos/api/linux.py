@@ -5,8 +5,6 @@ from typing import Tuple, Union
 import pydbus
 from gi.repository import GLib
 
-from ..player.vlc import VLCPlayer
-from ..player.mpv import MpvPlayer
 from ..utils import split_title, ConnectionNotReady
 
 
@@ -22,7 +20,7 @@ class DBusAPI(object):
     pausing/playing when the API detects it.
     """
 
-    def __init__(self, player: Union[VLCPlayer, MpvPlayer],
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  logger: logging.Logger) -> None:
 
         self._logger = logger

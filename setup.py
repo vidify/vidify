@@ -46,6 +46,9 @@ setup(
     python_requires='>=3.6',
     install_requires=dependencies,
     extras_require={
+        'mpv': [
+            'python-mpv'
+        ],
         'dev': [
             'flake8'
         ]

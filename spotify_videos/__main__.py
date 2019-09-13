@@ -6,8 +6,6 @@ from typing import Callable, Union
 import youtube_dl
 import lyricwikia
 
-from .player.vlc import VLCPlayer
-from .player.mpv import MpvPlayer
 from .config import Config
 from .utils import stderr_redirected, ConnectionNotReady
 
@@ -35,6 +33,7 @@ if config.max_width is not None:
 if config.max_height is not None:
     ydl_opts['format'] += f"[height<={config.max_height}]"
 
+# Can't append to a string if the config file has an empty field for it
 if config.vlc_args is None:
     config.vlc_args = ""
 
@@ -93,7 +92,7 @@ def print_lyrics(artist: str, title: str) -> None:
         print("No lyrics found\n")
 
 
-def play_videos_dbus(player: Union[VLCPlayer, MpvPlayer],
+def play_videos_dbus(player: Union['VLCPlayer', 'MpvPlayer'],
                      spotify: 'DBusAPI') -> None:
     """
     Playing videos with the DBus API (Linux).
@@ -126,7 +125,7 @@ def play_videos_dbus(player: Union[VLCPlayer, MpvPlayer],
         spotify.wait()
 
 
-def play_videos_web(player: Union[VLCPlayer, MpvPlayer],
+def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
                     spotify: 'WebAPI') -> None:
     """
     Playing videos with the Web API (macOS, Windows).
