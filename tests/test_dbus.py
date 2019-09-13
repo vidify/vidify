@@ -1,8 +1,8 @@
 import logging
 import unittest
 
-from spotify_videos.vlc_player import VLCPlayer
-from spotify_videos.dbus_api import DBusAPI
+from spotify_videos.player.vlc import VLCPlayer
+from spotify_videos.api.linux import DBusAPI
 
 
 class DBusTest(unittest.TestCase):

@@ -3,7 +3,7 @@ import time
 import logging
 from typing import Union
 
-from spotipy import Spotify, Credentials, Scope, scopes
+from spotipy import Spotify, Scope, scopes
 from spotipy.util import prompt_for_user_token
 
 from ..player.vlc import VLCPlayer

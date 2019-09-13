@@ -13,6 +13,7 @@ from .utils import stderr_redirected, ConnectionNotReady
 
 
 config = Config()
+config.parse()
 
 # Logger initialzation with precise milliseconds handler
 logger = logging.getLogger()
@@ -201,7 +202,7 @@ def choose_platform() -> None:
         from .api.web import WebAPI
         web_spotify = WebAPI(player, logger, config.client_id,
                              config.client_secret, config.redirect_uri,
-                             config.access_key)
+                             config.auth_token)
 
         if wait_for_connection(
                 web_spotify.connect,

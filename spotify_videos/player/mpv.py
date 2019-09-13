@@ -43,7 +43,7 @@ class MpvPlayer(object):
     @property
     def position(self):
         print(self._instance.playback_time)
-         # TODO
+        # TODO
 
     @position.setter
     def position(self, ms: int):
