@@ -116,14 +116,11 @@ class DBusAPI(object):
     def _bool_status(self, status: str) -> bool:
         """
         Converts a status string from DBus to a bool, both to keep
-        consistency with the web API status variable and because using
+        consistency with the other API status variables and because using
         booleans is easier and less confusing.
         """
 
-        if status.lower() in ('stopped', 'paused'):
-            return False
-        else:
-            return True
+        return False if status.lower() in ('stopped', 'paused') else True
 
     def _on_properties_changed(self, interface: str, properties: dict,
                                signature: list) -> None:
@@ -145,8 +142,7 @@ class DBusAPI(object):
                 self._loop.quit()
 
         if 'PlaybackStatus' in properties:
-            status = str(properties['PlaybackStatus'])
-            status = self._bool_status(status)
+            status = self._bool_status(properties['PlaybackStatus'])
             if status != self.is_playing:
                 self._logger.info("Paused/Played video")
                 self.is_playing = status

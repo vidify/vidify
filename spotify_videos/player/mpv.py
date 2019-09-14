@@ -78,5 +78,5 @@ class MpvPlayer(object):
         self._mpv.play(url)
         self._mpv.mute = True
         self._mpv.fullscreen = self._fullscreen
-        if is_playing:
-            self.play()
+        if not is_playing:
+            self.pause()
