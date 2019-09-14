@@ -2,16 +2,16 @@ import sys
 import time
 import logging
 
-from SwSpotify import get_info_windows
+from SwSpotify import spotify
 
 from ..utils import ConnectionNotReady
 
 
-def WindowsAPI(object):
-    def __init__(self, logger: logging.logger) -> None:
+class SwSpotifyAPI(object):
+    def __init__(self, logger: logging.Logger) -> None:
         """
-        The Windows API is really limited. All it can do is get the artist and
-        title of the current song using SwSpotify.
+        The SwSpotify API for Windows and Darwin (macOS) is really limited,
+        since all it can do is get the artist and title of the current song.
 
         The logger is an instance from the logging module, configured to show
         debug or error messages.
@@ -27,7 +27,7 @@ def WindowsAPI(object):
                                      " or no song currently playing.")
 
     def _refresh_metadata(self) -> None:
-        self.title, self.artist = get_info_windows()
+        self.title, self.artist = spotify.current()
 
     def wait(self) -> None:
         """
@@ -37,7 +37,7 @@ def WindowsAPI(object):
         self._logger.info("Starting loop")
         try:
             while True:
-                time.sleep(1)
+                time.sleep(0.5)
                 artist = self.artist
                 title = self.title
                 self._refresh_metadata()
