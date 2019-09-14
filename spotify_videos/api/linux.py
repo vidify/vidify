@@ -10,6 +10,7 @@ from ..utils import split_title, ConnectionNotReady
 
 class DBusAPI(object):
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
+                 logger: logging.Logger) -> None:
         """
         The logger is an instance from the logging module, configured
         to show info or error messages.
@@ -18,8 +19,6 @@ class DBusAPI(object):
         be controlled from the API more intuitively, like automatic
         pausing/playing when the API detects it.
         """
-
-         logger: logging.Logger) -> None:
 
         self._logger = logger
         self.player = player
