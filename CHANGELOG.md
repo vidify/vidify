@@ -6,5 +6,4 @@
 TODO:
 * Add optional dependency to PKGBUILD for python-mpv
 * Improve documentation for the new additions
-* Save token in config file and try to load in new sessions
 * Do more tests

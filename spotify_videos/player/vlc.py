@@ -17,37 +17,24 @@ class VLCPlayer(object):
         self._fullscreen = fullscreen
 
         try:
-            self._instance = vlc.Instance(vlc_args)
+            self._vlc = vlc.Instance(vlc_args)
         except NameError:
             raise Exception("ERROR: VLC is not installed")
-        self._video_player = self._instance.media_player_new()
+        self._player = self._vlc.media_player_new()
 
     def play(self) -> None:
-        self._video_player.play()
+        self._logger.info("Playing video")
+        self._player.play()
 
     def pause(self) -> None:
-        self._video_player.pause()
+        self._logger.info("Pausing video")
+        self._player.pause()
 
     def toggle_pause(self) -> None:
-        if self._video_player.is_playing():
+        if self._player.is_playing():
             self.pause()
         else:
             self.play()
-
-    def start_video(self, url: str) -> None:
-        """
-        Starts a new video in the VLC player.
-
-        A new media instance is created and set. Then, the audio is muted,
-        which is needed because not all the youtube-dl urls are silent.
-        Finally the fullscreen is set if it was indicated as an argument.
-        """
-
-        self._logger.info("Starting new video")
-        media = self._instance.media_new(url)
-        self._video_player.set_media(media)
-        self._video_player.audio_set_mute(True)
-        self._video_player.set_fullscreen(self._fullscreen)
 
     @property
     def position(self) -> int:
@@ -55,7 +42,7 @@ class VLCPlayer(object):
         Getting the position of the VLC player in milliseconds
         """
 
-        return self._video_player.get_time()
+        return self._player.get_time()
 
     @position.setter
     def position(self, ms: int) -> None:
@@ -63,4 +50,22 @@ class VLCPlayer(object):
         Setting the position in milliseconds
         """
 
-        self._video_player.set_time(ms)
+        self._logger.info(f"Time set to {ms} milliseconds")
+        self._player.set_time(ms)
+
+    def start_video(self, url: str, is_playing: bool = True) -> None:
+        """
+        Starts a new video in the VLC player. It can be directly played
+        from here to avoid extra calls.
+
+        The audio is muted, which is needed because not all the youtube-dl
+        videos are silent. The fullscreen is also set.
+        """
+
+        self._logger.info("Starting new video")
+        media = self._vlc.media_new(url)
+        self._player.set_media(media)
+        self._player.audio_set_mute(True)
+        self._player.set_fullscreen(self._fullscreen)
+        if is_playing:
+            self.play()
