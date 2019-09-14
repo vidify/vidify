@@ -36,7 +36,6 @@ class Config(object):
             'debug': False,
             'lyrics': True,
             'use_mpv': False,
-            'vlc_args': '',
             'fullscreen': False,
             'max_width': None,
             'max_height': None,
@@ -45,7 +44,10 @@ class Config(object):
             'client_id': None,
             'client_secret': None,
             'redirect_uri': 'http://localhost:8888/callback/',
-            'auth_token': None
+            'auth_token': None,
+
+            'vlc_args': None,
+            'mpv_flags': None
         }
 
     def add_arguments(self) -> None:
@@ -79,12 +81,6 @@ class Config(object):
             "-f", "--fullscreen",
             action="store_true", dest="fullscreen", default=None,
             help="play videos in fullscreen mode")
-
-        self._argparser.add_argument(
-            "--vlc-args",
-            action="store", dest="vlc_args", default=None,
-            help="custom arguments used when opening VLC."
-            " Note that some like args='--fullscreen' won't work in here")
 
         self._argparser.add_argument(
             "--use-mpv",
@@ -125,9 +121,19 @@ class Config(object):
             "--redirect-uri",
             action="store", dest="redirect_uri", default=None,
             help="optional redirect uri to get the authorization token."
-            " The default is http://localhost:8888/callback/"
-            " Check the README to learn how to obtain yours."
-            " Example: --client-id='5fe01282e44241328a84e7c5cc169165'")
+            " The default is http://localhost:8888/callback/")
+
+        self._argparser.add_argument(
+            "--vlc-args",
+            action="store", dest="vlc_args", default=None,
+            help="custom arguments used when opening VLC."
+            " Note that some like args='--fullscreen' won't work in here")
+
+        self._argparser.add_argument(
+            "--mpv-flags",
+            action="store", dest="mpv_flags", default=None,
+            help="custom boolean flags used when opening mpv, with dashes"
+            " and separated by spaces.")
 
     def write_config_file(self, name: str, value: str):
         """

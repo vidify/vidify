@@ -19,7 +19,7 @@ class VLCPlayer(object):
         try:
             self._vlc = vlc.Instance(vlc_args)
         except NameError:
-            raise Exception("ERROR: VLC is not installed")
+            raise Exception("VLC is not installed")
         self._player = self._vlc.media_player_new()
 
     def play(self) -> None:

@@ -4,26 +4,32 @@ from mpv import MPV
 
 
 class MpvPlayer(object):
-    def __init__(self, logger: logging.Logger,
+    def __init__(self, logger: logging.Logger, flags: str,
                  fullscreen: bool = False) -> None:
         """
         This MPV player is the instance where media should play optionally,
         since the default is VLC. It may be initialized with extra arguments
-        with the --mpv-args option.
+        with the --mpv-args option. It doesn't inherit mpv.MPV directly
+        because of naming issues.
 
         The logger is an instance from the logging module, configured
         to show debug or error messages.
 
-        It doesn't inherit mpv.MPV directly because of naming issues.
+        The audio is muted, which is needed because not all the youtube-dl
+        videos are silent. The fullscreen is also set.
         """
 
         self._logger = logger
-        self._fullscreen = fullscreen
+
+        flags = flags.split() if flags not in (None, '') else []
+        flags.extend(['mute', 'keep-open'])
+        if fullscreen:
+            flags.append('fullscreen')
 
         if self._logger.level <= logging.INFO:
-            self._mpv = MPV(log_handler=print, loglevel='info')
+            self._mpv = MPV(*flags, log_handler=print, loglevel='info')
         else:
-            self._mpv = MPV()
+            self._mpv = MPV(*flags)
 
     def __del__(self):
         try:
@@ -70,13 +76,8 @@ class MpvPlayer(object):
         """
         Starts a new video in the mpv player. It can be directly played from
         here to avoid extra calls.
-
-        The audio is muted, which is needed because not all the youtube-dl
-        videos are silent. The fullscreen is also set.
         """
 
         self._mpv.play(url)
-        self._mpv.mute = True
-        self._mpv.fullscreen = self._fullscreen
-        if is_playing:
-            self.play()
+        if not is_playing:
+            self.pause()
