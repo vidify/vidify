@@ -78,6 +78,7 @@ class MpvPlayer(object):
         here to avoid extra calls.
         """
 
+        self._logger.info(f"Started new video")
         self._mpv.play(url)
         if not is_playing:
             self.pause()

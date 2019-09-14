@@ -52,7 +52,7 @@ def format_name(artist: str, title: str) -> str:
     has to be different.
     """
 
-    if artist is (None, ""):
+    if artist in (None, ""):
         return f"{title}"
     else:
         return f"{artist} - {title}"
@@ -125,6 +125,42 @@ def play_videos_dbus(player: Union['VLCPlayer', 'MpvPlayer'],
         spotify.wait()
 
 
+def play_videos_windows(player: Union['VLCPlayer', 'MpvPlayer'],
+                        spotify: 'WindowsAPI') -> None:
+    """
+    Playing videos with the Windows "API" from SwSpotify.
+
+    It's really basic and can only get the window title.
+    """
+
+    while True:
+        url = get_url(spotify.artist, spotify.title)
+        player.start_video(url)
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()
+
+
+def play_videos_darwin(player: Union['VLCPlayer', 'MpvPlayer'],
+                      spotify: 'DarwinAPI') -> None:
+    """
+    Playing videos with the Darwin (macOS) "API" from SwSpotify.
+
+    It's really basic and can only get the window title.
+    """
+
+    while True:
+        url = get_url(spotify.artist, spotify.title)
+        player.start_video(url)
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()
+
+
 def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
                     spotify: 'WebAPI') -> None:
     """
@@ -189,13 +225,24 @@ def choose_platform() -> None:
         from .player.vlc import VLCPlayer
         player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
 
-    if platform.system() == 'Linux' and not config.use_web_api:
+    system = platform.system()
+    if system == 'Linux' and not config.use_web_api:
         from .api.linux import DBusAPI
         dbus_spotify = DBusAPI(player, logger)
 
         msg = "Waiting for a Spotify session to be ready..."
         if wait_for_connection(dbus_spotify.connect, msg):
             play_videos_dbus(dbus_spotify.player, dbus_spotify)
+    elif system == "Windows" and not config.use_web_api:
+        from .api.windows import WindowsAPI
+        windows_api = WindowsAPI(logger)
+
+        play_videos_windows(player, windows_api)
+    elif system == "Darwin" and not config.use_web_api:
+        from .api.darwin import DarwinAPI
+        darwin_api = DarwinAPI(logger)
+
+        play_videos_darwin(player, darwin_api)
     else:
         from .api.web import WebAPI
         web_spotify = WebAPI(player, logger, config.client_id,

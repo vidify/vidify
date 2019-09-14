@@ -6,13 +6,10 @@ dependencies = [
     'youtube-dl',
     'python-vlc',
     'lyricwikia',
-    'spotipy'  # TODO use new spotipy repo
+    'spotipy',  # TODO use new spotipy repo
+    'pydbus; platform_system=="Linux"',
+    'SwSpotify; platform_system=="Windows" or platform_system=="Darwin"'
 ]
-
-# DBus is only needed on Linux
-if platform.system() == 'Linux':
-    dependencies.append('pydbus')
-
 
 # Get version inside spotify_videos/version.py without importing the package
 exec(compile(open('spotify_videos/version.py').read(),
