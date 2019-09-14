@@ -132,9 +132,8 @@ class Config(object):
         self._argparser.add_argument(
             "--mpv-flags",
             action="store", dest="mpv_flags", default=None,
-            help="custom boolean flags used when opening mpv, with underscores"
-            " and separated by spaces. For example:"
-            " --mpv-flags='taskbar_progress'")
+            help="custom boolean flags used when opening mpv, with dashes"
+            " and separated by spaces.")
 
     def write_config_file(self, name: str, value: str):
         """

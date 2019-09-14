@@ -21,8 +21,8 @@ class MpvPlayer(object):
 
         self._logger = logger
 
-        flags = flags.split() if flags is not None else []
-        flags.append('mute')
+        flags = flags.split() if flags not in (None, '') else []
+        flags.extend(['mute', 'keep-open'])
         if fullscreen:
             flags.append('fullscreen')
 
