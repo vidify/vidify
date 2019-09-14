@@ -11,29 +11,22 @@ from ..utils import split_title, ConnectionNotReady
 
 
 class WebAPI(object):
-    """
-    The Web API class, containing all information from the web API.
-
-    The logger is an instance from the logging module, configured
-    to show debug or error messages.
-
-    It includes `player`, the VLC or mpv window, so that some actions can
-    be controlled from the API more intuitively, like automatic
-    pausing/playing/skipping when the API detects it.
-    """
 
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  logger: logging.Logger, client_id: str, client_secret: str,
                  redirect_uri: str, auth_token: str) -> None:
         """
         The parameters are saved in the class and the main song properties
-        are created.
+        are created. The logger is an instance from the logging module,
+        configured to show debug or error messages.
 
-        Handles the Spotipy authentication.
+        It includes `player`, the VLC or mpv window, so that some actions can
+        be controlled from the API more intuitively, like automatic
+        pausing/playing/skipping when the API detects it.
 
-        The auth scope is the least needed to access the currently playing song
-        and the redirect uri is always on localhost, since it's an offline
-        application.
+        It handles the Spotipy authentication. The auth scope is the least
+        needed to access the currently playing song and the redirect uri
+        is always on localhost, since it's an offline application.
         """
 
         self._logger = logger
@@ -142,7 +135,6 @@ class WebAPI(object):
                     self.player.position = self._position
 
                 if self.artist != artist or self.title != title:
-                    self._logger.info("Song changed")
                     break
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
