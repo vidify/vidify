@@ -92,8 +92,7 @@ def print_lyrics(artist: str, title: str) -> None:
         print("No lyrics found\n")
 
 
-def play_videos_dbus(player: Union['VLCPlayer', 'MpvPlayer'],
-                     spotify: 'DBusAPI') -> None:
+def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
     Playing videos with the DBus API (Linux).
 
@@ -103,6 +102,14 @@ def play_videos_dbus(player: Union['VLCPlayer', 'MpvPlayer'],
     After playing the video, the player waits for DBus events like
     pausing the video.
     """
+
+    from .api.linux import DBusAPI
+    spotify = DBusAPI(player, logger)
+
+    msg = "Waiting for a Spotify session to be ready..."
+
+    if not wait_for_connection(spotify.connect, msg):
+        return
 
     while True:
         start_time = time.time()
@@ -125,13 +132,19 @@ def play_videos_dbus(player: Union['VLCPlayer', 'MpvPlayer'],
         spotify.wait()
 
 
-def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'],
-                        spotify: 'SwSpotifyAPI') -> None:
+def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
     Playing videos with the SwSpotify API.
 
     It's really basic and can only get the window title.
     """
+
+    from .api.swspotify import SwSpotifyAPI
+    spotify = SwSpotifyAPI(logger)
+
+    msg = "Waiting for a Spotify session to be ready..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
 
     while True:
         url = get_url(spotify.artist, spotify.title)
@@ -143,13 +156,24 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'],
         spotify.wait()
 
 
-def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
-                    spotify: 'WebAPI') -> None:
+def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
     Playing videos with the Web API (macOS, Windows).
 
     Unlike the DBus API, the position can be requested and synced easily.
     """
+
+    from .api.web import WebAPI
+    spotify = WebAPI(player, logger, config.client_id,
+                     config.client_secret, config.redirect_uri,
+                     config.auth_token)
+
+    msg = "Waiting for a Spotify song to play..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
+
+    # Saves the auth token inside the config file for future usage
+    config.write_config_file('auth_token', spotify._token)
 
     while True:
         url = get_url(spotify.artist, spotify.title)
@@ -196,8 +220,7 @@ def wait_for_connection(connect: Callable, msg: str,
 
 def choose_platform() -> None:
     """
-    Chooses a platform and player, waits for the API to be ready and starts
-    playing videos.
+    Chooses a platform and player and starts the corresponding API function.
     """
 
     if config.use_mpv:
@@ -207,30 +230,12 @@ def choose_platform() -> None:
         from .player.vlc import VLCPlayer
         player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
 
-    system = platform.system()
-    if system == 'Linux' and not config.use_web_api:
-        from .api.linux import DBusAPI
-        dbus_spotify = DBusAPI(player, logger)
-
-        msg = "Waiting for a Spotify session to be ready..."
-        if wait_for_connection(dbus_spotify.connect, msg):
-            play_videos_dbus(dbus_spotify.player, dbus_spotify)
-    elif system in ('Windows', 'Darwin') and not config.use_web_api:
-        from .api.swspotify import SwSpotifyAPI
-        swspotify_api = SwSpotifyAPI(logger)
-
-        play_videos_swspotify(player, swspotify_api)
-    else:
-        from .api.web import WebAPI
-        web_spotify = WebAPI(player, logger, config.client_id,
-                             config.client_secret, config.redirect_uri,
-                             config.auth_token)
-
-        msg = "Waiting for a Spotify song to play..."
-        if wait_for_connection(web_spotify.connect, msg):
-            # Saves the auth token inside the config file for future usage
-            config.write_config_file('auth_token', web_spotify._token)
-            play_videos_web(web_spotify.player, web_spotify)
+    if config.use_web_api:
+        play_videos_web(player)
+    elif platform.system() == 'Linux':
+        play_videos_linux(player)
+    elif platform.system() in ('Windows', 'Darwin'):
+        play_videos_swspotify(player)
 
 
 def main() -> None:

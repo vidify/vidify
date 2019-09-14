@@ -21,6 +21,7 @@ class SwSpotifyAPI(object):
         self.artist = ""
         self.title = ""
 
+    def connect(self) -> None:
         self._refresh_metadata()
         if "" in (self.artist, self.title):
             raise ConnectionNotReady("No Spotify session currently running"

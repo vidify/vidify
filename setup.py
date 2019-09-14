@@ -1,15 +1,5 @@
 from setuptools import setup, find_packages
-import platform
 
-
-dependencies = [
-    'youtube-dl',
-    'python-vlc',
-    'lyricwikia',
-    'spotipy',  # TODO use new spotipy repo
-    'pydbus; platform_system=="Linux"',
-    'SwSpotify; platform_system=="Windows" or platform_system=="Darwin"'
-]
 
 # Get version inside spotify_videos/version.py without importing the package
 exec(compile(open('spotify_videos/version.py').read(),
@@ -41,7 +31,14 @@ setup(
     ],
     keywords='spotify music video videos lyrics',
     python_requires='>=3.6',
-    install_requires=dependencies,
+    install_requires=[
+        'youtube-dl',
+        'python-vlc',
+        'lyricwikia',
+        'spotipy',  # TODO use new spotipy repo
+        'pydbus; platform_system=="Linux"',
+        'SwSpotify; platform_system=="Windows" or platform_system=="Darwin"'
+    ],
     extras_require={
         'mpv': [
             'python-mpv'
