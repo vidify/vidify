@@ -8,4 +8,4 @@ TODO:
 * Improve documentation for the new additions
 * Automatically refresh Spotify token (save expiration date, generate a spotipy.Token instead of a string inside the web API to store it)
 * Do more tests, stabilize before release
-* Finish testing windows and darwin support. Unify local platforms in a single `play_videos` function inside `__main__` or even with the same API class if the differences aren't too big.
+* Finish testing windows and darwin support
