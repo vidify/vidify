@@ -127,7 +127,7 @@ class Config(object):
             "--vlc-args",
             action="store", dest="vlc_args", default=None,
             help="custom arguments used when opening VLC."
-            " Note that some like args='--fullscreen' won't work in here")
+            " --vlc-args='--video-on-top' is very helpful, for example.")
 
         self._argparser.add_argument(
             "--mpv-flags",
