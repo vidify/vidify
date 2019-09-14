@@ -184,7 +184,7 @@ def choose_platform() -> None:
 
     if config.use_mpv:
         from .player.mpv import MpvPlayer
-        player = MpvPlayer(logger, config.fullscreen)
+        player = MpvPlayer(logger, config.mpv_flags, config.fullscreen)
     else:
         from .player.vlc import VLCPlayer
         player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
