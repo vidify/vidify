@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 import logging
@@ -43,10 +44,17 @@ class WebAPI(object):
         self._position = 0
         self.is_playing = False
 
+        # Trying to load the env variables
+        if not client_id:
+            client_id = os.getenv('SPOTIPY_CLIENT_ID')
+        if not client_secret:
+            client_secret = os.getenv('SPOTIPY_CLIENT_SECRET')
+        if not redirect_uri:
+            redirect_uri = os.getenv('SPOTIPY_REDIRECT_URI')
+
         # Trying to use the config auth token
-        if auth_token in (None, ""):
-            pass
-            # TODO
+        if auth_token not in (None, ""):
+            self._token = auth_token
         else:
             scope = Scope(scopes.user_read_currently_playing)
             print("To authorize the Spotify API, you'll have to log-in"
@@ -55,14 +63,14 @@ class WebAPI(object):
                   " been redirected to, something like"
                   " 'http://localhost:8888/callback/?code=AQAa5v...'")
             self._token = prompt_for_user_token(
-                client_id, client_secret, redirect_uri, scope)
+                client_id, client_secret, redirect_uri, scope).access_token
 
-            if self._token:
-                print("Authorized correctly")
-                self._spotify = Spotify(self._token.access_token)
-            else:
-                raise Exception(f"Couldn't get token."
-                                " Please check the README for more info.")
+        # Finally intializing Spotipy
+        if self._token:
+            self._spotify = Spotify(self._token)
+        else:
+            raise Exception(f"Couldn't get token."
+                            " Please check the README for more info.")
 
     def connect(self) -> None:
         """
@@ -72,7 +80,7 @@ class WebAPI(object):
 
         try:
             self._refresh_metadata()
-        except AttributeError:
+        except (AttributeError, TypeError):
             raise ConnectionNotReady("No song currently playing")
 
     def _refresh_metadata(self) -> None:
@@ -127,12 +135,10 @@ class WebAPI(object):
                 self._refresh_metadata()
 
                 if self.is_playing != is_playing:
-                    self._logger.info("Paused/Played video")
                     self.player.toggle_pause()
 
                 diff = self._position - position
                 if diff >= 3000 or diff < 0:
-                    self._logger.info("Position changed")
                     self.player.position = self._position
 
                 if self.artist != artist or self.title != title:

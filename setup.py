@@ -6,7 +6,7 @@ dependencies = [
     'youtube-dl',
     'python-vlc',
     'lyricwikia',
-    'spotipy'  # TODO
+    'spotipy'  # TODO use new spotipy repo
 ]
 
 # DBus is only needed on Linux

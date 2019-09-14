@@ -108,11 +108,11 @@ def play_videos_dbus(player: Union['VLCPlayer', 'MpvPlayer'],
         start_time = time.time()
 
         url = get_url(spotify.artist, spotify.title)
-        player.start_video(url)
+        is_playing = spotify.is_playing
+        player.start_video(url, is_playing)
 
-        if spotify.is_playing:
-            player.play()
-            # Waits until VLC actually plays the video to set the offset
+        # Waits until VLC actually plays the video to set the offset
+        if is_playing:
             while player.position == 0:
                 pass
             offset = int((time.time() - start_time) * 1000)
@@ -135,10 +135,8 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
 
     while True:
         url = get_url(spotify.artist, spotify.title)
-        player.start_video(url)
+        player.start_video(url, spotify.is_playing)
 
-        if spotify.is_playing:
-            player.play()
         offset = spotify.position
         player.position = offset
 
@@ -195,9 +193,8 @@ def choose_platform() -> None:
         from .api.linux import DBusAPI
         dbus_spotify = DBusAPI(player, logger)
 
-        if wait_for_connection(
-                dbus_spotify.connect,
-                "Waiting for a Spotify session to be ready..."):
+        msg = "Waiting for a Spotify session to be ready..."
+        if wait_for_connection(dbus_spotify.connect, msg):
             play_videos_dbus(dbus_spotify.player, dbus_spotify)
     else:
         from .api.web import WebAPI
@@ -205,9 +202,10 @@ def choose_platform() -> None:
                              config.client_secret, config.redirect_uri,
                              config.auth_token)
 
-        if wait_for_connection(
-                web_spotify.connect,
-                "Waiting for a Spotify song to play..."):
+        msg = "Waiting for a Spotify song to play..."
+        if wait_for_connection(web_spotify.connect, msg):
+            # Saves the auth token inside the config file for future usage
+            config.write_config_file('auth_token', web_spotify._token)
             play_videos_web(web_spotify.player, web_spotify)
 
 
