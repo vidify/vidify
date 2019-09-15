@@ -173,6 +173,9 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         url = get_url(spotify.artist, spotify.title)
         player.start_video(url, spotify.is_playing)
 
+        # Refreshing the metadata before getting the position
+        # because the API only stores the position from the last refresh
+        spotify.refresh_metadata()
         offset = spotify.position
         player.position = offset
 
