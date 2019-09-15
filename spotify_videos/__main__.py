@@ -104,7 +104,7 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         is_playing = spotify.is_playing
         player.start_video(url, is_playing)
 
-        # Waits until VLC actually plays the video to set the offset
+        # Waits until the player starts the video to set the offset
         if is_playing:
             while player.position == 0:
                 pass
@@ -133,8 +133,16 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         return
 
     while True:
+        start_time = time.time()
         url = get_url(spotify.artist, spotify.title)
         player.start_video(url)
+
+        # Waits until the player starts the video to set the offset
+        while player.position == 0:
+            pass
+        offset = int((time.time() - start_time) * 1000)
+        player.position = offset
+        logging.debug(f"Starting offset is {offset}")
 
         if config.lyrics:
             print_lyrics(spotify.artist, spotify.title)
