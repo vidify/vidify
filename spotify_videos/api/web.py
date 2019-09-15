@@ -34,7 +34,7 @@ class WebAPI(object):
 
         self.artist = ""
         self.title = ""
-        self._position = 0
+        self.position = 0
         self.is_playing = False
 
         # Trying to load the env variables
@@ -72,11 +72,11 @@ class WebAPI(object):
         """
 
         try:
-            self._refresh_metadata()
+            self.refresh_metadata()
         except (AttributeError, TypeError):
             raise ConnectionNotReady("No song currently playing")
 
-    def _refresh_metadata(self) -> None:
+    def refresh_metadata(self) -> None:
         """
         Refreshes the metadata of the player: artist, title, whether
         it's playing or not, and the current position.
@@ -92,17 +92,8 @@ class WebAPI(object):
         if self.artist == "":
             self.artist, self.title = split_title(self.title)
 
-        self._position = metadata['progress_ms']
+        self.position = metadata['progress_ms']
         self.is_playing = metadata['is_playing']
-
-    @property
-    def position(self) -> int:
-        """
-        Returns the position in milliseconds of the player.
-        """
-
-        self._refresh_metadata()
-        return self._position
 
     def wait(self) -> None:
         """
@@ -113,29 +104,35 @@ class WebAPI(object):
 
         It checks if the playback status changed (playing/paused), the
         song position, which will be ignored unless the difference
-        is larger than 3 seconds or backward, and the song itself
-        to break the loop. Said loop is also broken with a
-        KeyboardInterrupt from the user.
+        is larger than the actual elapsed time or backward, and the song itself
+        to break the loop. Said loop is also broken with a KeyboardInterrupt
+        from the user.
+
+        The elapsed time has to be manually checked because some systems
+        may lag and change positions when they shouldn't.
         """
 
+        artist = self.artist
+        title = self.title
         try:
             while True:
-                time.sleep(1)
-                artist = self.artist
-                title = self.title
+                timer = time.time()
+                position = self.position
                 is_playing = self.is_playing
-                position = self._position
-                self._refresh_metadata()
+                time.sleep(1)
+
+                self.refresh_metadata()
+
+                if self.artist != artist or self.title != title:
+                    break
 
                 if self.is_playing != is_playing:
                     self.player.toggle_pause()
 
-                diff = self._position - position
-                if diff >= 3000 or diff < 0:
-                    self.player.position = self._position
-
-                if self.artist != artist or self.title != title:
-                    break
+                diff = self.position - position
+                time_diff = int((time.time() - timer) * 1000)
+                if diff >= time_diff + 100 or diff < 0:
+                    self.player.position = self.position
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
             sys.exit(0)
