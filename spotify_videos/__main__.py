@@ -10,40 +10,29 @@ from .config import Config
 from .utils import stderr_redirected, ConnectionNotReady
 
 
+# Initialization and parsing of the config from arguments and config file
 config = Config()
 config.parse()
 
 # Logger initialzation with precise milliseconds handler
 logger = logging.getLogger()
 handler = logging.StreamHandler()
-formatter = logging.Formatter("[%(asctime)s.%(msecs)03d] "
-                              "%(levelname)s: %(message)s", datefmt="%H:%M:%S")
+formatter = logging.Formatter(
+    "[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s", datefmt="%H:%M:%S")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
+level = logging.DEBUG if config.debug else logging.ERROR
+logger.setLevel(level)
 
 # Youtube-dl config
 ydl_opts = {
     'format': 'bestvideo',
-    'quiet': True
+    'quiet': not config.debug
 }
-
 if config.max_width is not None:
     ydl_opts['format'] += f"[width<={config.max_width}]"
-
 if config.max_height is not None:
     ydl_opts['format'] += f"[height<={config.max_height}]"
-
-# Can't append to a string if the config file has an empty field for it
-if config.vlc_args is None:
-    config.vlc_args = ""
-
-if config.debug:
-    logger.setLevel(logging.DEBUG)
-    config.vlc_args += " --verbose 1"
-    ydl_opts['quiet'] = False
-else:
-    logger.setLevel(logging.ERROR)
-    config.vlc_args += " --quiet"
 
 
 def format_name(artist: str, title: str) -> str:
@@ -52,10 +41,7 @@ def format_name(artist: str, title: str) -> str:
     has to be different.
     """
 
-    if artist in (None, ""):
-        return f"{title}"
-    else:
-        return f"{artist} - {title}"
+    return title if artist in (None, "") else f"{artist} - {title}"
 
 
 def get_url(artist: str, title: str) -> str:
@@ -230,12 +216,12 @@ def choose_platform() -> None:
         from .player.vlc import VLCPlayer
         player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
 
-    if config.use_web_api:
-        play_videos_web(player)
-    elif platform.system() == 'Linux':
+    if platform.system() == 'Linux' and not config.use_web_api:
         play_videos_linux(player)
-    elif platform.system() in ('Windows', 'Darwin'):
+    elif platform.system() in ('Windows', 'Darwin') and not config.use_web_api:
         play_videos_swspotify(player)
+    else:
+        play_videos_web(player)
 
 
 def main() -> None:
