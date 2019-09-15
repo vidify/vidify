@@ -29,6 +29,12 @@ class VLCPlayer(object):
             self._vlc = vlc.Instance(vlc_args)
         except NameError:
             raise Exception("VLC is not installed")
+
+        if self._vlc is None:
+            raise AttributeError("VLC couldn't load. This is almost always"
+                                 " caused by an unexistent parameter passed"
+                                 " with --vlc-args")
+
         self._player = self._vlc.media_player_new()
 
     def play(self) -> None:
