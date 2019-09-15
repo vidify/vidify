@@ -16,10 +16,25 @@ class VLCPlayer(object):
         self._logger = logger
         self._fullscreen = fullscreen
 
+        # The config file might have an empty field for it
+        if vlc_args is None:
+            vlc_args = ""
+        vlc_args += " --no-audio"
+        if self._logger.level <= logging.INFO:
+            vlc_args += " --verbose 1"
+        else:
+            vlc_args += " --quiet"
+
         try:
             self._vlc = vlc.Instance(vlc_args)
         except NameError:
             raise Exception("VLC is not installed")
+
+        if self._vlc is None:
+            raise AttributeError("VLC couldn't load. This is almost always"
+                                 " caused by an unexistent parameter passed"
+                                 " with --vlc-args")
+
         self._player = self._vlc.media_player_new()
 
     def play(self) -> None:
@@ -56,16 +71,15 @@ class VLCPlayer(object):
     def start_video(self, url: str, is_playing: bool = True) -> None:
         """
         Starts a new video in the VLC player. It can be directly played
-        from here to avoid extra calls.
+        with `is_playing` to avoid extra calls.
 
-        The audio is muted, which is needed because not all the youtube-dl
-        videos are silent. The fullscreen is also set.
+        The fullscreen can't be set as an initial parameter so it's indicated
+        when the video starts.
         """
 
         self._logger.info("Starting new video")
         media = self._vlc.media_new(url)
         self._player.set_media(media)
-        self._player.audio_set_mute(True)
         self._player.set_fullscreen(self._fullscreen)
         if is_playing:
             self.play()
