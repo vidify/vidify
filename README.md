@@ -72,7 +72,7 @@ The config file is created by default at your home directory with `.spotify_vide
 
 [Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/config.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file) and all the options are inside the `[Defaults]` section.
 
-All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`. Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = True`.
+All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`. Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
 
 ## The web API
@@ -85,7 +85,7 @@ All platforms have a local way to get information from Spotify, but it may not b
 The web API can be enabled inside the config file or passed as arguments. Example of the section inside the config file:
 
 ```ini
-use_web_api = True
+use_web_api = true
 client_id = 
 client_secret = 
 ```
