@@ -22,6 +22,23 @@ class Config(object):
         Also loads a list with the default values for the parameters.
         """
 
+        self._defaults = {
+            'debug': False,
+            'lyrics': True,
+            'fullscreen': False,
+            'max_width': None,
+            'max_height': None,
+            'use_mpv': False,
+            'vlc_args': None,
+            'mpv_flags': None,
+
+            'use_web_api': False,
+            'client_id': None,
+            'client_secret': None,
+            'redirect_uri': 'http://localhost:8888/callback/',
+            'auth_token': None
+        }
+
         self._argparser = argparse.ArgumentParser(
             prog="spotify-videos",
             description="Windows and macOS users must pass --client-id"
@@ -31,24 +48,6 @@ class Config(object):
         self.add_arguments()
 
         self._file = configparser.ConfigParser()
-
-        self._defaults = {
-            'debug': False,
-            'lyrics': True,
-            'use_mpv': False,
-            'fullscreen': False,
-            'max_width': None,
-            'max_height': None,
-
-            'use_web_api': False,
-            'client_id': None,
-            'client_secret': None,
-            'redirect_uri': 'http://localhost:8888/callback/',
-            'auth_token': None,
-
-            'vlc_args': None,
-            'mpv_flags': None
-        }
 
     def add_arguments(self) -> None:
         """
@@ -135,6 +134,18 @@ class Config(object):
             help="custom boolean flags used when opening mpv, with dashes"
             " and separated by spaces.")
 
+    def read_config_file(self, key: str, value_type: type = str):
+        """
+        Reads the config file data with the corresponding type.
+
+        Currently only bool and str are needed. NoneType will return a string.
+        """
+
+        if value_type == bool:
+            return self._file.getboolean('Defaults', key)
+        else:
+            return self._file.get('Defaults', key)
+
     def write_config_file(self, name: str, value: str):
         """
         Modify a value from the config file.
@@ -144,7 +155,7 @@ class Config(object):
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
-    def parse(self, config_path: str = None, args: list = None):
+    def parse(self, config_path: str = None, custom_args: list = None):
         """
         Save the configuration from all sources in the correct order
         (arguments > config file > defaults)
@@ -154,13 +165,14 @@ class Config(object):
         used, defined at the top of this module.
         """
 
-        self._args = self._argparser.parse_args(args)
+        self._args = self._argparser.parse_args(custom_args)
         self._path = config_path or self._args.config_path or default_path
 
         if not os.path.exists(self._path):
             print('Creating config file at', self._path)
             with open(self._path, 'w') as f:
                 f.write('[Defaults]')
+
         self._file.read(self._path)
 
         for attr in self._defaults:
@@ -170,17 +182,18 @@ class Config(object):
             except AttributeError:
                 pass
             else:
-                if value is not None:
+                if value not in (None, ''):
                     setattr(self, attr, value)
                     continue
 
             # Config file
             try:
-                value = self._file['Defaults'][attr]
+                value = self.read_config_file(attr,
+                                              type(self._defaults[attr]))
             except KeyError:
                 pass
             else:
-                if value is not None:
+                if value not in (None, ''):
                     setattr(self, attr, value)
                     continue
 
