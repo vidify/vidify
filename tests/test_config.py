@@ -21,6 +21,9 @@ class ConfigTest(unittest.TestCase):
 
         self.config.parse(path)
 
+    def tearDown(self):
+        os.remove(path)
+
     def test_order(self):
         """
         The order should always be arguments > config file > defaults
@@ -65,5 +68,3 @@ class ConfigTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    print("Removing dummy config file")
-    os.remove(path)

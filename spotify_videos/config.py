@@ -141,10 +141,13 @@ class Config(object):
         Currently only bool and str are needed. NoneType will return a string.
         """
 
-        if value_type == bool:
-            return self._file.getboolean('Defaults', key)
-        else:
-            return self._file.get('Defaults', key)
+        try:
+            if value_type == bool:
+                return self._file.getboolean('Defaults', key)
+            else:
+                return self._file.get('Defaults', key)
+        except configparser.NoOptionError:
+            return None
 
     def write_config_file(self, name: str, value: str):
         """
