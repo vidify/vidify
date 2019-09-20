@@ -55,15 +55,17 @@ class ConfigTest(unittest.TestCase):
 
     def test_write(self):
         """
-        Check if the config file is modified correctly.
+        Check if the config file is modified correctly. The nonexisting
+        section should be created too.
         """
 
         key = 'test_attr'
+        section = 'Test'
         value = 'test_value'
-        self.config.write_config_file(key, 'Defaults', value)
+        self.config.write_config_file(key, section, value)
         conf = configparser.ConfigParser()
         conf.read(path)
-        self.assertEqual(conf['Defaults'][key], value)
+        self.assertEqual(conf[section][key], value)
 
 
 if __name__ == '__main__':

@@ -180,7 +180,7 @@ class Config:
 
         if section not in self._file.sections():
             with open(self._path, 'a') as configfile:
-                configfile.write(f'[{section}]')
+                configfile.write(f'\n[{section}]')
             self._file.read(self._path)
 
         self._file[section][name] = value

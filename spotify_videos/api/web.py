@@ -63,7 +63,6 @@ class WebAPI:
                   " 'http://localhost:8888/callback/?code=AQAa5v...'")
             self._token = prompt_for_user_token(
                 client_id, client_secret, redirect_uri, scope)
-            print(self._token.expires_at, type(self._token.expires_at), self._token.token_type)
 
         # Finally intializing Spotipy
         if self._token:
