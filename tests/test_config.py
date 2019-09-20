@@ -34,13 +34,13 @@ class ConfigTest(unittest.TestCase):
 
         # Default
         self.config.parse(path)
-        true_value = self.config._defaults[attr]
+        true_value = getattr(self.config._options, attr).default
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
         # Config file
         true_value = 'file'
-        self.config.write_config_file(attr, true_value)
+        self.config.write_config_file(attr, 'Defaults', true_value)
         self.config.parse(path)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
@@ -60,7 +60,7 @@ class ConfigTest(unittest.TestCase):
 
         key = 'test_attr'
         value = 'test_value'
-        self.config.write_config_file(key, value)
+        self.config.write_config_file(key, 'Defaults', value)
         conf = configparser.ConfigParser()
         conf.read(path)
         self.assertEqual(conf['Defaults'][key], value)
