@@ -4,17 +4,17 @@ import time
 import logging
 from typing import Union
 
-from spotipy import Spotify, Scope, scopes
+from spotipy import Spotify, Scope, scopes, Token
 from spotipy.util import prompt_for_user_token
 
 from ..utils import split_title, ConnectionNotReady
 
 
-class WebAPI(object):
+class WebAPI:
 
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  logger: logging.Logger, client_id: str, client_secret: str,
-                 redirect_uri: str, auth_token: str) -> None:
+                 redirect_uri: str, auth_token: str, expiration: str) -> None:
         """
         The parameters are saved in the class and the main song properties
         are created. The logger is an instance from the logging module,
@@ -37,26 +37,32 @@ class WebAPI(object):
         self.position = 0
         self.is_playing = False
 
-        # Trying to load the env variables
-        if not client_id:
-            client_id = os.getenv('SPOTIPY_CLIENT_ID')
-        if not client_secret:
-            client_secret = os.getenv('SPOTIPY_CLIENT_SECRET')
-        if not redirect_uri:
-            redirect_uri = os.getenv('SPOTIPY_REDIRECT_URI')
-
+        scope = Scope(scopes.user_read_currently_playing)
         # Trying to use the config auth token
         if auth_token not in (None, ""):
-            self._token = auth_token
+            data = {
+                'access_token': auth_token,
+                'token_type': 'Bearer',
+                'scope': scope,
+                'expires_in': expiration
+            }
+            self._token = Token(data)
         else:
-            scope = Scope(scopes.user_read_currently_playing)
+            # Trying to load the env variables
+            if not client_id:
+                client_id = os.getenv('SPOTIFY_CLIENT_ID')
+            if not client_secret:
+                client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+            if not redirect_uri:
+                redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
+
             print("To authorize the Spotify API, you'll have to log-in"
                   " in the new tab that is going to open in your browser.\n"
                   "Afterwards, just paste the contents of the URL you have"
                   " been redirected to, something like"
                   " 'http://localhost:8888/callback/?code=AQAa5v...'")
             self._token = prompt_for_user_token(
-                client_id, client_secret, redirect_uri, scope).access_token
+                client_id, client_secret, redirect_uri, scope)
 
         # Finally intializing Spotipy
         if self._token:

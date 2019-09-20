@@ -3,7 +3,7 @@ import logging
 from mpv import MPV
 
 
-class MpvPlayer(object):
+class MpvPlayer:
     def __init__(self, logger: logging.Logger, flags: str,
                  fullscreen: bool = False) -> None:
         """

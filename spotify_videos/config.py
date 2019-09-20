@@ -1,6 +1,7 @@
 import os
 import argparse
 import configparser
+from dataclasses import dataclass
 
 from .version import __version__
 
@@ -9,7 +10,45 @@ from .version import __version__
 default_path = os.path.expanduser('~/.spotify_videos_config')
 
 
-class Config(object):
+# TODO: Consider the 'attrs' module instead of dataclasses
+@dataclass
+class Option:
+    section: str
+    value_type: type
+    default: any
+
+    def __init__(self, section, value_type, default) -> None:
+        self.section = section
+        self.value_type = value_type
+        self.default = default
+
+
+@dataclass
+class Options(object):
+    def __init__(self):
+        """
+        Listing all options with their section, type and default value.
+        """
+
+        self.debug = Option('Defaults', bool, False)
+        self.lyrics = Option('Defaults', bool, True)
+        self.fullscreen = Option('Defaults', bool, False)
+        self.max_width = Option('Defaults', str, None)
+        self.max_height = Option('Defaults', str, None)
+        self.use_mpv = Option('Defaults', bool, False)
+        self.vlc_args = Option('Defaults', str, None)
+        self.mpv_args = Option('Defaults', str, None)
+
+        self.use_web_api = Option('WebAPI', bool, False)
+        self.client_id = Option('WebAPI', str, None)
+        self.client_secret = Option('WebAPI', str, None)
+        self.redirect_uri = Option('WebAPI', str,
+                                   'http://localhost:8888/callback/')
+        self.auth_token = Option('WebAPI', str, None)
+        self.expiration = Option('WebAPI', str, None)
+
+
+class Config:
     """
     Object containing all configuration options from both the argument parser
     and the config file.
@@ -22,22 +61,7 @@ class Config(object):
         Also loads a list with the default values for the parameters.
         """
 
-        self._defaults = {
-            'debug': False,
-            'lyrics': True,
-            'fullscreen': False,
-            'max_width': None,
-            'max_height': None,
-            'use_mpv': False,
-            'vlc_args': None,
-            'mpv_flags': None,
-
-            'use_web_api': False,
-            'client_id': None,
-            'client_secret': None,
-            'redirect_uri': 'http://localhost:8888/callback/',
-            'auth_token': None
-        }
+        self._options = Options()
 
         self._argparser = argparse.ArgumentParser(
             prog="spotify-videos",
@@ -87,12 +111,12 @@ class Config(object):
             help="use mpv as the video player")
 
         self._argparser.add_argument(
-            "--width",
+            "--max-width",
             action="store", dest="max_width", default=None,
             help="set the maximum width for the played videos")
 
         self._argparser.add_argument(
-            "--height",
+            "--max-height",
             action="store", dest="max_height", default=None,
             help="set the maximum height for the played videos")
 
@@ -134,38 +158,46 @@ class Config(object):
             help="custom boolean flags used when opening mpv, with dashes"
             " and separated by spaces.")
 
-    def read_config_file(self, key: str, value_type: type = str):
+    def read_config_file(self, attr: str):
         """
         Reads the config file data with the corresponding type.
-
-        Currently only bool and str are needed. NoneType will return a string.
         """
 
-        try:
-            if value_type == bool:
-                return self._file.getboolean('Defaults', key)
-            else:
-                return self._file.get('Defaults', key)
-        except configparser.NoOptionError:
-            return None
+        option = getattr(self._options, attr)
 
-    def write_config_file(self, name: str, value: str):
+        if option.value_type == bool:
+            return self._file.getboolean(option.section, attr)
+        elif option.value_type == int:
+            return self._file.getint(option.section, attr)
+        else:
+            return self._file.get(option.section, attr)
+
+    def write_config_file(self, name: str, section: str, value: str):
         """
-        Modify a value from the config file.
+        Modify a value from the config file. If the section doesn't exist,
+        create it.
         """
 
-        self._file['Defaults'][name] = value
+        if section not in self._file.sections():
+            with open(self._path, 'a') as configfile:
+                configfile.write(f'\n[{section}]')
+            self._file.read(self._path)
+
+        self._file[section][name] = value
+
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
     def parse(self, config_path: str = None, custom_args: list = None):
         """
-        Save the configuration from all sources in the correct order
-        (arguments > config file > defaults)
+        Get the config file sources data.
 
-        The config path can be passed as a function argument or as an argument
+        The config path can be passed as a function parameter or as an argument
         inside the program. If none of these exist, the default path will be
         used, defined at the top of this module.
+
+        A config file will also be created if none is found. This means that
+        all sections of self._options have to be written.
         """
 
         self._args = self._argparser.parse_args(custom_args)
@@ -178,27 +210,30 @@ class Config(object):
 
         self._file.read(self._path)
 
-        for attr in self._defaults:
-            # Arguments
-            try:
-                value = getattr(self._args, attr)
-            except AttributeError:
-                pass
-            else:
-                if value not in (None, ''):
-                    setattr(self, attr, value)
-                    continue
+    def __getattr__(self, attr):
+        """
+        Return the configuration from all sources in the correct order
+        (arguments > config file > defaults)
+        """
 
-            # Config file
-            try:
-                value = self.read_config_file(attr,
-                                              type(self._defaults[attr]))
-            except KeyError:
-                pass
-            else:
-                if value not in (None, ''):
-                    setattr(self, attr, value)
-                    continue
+        # Arguments
+        try:
+            value = getattr(self._args, attr)
+        except AttributeError:
+            pass
+        else:
+            if value not in (None, ''):
+                return value
 
-            # Default values
-            setattr(self, attr, self._defaults[attr])
+        # Config file
+        try:
+            value = self.read_config_file(attr)
+        except (configparser.NoOptionError, configparser.NoSectionError):
+            pass
+        else:
+            if value not in (None, ''):
+                return value
+
+        # Default values
+        option = getattr(self._options, attr)
+        return option.default

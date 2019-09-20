@@ -160,14 +160,17 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     from .api.web import WebAPI
     spotify = WebAPI(player, logger, config.client_id,
                      config.client_secret, config.redirect_uri,
-                     config.auth_token)
+                     config.auth_token, config.expiration)
 
     msg = "Waiting for a Spotify song to play..."
     if not wait_for_connection(spotify.connect, msg):
         return
 
     # Saves the auth token inside the config file for future usage
-    config.write_config_file('auth_token', spotify._token)
+    config.write_config_file('auth_token', 'WebAPI',
+                             spotify._token.access_token)
+    config.write_config_file('expiration', 'WebAPI',
+                             spotify._token.expires_at)
 
     while True:
         url = get_url(spotify.artist, spotify.title)

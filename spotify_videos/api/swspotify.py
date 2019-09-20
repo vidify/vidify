@@ -7,7 +7,7 @@ from SwSpotify import spotify, SpotifyNotRunning
 from ..utils import ConnectionNotReady
 
 
-class SwSpotifyAPI(object):
+class SwSpotifyAPI:
     def __init__(self, logger: logging.Logger) -> None:
         """
         The SwSpotify API for Windows and Darwin (macOS) is really limited,

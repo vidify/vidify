@@ -17,7 +17,7 @@ A simple tool to show Youtube **music videos** and **lyrics** for the currently 
 
 
 ## Requirements
-* Python 3.6+
+* Python 3.7+
 * VLC or mpv to play the videos
 
 For **Linux** users:
@@ -51,8 +51,8 @@ usage: spotify-videos [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
 |----------------------------------|---------------------|
 | `-n`, `--no-lyrics`              | do not print lyrics |
 | `-f`, `--fullscreen`             | play videos in fullscreen mode |
-| `--width <MAX_WIDTH>`            | set the maximum width for the played videos |
-| `--height <MAX_HEIGHT>`          | set the maximum height for the played videos |
+| `--max-width <MAX_WIDTH>`        | set the maximum width for the played videos |
+| `--max-height <MAX_HEIGHT>`      | set the maximum height for the played videos |
 | `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation guide](https://github.com/marioortizmanero/spotify-music-videos) for more. |
 | `-w, --use-web-api`              | use Spotify's web API. See [the web API section](#the-web-api) for more info about how to set it up. |
 | `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |
@@ -70,7 +70,7 @@ usage: spotify-videos [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
 ### The config file
 The config file is created by default at your home directory with `.spotify_videos_config` as the name, but you can use a custom one by passing `--config-file <PATH>` as an argument. It's overriden by the configuration passed as arguments.
 
-[Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/config.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file) and all the options are inside the `[Defaults]` section.
+[Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/config.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
 All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`. Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
@@ -85,9 +85,10 @@ All platforms have a local way to get information from Spotify, but it may not b
 The web API can be enabled inside the config file or passed as arguments. Example of the section inside the config file:
 
 ```ini
+[WebAPI]
 use_web_api = true
-client_id = 
-client_secret = 
+client_id = 5fe01282e44241328a84e7c5cc169165
+client_secret = 2665f6d143be47c1bc9ff284e9dfb350
 ```
 
 Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`
@@ -96,7 +97,7 @@ Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secr
 1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
 2. Create a new client ID. You can fill the descriptions as you like. Click `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
 3. Go to `Edit Settings` and type `http://localhost:8888/callback/` (the default redirect uri) in the Redirect URIs field.
-4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by saving them inside your config file or by exporting them `export SPOTIPY_CLIENT_ID='your-spotify-client-id'; export SPOTIPY_CLIENT_SECRET='your-spotify-client-secret'`
+4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by saving them inside your config file or by exporting them `export SPOTIFY_CLIENT_ID='your-spotify-client-id'; export SPOTIFY_CLIENT_SECRET='your-spotify-client-secret'`
 
 You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth token will be saved into the config file for future usage.
 

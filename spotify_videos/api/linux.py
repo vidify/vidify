@@ -8,7 +8,7 @@ from gi.repository import GLib
 from ..utils import split_title, ConnectionNotReady
 
 
-class DBusAPI(object):
+class DBusAPI:
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  logger: logging.Logger) -> None:
         """

@@ -34,13 +34,13 @@ class ConfigTest(unittest.TestCase):
 
         # Default
         self.config.parse(path)
-        true_value = self.config._defaults[attr]
+        true_value = getattr(self.config._options, attr).default
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
         # Config file
         true_value = 'file'
-        self.config.write_config_file(attr, true_value)
+        self.config.write_config_file(attr, 'Defaults', true_value)
         self.config.parse(path)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
@@ -55,15 +55,17 @@ class ConfigTest(unittest.TestCase):
 
     def test_write(self):
         """
-        Check if the config file is modified correctly.
+        Check if the config file is modified correctly. The nonexisting
+        section should be created too.
         """
 
         key = 'test_attr'
+        section = 'Test'
         value = 'test_value'
-        self.config.write_config_file(key, value)
+        self.config.write_config_file(key, section, value)
         conf = configparser.ConfigParser()
         conf.read(path)
-        self.assertEqual(conf['Defaults'][key], value)
+        self.assertEqual(conf[section][key], value)
 
 
 if __name__ == '__main__':
