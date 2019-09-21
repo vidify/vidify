@@ -1,7 +1,7 @@
 # Spotify Music Videos
 ![travis](https://travis-ci.com/marioortizmanero/spotify-music-videos.svg?branch=master) ![pypi](https://img.shields.io/pypi/v/spotify-videos) ![aur](https://img.shields.io/aur/version/spotify-videos)
 
-A simple tool to show Youtube **music videos** and **lyrics** for the currently playing Spotify songs.
+A cross-platform tool to watch Youtube **music videos** and **lyrics** for the currently playing Spotify songs.
 
 ![example](images/screenshot.png)
 
@@ -13,14 +13,14 @@ A simple tool to show Youtube **music videos** and **lyrics** for the currently 
     * [Advanced](#advanced)
     * [The config file](#the-config-file)
 * [The web API](#the-web-api)
-* [Developing resources](#developing)
+* [Development resources](#development)
 
 
 ## Requirements
 * Python 3.7+
 * VLC or mpv to play the videos
 
-For **Linux** users:
+For **Linux** or **BSD** users:
 
 * [PyGI](https://pygobject.readthedocs.io/en/latest/) (not packaged on PyPi, you need to install it from your distribution's repository - it's usually called python-gi, python-gobject or pygobject). Here's a quick [tutorial](https://pygobject.readthedocs.io/en/latest/getting_started.html) on how to install it on most systems.
 
@@ -68,15 +68,17 @@ usage: spotify-videos [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
 | `--redirect-uri <REDIRECT_URI>`| optional redirect uri to get the web API authorization token. The default is http://localhost:8888/callback/ |
 
 ### The config file
-The config file is created by default at your home directory with `.spotify_videos_config` as the name, but you can use a custom one by passing `--config-file <PATH>` as an argument. It's overriden by the configuration passed as arguments.
+The config file is created by default at your user home directory named `.spotify_videos_config`. You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments.
 
-[Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/config.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
+[Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
-All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`. Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
+All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`, which, obviously, is only an argument . Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
+
+Some other options are only avaliable on the config file, like `auth_token` and `expiration`, but these are only used to retain info from the WebAPI and should not be modified manually.
 
 
 ## The web API
-All platforms have a local way to get information from Spotify, but it may not be as reliable as the official web API, or may lack features in comparison to it, like better audio syncing or pausing the video. But it also brings other downsides, like:
+All platforms have a local way to get information from Spotify, but it may not be as reliable as the official web API, or may lack features in comparison to it, like better audio syncing or pausing the video. However, it also brings other downsides:
 
 * You have to sign in and set it up manually
 * Only Spotify Premium users are able to use some functions
@@ -91,18 +93,18 @@ client_id = 5fe01282e44241328a84e7c5cc169165
 client_secret = 2665f6d143be47c1bc9ff284e9dfb350
 ```
 
-Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`
+Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`. They will be saved in the default config file later. `auth_token` and `expiration` will be written into the config file too, but do not touch these.
 
 ### How to obtain your client ID and your client secret:
 1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
 2. Create a new client ID. You can fill the descriptions as you like. Click `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
 3. Go to `Edit Settings` and type `http://localhost:8888/callback/` (the default redirect uri) in the Redirect URIs field.
-4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by saving them inside your config file or by exporting them `export SPOTIFY_CLIENT_ID='your-spotify-client-id'; export SPOTIFY_CLIENT_SECRET='your-spotify-client-secret'`
+4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by passing them as arguments or saving it directly into your config file, as shown avobe.
 
 You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth token will be saved into the config file for future usage.
 
 
-## Developing
+## Development
 Helpful documentation links for contributing:
 * [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv)
@@ -117,3 +119,4 @@ This project uses `unittest` for testing. Run them with `python -m unittest` or 
 
 * Spotify on Linux doesn't currently support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
 * Spotify's Web API doesn't allow function calls on updates like DBus, meaning that the metadata has to be manually updated every second and checked in case of changes.
+* A server is needed to get a working `redirect_uri`. So a website should be created in the future, rather than implementing it with flask on localhost only because of this.
