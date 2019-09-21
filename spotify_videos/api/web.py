@@ -62,7 +62,7 @@ class WebAPI:
                 'access_token': auth_token,
                 'token_type': 'Bearer',
                 'scope': scope,
-                'expires_in': expiration
+                'expires_in': expiration - int(time.time())
             }
             creds = Credentials(self._client_id, self._client_secret,
                                 self._redirect_uri)
