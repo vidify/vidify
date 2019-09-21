@@ -4,8 +4,8 @@ import time
 import logging
 from typing import Union
 
-from spotipy import Spotify, Scope, scopes, Token
-from spotipy.util import prompt_for_user_token
+from spotipy import Spotify, Scope, scopes, Token, Credentials
+from spotipy.util import prompt_for_user_token, RefreshingToken
 
 from ..utils import split_title, ConnectionNotReady
 
@@ -14,7 +14,7 @@ class WebAPI:
 
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  logger: logging.Logger, client_id: str, client_secret: str,
-                 redirect_uri: str, auth_token: str, expiration: str) -> None:
+                 redirect_uri: str, auth_token: str, expiration: int) -> None:
         """
         The parameters are saved in the class and the main song properties
         are created. The logger is an instance from the logging module,
@@ -37,25 +37,37 @@ class WebAPI:
         self.position = 0
         self.is_playing = False
 
+        # Trying to load the env variables
+        if not client_id:
+            client_id = os.getenv('SPOTIFY_CLIENT_ID')
+        if not client_secret:
+            client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+        if not redirect_uri:
+            redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
+
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._redirect_uri = redirect_uri
+
         scope = Scope(scopes.user_read_currently_playing)
+
         # Trying to use the config auth token
-        if auth_token not in (None, ""):
+        if expiration is None:
+            expired = True
+        else:
+            expired = (expiration - int(time.time())) < 60
+
+        if auth_token not in (None, "") and not expired:
             data = {
                 'access_token': auth_token,
                 'token_type': 'Bearer',
                 'scope': scope,
                 'expires_in': expiration
             }
-            self._token = Token(data)
+            creds = Credentials(self._client_id, self._client_secret,
+                                self._redirect_uri)
+            self._token = RefreshingToken(Token(data), creds)
         else:
-            # Trying to load the env variables
-            if not client_id:
-                client_id = os.getenv('SPOTIFY_CLIENT_ID')
-            if not client_secret:
-                client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-            if not redirect_uri:
-                redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
-
             print("To authorize the Spotify API, you'll have to log-in"
                   " in the new tab that is going to open in your browser.\n"
                   "Afterwards, just paste the contents of the URL you have"
@@ -64,12 +76,7 @@ class WebAPI:
             self._token = prompt_for_user_token(
                 client_id, client_secret, redirect_uri, scope)
 
-        # Finally intializing Spotipy
-        if self._token:
-            self._spotify = Spotify(self._token)
-        else:
-            raise Exception(f"Couldn't get token."
-                            " Please check the README for more info.")
+        self._spotify = Spotify(self._token.access_token)
 
     def connect(self) -> None:
         """

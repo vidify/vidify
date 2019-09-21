@@ -7,7 +7,5 @@
 
 TODO:
 * Add optional dependency to PKGBUILD for python-mpv
-* Improve documentation for the new additions
-* Automatically refresh Spotify token (save expiration date, generate a spotipy.Token instead of a string inside the web API to store it)
 * Do more tests, stabilize before release
 * Finish testing windows and darwin support
