@@ -1,5 +1,5 @@
+import sys
 import time
-import platform
 import logging
 from typing import Callable, Union
 
@@ -9,6 +9,12 @@ import lyricwikia
 from .config import Config
 from .utils import stderr_redirected, ConnectionNotReady
 
+
+# Cross platform info
+BSD = sys.platform.find('bsd') != -1
+LINUX = sys.platform.startswith('linux')
+MACOS = sys.platform.startswith('darwin')
+WINDOWS = sys.platform.startswith('win')
 
 # Initialization and parsing of the config from arguments and config file
 config = Config()
@@ -67,7 +73,7 @@ def print_lyrics(artist: str, title: str) -> None:
 
     name = format_name(artist, title)
 
-    if platform.system() == 'Windows':
+    if WINDOWS:
         print(f">> {name}")
     else:
         print(f"\033[4m{name}\033[0m")
@@ -236,9 +242,9 @@ def choose_platform() -> None:
         from .player.vlc import VLCPlayer
         player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
 
-    if platform.system() == 'Linux' and not config.use_web_api:
+    if (BSD or LINUX) and not config.use_web_api:
         play_videos_linux(player)
-    elif platform.system() in ('Windows', 'Darwin') and not config.use_web_api:
+    elif (WINDOWS or MACOS) and not config.use_web_api:
         play_videos_swspotify(player)
     else:
         play_videos_web(player)

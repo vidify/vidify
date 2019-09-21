@@ -6,6 +6,6 @@
 * #14: Modules have been reorganized inside different directories
 
 TODO:
-* Add optional dependency to PKGBUILD for python-mpv
+* Add optional dependency to PKGBUILD for python-mpv, change description and etc
 * Do more tests, stabilize before release
 * Finish testing windows and darwin support

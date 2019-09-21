@@ -1,7 +1,7 @@
 # Spotify Music Videos
 ![travis](https://travis-ci.com/marioortizmanero/spotify-music-videos.svg?branch=master) ![pypi](https://img.shields.io/pypi/v/spotify-videos) ![aur](https://img.shields.io/aur/version/spotify-videos)
 
-A simple tool to show Youtube **music videos** and **lyrics** for the currently playing Spotify songs.
+A cross-platform tool to watch Youtube **music videos** and **lyrics** for the currently playing Spotify songs.
 
 ![example](images/screenshot.png)
 
@@ -20,7 +20,7 @@ A simple tool to show Youtube **music videos** and **lyrics** for the currently 
 * Python 3.7+
 * VLC or mpv to play the videos
 
-For **Linux** users:
+For **Linux** or **BSD** users:
 
 * [PyGI](https://pygobject.readthedocs.io/en/latest/) (not packaged on PyPi, you need to install it from your distribution's repository - it's usually called python-gi, python-gobject or pygobject). Here's a quick [tutorial](https://pygobject.readthedocs.io/en/latest/getting_started.html) on how to install it on most systems.
 
@@ -91,13 +91,13 @@ client_id = 5fe01282e44241328a84e7c5cc169165
 client_secret = 2665f6d143be47c1bc9ff284e9dfb350
 ```
 
-Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`
+Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`. They will be saved in the default config file later. `auth_token` and `expiration` will be written into the config file too, but do not touch these.
 
 ### How to obtain your client ID and your client secret:
 1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
 2. Create a new client ID. You can fill the descriptions as you like. Click `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
 3. Go to `Edit Settings` and type `http://localhost:8888/callback/` (the default redirect uri) in the Redirect URIs field.
-4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by saving them inside your config file or by exporting them `export SPOTIFY_CLIENT_ID='your-spotify-client-id'; export SPOTIFY_CLIENT_SECRET='your-spotify-client-secret'`
+4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by passing them as arguments or saving it directly into your config file, as shown avobe.
 
 You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth token will be saved into the config file for future usage.
 
@@ -117,3 +117,4 @@ This project uses `unittest` for testing. Run them with `python -m unittest` or 
 
 * Spotify on Linux doesn't currently support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
 * Spotify's Web API doesn't allow function calls on updates like DBus, meaning that the metadata has to be manually updated every second and checked in case of changes.
+* A website is needed to get a working `redirect_uri`. So a website should be created in the future.

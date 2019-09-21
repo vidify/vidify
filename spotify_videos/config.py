@@ -172,7 +172,7 @@ class Config:
         else:
             return self._file.get(option.section, attr)
 
-    def write_config_file(self, section: str, name: str, value: str):
+    def write_config_file(self, section: str, name: str, value: any):
         """
         Modify a value from the config file. If the section doesn't exist,
         create it.
