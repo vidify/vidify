@@ -37,7 +37,7 @@ class Options(object):
         self.max_height = Option('Defaults', str, None)
         self.use_mpv = Option('Defaults', bool, False)
         self.vlc_args = Option('Defaults', str, None)
-        self.mpv_args = Option('Defaults', str, None)
+        self.mpv_flags = Option('Defaults', str, None)
 
         self.use_web_api = Option('WebAPI', bool, False)
         self.client_id = Option('WebAPI', str, None)
@@ -45,7 +45,7 @@ class Options(object):
         self.redirect_uri = Option('WebAPI', str,
                                    'http://localhost:8888/callback/')
         self.auth_token = Option('WebAPI', str, None)
-        self.expiration = Option('WebAPI', str, None)
+        self.expiration = Option('WebAPI', int, None)
 
 
 class Config:
@@ -172,7 +172,7 @@ class Config:
         else:
             return self._file.get(option.section, attr)
 
-    def write_config_file(self, name: str, section: str, value: str):
+    def write_config_file(self, section: str, name: str, value: str):
         """
         Modify a value from the config file. If the section doesn't exist,
         create it.
@@ -183,7 +183,7 @@ class Config:
                 configfile.write(f'\n[{section}]')
             self._file.read(self._path)
 
-        self._file[section][name] = value
+        self._file[section][name] = str(value)
 
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)

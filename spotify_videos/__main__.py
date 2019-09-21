@@ -167,10 +167,16 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         return
 
     # Saves the auth token inside the config file for future usage
-    config.write_config_file('auth_token', 'WebAPI',
+    config.write_config_file('WebAPI', 'auth_token',
                              spotify._token.access_token)
-    config.write_config_file('expiration', 'WebAPI',
+    config.write_config_file('WebAPI', 'expiration',
                              spotify._token.expires_at)
+    config.write_config_file('WebAPI', 'client_secret',
+                             spotify._client_secret)
+    config.write_config_file('WebAPI', 'client_id',
+                             spotify._client_id)
+    config.write_config_file('WebAPI', 'redirect_uri',
+                             spotify._redirect_uri)
 
     while True:
         url = get_url(spotify.artist, spotify.title)
