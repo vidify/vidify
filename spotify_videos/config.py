@@ -10,7 +10,6 @@ from .version import __version__
 default_path = os.path.expanduser('~/.spotify_videos_config')
 
 
-# TODO: Consider the 'attrs' module instead of dataclasses
 @dataclass
 class Option:
     section: str
@@ -24,7 +23,7 @@ class Option:
 
 
 @dataclass
-class Options(object):
+class Options:
     def __init__(self):
         """
         Listing all options with their section, type and default value.

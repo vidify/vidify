@@ -13,7 +13,7 @@ A cross-platform tool to watch Youtube **music videos** and **lyrics** for the c
     * [Advanced](#advanced)
     * [The config file](#the-config-file)
 * [The web API](#the-web-api)
-* [Developing resources](#developing)
+* [Development resources](#development)
 
 
 ## Requirements
@@ -68,15 +68,17 @@ usage: spotify-videos [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
 | `--redirect-uri <REDIRECT_URI>`| optional redirect uri to get the web API authorization token. The default is http://localhost:8888/callback/ |
 
 ### The config file
-The config file is created by default at your home directory with `.spotify_videos_config` as the name, but you can use a custom one by passing `--config-file <PATH>` as an argument. It's overriden by the configuration passed as arguments.
+The config file is created by default at your user home directory named `.spotify_videos_config`. You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments.
 
-[Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/config.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
+[Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
-All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`. Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
+All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`, which, obviously, is only an argument . Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
+
+Some other options are only avaliable on the config file, like `auth_token` and `expiration`, but these are only used to retain info from the WebAPI and should not be modified manually.
 
 
 ## The web API
-All platforms have a local way to get information from Spotify, but it may not be as reliable as the official web API, or may lack features in comparison to it, like better audio syncing or pausing the video. But it also brings other downsides, like:
+All platforms have a local way to get information from Spotify, but it may not be as reliable as the official web API, or may lack features in comparison to it, like better audio syncing or pausing the video. However, it also brings other downsides:
 
 * You have to sign in and set it up manually
 * Only Spotify Premium users are able to use some functions
@@ -102,7 +104,7 @@ Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secr
 You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth token will be saved into the config file for future usage.
 
 
-## Developing
+## Development
 Helpful documentation links for contributing:
 * [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv)
@@ -117,4 +119,4 @@ This project uses `unittest` for testing. Run them with `python -m unittest` or 
 
 * Spotify on Linux doesn't currently support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
 * Spotify's Web API doesn't allow function calls on updates like DBus, meaning that the metadata has to be manually updated every second and checked in case of changes.
-* A website is needed to get a working `redirect_uri`. So a website should be created in the future.
+* A server is needed to get a working `redirect_uri`. So a website should be created in the future, rather than implementing it with flask on localhost only because of this.
