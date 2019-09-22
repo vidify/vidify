@@ -2,7 +2,7 @@ import os
 import unittest
 import configparser
 
-from spotify_videos.config import Config
+from spotivids.config import Config
 
 
 # Using a dummy config file

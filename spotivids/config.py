@@ -7,7 +7,7 @@ from .version import __version__
 
 
 # Default config path in the system
-default_path = os.path.expanduser('~/.spotify_videos_config')
+default_path = os.path.expanduser('~/.spotivids_config')
 
 
 @dataclass
@@ -63,11 +63,11 @@ class Config:
         self._options = Options()
 
         self._argparser = argparse.ArgumentParser(
-            prog="spotify-videos",
+            prog="spotivids",
             description="Windows and macOS users must pass --client-id"
             " and --client-secret to use the web API."
             " Read more about how to obtain them in the README at"
-            " https://github.com/marioortizmanero/spotify-music-videos")
+            " https://github.com/marioortizmanero/spotivids")
         self.add_arguments()
 
         self._file = configparser.ConfigParser()

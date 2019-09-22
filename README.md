@@ -1,5 +1,5 @@
-# Spotify Music Videos
-![travis](https://travis-ci.com/marioortizmanero/spotify-music-videos.svg?branch=master) ![pypi](https://img.shields.io/pypi/v/spotify-videos) ![aur](https://img.shields.io/aur/version/spotify-videos)
+# Spotivids
+![travis](https://travis-ci.com/marioortizmanero/spotivids.svg?branch=master) ![pypi](https://img.shields.io/pypi/v/spotivids) ![aur](https://img.shields.io/aur/version/spotivids)
 
 A cross-platform tool to watch Youtube **music videos** and **lyrics** for the currently playing Spotify songs.
 
@@ -28,23 +28,23 @@ For **Linux** or **BSD** users:
 
 
 ## Installation
-* You can use pip to install it: `pip3 install spotify-videos --user`. If you want to use mpv instead of VLC, just use `pip3 install 'spotify-videos[mpv]' --user` instead.
+* You can use pip to install it: `pip3 install spotivids --user`. If you want to use mpv instead of VLC, just use `pip3 install 'spotivids[mpv]' --user` instead.
 
-* If you're on Arch Linux, you can install it from the AUR: [`spotify-videos`](https://aur.archlinux.org/packages/spotify-videos/)
+* If you're on Arch Linux, you can install it from the AUR: [`spotivids`](https://aur.archlinux.org/packages/spotivids/)
 
-* You can also download the latest stable [release](https://github.com/marioortizmanero/spotify-music-videos/releases). Uncompress the `spotify-videos-X.Y.Z.tar.gz` file and run inside the folder: `pip3 install . --user` (or `pip3 install '.[mpv]' --user` if you want to use mpv instead of VLC)
+* You can also download the latest stable [release](https://github.com/marioortizmanero/spotivids/releases). Uncompress the `spotivids-X.Y.Z.tar.gz` file and run inside the folder: `pip3 install . --user` (or `pip3 install '.[mpv]' --user` if you want to use mpv instead of VLC)
 
 
 ## Usage
-Just running `spotify-videos` in your terminal should work, but here's more info about how to configure this module:
+Just running `spotivids` in your terminal should work, but here's more info about how to configure this module:
 
 ```
-usage: spotify-videos [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
-                      [-f] [--use-mpv] [--width MAX_WIDTH]
-                      [--height MAX_HEIGHT] [-w] [--client-id CLIENT_ID]
-                      [--client-secret CLIENT_SECRET]
-                      [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
-                      [--mpv-flags MPV_FLAGS]
+usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
+                 [-f] [--use-mpv] [--width MAX_WIDTH]
+                 [--height MAX_HEIGHT] [-w] [--client-id CLIENT_ID]
+                 [--client-secret CLIENT_SECRET]
+                 [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
+                 [--mpv-flags MPV_FLAGS]
 ```
 
 | Argument                         | Description         |
@@ -53,7 +53,7 @@ usage: spotify-videos [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
 | `-f`, `--fullscreen`             | play videos in fullscreen mode |
 | `--max-width <MAX_WIDTH>`        | set the maximum width for the played videos |
 | `--max-height <MAX_HEIGHT>`      | set the maximum height for the played videos |
-| `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation guide](https://github.com/marioortizmanero/spotify-music-videos) for more. |
+| `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation guide](https://github.com/marioortizmanero/spotivids) for more. |
 | `-w, --use-web-api`              | use Spotify's web API. See [the web API section](#the-web-api) for more info about how to set it up. |
 | `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |
 | `--client-secret <CLIENT_SECRET>`| your client secret ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-secret='2665f6d143be47c1bc9ff284e9dfb350'` |
@@ -68,9 +68,9 @@ usage: spotify-videos [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
 | `--redirect-uri <REDIRECT_URI>`| optional redirect uri to get the web API authorization token. The default is http://localhost:8888/callback/ |
 
 ### The config file
-The config file is created by default at your user home directory named `.spotify_videos_config`. You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments.
+The config file is created by default at your user home directory named `.spotivids_config`. You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments.
 
-[Here's an example of one](https://github.com/marioortizmanero/spotify-music-videos/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
+[Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
 All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`, which, obviously, is only an argument . Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
@@ -93,13 +93,13 @@ client_id = 5fe01282e44241328a84e7c5cc169165
 client_secret = 2665f6d143be47c1bc9ff284e9dfb350
 ```
 
-Or simply as arguments: `spotify-videos -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`. They will be saved in the default config file later. `auth_token` and `expiration` will be written into the config file too, but do not touch these.
+Or simply as arguments: `spotivids -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`. They will be saved in the default config file later. `auth_token` and `expiration` will be written into the config file too, but do not touch these.
 
 ### How to obtain your client ID and your client secret:
 1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
 2. Create a new client ID. You can fill the descriptions as you like. Click `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
 3. Go to `Edit Settings` and type `http://localhost:8888/callback/` (the default redirect uri) in the Redirect URIs field.
-4. You can now copy your Client ID and Client Secret and add them when you call `spotify-videos` by passing them as arguments or saving it directly into your config file, as shown avobe.
+4. You can now copy your Client ID and Client Secret and add them when you call `spotivids` by passing them as arguments or saving it directly into your config file, as shown avobe.
 
 You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth token will be saved into the config file for future usage.
 
@@ -111,7 +111,7 @@ Helpful documentation links for contributing:
 
 ### Tests
 
-You can run the module locally with `python -m spotify_videos`.
+You can run the module locally with `python -m spotivids`.
 
 This project uses `unittest` for testing. Run them with `python -m unittest` or `python -m unittest discover -s tests`
 
