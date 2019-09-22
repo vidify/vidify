@@ -1,18 +1,18 @@
 from setuptools import setup, find_packages
 
 
-# Get version inside spotify_videos/version.py without importing the package
-exec(compile(open('spotify_videos/version.py').read(),
-             'spotify_videos/version.py', 'exec'))
+# Get version inside spotivids/version.py without importing the package
+exec(compile(open('spotivids/version.py').read(),
+             'spotivids/version.py', 'exec'))
 
 setup(
-    name='spotify-videos',
+    name='spotivids',
     version=__version__,
     packages=find_packages(),
-    description='Simple tool to show Youtube music videos and lyrics',
+    description='Simple tool to watch Youtube music videos and lyrics',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/marioortizmanero/spotify-music-videos',
+    url='https://github.com/marioortizmanero/spotivids',
     license='MIT',
 
     author='Mario O.M.',
@@ -28,7 +28,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
     ],
-    keywords='spotify music video videos lyrics',
+    keywords='spotify music video videos lyrics spotivids',
     python_requires='>=3.7',
     install_requires=[
         'youtube-dl',
@@ -47,6 +47,6 @@ setup(
         ]
     },
     entry_points={
-        'console_scripts': ['spotify-videos = spotify_videos.__main__:main']
+        'console_scripts': ['spotivids = spotivids.__main__:main']
     }
 )
