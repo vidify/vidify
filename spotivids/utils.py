@@ -52,7 +52,7 @@ def stderr_redirected(to: str = os.devnull) -> None:
 
     fd = sys.stderr.fileno()
 
-    def _redirect_stderr(to):
+    def _redirect_stderr(to: str) -> None:
         sys.stderr.close()  # + implicit flush()
         os.dup2(to.fileno(), fd)  # fd writes to 'to' file
         sys.stderr = os.fdopen(fd, 'w')  # Python writes to fd

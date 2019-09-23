@@ -31,28 +31,28 @@ class MpvPlayer:
         else:
             self._mpv = MPV(*flags)
 
-    def __del__(self):
+    def __del__(self) -> None:
         try:
             self._mpv.terminate()
         except AttributeError:
             pass
 
-    def play(self):
+    def play(self) -> None:
         self._logger.info("Playing video")
         self._mpv.pause = False
 
-    def pause(self):
+    def pause(self) -> None:
         self._logger.info("Pausing video")
         self._mpv.pause = True
 
-    def toggle_pause(self):
+    def toggle_pause(self) -> None:
         if self._mpv.pause:
             self.play()
         else:
             self.pause()
 
     @property
-    def position(self):
+    def position(self) -> int:
         """
         Getting the position of the VLC player in milliseconds
         """
@@ -61,7 +61,7 @@ class MpvPlayer:
         return time if time is not None else 0
 
     @position.setter
-    def position(self, ms: int):
+    def position(self, ms: int) -> None:
         """
         Setting the position in milliseconds. Unlike VLC, mpv will throw an
         error if the position is changed before the video starts, so

@@ -45,12 +45,12 @@ class SwSpotifyAPI:
         """
 
         self._logger.info("Starting loop")
+        artist = self.artist
+        title = self.title
         try:
             while True:
                 time.sleep(0.5)
-                artist = self.artist
-                title = self.title
-                # If the song is paused mid-way, SwSpotify will throw an error.
+                # Temporary until pause is implemented in SwSpotify
                 try:
                     self._refresh_metadata()
                 except ConnectionNotReady:

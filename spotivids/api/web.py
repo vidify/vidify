@@ -34,7 +34,7 @@ class WebAPI:
 
         self.artist = ""
         self.title = ""
-        self.position = 0
+        self._position = 0
         self.is_playing = False
 
         # Trying to load the env variables
@@ -78,6 +78,11 @@ class WebAPI:
 
         self._spotify = Spotify(self._token.access_token)
 
+    @property
+    def position(self) -> int:
+        self._refresh_metadata()
+        return self._position
+
     def connect(self) -> None:
         """
         An initial metadata refresh is run. It throws a `ConnectionNotReady`
@@ -85,11 +90,11 @@ class WebAPI:
         """
 
         try:
-            self.refresh_metadata()
+            self._refresh_metadata()
         except (AttributeError, TypeError):
             raise ConnectionNotReady("No song currently playing")
 
-    def refresh_metadata(self) -> None:
+    def _refresh_metadata(self) -> None:
         """
         Refreshes the metadata of the player: artist, title, whether
         it's playing or not, and the current position.
@@ -105,7 +110,7 @@ class WebAPI:
         if self.artist == "":
             self.artist, self.title = split_title(self.title)
 
-        self.position = metadata['progress_ms']
+        self._position = metadata['progress_ms']
         self.is_playing = metadata['is_playing']
 
     def wait(self) -> None:
@@ -125,16 +130,17 @@ class WebAPI:
         may lag and change positions when they shouldn't.
         """
 
+        self._logger.info("Starting loop")
         artist = self.artist
         title = self.title
         try:
             while True:
                 timer = time.time()
-                position = self.position
+                position = self._position
                 is_playing = self.is_playing
                 time.sleep(1)
 
-                self.refresh_metadata()
+                self._refresh_metadata()
 
                 if self.artist != artist or self.title != title:
                     break
@@ -142,10 +148,10 @@ class WebAPI:
                 if self.is_playing != is_playing:
                     self.player.toggle_pause()
 
-                diff = self.position - position
+                diff = self._position - position
                 time_diff = int((time.time() - timer) * 1000)
                 if diff >= time_diff + 100 or diff < 0:
-                    self.player.position = self.position
+                    self.player.position = self._position
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
             sys.exit(0)

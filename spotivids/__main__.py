@@ -47,15 +47,15 @@ def format_name(artist: str, title: str) -> str:
     has to be different.
     """
 
-    return title if artist in (None, "") else f"{artist} - {title}"
+    return title if artist in (None, '') else f"{artist} - {title}"
 
 
 def get_url(artist: str, title: str) -> str:
     """
-    Getting the youtube direct link to play it directly with VLC.
+    Getting the youtube direct link with youtube-dl.
     """
 
-    name = f"ytsearch:'{format_name(artist, title)} Official Video'"
+    name = f"ytsearch:{format_name(artist, title)} Official Video"
 
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(name, download=False)
@@ -99,12 +99,11 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     spotify = DBusAPI(player, logger)
 
     msg = "Waiting for a Spotify session to be ready..."
-
     if not wait_for_connection(spotify.connect, msg):
         return
 
     while True:
-        start_time = time.time()
+        start_time = time.time_ns()
 
         url = get_url(spotify.artist, spotify.title)
         is_playing = spotify.is_playing
@@ -114,7 +113,7 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         if is_playing:
             while player.position == 0:
                 pass
-            offset = int((time.time() - start_time) * 1000)
+            offset = int((time.time_ns() - start_time) / 10**9)
             player.position = offset
             logging.debug(f"Starting offset is {offset}")
 
@@ -126,9 +125,7 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
 
 def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
-    Playing videos with the SwSpotify API.
-
-    It's really basic and can only get the window title.
+    Playing videos with the SwSpotify API (macOS and Windows).
     """
 
     from .api.swspotify import SwSpotifyAPI
@@ -139,14 +136,14 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         return
 
     while True:
-        start_time = time.time()
+        start_time = time.time_ns()
         url = get_url(spotify.artist, spotify.title)
         player.start_video(url)
 
         # Waits until the player starts the video to set the offset
         while player.position == 0:
             pass
-        offset = int((time.time() - start_time) * 1000)
+        offset = int((time.time_ns() - start_time) / 10**9)
         player.position = offset
         logging.debug(f"Starting offset is {offset}")
 
@@ -158,9 +155,10 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
 
 def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
-    Playing videos with the Web API (macOS, Windows).
+    Playing videos with the Web API (optional).
 
-    Unlike the DBus API, the position can be requested and synced easily.
+    Unlike the other APIs, the position can be requested and the video is
+    synced easily.
     """
 
     from .api.web import WebAPI
@@ -173,25 +171,22 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         return
 
     # Saves the auth token inside the config file for future usage
-    config.write_config_file('WebAPI', 'client_secret',
-                             spotify._client_secret)
-    config.write_config_file('WebAPI', 'client_id',
-                             spotify._client_id)
+    config.write_file('WebAPI', 'client_secret',
+                      spotify._client_secret)
+    config.write_file('WebAPI', 'client_id',
+                      spotify._client_id)
     if spotify._redirect_uri != config._options.redirect_uri.default:
-        config.write_config_file('WebAPI', 'redirect_uri',
-                                 spotify._redirect_uri)
-    config.write_config_file('WebAPI', 'auth_token',
-                             spotify._token.access_token)
-    config.write_config_file('WebAPI', 'expiration',
-                             spotify._token.expires_at)
+        config.write_file('WebAPI', 'redirect_uri',
+                          spotify._redirect_uri)
+    config.write_file('WebAPI', 'auth_token',
+                      spotify._token.access_token)
+    config.write_file('WebAPI', 'expiration',
+                      spotify._token.expires_at)
 
     while True:
         url = get_url(spotify.artist, spotify.title)
         player.start_video(url, spotify.is_playing)
 
-        # Refreshing the metadata before getting the position
-        # because the API only stores the position from the last refresh
-        spotify.refresh_metadata()
         offset = spotify.position
         player.position = offset
 
@@ -205,10 +200,10 @@ def wait_for_connection(connect: Callable, msg: str,
                         attempts: int = 30) -> bool:
     """
     Waits for a Spotify session to be opened or for a song to play.
-    Times out after <attempts> seconds to avoid infinite loops and to
-    avoid too many API/process requests.
+    Times out after `attempts` seconds to avoid infinite loops or
+    too many API/process requests.
 
-    Returns True if the connect was succesfull and False otherwise.
+    Returns True if the connection was succesfull and False otherwise.
     """
 
     counter = 0
