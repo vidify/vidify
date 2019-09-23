@@ -80,7 +80,7 @@ class DBusAPI:
             self.disconnect()
             sys.exit(0)
 
-    def _formatted_metadata(self, metadata: dict) -> Tuple[str, str]:
+    def _format_metadata(self, metadata: dict) -> Tuple[str, str]:
         """
         Returns the artist and title out of a raw metadata object
         as a tuple, first the artist and then the title.
@@ -105,7 +105,7 @@ class DBusAPI:
 
         player_interface = self._obj['org.mpris.MediaPlayer2.Player']
         metadata = player_interface.Metadata
-        self.artist, self.title = self._formatted_metadata(metadata)
+        self.artist, self.title = self._format_metadata(metadata)
 
         status = str(player_interface.PlaybackStatus)
         self.is_playing = self._bool_status(status)
@@ -117,7 +117,7 @@ class DBusAPI:
         booleans is easier and less confusing.
         """
 
-        return False if status.lower() in ('stopped', 'paused') else True
+        return status.lower() == 'playing'
 
     def _on_properties_changed(self, interface: str, properties: dict,
                                signature: list) -> None:
@@ -131,7 +131,7 @@ class DBusAPI:
 
         if 'Metadata' in properties:
             metadata = properties['Metadata']
-            artist, title = self._formatted_metadata(metadata)
+            artist, title = self._format_metadata(metadata)
             if artist != self.artist or title != self.title:
                 self._logger.info("New video detected")
                 self.artist = artist

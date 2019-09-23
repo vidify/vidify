@@ -39,10 +39,9 @@ For **Linux** or **BSD** users:
 Just running `spotivids` in your terminal should work, but here's more info about how to configure this module:
 
 ```
-usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n]
-                 [-f] [--use-mpv] [--width MAX_WIDTH]
-                 [--height MAX_HEIGHT] [-w] [--client-id CLIENT_ID]
-                 [--client-secret CLIENT_SECRET]
+usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
+                 [--use-mpv] [--max-width MAX_WIDTH] [--max-height MAX_HEIGHT]
+                 [-w] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
                  [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
                  [--mpv-flags MPV_FLAGS]
 ```

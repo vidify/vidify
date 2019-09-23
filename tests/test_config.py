@@ -40,7 +40,7 @@ class ConfigTest(unittest.TestCase):
 
         # Config file
         true_value = 'file'
-        self.config.write_config_file('Defaults', attr, true_value)
+        self.config.write_file('Defaults', attr, true_value)
         self.config.parse(path)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
@@ -62,7 +62,7 @@ class ConfigTest(unittest.TestCase):
         key = 'test_attr'
         section = 'Test'
         value = 'test_value'
-        self.config.write_config_file(section, key, value)
+        self.config.write_file(section, key, value)
         conf = configparser.ConfigParser()
         conf.read(path)
         self.assertEqual(conf[section][key], value)

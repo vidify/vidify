@@ -1,6 +1,7 @@
 import os
 import argparse
 import configparser
+from typing import Union
 from dataclasses import dataclass
 
 from .version import __version__
@@ -24,7 +25,7 @@ class Option:
 
 @dataclass
 class Options:
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Listing all options with their section, type and default value.
         """
@@ -55,9 +56,7 @@ class Config:
 
     def __init__(self) -> None:
         """
-        Parses the arguments and tries to open the config file.
-
-        Also loads a list with the default values for the parameters.
+        Initializing the argument parser and the config file.
         """
 
         self._options = Options()
@@ -73,15 +72,10 @@ class Config:
         self._file = configparser.ConfigParser()
 
     def add_arguments(self) -> None:
-        """
-        Adding all the arguments. The version is single sourced from the
-        version.py file.
-        """
-
         self._argparser.add_argument(
-            '-v', '--version',
-            action='version',
-            version=f'%(prog)s {__version__}',
+            "-v", "--version",
+            action="version",
+            version=f"%(prog)s {__version__}",
             help="show program's version number and exit")
 
         self._argparser.add_argument(
@@ -157,9 +151,10 @@ class Config:
             help="custom boolean flags used when opening mpv, with dashes"
             " and separated by spaces.")
 
-    def read_config_file(self, attr: str):
+    def read_file(self, attr: str) -> Union[bool, int, str]:
         """
-        Reads the config file data with the corresponding type.
+        Reads the config file data with the corresponding data (section and
+        type) from the options list.
         """
 
         option = getattr(self._options, attr)
@@ -171,7 +166,7 @@ class Config:
         else:
             return self._file.get(option.section, attr)
 
-    def write_config_file(self, section: str, name: str, value: any):
+    def write_file(self, section: str, name: str, value: any) -> None:
         """
         Modify a value from the config file. If the section doesn't exist,
         create it.
@@ -187,29 +182,26 @@ class Config:
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
-    def parse(self, config_path: str = None, custom_args: list = None):
+    def parse(self, config_path: str = None, custom_args: list = None) -> None:
         """
-        Get the config file sources data.
-
         The config path can be passed as a function parameter or as an argument
         inside the program. If none of these exist, the default path will be
-        used, defined at the top of this module.
+        used, defined at the top of this file.
 
-        A config file will also be created if none is found. This means that
-        all sections of self._options have to be written.
+        The config file will also be created if it isn't found.
         """
 
         self._args = self._argparser.parse_args(custom_args)
         self._path = config_path or self._args.config_path or default_path
 
         if not os.path.exists(self._path):
-            print('Creating config file at', self._path)
+            print("Creating config file at", self._path)
             with open(self._path, 'w') as f:
                 f.write('[Defaults]')
 
         self._file.read(self._path)
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr) -> Union[bool, int, str]:
         """
         Return the configuration from all sources in the correct order
         (arguments > config file > defaults)
@@ -226,7 +218,7 @@ class Config:
 
         # Config file
         try:
-            value = self.read_config_file(attr)
+            value = self.read_file(attr)
         except (configparser.NoOptionError, configparser.NoSectionError):
             pass
         else:
