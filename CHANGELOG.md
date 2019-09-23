@@ -10,6 +10,7 @@ TODO:
 * Add optional dependency to PKGBUILD for python-mpv, change description and etc
 * Rename on PyPi, AUR, GitHub.
 * Do more tests, stabilize before release
+* Add version requirements to setup.py for dependencies (SwSpotify)
 
 WAITING:
 * The new Spotify API hasn't been released to PyPi yet
