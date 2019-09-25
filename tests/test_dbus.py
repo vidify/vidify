@@ -1,8 +1,13 @@
 import logging
 import unittest
 
+from PySide2.QtWidgets import QApplication
+
 from spotivids.player.vlc import VLCPlayer
 from spotivids.api.linux import DBusAPI
+
+
+app = QApplication()
 
 
 class DBusTest(unittest.TestCase):

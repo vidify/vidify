@@ -5,7 +5,7 @@ from typing import Callable, Union
 
 import youtube_dl
 import lyricwikia
-from PySide2.QtWidgets import QApplication, QMainWindow
+from PySide2.QtWidgets import QApplication
 
 from .config import Config
 from .utils import stderr_redirected, ConnectionNotReady

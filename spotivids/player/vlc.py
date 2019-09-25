@@ -2,7 +2,7 @@ import sys
 import logging
 
 import vlc
-from PySide2.QtWidgets import QWidget, QFrame, QVBoxLayout, QLabel
+from PySide2.QtWidgets import QFrame
 
 
 class VLCPlayer(QFrame):

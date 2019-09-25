@@ -1,6 +1,4 @@
-import sys
-
-from PySide2.QtWidgets import QApplication, QMainWindow, QLabel
+from PySide2.QtWidgets import QMainWindow
 
 
 class MainWindow(QMainWindow):
