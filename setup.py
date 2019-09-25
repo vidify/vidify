@@ -34,7 +34,8 @@ setup(
         'youtube-dl',
         'python-vlc',
         'lyricwikia',
-        'spotipy',  # TODO use new spotipy repo
+        'spotipy',
+        'PySide2',
         'pydbus; platform_system=="Linux"',
         'SwSpotify; platform_system=="Windows" or platform_system=="Darwin"'
     ],

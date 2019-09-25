@@ -76,7 +76,7 @@ class WebAPI:
             self._token = prompt_for_user_token(
                 client_id, client_secret, redirect_uri, scope)
 
-        self._spotify = Spotify(self._token.access_token)
+        self._spotify = Spotify(self._token)
 
     @property
     def position(self) -> int:
@@ -104,14 +104,14 @@ class WebAPI:
         """
 
         metadata = self._spotify.playback_currently_playing()
-        self.artist = metadata['item']['artists'][0]['name']
-        self.title = metadata['item']['name']
+        self.artist = metadata.item.artists[0]
+        self.title = metadata.item.name
 
         if self.artist == "":
             self.artist, self.title = split_title(self.title)
 
-        self._position = metadata['progress_ms']
-        self.is_playing = metadata['is_playing']
+        self._position = metadata.progress_ms
+        self.is_playing = metadata.is_playing
 
     def wait(self) -> None:
         """

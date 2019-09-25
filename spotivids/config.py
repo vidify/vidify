@@ -17,13 +17,7 @@ class Option:
     value_type: type
     default: any
 
-    def __init__(self, section, value_type, default) -> None:
-        self.section = section
-        self.value_type = value_type
-        self.default = default
 
-
-@dataclass
 class Options:
     def __init__(self) -> None:
         """

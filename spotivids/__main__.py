@@ -5,9 +5,11 @@ from typing import Callable, Union
 
 import youtube_dl
 import lyricwikia
+from PySide2.QtWidgets import QApplication, QMainWindow
 
 from .config import Config
 from .utils import stderr_redirected, ConnectionNotReady
+from .gui import MainWindow
 
 
 # Cross platform info
@@ -115,7 +117,7 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
                 pass
             offset = int((time.time_ns() - start_time) / 10**9)
             player.position = offset
-            logging.debug(f"Starting offset is {offset}")
+            logging.info(f"Starting offset is {offset}")
 
         if config.lyrics:
             print_lyrics(spotify.artist, spotify.title)
@@ -231,12 +233,15 @@ def choose_platform() -> None:
     Chooses a platform and player and starts the corresponding API function.
     """
 
+    app = QApplication()
     if config.use_mpv:
         from .player.mpv import MpvPlayer
         player = MpvPlayer(logger, config.mpv_flags, config.fullscreen)
     else:
         from .player.vlc import VLCPlayer
         player = VLCPlayer(logger, config.vlc_args, config.fullscreen)
+    window = MainWindow(player)
+    window.show()
 
     if (BSD or LINUX) and not config.use_web_api:
         play_videos_linux(player)
@@ -244,6 +249,8 @@ def choose_platform() -> None:
         play_videos_swspotify(player)
     else:
         play_videos_web(player)
+
+    sys.exit(app.exec_())
 
 
 def main() -> None:
