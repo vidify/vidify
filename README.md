@@ -20,7 +20,7 @@ A cross-platform tool to watch Youtube **music videos** and **lyrics** for the c
 * Python 3.7+
 * VLC or mpv to play the videos
 
-For **Linux** or **BSD** users:
+For **Linux** users:
 
 * [PyGI](https://pygobject.readthedocs.io/en/latest/) (not packaged on PyPi, you need to install it from your distribution's repository - it's usually called python-gi, python-gobject or pygobject). Here's a quick [tutorial](https://pygobject.readthedocs.io/en/latest/getting_started.html) on how to install it on most systems.
 
