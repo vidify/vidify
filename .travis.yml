@@ -4,6 +4,9 @@ language: python
 python:
     - '3.7'
 
+services:
+  - xvfb
+
 before_install:
     - sudo apt-get update
     - sudo apt-get -y install python3-pip libdbus-glib-1-dev libcairo2-dev libglib2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 vlc libvlc-dev

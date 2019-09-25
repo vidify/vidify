@@ -1,8 +1,13 @@
 import logging
 import unittest
 
+from PySide2.QtWidgets import QApplication
+
 from spotivids.player.vlc import VLCPlayer
 from spotivids.api.linux import DBusAPI
+
+
+app = QApplication()
 
 
 class DBusTest(unittest.TestCase):
@@ -19,38 +24,38 @@ class DBusTest(unittest.TestCase):
         self.assertTrue(self.player._bool_status("playing"))
         self.assertTrue(self.player._bool_status("Playing"))
 
-    def test_formatted_metadata(self):
+    def test_format_metadata(self):
         metadata = {
             'xesam:artist': [''],
             'xesam:title': 'Rick Astley - Never Gonna Give You Up'
         }
-        artist, title = self.player._formatted_metadata(metadata)
+        artist, title = self.player._format_metadata(metadata)
         self.assertTrue(artist == "Rick Astley"
                         and title == "Never Gonna Give You Up")
 
         metadata['xesam:title'] = "Rick Astley: Never Gonna Give You Up"
-        artist, title = self.player._formatted_metadata(metadata)
+        artist, title = self.player._format_metadata(metadata)
         self.assertTrue(artist == "Rick Astley"
                         and title == "Never Gonna Give You Up")
 
         metadata['xesam:title'] = "Rick Astley : Never Gonna Give You Up"
-        artist, title = self.player._formatted_metadata(metadata)
+        artist, title = self.player._format_metadata(metadata)
         self.assertTrue(artist == "Rick Astley"
                         and title == "Never Gonna Give You Up")
 
         metadata['xesam:title'] = "Rick Astley Never Gonna Give You Up"
-        artist, title = self.player._formatted_metadata(metadata)
+        artist, title = self.player._format_metadata(metadata)
         self.assertTrue(artist == ""
                         and title == "Rick Astley Never Gonna Give You Up")
 
         metadata['xesam:title'] = "Rick - Astley - Never Gonna Give You Up"
-        artist, title = self.player._formatted_metadata(metadata)
+        artist, title = self.player._format_metadata(metadata)
         self.assertTrue(artist == "Rick"
                         and title == "Astley - Never Gonna Give You Up")
 
         metadata['xesam:artist'][0] = "Rick Astley"
         metadata['xesam:title'] = "Never Gonna - Give You Up"
-        artist, title = self.player._formatted_metadata(metadata)
+        artist, title = self.player._format_metadata(metadata)
         self.assertTrue(artist == "Rick Astley"
                         and title == "Never Gonna - Give You Up")
 
