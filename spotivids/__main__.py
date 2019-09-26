@@ -28,7 +28,7 @@ def choose_platform() -> None:
         play_videos_linux(player)
     elif (WINDOWS or MACOS) and not config.use_web_api:
         from .api.swspotify import play_videos_swspotify
-        play_videos_swspotify(player, config.lyrics, config.debug)
+        play_videos_swspotify(player)
     else:
         from .api.web import play_videos_web
         play_videos_web(player)
