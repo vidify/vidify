@@ -6,23 +6,20 @@ from typing import Tuple, Union
 import pydbus
 from gi.repository import GLib
 
-from ..utils import split_title, ConnectionNotReady
+from . import split_title, ConnectionNotReady, wait_for_connection
+from ..lyrics import print_lyrics
 from ..youtube import YouTube
 
 
 class DBusAPI:
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 logger: logging.Logger) -> None:
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         """
-        The logger is an instance from the logging module, configured
-        to show info or error messages.
-
         It includes `player`, the VLC or mpv window, so that some actions can
         be controlled from the API more intuitively, like automatic
         pausing/playing when the API detects it.
         """
 
-        self._logger = logger
+        self._logger = logging.getLogger('spotivids')
         self.player = player
 
         self.artist = ""
@@ -148,7 +145,7 @@ class DBusAPI:
                 self.player.toggle_pause()
 
 
-def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer'], youtube: YouTube) -> None:
+def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
     Playing videos with the DBus API (Linux).
 
@@ -159,15 +156,15 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer'], youtube: YouTube)
     pausing the video.
     """
 
-    spotify = DBusAPI(player, logger)
-
+    from .. import config
+    youtube = YouTube(config.debug, config.width, config.height)
+    spotify = DBusAPI(player)
     msg = "Waiting for a Spotify session to be ready..."
     if not wait_for_connection(spotify.connect, msg):
         return
 
     while True:
         start_time = time.time_ns()
-
         url = youtube.get_url(spotify.artist, spotify.title)
         is_playing = spotify.is_playing
         player.start_video(url, is_playing)

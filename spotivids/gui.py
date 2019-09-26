@@ -9,6 +9,8 @@ class MainWindow(QMainWindow):
 
         QMainWindow.__init__(self)
 
-        self.setWindowTitle("spotivids")
-        self.resize(width, height)
+        self.setWindowTitle('spotivids')
+        self.setStyleSheet('background-color: #282828')
+        if None not in (height, width):
+            self.resize(width, height)
         self.setCentralWidget(widget)

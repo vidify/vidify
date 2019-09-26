@@ -7,19 +7,16 @@ from typing import Union
 from spotipy import Spotify, Scope, scopes, Token, Credentials
 from spotipy.util import prompt_for_user_token, RefreshingToken
 
-from ..utils import split_title, ConnectionNotReady
+from . import split_title, ConnectionNotReady, wait_for_connection
+from ..lyrics import print_lyrics
 from ..youtube import YouTube
 
 
 class WebAPI:
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 logger: logging.Logger, client_id: str, client_secret: str,
-                 redirect_uri: str, auth_token: str, expiration: int) -> None:
+                 client_id: str, client_secret: str, redirect_uri: str,
+                 auth_token: str, expiration: int) -> None:
         """
-        The parameters are saved in the class and the main song properties
-        are created. The logger is an instance from the logging module,
-        configured to show debug or error messages.
-
         It includes `player`, the VLC or mpv window, so that some actions can
         be controlled from the API more intuitively, like automatic
         pausing/playing/skipping when the API detects it.
@@ -29,9 +26,8 @@ class WebAPI:
         is always on localhost, since it's an offline application.
         """
 
-        self._logger = logger
+        self._logger = logging.getLogger('spotivids')
         self.player = player
-
         self.artist = ""
         self.title = ""
         self._position = 0
@@ -157,7 +153,7 @@ class WebAPI:
             sys.exit(0)
 
 
-def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'], youtube: YouTube) -> None:
+def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
     Playing videos with the Web API (optional).
 
@@ -165,10 +161,10 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'], youtube: YouTube) -
     synced easily.
     """
 
-    spotify = WebAPI(player, logger, config.client_id,
-                     config.client_secret, config.redirect_uri,
-                     config.auth_token, config.expiration)
-
+    from .. import config
+    youtube = YouTube(config.debug, config.width, config.height)
+    spotify = WebAPI(player, config.client_id, config.client_secret,
+                     config.redirect_uri, config.auth_token, config.expiration)
     msg = "Waiting for a Spotify song to play..."
     if not wait_for_connection(spotify.connect, msg):
         return

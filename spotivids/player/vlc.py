@@ -6,18 +6,13 @@ from PySide2.QtWidgets import QFrame
 
 
 class VLCPlayer(QFrame):
-    def __init__(self, logger: logging.Logger, vlc_args: str = "",
-                 fullscreen: bool = False) -> None:
+    def __init__(self, vlc_args: str = "", fullscreen: bool = False) -> None:
         """
         This VLC player is the instance where media should play.
-
-        The logger is an instance from the logging module, configured
-        to show debug or error messages.
         """
 
-        super().__init__(self)
-
-        self._logger = logger
+        super().__init__()
+        self._logger = logging.getLogger('spotivids')
         self._fullscreen = fullscreen
 
         # VLC initialization
