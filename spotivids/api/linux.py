@@ -1,26 +1,25 @@
 import sys
+import time
 import logging
 from typing import Tuple, Union
 
 import pydbus
 from gi.repository import GLib
 
-from ..utils import split_title, ConnectionNotReady
+from . import split_title, ConnectionNotReady, wait_for_connection
+from ..lyrics import print_lyrics
+from ..youtube import YouTube
 
 
 class DBusAPI:
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 logger: logging.Logger) -> None:
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         """
-        The logger is an instance from the logging module, configured
-        to show info or error messages.
-
         It includes `player`, the VLC or mpv window, so that some actions can
         be controlled from the API more intuitively, like automatic
         pausing/playing when the API detects it.
         """
 
-        self._logger = logger
+        self._logger = logging.getLogger('spotivids')
         self.player = player
 
         self.artist = ""
@@ -144,3 +143,41 @@ class DBusAPI:
                 self._logger.info("Paused/Played video")
                 self.is_playing = status
                 self.player.toggle_pause()
+
+
+def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    """
+    Playing videos with the DBus API (Linux).
+
+    Spotify doesn't currently support the MPRIS property `Position`
+    so the starting offset is calculated manually and may be a bit rough.
+
+    After playing the video, the player waits for DBus events like
+    pausing the video.
+    """
+
+    from .. import config
+    youtube = YouTube(config.debug, config.width, config.height)
+    spotify = DBusAPI(player)
+    msg = "Waiting for a Spotify session to be ready..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
+
+    while True:
+        start_time = time.time_ns()
+        url = youtube.get_url(spotify.artist, spotify.title)
+        is_playing = spotify.is_playing
+        player.start_video(url, is_playing)
+
+        # Waits until the player starts the video to set the offset
+        if is_playing:
+            while player.position == 0:
+                pass
+            offset = int((time.time_ns() - start_time) / 10**9)
+            player.position = offset
+            logging.info(f"Starting offset is {offset}")
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()

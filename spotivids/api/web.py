@@ -7,19 +7,16 @@ from typing import Union
 from spotipy import Spotify, Scope, scopes, Token, Credentials
 from spotipy.util import prompt_for_user_token, RefreshingToken
 
-from ..utils import split_title, ConnectionNotReady
+from . import split_title, ConnectionNotReady, wait_for_connection
+from ..lyrics import print_lyrics
+from ..youtube import YouTube
 
 
 class WebAPI:
-
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 logger: logging.Logger, client_id: str, client_secret: str,
-                 redirect_uri: str, auth_token: str, expiration: int) -> None:
+                 client_id: str, client_secret: str, redirect_uri: str,
+                 auth_token: str, expiration: int) -> None:
         """
-        The parameters are saved in the class and the main song properties
-        are created. The logger is an instance from the logging module,
-        configured to show debug or error messages.
-
         It includes `player`, the VLC or mpv window, so that some actions can
         be controlled from the API more intuitively, like automatic
         pausing/playing/skipping when the API detects it.
@@ -29,9 +26,8 @@ class WebAPI:
         is always on localhost, since it's an offline application.
         """
 
-        self._logger = logger
+        self._logger = logging.getLogger('spotivids')
         self.player = player
-
         self.artist = ""
         self.title = ""
         self._position = 0
@@ -76,7 +72,7 @@ class WebAPI:
             self._token = prompt_for_user_token(
                 client_id, client_secret, redirect_uri, scope)
 
-        self._spotify = Spotify(self._token.access_token)
+        self._spotify = Spotify(self._token)
 
     @property
     def position(self) -> int:
@@ -104,14 +100,14 @@ class WebAPI:
         """
 
         metadata = self._spotify.playback_currently_playing()
-        self.artist = metadata['item']['artists'][0]['name']
-        self.title = metadata['item']['name']
+        self.artist = metadata.item.artists[0]
+        self.title = metadata.item.name
 
         if self.artist == "":
             self.artist, self.title = split_title(self.title)
 
-        self._position = metadata['progress_ms']
-        self.is_playing = metadata['is_playing']
+        self._position = metadata.progress_ms
+        self.is_playing = metadata.is_playing
 
     def wait(self) -> None:
         """
@@ -155,3 +151,45 @@ class WebAPI:
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
             sys.exit(0)
+
+
+def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    """
+    Playing videos with the Web API (optional).
+
+    Unlike the other APIs, the position can be requested and the video is
+    synced easily.
+    """
+
+    from .. import config
+    youtube = YouTube(config.debug, config.width, config.height)
+    spotify = WebAPI(player, config.client_id, config.client_secret,
+                     config.redirect_uri, config.auth_token, config.expiration)
+    msg = "Waiting for a Spotify song to play..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
+
+    # Saves the auth token inside the config file for future usage
+    config.write_file('WebAPI', 'client_secret',
+                      spotify._client_secret)
+    config.write_file('WebAPI', 'client_id',
+                      spotify._client_id)
+    if spotify._redirect_uri != config._options.redirect_uri.default:
+        config.write_file('WebAPI', 'redirect_uri',
+                          spotify._redirect_uri)
+    config.write_file('WebAPI', 'auth_token',
+                      spotify._token.access_token)
+    config.write_file('WebAPI', 'expiration',
+                      spotify._token.expires_at)
+
+    while True:
+        url = youtube.get_url(spotify.artist, spotify.title)
+        player.start_video(url, spotify.is_playing)
+
+        offset = spotify.position
+        player.position = offset
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()

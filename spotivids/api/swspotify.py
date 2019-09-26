@@ -1,23 +1,23 @@
 import sys
 import time
 import logging
+from typing import Union
 
 from SwSpotify import spotify, SpotifyNotRunning
 
-from ..utils import ConnectionNotReady
+from . import ConnectionNotReady, wait_for_connection
+from ..lyrics import print_lyrics
+from ..youtube import YouTube
 
 
 class SwSpotifyAPI:
-    def __init__(self, logger: logging.Logger) -> None:
+    def __init__(self) -> None:
         """
         The SwSpotify API for Windows and Darwin (macOS) is really limited,
         since all it can do is get the artist and title of the current song.
-
-        The logger is an instance from the logging module, configured to show
-        debug or error messages.
         """
 
-        self._logger = logger
+        self._logger = logging.getLogger('spotivids')
         self.artist = ""
         self.title = ""
 
@@ -61,3 +61,33 @@ class SwSpotifyAPI:
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
             sys.exit(0)
+
+
+def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    """
+    Playing videos with the SwSpotify API (macOS and Windows).
+    """
+
+    from .. import config
+    youtube = YouTube(config.debug, config.width, config.height)
+    spotify = SwSpotifyAPI()
+    msg = "Waiting for a Spotify session to be ready..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
+
+    while True:
+        start_time = time.time_ns()
+        url = youtube.get_url(spotify.artist, spotify.title)
+        player.start_video(url)
+
+        # Waits until the player starts the video to set the offset
+        while player.position == 0:
+            pass
+        offset = int((time.time_ns() - start_time) / 10**9)
+        player.position = offset
+        logging.debug(f"Starting offset is {offset}")
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()

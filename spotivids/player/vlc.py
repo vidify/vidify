@@ -1,29 +1,28 @@
+import sys
 import logging
 
 import vlc
+from PySide2.QtWidgets import QFrame
 
 
-class VLCPlayer:
-    def __init__(self, logger: logging.Logger, vlc_args: str = "",
-                 fullscreen: bool = False) -> None:
+class VLCPlayer(QFrame):
+    def __init__(self, vlc_args: str = "", fullscreen: bool = False) -> None:
         """
         This VLC player is the instance where media should play.
-
-        The logger is an instance from the logging module, configured
-        to show debug or error messages.
         """
 
-        self._logger = logger
+        super().__init__()
+        self._logger = logging.getLogger('spotivids')
         self._fullscreen = fullscreen
 
-        # The config file might have an empty field for it
+        # VLC initialization
         if vlc_args is None:
             vlc_args = ""
-        vlc_args += " --no-audio"
         if self._logger.level <= logging.INFO:
             vlc_args += " --verbose 1"
         else:
             vlc_args += " --quiet"
+        vlc_args += " --no-audio"
 
         try:
             self._vlc = vlc.Instance(vlc_args)
@@ -77,9 +76,17 @@ class VLCPlayer:
         when the video starts.
         """
 
-        self._logger.info("Starting new video")
-        media = self._vlc.media_new(url)
-        self._player.set_media(media)
+        self._logger.info(f"Starting new video at {self.winId()}")
+        if sys.platform.startswith('linux'):
+            self._player.set_xwindow(self.winId())
+        elif sys.platform == "win32":
+            self._player.set_hwnd(self.winId())
+        elif sys.platform == "darwin":
+            self._player.set_nsobject(int(self.winId()))
+
+        self.media = self._vlc.media_new(url)
+        self.media.get_mrl()
+        self._player.set_media(self.media)
         self._player.set_fullscreen(self._fullscreen)
         if is_playing:
             self.play()

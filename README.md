@@ -20,7 +20,7 @@ A cross-platform tool to watch Youtube **music videos** and **lyrics** for the c
 * Python 3.7+
 * VLC or mpv to play the videos
 
-For **Linux** or **BSD** users:
+For **Linux** users:
 
 * [PyGI](https://pygobject.readthedocs.io/en/latest/) (not packaged on PyPi, you need to install it from your distribution's repository - it's usually called python-gi, python-gobject or pygobject). Here's a quick [tutorial](https://pygobject.readthedocs.io/en/latest/getting_started.html) on how to install it on most systems.
 
@@ -40,8 +40,8 @@ Just running `spotivids` in your terminal should work, but here's more info abou
 
 ```
 usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
-                 [--use-mpv] [--max-width MAX_WIDTH] [--max-height MAX_HEIGHT]
-                 [-w] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
+                 [--use-mpv] [--width MAX_WIDTH] [--height MAX_HEIGHT] [-w]
+                 [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
                  [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
                  [--mpv-flags MPV_FLAGS]
 ```
@@ -50,8 +50,8 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
 |----------------------------------|---------------------|
 | `-n`, `--no-lyrics`              | do not print lyrics |
 | `-f`, `--fullscreen`             | play videos in fullscreen mode |
-| `--max-width <MAX_WIDTH>`        | set the maximum width for the played videos |
-| `--max-height <MAX_HEIGHT>`      | set the maximum height for the played videos |
+| `--width <WIDTH>`                | set the width for the player |
+| `--height <HEIGHT>`              | set the height for the player |
 | `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation guide](https://github.com/marioortizmanero/spotivids) for more. |
 | `-w, --use-web-api`              | use Spotify's web API. See [the web API section](#the-web-api) for more info about how to set it up. |
 | `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |
