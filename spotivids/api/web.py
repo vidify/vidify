@@ -8,6 +8,7 @@ from spotipy import Spotify, Scope, scopes, Token, Credentials
 from spotipy.util import prompt_for_user_token, RefreshingToken
 
 from ..utils import split_title, ConnectionNotReady
+from ..youtube import YouTube
 
 
 class WebAPI:
@@ -156,7 +157,7 @@ class WebAPI:
             sys.exit(0)
 
 
-def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'], youtube: YouTube) -> None:
     """
     Playing videos with the Web API (optional).
 
@@ -186,7 +187,7 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
                       spotify._token.expires_at)
 
     while True:
-        url = get_url(spotify.artist, spotify.title)
+        url = youtube.get_url(spotify.artist, spotify.title)
         player.start_video(url, spotify.is_playing)
 
         offset = spotify.position
