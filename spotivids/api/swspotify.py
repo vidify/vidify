@@ -5,6 +5,7 @@ import logging
 from SwSpotify import spotify, SpotifyNotRunning
 
 from ..utils import ConnectionNotReady
+from ..youtube import YouTube
 
 
 class SwSpotifyAPI:
@@ -63,7 +64,7 @@ class SwSpotifyAPI:
             sys.exit(0)
 
 
-def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'], youtube: YouTube) -> None:
     """
     Playing videos with the SwSpotify API (macOS and Windows).
     """
@@ -76,7 +77,7 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
 
     while True:
         start_time = time.time_ns()
-        url = get_url(spotify.artist, spotify.title)
+        url = youtube.get_url(spotify.artist, spotify.title)
         player.start_video(url)
 
         # Waits until the player starts the video to set the offset

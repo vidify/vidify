@@ -3,13 +3,13 @@ import time
 import logging
 from typing import Callable, Union
 
-import youtube_dl
 import lyricwikia
 from PySide2.QtWidgets import QApplication
 
 from .config import Config
 from .utils import stderr_redirected, ConnectionNotReady
 from .gui import MainWindow
+from .youtube import YouTube
 
 
 # Cross platform info
@@ -32,15 +32,6 @@ logger.addHandler(handler)
 level = logging.DEBUG if config.debug else logging.ERROR
 logger.setLevel(level)
 
-# Youtube-dl config
-ydl_opts = {
-    'format': 'bestvideo',
-    'quiet': not config.debug
-}
-if config.width is not None:
-    ydl_opts['format'] += f"[width<={config.width}]"
-if config.height is not None:
-    ydl_opts['format'] += f"[height<={config.height}]"
 
 
 def format_name(artist: str, title: str) -> str:
@@ -50,19 +41,6 @@ def format_name(artist: str, title: str) -> str:
     """
 
     return title if artist in (None, '') else f"{artist} - {title}"
-
-
-def get_url(artist: str, title: str) -> str:
-    """
-    Getting the youtube direct link with youtube-dl.
-    """
-
-    name = f"ytsearch:{format_name(artist, title)} Official Video"
-
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(name, download=False)
-
-    return info['entries'][0]['url']
 
 
 def print_lyrics(artist: str, title: str) -> None:
@@ -133,15 +111,16 @@ def choose_platform() -> None:
     window = MainWindow(player, config.width, config.height)
     window.show()
 
+    youtube = YouTube(config.debug, config.width, config.height)
     if (BSD or LINUX) and not config.use_web_api:
         from .api.linux import play_videos_linux
-        play_videos_linux(player)
+        play_videos_linux(player, youtube)
     elif (WINDOWS or MACOS) and not config.use_web_api:
         from .api.swspotify import play_videos_swspotify
-        play_videos_swspotify(player)
+        play_videos_swspotify(player, youtube)
     else:
         from .api.web import play_videos_web
-        play_videos_web(player)
+        play_videos_web(player, youtube)
 
     sys.exit(app.exec_())
 

@@ -7,6 +7,7 @@ import pydbus
 from gi.repository import GLib
 
 from ..utils import split_title, ConnectionNotReady
+from ..youtube import YouTube
 
 
 class DBusAPI:
@@ -147,7 +148,7 @@ class DBusAPI:
                 self.player.toggle_pause()
 
 
-def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer'], youtube: YouTube) -> None:
     """
     Playing videos with the DBus API (Linux).
 
@@ -167,7 +168,7 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     while True:
         start_time = time.time_ns()
 
-        url = get_url(spotify.artist, spotify.title)
+        url = youtube.get_url(spotify.artist, spotify.title)
         is_playing = spotify.is_playing
         player.start_video(url, is_playing)
 
