@@ -1,4 +1,5 @@
 import sys
+import time
 import logging
 from typing import Tuple, Union
 
@@ -144,3 +145,41 @@ class DBusAPI:
                 self._logger.info("Paused/Played video")
                 self.is_playing = status
                 self.player.toggle_pause()
+
+
+def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    """
+    Playing videos with the DBus API (Linux).
+
+    Spotify doesn't currently support the MPRIS property `Position`
+    so the starting offset is calculated manually and may be a bit rough.
+
+    After playing the video, the player waits for DBus events like
+    pausing the video.
+    """
+
+    spotify = DBusAPI(player, logger)
+
+    msg = "Waiting for a Spotify session to be ready..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
+
+    while True:
+        start_time = time.time_ns()
+
+        url = get_url(spotify.artist, spotify.title)
+        is_playing = spotify.is_playing
+        player.start_video(url, is_playing)
+
+        # Waits until the player starts the video to set the offset
+        if is_playing:
+            while player.position == 0:
+                pass
+            offset = int((time.time_ns() - start_time) / 10**9)
+            player.position = offset
+            logging.info(f"Starting offset is {offset}")
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()

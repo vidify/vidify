@@ -1,9 +1,10 @@
 import logging
 
 from mpv import MPV
+from PySide2.QtWidgets import QFrame
 
 
-class MpvPlayer:
+class MpvPlayer(QFrame):
     def __init__(self, logger: logging.Logger, flags: str,
                  fullscreen: bool = False) -> None:
         """
@@ -19,18 +20,25 @@ class MpvPlayer:
         videos are silent. The fullscreen is also set.
         """
 
+        super().__init__(self)
+
         self._logger = logger
 
+        # mpv initialization
         flags = flags.split() if flags not in (None, '') else []
         flags.extend(['mute', 'keep-open'])
         if fullscreen:
             flags.append('fullscreen')
 
+        args = {}
         if self._logger.level <= logging.INFO:
-            self._mpv = MPV(*flags, log_handler=print, loglevel='info')
-        else:
-            self._mpv = MPV(*flags)
+            args['log_handler'] = print
+            args['loglevel'] = 'info'
 
+        args['wid'] = str(int(self.winId()))
+        args['vo'] = 'x11'  # May not be necessary
+
+        self._mpv = MPV(*flags, **args)
     def __del__(self) -> None:
         try:
             self._mpv.terminate()

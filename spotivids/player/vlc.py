@@ -15,7 +15,7 @@ class VLCPlayer(QFrame):
         to show debug or error messages.
         """
 
-        QFrame.__init__(self)
+        super().__init__(self)
 
         self._logger = logger
         self._fullscreen = fullscreen

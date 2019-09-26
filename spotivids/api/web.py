@@ -11,7 +11,6 @@ from ..utils import split_title, ConnectionNotReady
 
 
 class WebAPI:
-
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  logger: logging.Logger, client_id: str, client_secret: str,
                  redirect_uri: str, auth_token: str, expiration: int) -> None:
@@ -155,3 +154,45 @@ class WebAPI:
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
             sys.exit(0)
+
+
+def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    """
+    Playing videos with the Web API (optional).
+
+    Unlike the other APIs, the position can be requested and the video is
+    synced easily.
+    """
+
+    spotify = WebAPI(player, logger, config.client_id,
+                     config.client_secret, config.redirect_uri,
+                     config.auth_token, config.expiration)
+
+    msg = "Waiting for a Spotify song to play..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
+
+    # Saves the auth token inside the config file for future usage
+    config.write_file('WebAPI', 'client_secret',
+                      spotify._client_secret)
+    config.write_file('WebAPI', 'client_id',
+                      spotify._client_id)
+    if spotify._redirect_uri != config._options.redirect_uri.default:
+        config.write_file('WebAPI', 'redirect_uri',
+                          spotify._redirect_uri)
+    config.write_file('WebAPI', 'auth_token',
+                      spotify._token.access_token)
+    config.write_file('WebAPI', 'expiration',
+                      spotify._token.expires_at)
+
+    while True:
+        url = get_url(spotify.artist, spotify.title)
+        player.start_video(url, spotify.is_playing)
+
+        offset = spotify.position
+        player.position = offset
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()

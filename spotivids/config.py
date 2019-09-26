@@ -27,8 +27,8 @@ class Options:
         self.debug = Option('Defaults', bool, False)
         self.lyrics = Option('Defaults', bool, True)
         self.fullscreen = Option('Defaults', bool, False)
-        self.max_width = Option('Defaults', str, None)
-        self.max_height = Option('Defaults', str, None)
+        self.width = Option('Defaults', int, None)
+        self.height = Option('Defaults', int, None)
         self.use_mpv = Option('Defaults', bool, False)
         self.vlc_args = Option('Defaults', str, None)
         self.mpv_flags = Option('Defaults', str, None)
@@ -98,14 +98,14 @@ class Config:
             help="use mpv as the video player")
 
         self._argparser.add_argument(
-            "--max-width",
-            action="store", dest="max_width", default=None,
-            help="set the maximum width for the played videos")
+            "--width",
+            action="store", dest="width", default=None,
+            help="set the maximum width for the player")
 
         self._argparser.add_argument(
-            "--max-height",
-            action="store", dest="max_height", default=None,
-            help="set the maximum height for the played videos")
+            "--height",
+            action="store", dest="height", default=None,
+            help="set the maximum height for the player")
 
         self._argparser.add_argument(
             "-w", "--use-web-api",
