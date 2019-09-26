@@ -61,3 +61,32 @@ class SwSpotifyAPI:
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
             sys.exit(0)
+
+
+def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    """
+    Playing videos with the SwSpotify API (macOS and Windows).
+    """
+
+    spotify = SwSpotifyAPI(logger)
+
+    msg = "Waiting for a Spotify session to be ready..."
+    if not wait_for_connection(spotify.connect, msg):
+        return
+
+    while True:
+        start_time = time.time_ns()
+        url = get_url(spotify.artist, spotify.title)
+        player.start_video(url)
+
+        # Waits until the player starts the video to set the offset
+        while player.position == 0:
+            pass
+        offset = int((time.time_ns() - start_time) / 10**9)
+        player.position = offset
+        logging.debug(f"Starting offset is {offset}")
+
+        if config.lyrics:
+            print_lyrics(spotify.artist, spotify.title)
+
+        spotify.wait()
