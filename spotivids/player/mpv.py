@@ -5,7 +5,7 @@ from PySide2.QtWidgets import QFrame
 
 
 class MpvPlayer(QFrame):
-    def __init__(self, flags: str, fullscreen: bool = False) -> None:
+    def __init__(self, flags: str) -> None:
         """
         This MPV player is the instance where media should play optionally,
         since the default is VLC. It may be initialized with extra arguments
@@ -13,7 +13,7 @@ class MpvPlayer(QFrame):
         because of naming issues.
 
         The audio is muted, which is needed because not all the youtube-dl
-        videos are silent. The fullscreen is also set.
+        videos are silent.
         """
 
         super().__init__()
@@ -22,14 +22,10 @@ class MpvPlayer(QFrame):
         # mpv initialization
         flags = flags.split() if flags not in (None, '') else []
         flags.extend(['mute', 'keep-open'])
-        if fullscreen:
-            flags.append('fullscreen')
-
         args = {}
         if self._logger.level <= logging.INFO:
             args['log_handler'] = print
             args['loglevel'] = 'info'
-
         args['wid'] = str(int(self.winId()))
         args['vo'] = 'x11'  # May not be necessary
 
