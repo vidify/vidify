@@ -16,8 +16,9 @@ class MainWindow(QMainWindow):
         self.setStyleSheet('background-color: #282828')
         if fullscreen:
             self.showFullScreen()
-        if None in (width, height):
+        if width is None:
             width = 800
+        if height is None:
             height = 600
         self.resize(width, height)
         self.setCentralWidget(widget)
