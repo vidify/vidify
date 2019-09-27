@@ -1,4 +1,4 @@
-* #9: Now using a newer Spotipy fork made by Felix Hildén. This brings more features and improves the web API behaviour. For example, instead of creating an annoying `.cache-username` file with API information wherever spotify_videos was launched, it's saved inside the default config file.
+* #9: Now using a newer Spotipy fork made by Felix Hildén. This brings more features and improves the web API behaviour. For example, instead of creating an annoying `.cache-username` file with API information wherever spotify-videos was launched, it's saved inside the default config file.
 * #10: Support for local Spotify info on Windows and macOS without having to use the web API, thanks to SwSpotify. I even contributed to the project with more features from this program.
 * #11, #16: Support for mpv has been added. It can be enabled from the config file or passing --use-mpv as an argument.
 * #12: A config file has been implemented. Read more about how it works inside the README.md.
@@ -12,6 +12,7 @@ TODO:
 * Rename on PyPi, AUR, GitHub.
 * Do more tests, stabilize before release
 * Add version requirements to setup.py for dependencies (SwSpotify)
+* Add warning of obsoletion in PyPi spotify-videos package. The AUR package can be renamed but it's not possible for users who installed it with spotify_videos.
 
 WAITING:
 * The new Spotify API hasn't been released to PyPi yet
