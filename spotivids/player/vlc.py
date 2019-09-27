@@ -6,14 +6,13 @@ from PySide2.QtWidgets import QFrame
 
 
 class VLCPlayer(QFrame):
-    def __init__(self, vlc_args: str = "", fullscreen: bool = False) -> None:
+    def __init__(self, vlc_args: str = "") -> None:
         """
         This VLC player is the instance where media should play.
         """
 
         super().__init__()
         self._logger = logging.getLogger('spotivids')
-        self._fullscreen = fullscreen
 
         # VLC initialization
         if vlc_args is None:
@@ -71,9 +70,6 @@ class VLCPlayer(QFrame):
         """
         Starts a new video in the VLC player. It can be directly played
         with `is_playing` to avoid extra calls.
-
-        The fullscreen can't be set as an initial parameter so it's indicated
-        when the video starts.
         """
 
         self._logger.info(f"Starting new video at {self.winId()}")
@@ -87,6 +83,5 @@ class VLCPlayer(QFrame):
         self.media = self._vlc.media_new(url)
         self.media.get_mrl()
         self._player.set_media(self.media)
-        self._player.set_fullscreen(self._fullscreen)
         if is_playing:
             self.play()

@@ -15,12 +15,12 @@ def choose_platform() -> None:
 
     if config.use_mpv:
         from .player.mpv import MpvPlayer
-        player = MpvPlayer(config.mpv_flags, config.fullscreen)
+        player = MpvPlayer(config.mpv_flags)
     else:
         from .player.vlc import VLCPlayer
-        player = VLCPlayer(config.vlc_args, config.fullscreen)
+        player = VLCPlayer(config.vlc_args)
 
-    window = MainWindow(player, config.width, config.height)
+    window = MainWindow(player, config.width, config.height, config.fullscreen)
     window.show()
 
     if (BSD or LINUX) and not config.use_web_api:
