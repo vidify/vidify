@@ -9,11 +9,11 @@ setup(
     name='spotivids',
     version=__version__,
     packages=find_packages(),
-    description='Simple tool to watch Youtube music videos and lyrics',
+    description='Watch music videos and lyrics for the playing Spotify songs',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/marioortizmanero/spotivids',
-    license='MIT',
+    license='LGPL',
 
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',

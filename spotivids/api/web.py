@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import logging
+from requests import HTTPError
 from typing import Union
 
 from spotipy import Spotify, Scope, scopes, Token, Credentials
@@ -15,7 +16,7 @@ from ..youtube import YouTube
 class WebAPI:
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  client_id: str, client_secret: str, redirect_uri: str,
-                 auth_token: str, expiration: int) -> None:
+                 auth_token: str = None, expiration: int = None) -> None:
         """
         It includes `player`, the VLC or mpv window, so that some actions can
         be controlled from the API more intuitively, like automatic
@@ -74,21 +75,21 @@ class WebAPI:
 
         self._spotify = Spotify(self._token)
 
-    @property
-    def position(self) -> int:
-        self._refresh_metadata()
-        return self._position
-
     def connect(self) -> None:
         """
-        An initial metadata refresh is run. It throws a `ConnectionNotReady`
-        exception if no songs are playing in that moment.
+        An initial metadata refresh is run. It raises `ConnectionNotReady`
+        if no songs are playing in that moment.
         """
 
         try:
             self._refresh_metadata()
-        except (AttributeError, TypeError):
+        except AttributeError:
             raise ConnectionNotReady("No song currently playing")
+
+    @property
+    def position(self) -> int:
+        self._refresh_metadata()
+        return self._position
 
     def _refresh_metadata(self) -> None:
         """
@@ -100,7 +101,7 @@ class WebAPI:
         """
 
         metadata = self._spotify.playback_currently_playing()
-        self.artist = metadata.item.artists[0]
+        self.artist = metadata.item.artists[0].name
         self.title = metadata.item.name
 
         if self.artist == "":
@@ -166,10 +167,19 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     spotify = WebAPI(player, config.client_id, config.client_secret,
                      config.redirect_uri, config.auth_token, config.expiration)
     msg = "Waiting for a Spotify song to play..."
-    if not wait_for_connection(spotify.connect, msg):
-        return
+    # Checking if Spotify is paused/closed and if the auth details are valid
+    try:
+        if not wait_for_connection(spotify.connect, msg):
+            return
+    except HTTPError as e:
+        if e.response.status_code != 401:
+            raise
+        spotify = WebAPI(player, config.client_id, config.client_secret,
+                         config.redirect_uri)
+        if not wait_for_connection(spotify.connect, msg):
+            return
 
-    # Saves the auth token inside the config file for future usage
+    # Saves the used credentials inside the config file for future usage
     config.write_file('WebAPI', 'client_secret',
                       spotify._client_secret)
     config.write_file('WebAPI', 'client_id',

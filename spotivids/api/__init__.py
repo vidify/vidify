@@ -5,12 +5,14 @@ from typing import Tuple, Callable
 
 class ConnectionNotReady(Exception):
     """
-    This error is called when no Spotify session is open or when
+    This exception is raised when no Spotify session is open or when
     no songs are currently playing, since it is better to catch them
     outside of the init function.
     """
 
-    pass
+    def __init__(self, msg: str = "Spotify is closed or there isn't a"
+                 "  currently playing track."):
+        super().__init__(msg)
 
 
 def split_title(title: str) -> Tuple[str, str]:
