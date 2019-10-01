@@ -40,7 +40,7 @@ Just running `spotivids` in your terminal should work, but here's more info abou
 
 ```
 usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
-                 [--use-mpv] [--width MAX_WIDTH] [--height MAX_HEIGHT] [-w]
+                 [--use-mpv] [--width WIDTH] [--height HEIGHT] [-w]
                  [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
                  [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
                  [--mpv-flags MPV_FLAGS]
@@ -52,11 +52,10 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
 | `-f`, `--fullscreen`             | play videos in fullscreen mode |
 | `--width <WIDTH>`                | set the width for the player |
 | `--height <HEIGHT>`              | set the height for the player |
-| `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation guide](https://github.com/marioortizmanero/spotivids) for more. |
+| `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation section](#installation) for more. |
 | `-w, --use-web-api`              | use Spotify's web API. See [the web API section](#the-web-api) for more info about how to set it up. |
 | `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |
 | `--client-secret <CLIENT_SECRET>`| your client secret ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-secret='2665f6d143be47c1bc9ff284e9dfb350'` |
-
 
 ### Advanced:
 | Argument                         | Description         |
@@ -71,7 +70,7 @@ The config file is created by default at your user home directory named `.spotiv
 
 [Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
-All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`, which, obviously, is only an argument . Their names are always the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
+All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`, which obviously is only an argument . Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
 Some other options are only avaliable on the config file, like `auth_token` and `expiration`, but these are only used to retain info from the WebAPI and should not be modified manually.
 
@@ -102,6 +101,7 @@ Or simply as arguments: `spotivids -w --client-id <CLIENT_ID> --client-secret <C
 
 You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth token will be saved into the config file for future usage.
 
+---
 
 ## Development
 Helpful documentation links for contributing:
@@ -109,13 +109,11 @@ Helpful documentation links for contributing:
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv)
 
 ### Tests
-
 You can run the module locally with `python -m spotivids`.
 
 This project uses `unittest` for testing. Run them with `python -m unittest` or `python -m unittest discover -s tests`
 
 ### Current limitations
-
 * Spotify on Linux doesn't currently support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
 * Spotify's Web API doesn't allow function calls on updates like DBus, meaning that the metadata has to be manually updated every second and checked in case of changes.
 * A server is needed to get a working `redirect_uri`. So a website should be created in the future, rather than implementing it with flask on localhost only because of this.
