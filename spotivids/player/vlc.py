@@ -72,7 +72,7 @@ class VLCPlayer(QFrame):
         with `is_playing` to avoid extra calls.
         """
 
-        self._logger.info(f"Starting new video at {self.winId()}")
+        self._logger.info(f"Starting new video")
         if sys.platform.startswith('linux'):
             self._player.set_xwindow(self.winId())
         elif sys.platform == "win32":

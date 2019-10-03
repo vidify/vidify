@@ -4,7 +4,7 @@ import configparser
 from typing import Union
 from dataclasses import dataclass
 
-from .version import __version__
+from spotivids.version import __version__
 
 
 # Default config path in the system

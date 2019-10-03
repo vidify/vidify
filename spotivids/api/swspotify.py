@@ -5,9 +5,9 @@ from typing import Union
 
 from SwSpotify import spotify, SpotifyNotRunning
 
-from . import ConnectionNotReady, wait_for_connection
-from ..lyrics import print_lyrics
-from ..youtube import YouTube
+from spotivids.api import ConnectionNotReady, wait_for_connection
+from spotivids.lyrics import print_lyrics
+from spotivids.youtube import YouTube
 
 
 class SwSpotifyAPI:
@@ -68,7 +68,7 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     Playing videos with the SwSpotify API (macOS and Windows).
     """
 
-    from .. import config
+    from spotivids import config
     youtube = YouTube(config.debug, config.width, config.height)
     spotify = SwSpotifyAPI()
     msg = "Waiting for a Spotify session to be ready..."
@@ -83,9 +83,7 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         # Waits until the player starts the video to set the offset
         while player.position == 0:
             pass
-        offset = int((time.time_ns() - start_time) / 10**9)
-        player.position = offset
-        logging.debug(f"Starting offset is {offset}")
+        player.position = int((time.time_ns() - start_time) / 10**9)
 
         if config.lyrics:
             print_lyrics(spotify.artist, spotify.title)
