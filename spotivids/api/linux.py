@@ -36,15 +36,14 @@ class DBusAPI:
 
         self._logger.info("Connecting")
         self._bus = pydbus.SessionBus()
-
         try:
             self._obj = self._bus.get('org.mpris.MediaPlayer2.spotify',
                                       '/org/mpris/MediaPlayer2')
         except GLib.Error:
             raise ConnectionNotReady("No Spotify session currently running")
 
+        self.player_interface = self._obj['org.mpris.MediaPlayer2.Player']
         self._loop = GLib.MainLoop()
-
         self._disconnect_obj = self._obj.PropertiesChanged.connect(
             self._on_properties_changed)
 
@@ -101,11 +100,10 @@ class DBusAPI:
         first the artist and then the title.
         """
 
-        player_interface = self._obj['org.mpris.MediaPlayer2.Player']
-        metadata = player_interface.Metadata
+        metadata = self.player_interface.Metadata
         self.artist, self.title = self._format_metadata(metadata)
 
-        status = str(player_interface.PlaybackStatus)
+        status = str(self.player_interface.PlaybackStatus)
         self.is_playing = self._bool_status(status)
 
     def _bool_status(self, status: str) -> bool:
