@@ -2,8 +2,8 @@ import sys
 
 from PySide2.QtWidgets import QApplication
 
-from . import config, stderr_redirected, BSD, LINUX, MACOS, WINDOWS
-from .gui import MainWindow
+from spotivids import config, stderr_redirected, BSD, LINUX, MACOS, WINDOWS
+from spotivids.gui import MainWindow
 
 
 def choose_platform() -> None:
@@ -14,23 +14,23 @@ def choose_platform() -> None:
     app = QApplication()
 
     if config.use_mpv:
-        from .player.mpv import MpvPlayer
+        from spotivids.player.mpv import MpvPlayer
         player = MpvPlayer(config.mpv_flags)
     else:
-        from .player.vlc import VLCPlayer
+        from spotivids.player.vlc import VLCPlayer
         player = VLCPlayer(config.vlc_args)
 
     window = MainWindow(player, config.width, config.height, config.fullscreen)
     window.show()
 
     if (BSD or LINUX) and not config.use_web_api:
-        from .api.linux import play_videos_linux
+        from spotivids.api.linux import play_videos_linux
         play_videos_linux(player)
     elif (WINDOWS or MACOS) and not config.use_web_api:
-        from .api.swspotify import play_videos_swspotify
+        from spotivids.api.swspotify import play_videos_swspotify
         play_videos_swspotify(player)
     else:
-        from .api.web import play_videos_web
+        from spotivids.api.web import play_videos_web
         play_videos_web(player)
 
     sys.exit(app.exec_())

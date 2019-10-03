@@ -3,7 +3,7 @@ import sys
 import logging
 from contextlib import contextmanager
 
-from .config import Config
+from spotivids.config import Config
 
 
 # Initialization and parsing of the config from arguments and config file

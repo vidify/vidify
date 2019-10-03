@@ -1,6 +1,6 @@
 import youtube_dl
 
-from . import format_name
+from spotivids import format_name
 
 
 class YouTube:

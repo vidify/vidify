@@ -1,6 +1,6 @@
 import lyricwikia
 
-from . import format_name, WINDOWS
+from spotivids import format_name, WINDOWS
 
 
 def print_lyrics(artist: str, title: str) -> None:

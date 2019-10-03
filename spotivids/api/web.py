@@ -8,9 +8,9 @@ from typing import Union
 from spotipy import Spotify, Scope, scopes, Token, Credentials
 from spotipy.util import prompt_for_user_token, RefreshingToken
 
-from . import split_title, ConnectionNotReady, wait_for_connection
-from ..lyrics import print_lyrics
-from ..youtube import YouTube
+from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
+from spotivids.lyrics import print_lyrics
+from spotivids.youtube import YouTube
 
 
 class WebAPI:
@@ -147,7 +147,7 @@ class WebAPI:
 
                 diff = self._position - position
                 time_diff = int((time.time() - timer) * 1000)
-                if diff >= time_diff + 100 or diff < 0:
+                if diff >= (time_diff + 100) or diff < 0:
                     self.player.position = self._position
         except KeyboardInterrupt:
             self._logger.info("Quitting from web player loop")
@@ -162,12 +162,13 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     synced easily.
     """
 
-    from .. import config
+    from spotivids import config
     youtube = YouTube(config.debug, config.width, config.height)
     spotify = WebAPI(player, config.client_id, config.client_secret,
                      config.redirect_uri, config.auth_token, config.expiration)
-    msg = "Waiting for a Spotify song to play..."
+
     # Checking if Spotify is paused/closed and if the auth details are valid
+    msg = "Waiting for a Spotify song to play..."
     try:
         if not wait_for_connection(spotify.connect, msg):
             return
@@ -180,24 +181,17 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
             return
 
     # Saves the used credentials inside the config file for future usage
-    config.write_file('WebAPI', 'client_secret',
-                      spotify._client_secret)
-    config.write_file('WebAPI', 'client_id',
-                      spotify._client_id)
+    config.write_file('WebAPI', 'client_secret', spotify._client_secret)
+    config.write_file('WebAPI', 'client_id', spotify._client_id)
     if spotify._redirect_uri != config._options.redirect_uri.default:
-        config.write_file('WebAPI', 'redirect_uri',
-                          spotify._redirect_uri)
-    config.write_file('WebAPI', 'auth_token',
-                      spotify._token.access_token)
-    config.write_file('WebAPI', 'expiration',
-                      spotify._token.expires_at)
+        config.write_file('WebAPI', 'redirect_uri', spotify._redirect_uri)
+    config.write_file('WebAPI', 'auth_token', spotify._token.access_token)
+    config.write_file('WebAPI', 'expiration', spotify._token.expires_at)
 
     while True:
         url = youtube.get_url(spotify.artist, spotify.title)
         player.start_video(url, spotify.is_playing)
-
-        offset = spotify.position
-        player.position = offset
+        player.position = spotify.position
 
         if config.lyrics:
             print_lyrics(spotify.artist, spotify.title)

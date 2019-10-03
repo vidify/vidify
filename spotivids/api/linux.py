@@ -6,9 +6,9 @@ from typing import Tuple, Union
 import pydbus
 from gi.repository import GLib
 
-from . import split_title, ConnectionNotReady, wait_for_connection
-from ..lyrics import print_lyrics
-from ..youtube import YouTube
+from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
+from spotivids.lyrics import print_lyrics
+from spotivids.youtube import YouTube
 
 
 class DBusAPI:
@@ -21,7 +21,6 @@ class DBusAPI:
 
         self._logger = logging.getLogger('spotivids')
         self.player = player
-
         self.artist = ""
         self.title = ""
         self.is_playing = False
@@ -156,7 +155,7 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     pausing the video.
     """
 
-    from .. import config
+    from spotivids import config
     youtube = YouTube(config.debug, config.width, config.height)
     spotify = DBusAPI(player)
     msg = "Waiting for a Spotify session to be ready..."
@@ -173,9 +172,7 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         if is_playing:
             while player.position == 0:
                 pass
-            offset = int((time.time_ns() - start_time) / 10**9)
-            player.position = offset
-            logging.info(f"Starting offset is {offset}")
+            player.position = int((time.time_ns() - start_time) / 10**9)
 
         if config.lyrics:
             print_lyrics(spotify.artist, spotify.title)
