@@ -3,17 +3,16 @@ sudo: required
 language: python
 python:
     - '3.7'
-os:
-    - linux
-    - osx
-    - windows
 
 services:
   - xvfb
 
 before_install:
+    - sudo add-apt-repository -y ppa:mc3man/mpv-tests
     - sudo apt-get update
-    - sudo apt-get -y install python3-pip libdbus-glib-1-dev libcairo2-dev libglib2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 vlc libvlc-dev
+    - sudo apt-get -y install python3-pip libdbus-glib-1-dev libcairo2-dev 
+         libglib2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 vlc libvlc-dev
+         mpv libmpv-dev
     - sudo pip3 install --upgrade pip
     - pip3 install pygobject
 
