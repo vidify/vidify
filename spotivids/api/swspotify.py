@@ -1,25 +1,29 @@
-import sys
 import time
 import logging
 from typing import Union
 
-from SwSpotify import spotify, SpotifyNotRunning
+from SwSpotify import spotify, SpotifyPaused, SpotifyClosed
 
+from spotivids import config
 from spotivids.api import ConnectionNotReady, wait_for_connection
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
+from spotivids.gui import MainWindow
 
 
 class SwSpotifyAPI:
-    def __init__(self) -> None:
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         """
-        The SwSpotify API for Windows and Darwin (macOS) is really limited,
-        since all it can do is get the artist and title of the current song.
+        It includes `player`, the VLC or mpv window to play videos and control
+        it when the song status changes. The `Youtube` object is also needed
+        to play the videos.
         """
 
         self._logger = logging.getLogger('spotivids')
         self.artist = ""
         self.title = ""
+        self._youtube = YouTube(config.debug, config.width, config.height)
+        self.player = player
 
     def connect(self) -> None:
         """
@@ -34,58 +38,78 @@ class SwSpotifyAPI:
                                      " or no song currently playing.")
 
     def _refresh_metadata(self) -> None:
+        """
+        Refreshes the API metadata: updates the artist and title of the song.
+
+        The SwSpotify API works with exceptions so `SpotifyPaused` means
+        the song isn't currently playing (the artist and title should remain
+        the same), and `SpotifyClosed` means that there isn't a Spotify
+        session open at that moment.
+        """
+
         try:
             self.title, self.artist = spotify.current()
-        except SpotifyNotRunning:
+            self.is_playing = True
+        except SpotifyPaused:
+            self.is_playing = False
+        except SpotifyClosed:
             raise ConnectionNotReady("No song currently playing")
 
-    def wait(self) -> None:
+    def play_video(self) -> None:
         """
-        Waits until a new song is played.
+        Plays the currently playing song's music video.
+
+        The SwSpotify API doesn't offer information about the position so
+        it's roughly calculated with a timer.
         """
 
-        self._logger.info("Starting loop")
+        start_time = time.time_ns()
+        url = self._youtube.get_url(self.artist, self.title)
+        self.player.start_video(url)
+
+        # Waits until the player starts the video to set the offset
+        while self.player.position == 0:
+            pass
+        self.player.position = int((time.time_ns() - start_time) / 10**9)
+
+        if config.lyrics:
+            print_lyrics(self.artist, self.title)
+
+    def event_loop(self) -> None:
+        """
+        A callable event loop that checks if changes happen. This is called
+        every 0.5 seconds from the QT window.
+
+        It checks if a new song started to call `play_video`, or if the
+        Spotify player was paused/continued to do so in the Qt player too.
+        """
+
         artist = self.artist
         title = self.title
-        try:
-            while True:
-                time.sleep(0.5)
-                # Temporary until pause is implemented in SwSpotify
-                try:
-                    self._refresh_metadata()
-                except ConnectionNotReady:
-                    pass
+        is_playing = self.is_playing
+        self._refresh_metadata()
 
-                if self.artist != artist or self.title != title:
-                    break
-        except KeyboardInterrupt:
-            self._logger.info("Quitting from web player loop")
-            sys.exit(0)
+        # The first check should be if the song has ended to not touch
+        # anything else that may not actually be true.
+        if self.artist != artist or self.title != title:
+            self.play_video()
+
+        if is_playing != self.is_playing:
+            self.player.toggle_pause()
 
 
-def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'],
+                          window: MainWindow) -> None:
     """
-    Playing videos with the SwSpotify API (macOS and Windows).
+    Playing videos with the SwSpotify API (Windows/macOS)
+
+    Initializes the SwSpotify API and plays the first video.
+    Also starts the event loop to detect changes and play new videos.
     """
 
-    from spotivids import config
-    youtube = YouTube(config.debug, config.width, config.height)
-    spotify = SwSpotifyAPI()
+    spotify = SwSpotifyAPI(player)
     msg = "Waiting for a Spotify session to be ready..."
     if not wait_for_connection(spotify.connect, msg):
         return
-
-    while True:
-        start_time = time.time_ns()
-        url = youtube.get_url(spotify.artist, spotify.title)
-        player.start_video(url)
-
-        # Waits until the player starts the video to set the offset
-        while player.position == 0:
-            pass
-        player.position = int((time.time_ns() - start_time) / 10**9)
-
-        if config.lyrics:
-            print_lyrics(spotify.artist, spotify.title)
-
-        spotify.wait()
+    spotify.play_video()
+    window.start_event_loop(spotify.event_loop, 500)

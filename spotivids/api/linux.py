@@ -6,6 +6,7 @@ from typing import Tuple, Union
 import pydbus
 from gi.repository import GLib
 
+from spotivids import config
 from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
@@ -14,9 +15,9 @@ from spotivids.youtube import YouTube
 class DBusAPI:
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer']) -> None:
         """
-        It includes `player`, the VLC or mpv window, so that some actions can
-        be controlled from the API more intuitively, like automatic
-        pausing/playing when the API detects it.
+        It includes `player`, the VLC or mpv window to play videos and control
+        it when the song status changes. The `Youtube` object is also needed
+        to play the videos.
         """
 
         self._logger = logging.getLogger('spotivids')
@@ -24,6 +25,7 @@ class DBusAPI:
         self.artist = ""
         self.title = ""
         self.is_playing = False
+        self._youtube = YouTube(config.debug, config.width, config.height)
 
     def connect(self) -> None:
         """
@@ -108,21 +110,40 @@ class DBusAPI:
 
     def _bool_status(self, status: str) -> bool:
         """
-        Converts a status string from DBus to a bool, both to keep
-        consistency with the other API status variables and because using
-        booleans is easier and less confusing.
+        Converts a status string from DBus to a bool, to keep consistency
+        with the other API status variables and because using booleans is
+        easier and less confusing.
         """
 
         return status.lower() == 'playing'
 
+    def play_video(self) -> None:
+        """
+        Plays the currently playing song's music video.
+
+        Spotify doesn't currently support the MPRIS property `Position`
+        so the starting offset is calculated manually and may be a bit rough.
+        """
+
+        start_time = time.time_ns()
+        url = self._youtube.get_url(self.artist, self.title)
+        is_playing = self.is_playing
+        self.player.start_video(url, is_playing)
+
+        # Waits until the player starts the video to set the offset
+        if is_playing:
+            while self.player.position == 0:
+                pass
+            self.player.position = int((time.time_ns() - start_time) / 10**9)
+
+        if config.lyrics:
+            print_lyrics(self.artist, self.title)
+
     def _on_properties_changed(self, interface: str, properties: dict,
                                signature: list) -> None:
         """
-        Function called from DBus on events from the main loop.
-
-        If the song was changed, the loop is broken to finish the song.
-        If the playback status changed it directly plays/pauses
-        the VLC player.
+        Function called from DBus on event changes like the song or if it
+        has been paused.
         """
 
         if 'Metadata' in properties:
@@ -130,14 +151,17 @@ class DBusAPI:
             artist, title = self._format_metadata(metadata)
             if artist != self.artist or title != self.title:
                 self._logger.info("New video detected")
+                # Refreshes the metadata with the new data and plays the video
                 self.artist = artist
                 self.title = title
                 self._loop.quit()
+                self.play_video()
 
         if 'PlaybackStatus' in properties:
             status = self._bool_status(properties['PlaybackStatus'])
             if status != self.is_playing:
                 self._logger.info("Paused/Played video")
+                # Refreshes the metadata and pauses/plays the video
                 self.is_playing = status
                 self.player.toggle_pause()
 
@@ -146,33 +170,11 @@ def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
     """
     Playing videos with the DBus API (Linux).
 
-    Spotify doesn't currently support the MPRIS property `Position`
-    so the starting offset is calculated manually and may be a bit rough.
-
-    After playing the video, the player waits for DBus events like
-    pausing the video.
+    Initializes the DBus API and plays the first video.
     """
 
-    from spotivids import config
-    youtube = YouTube(config.debug, config.width, config.height)
     spotify = DBusAPI(player)
     msg = "Waiting for a Spotify session to be ready..."
     if not wait_for_connection(spotify.connect, msg):
         return
-
-    while True:
-        start_time = time.time_ns()
-        url = youtube.get_url(spotify.artist, spotify.title)
-        is_playing = spotify.is_playing
-        player.start_video(url, is_playing)
-
-        # Waits until the player starts the video to set the offset
-        if is_playing:
-            while player.position == 0:
-                pass
-            player.position = int((time.time_ns() - start_time) / 10**9)
-
-        if config.lyrics:
-            print_lyrics(spotify.artist, spotify.title)
-
-        spotify.wait()
+    spotify.play_video()

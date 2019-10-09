@@ -28,10 +28,10 @@ def choose_platform() -> None:
         play_videos_linux(player)
     elif (WINDOWS or MACOS) and not config.use_web_api:
         from spotivids.api.swspotify import play_videos_swspotify
-        play_videos_swspotify(player)
+        play_videos_swspotify(player, window)
     else:
         from spotivids.api.web import play_videos_web
-        play_videos_web(player)
+        play_videos_web(player, window)
 
     sys.exit(app.exec_())
 

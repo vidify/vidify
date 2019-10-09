@@ -5,7 +5,7 @@ from PySide2.QtWidgets import QFrame
 
 
 class MpvPlayer(QFrame):
-    def __init__(self, flags: str) -> None:
+    def __init__(self, flags: str = None) -> None:
         """
         This MPV player is the instance where media should play optionally,
         since the default is VLC. It may be initialized with extra arguments
