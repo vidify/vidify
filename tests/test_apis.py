@@ -1,55 +1,62 @@
 import unittest
 
+from spotivids import BSD, LINUX, MACOS, WINDOWS
 from spotivids.__main__ import choose_platform
 from spotivids.player.vlc import VLCPlayer
 from spotivids.player.mpv import MpvPlayer
-from spotivids.api.linux import DBusAPI
-from spotivids.api.swspotify import SwSpotifyAPI
-from spotivids.api.web import WebAPI
 
 
-# TODO: Finish tests, test play_videos_xxx too.
+vlc = VLCPlayer()
+mpv = MpvPlayer()
 
 
-class ConnectionTest(unittest.TestCase):
+class APITest(unittest.TestCase):
     """
     Simple test to check for simple errors in all platforms by running the
     module on the supported systems. It is run automatically with Travis, so
     manual interaction isn't expected.
     """
 
-    def setUp(self):
-        self.vlc = VLCPlayer()
-        self.mpv = MpvPlayer()
-
     def test_connection(self):
         choose_platform()
 
     def test_dbus(self):
-        for player in (self.vlc, self.mpv):
+        # This won't work on systems other than BSD or Linux
+        if not (BSD or LINUX):
+            return
+
+        from spotivids.api.linux import DBusAPI
+        for player in (vlc, mpv):
             dbus = DBusAPI(player)
             dbus.connect()
-            dbus._format_metadata()
+            # Format metadata and bool status are tested in test_dbus
             dbus._refresh_metadata()
-            dbus._bool_status()
-            dbus._on_properties_changed()
+            #  dbus._on_properties_changed()  # TODO
             dbus.disconnect()
 
     def test_swspotify(self):
-        for player in (self.vlc, self.mpv):
+        # This won't work on systems other than macOS or Windows
+        if not (MACOS or WINDOWS):
+            return
+
+        from spotivids.api.swspotify import SwSpotifyAPI
+        for player in (vlc, mpv):
             swspotify = SwSpotifyAPI(player)
             swspotify.connect()
             swspotify._refresh_metadata()
-            swspotify._on_properties_changed()
+            swspotify.play_video()
+            swspotify.event_loop()
 
     def test_web(self):
         """
         Client ID and Client Secret should be set up as environment variables.
         """
 
-        for player in (self.vlc, self.mpv):
+        from spotivids.api.web import WebAPI
+        for player in (vlc, mpv):
             web = WebAPI(player)
             web.connect()
             position = web.position
             web._refresh_metadata()
-            web._on_properties_changed()
+            web.play_video()
+            web.event_loop()
