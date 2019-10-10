@@ -1,18 +1,26 @@
 import unittest
 
-from PySide2.QtWidgets import QApplication
+import PySide2
 
 from spotivids.player.vlc import VLCPlayer
 from spotivids.api.linux import DBusAPI
 
 
-app = QApplication()
-
-
 class DBusTest(unittest.TestCase):
     def setUp(self):
+        super().setUp()
+
+        # Creating the first app instance
+        if isinstance(PySide2.QtGui.qApp, type(None)):
+            self.app = PySide2.QtWidgets.QApplication([])
+        else:
+            self.app = PySide2.QtGui.qApp
         player = VLCPlayer()
         self.dbus = DBusAPI(player)
+
+    def tearDown(self):
+        del self.app
+        return super().tearDown()
 
     def test_bool_status(self):
         self.assertFalse(self.dbus._bool_status("stopped"))
