@@ -8,7 +8,7 @@ from spotivids import config
 from spotivids.api import ConnectionNotReady, wait_for_connection
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
-from spotivids.gui import MainWindow
+from spotivids.gui.window import MainWindow
 
 
 class SwSpotifyAPI:
@@ -65,7 +65,7 @@ class SwSpotifyAPI:
 
         start_time = time.time_ns()
         url = self._youtube.get_url(self.artist, self.title)
-        self.player.start_video(url)
+        self.player.start_video(url, self.is_playing)
 
         # Waits until the player starts the video to set the offset
         while self.player.position == 0:
@@ -80,8 +80,9 @@ class SwSpotifyAPI:
         A callable event loop that checks if changes happen. This is called
         every 0.5 seconds from the QT window.
 
-        It checks if a new song started to call `play_video`, or if the
-        Spotify player was paused/continued to do so in the Qt player too.
+        It checks for changes in:
+            * The playback status (playing/paused) to change the player's too
+            * The currently playing song: if a new song started, it's played
         """
 
         artist = self.artist
@@ -92,10 +93,11 @@ class SwSpotifyAPI:
         # The first check should be if the song has ended to not touch
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
+            self._logger.info("New video detected")
             self.play_video()
 
-        if is_playing != self.is_playing:
-            self.player.toggle_pause()
+        if self.is_playing != is_playing:
+            self.player.pause = not self.is_playing
 
 
 def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'],

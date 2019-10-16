@@ -1,7 +1,6 @@
 import os
 import time
 import logging
-from requests import HTTPError
 from typing import Union
 
 from spotipy import Spotify, Scope, scopes, Token, Credentials
@@ -9,7 +8,7 @@ from spotipy.util import prompt_for_user_token, RefreshingToken
 
 from spotivids import config
 from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
-from spotivids.gui import MainWindow
+from spotivids.gui.window import MainWindow
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
 
@@ -34,6 +33,7 @@ class WebAPI:
         self._position = 0
         self.is_playing = False
         self._youtube = YouTube(config.debug, config.width, config.height)
+        self._event_timestamp = time.time()
 
         # Trying to load the env variables
         if client_id is None:
@@ -86,10 +86,7 @@ class WebAPI:
         if no songs are playing in that moment.
         """
 
-        try:
-            self._refresh_metadata()
-        except AttributeError:
-            raise ConnectionNotReady("No song currently playing")
+        self._refresh_metadata()
 
     @property
     def position(self) -> int:
@@ -106,6 +103,8 @@ class WebAPI:
         """
 
         metadata = self._spotify.playback_currently_playing()
+        if metadata is None:
+            raise ConnectionNotReady("No song currently playing")
         self.artist = metadata.item.artists[0].name
         self.title = metadata.item.name
 
@@ -116,12 +115,9 @@ class WebAPI:
         self.is_playing = metadata.is_playing
 
     def play_video(self) -> None:
-        """
-        """
-
         url = self._youtube.get_url(self.artist, self.title)
-        self.player.position = self.position
         self.player.start_video(url, self.is_playing)
+        self.player.position = self.position
 
         if config.lyrics:
             print_lyrics(self.artist, self.title)
@@ -131,15 +127,17 @@ class WebAPI:
         A callable event loop that checks if changes happen. This is called
         every 0.5 seconds from the QT window.
 
-        It checks if the playback status changed (playing/paused), if a new
-        song started to call `play_video` and the song position. The position
-        changes will be ignored unless the difference is larger than the real
-        elapsed time or if it was backwards. This is done because some systems
-        may lag more than others and a fixed time difference would cause
-        errors.
+        It checks for changes in:
+            * The playback status (playing/paused) to change the player's too
+            * The currently playing song: if a new song started, it's played
+            * The position. Changes will be ignored unless the difference is
+              larger than the real elapsed time or if it was backwards.
+              This is done because some systems may lag more than others and
+              a fixed time difference would cause errors
         """
 
-        timer = time.time()
+        # Previous properties are saved to compare them with the new ones
+        # after the metadata refresh
         artist = self.artist
         title = self.title
         position = self._position
@@ -149,15 +147,19 @@ class WebAPI:
         # The first check should be if the song has ended to not touch
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
+            self._logger.info("New video detected")
             self.play_video()
 
         if self.is_playing != is_playing:
-            self.player.toggle_pause()
+            self.player.pause = not self.is_playing
 
-        diff = self._position - position
-        time_diff = int((time.time() - timer) * 1000)
-        if diff >= (time_diff + 100) or diff < 0:
+        playback_diff = self._position - position
+        calls_diff = int((time.time() - self._event_timestamp) * 1000)
+        if playback_diff >= (calls_diff + 100) or playback_diff < 0:
             self.player.position = self._position
+
+        # The time passed between calls is refreshed
+        self._event_timestamp = time.time()
 
 
 def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
@@ -174,16 +176,8 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
 
     # Checks if Spotify is closed and if the auth details are valid
     msg = "Waiting for a Spotify song to play..."
-    try:
-        if not wait_for_connection(spotify.connect, msg):
-            return
-    except HTTPError as e:
-        if e.response.status_code != 401:
-            raise
-        spotify = WebAPI(player, config.client_id, config.client_secret,
-                         config.redirect_uri)
-        if not wait_for_connection(spotify.connect, msg):
-            return
+    if not wait_for_connection(spotify.connect, msg):
+        return
 
     # Saves the used credentials inside the config file for future usage
     config.write_file('WebAPI', 'client_secret', spotify._client_secret)
