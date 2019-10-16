@@ -17,13 +17,11 @@ class MpvPlayer(QFrame):
         """
 
         super().__init__()
-        self._logger = logging.getLogger('spotivids')
-
         # mpv initialization
         flags = flags.split() if flags not in (None, '') else []
         flags.extend(['mute', 'keep-open'])
         args = {}
-        if self._logger.level <= logging.INFO:
+        if logging.level <= logging.INFO:
             args['log_handler'] = print
             args['loglevel'] = 'info'
         args['wid'] = str(int(self.winId()))
@@ -47,7 +45,7 @@ class MpvPlayer(QFrame):
         The video will be paused if `do_pause` is true.
         """
 
-        self._logger.info("Playing/Pausing video")
+        logging.info("Playing/Pausing video")
         self._mpv.pause = do_pause
 
     @property
@@ -68,7 +66,7 @@ class MpvPlayer(QFrame):
         """
 
         self._mpv.wait_for_property('seekable')
-        self._logger.info(f"Time set to {ms} milliseconds")
+        logging.info(f"Time set to {ms} milliseconds")
         self._mpv.seek(ms / 1000, reference='absolute')
 
     def start_video(self, url: str, is_playing: bool = True) -> None:
@@ -77,7 +75,7 @@ class MpvPlayer(QFrame):
         here to avoid extra calls.
         """
 
-        self._logger.info(f"Started new video")
+        logging.info(f"Started new video")
         self._mpv.play(url)
         # Mpv starts automatically playing the video
         if not is_playing:

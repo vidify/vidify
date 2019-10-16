@@ -13,12 +13,11 @@ class VLCPlayer(QFrame):
         """
 
         super().__init__()
-        self._logger = logging.getLogger('spotivids')
 
         # VLC initialization
         if vlc_args is None:
             vlc_args = ""
-        if self._logger.level <= logging.INFO:
+        if logging.root.level <= logging.INFO:
             vlc_args += " --verbose 1"
         else:
             vlc_args += " --quiet"
@@ -50,7 +49,7 @@ class VLCPlayer(QFrame):
 
         # Saved in variable to not call self._player.is_playing() twice
         is_paused = self.pause
-        self._logger.info("Playing/Pausing video")
+        logging.info("Playing/Pausing video")
         if do_pause and not is_paused:
             self._player.pause()
         elif not do_pause and is_paused:
@@ -70,7 +69,7 @@ class VLCPlayer(QFrame):
         Setting the position in milliseconds
         """
 
-        self._logger.info(f"Time set to {ms} milliseconds")
+        logging.info(f"Time set to {ms} milliseconds")
         self._player.set_time(ms)
 
     def start_video(self, url: str, is_playing: bool = True) -> None:
@@ -79,7 +78,7 @@ class VLCPlayer(QFrame):
         with `is_playing` to avoid extra calls.
         """
 
-        self._logger.info(f"Starting new video")
+        logging.info(f"Starting new video")
         if LINUX:
             self._player.set_xwindow(self.winId())
         elif WINDOWS:

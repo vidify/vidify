@@ -26,7 +26,6 @@ class WebAPI:
         This also handles the Spotipy authentication.
         """
 
-        self._logger = logging.getLogger('spotivids')
         self.player = player
         self.artist = ""
         self.title = ""
@@ -147,7 +146,7 @@ class WebAPI:
         # The first check should be if the song has ended to not touch
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
-            self._logger.info("New video detected")
+            logging.info("New video detected")
             self.play_video()
 
         if self.is_playing != is_playing:
