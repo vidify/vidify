@@ -1,7 +1,6 @@
 import os
 import time
 import logging
-from requests import HTTPError
 from typing import Union
 
 from spotipy import Spotify, Scope, scopes, Token, Credentials
@@ -156,7 +155,6 @@ class WebAPI:
 
         playback_diff = self._position - position
         calls_diff = int((time.time() - self._event_timestamp) * 1000)
-        print("INFO: Event loop (pos, _pos, calls, playback)", position, self._position, calls_diff, playback_diff)
         if playback_diff >= (calls_diff + 100) or playback_diff < 0:
             self.player.position = self._position
 
