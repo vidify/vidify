@@ -9,7 +9,7 @@ from spotipy.util import prompt_for_user_token, RefreshingToken
 
 from spotivids import config
 from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
-from spotivids.gui import MainWindow
+from spotivids.gui.window import MainWindow
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
 

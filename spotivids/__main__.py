@@ -3,7 +3,7 @@ import sys
 from PySide2.QtWidgets import QApplication
 
 from spotivids import config, stderr_redirected, BSD, LINUX, MACOS, WINDOWS
-from spotivids.gui import MainWindow
+from spotivids.gui.window import MainWindow
 
 
 def choose_platform() -> None:
