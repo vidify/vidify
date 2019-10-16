@@ -127,11 +127,10 @@ class DBusAPI:
 
         start_time = time.time_ns()
         url = self._youtube.get_url(self.artist, self.title)
-        is_playing = self.is_playing
-        self.player.start_video(url, is_playing)
+        self.player.start_video(url, self.is_playing)
 
         # Waits until the player starts the video to set the offset
-        if is_playing:
+        if self.is_playing:
             while self.player.position == 0:
                 pass
             self.player.position = int((time.time_ns() - start_time) / 10**9)
@@ -149,21 +148,20 @@ class DBusAPI:
         if 'Metadata' in properties:
             metadata = properties['Metadata']
             artist, title = self._format_metadata(metadata)
-            if artist != self.artist or title != self.title:
+            if self.artist != artist or self.title != title:
                 self._logger.info("New video detected")
+                self._loop.quit()
                 # Refreshes the metadata with the new data and plays the video
                 self.artist = artist
                 self.title = title
-                self._loop.quit()
                 self.play_video()
 
         if 'PlaybackStatus' in properties:
-            status = self._bool_status(properties['PlaybackStatus'])
-            if status != self.is_playing:
-                self._logger.info("Paused/Played video")
+            is_playing = self._bool_status(properties['PlaybackStatus'])
+            if self.is_playing != is_playing:
                 # Refreshes the metadata and pauses/plays the video
-                self.is_playing = status
-                self.player.toggle_pause()
+                self.is_playing = is_playing
+                self.player.pause = not is_playing
 
 
 def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:

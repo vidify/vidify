@@ -1,6 +1,8 @@
 import sys
 import logging
 
+from .. import LINUX, WINDOWS, MACOS
+
 import vlc
 from PySide2.QtWidgets import QFrame
 
@@ -35,19 +37,25 @@ class VLCPlayer(QFrame):
 
         self._player = self._vlc.media_player_new()
 
-    def play(self) -> None:
-        self._logger.info("Playing video")
-        self._player.play()
+    @property
+    def pause(self) -> bool:
+        return not self._player.is_playing()
 
-    def pause(self) -> None:
-        self._logger.info("Pausing video")
-        self._player.pause()
+    @pause.setter
+    def pause(self, do_pause: bool) -> None:
+        """
+        The video will be played if `do_pause` is true, or it will be paused
+        if it's false. If it's already in the requested status, nothing
+        is done.
+        """
 
-    def toggle_pause(self) -> None:
-        if self._player.is_playing():
-            self.pause()
-        else:
-            self.play()
+        # Saved in variable to not call self._player.is_playing() twice
+        is_paused = self.pause
+        self._logger.info("Playing/Pausing video")
+        if do_pause and not is_paused:
+            self._player.pause()
+        elif not do_pause and is_paused:
+            self._player.play()
 
     @property
     def position(self) -> int:
@@ -73,15 +81,16 @@ class VLCPlayer(QFrame):
         """
 
         self._logger.info(f"Starting new video")
-        if sys.platform.startswith('linux'):
+        if LINUX:
             self._player.set_xwindow(self.winId())
-        elif sys.platform == "win32":
+        elif WINDOWS:
             self._player.set_hwnd(self.winId())
-        elif sys.platform == "darwin":
+        elif MACOS:
             self._player.set_nsobject(int(self.winId()))
 
         self.media = self._vlc.media_new(url)
         self.media.get_mrl()
         self._player.set_media(self.media)
+        # VLC starts paused
         if is_playing:
-            self.play()
+            self.pause = False

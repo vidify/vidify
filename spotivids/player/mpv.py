@@ -37,19 +37,18 @@ class MpvPlayer(QFrame):
         except AttributeError:
             pass
 
-    def play(self) -> None:
-        self._logger.info("Playing video")
-        self._mpv.pause = False
+    @property
+    def pause(self) -> bool:
+        return self._mpv.pause
 
-    def pause(self) -> None:
-        self._logger.info("Pausing video")
-        self._mpv.pause = True
+    @pause.setter
+    def pause(self, do_pause: bool) -> None:
+        """
+        The video will be paused if `do_pause` is true.
+        """
 
-    def toggle_pause(self) -> None:
-        if self._mpv.pause:
-            self.play()
-        else:
-            self.pause()
+        self._logger.info("Playing/Pausing video")
+        self._mpv.pause = do_pause
 
     @property
     def position(self) -> int:
@@ -74,11 +73,12 @@ class MpvPlayer(QFrame):
 
     def start_video(self, url: str, is_playing: bool = True) -> None:
         """
-        Starts a new video in the mpv player. It can be directly played from
+        Starts a new video in the mpv player. It can be directly paused from
         here to avoid extra calls.
         """
 
         self._logger.info(f"Started new video")
         self._mpv.play(url)
+        # Mpv starts automatically playing the video
         if not is_playing:
-            self.pause()
+            self.pause = True
