@@ -1,11 +1,8 @@
+import types
 from typing import Union, Callable
 
 from PySide2.QtWidgets import QMainWindow
 from PySide2.QtCore import QTimer
-
-
-def printmsg():
-    print("Event loop check")
 
 
 class MainWindow(QMainWindow):
@@ -36,5 +33,12 @@ class MainWindow(QMainWindow):
         """
 
         timer = QTimer(self)
-        timer.timeout.connect(event_loop)
+
+        # Qt doesn't accept a method as the parameter so it's converted
+        # to a function.
+        if isinstance(event_loop, types.MethodType):
+            fn = lambda: event_loop()
+            timer.timeout.connect(fn)
+        else:
+            timer.timeout.connect(event_loop)
         timer.start(ms)
