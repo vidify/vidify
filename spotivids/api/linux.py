@@ -20,7 +20,6 @@ class DBusAPI:
         to play the videos.
         """
 
-        self._logger = logging.getLogger('spotivids')
         self.player = player
         self.artist = ""
         self.title = ""
@@ -36,7 +35,7 @@ class DBusAPI:
         exists or if no song is playing.
         """
 
-        self._logger.info("Connecting")
+        logging.info("Connecting")
         self._bus = pydbus.SessionBus()
         try:
             self._obj = self._bus.get('org.mpris.MediaPlayer2.spotify',
@@ -59,7 +58,7 @@ class DBusAPI:
         Safely disconnects from the bus and loop.
         """
 
-        self._logger.info("Disconnecting")
+        logging.info("Disconnecting")
         try:
             self._disconnect_obj.disconnect()
             self._loop.quit()
@@ -72,7 +71,7 @@ class DBusAPI:
         is detected or a new song starts
         """
 
-        self._logger.info("Starting loop")
+        logging.info("Starting loop")
         try:
             self._loop.run()
         except KeyboardInterrupt:
@@ -149,7 +148,7 @@ class DBusAPI:
             metadata = properties['Metadata']
             artist, title = self._format_metadata(metadata)
             if self.artist != artist or self.title != title:
-                self._logger.info("New video detected")
+                logging.info("New video detected")
                 self._loop.quit()
                 # Refreshes the metadata with the new data and plays the video
                 self.artist = artist

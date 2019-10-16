@@ -11,17 +11,9 @@ config = Config()
 config.parse()
 
 # Logger initialzation with precise milliseconds handler.
-logger = logging.getLogger('spotivids')
-
-handler = logging.StreamHandler()
-formatter = logging.Formatter(
-    "[%(asctime)s.%(msecs)03d] %(levelname)s: %(message)s",
-    datefmt="%H:%M:%S")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-level = logging.DEBUG if config.debug else logging.ERROR
-logger.setLevel(level)
+logging.basicConfig(level=logging.DEBUG if config.debug else logging.ERROR,
+                    format="[%(asctime)s.%(msecs)03d] %(levelname)s:"
+                    " %(message)s", datefmt="%H:%M:%S")
 
 # Useful global variables for cross-platform and utils
 BSD = sys.platform.find('bsd') != -1
