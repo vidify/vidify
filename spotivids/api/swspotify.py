@@ -8,7 +8,7 @@ from spotivids import config
 from spotivids.api import ConnectionNotReady, wait_for_connection
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
-from spotivids.gui import MainWindow
+from spotivids.gui.window import MainWindow
 
 
 class SwSpotifyAPI:
