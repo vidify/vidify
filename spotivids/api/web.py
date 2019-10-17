@@ -31,7 +31,7 @@ class WebAPI:
         self.title = ""
         self._position = 0
         self.is_playing = False
-        self._youtube = YouTube(config.debug, config.width, config.height)
+        self._youtube = YouTube(config.debug, config.quality)
         self._event_timestamp = time.time()
 
         # Trying to load the env variables
@@ -179,12 +179,12 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
         return
 
     # Saves the used credentials inside the config file for future usage
-    config.write_file('WebAPI', 'client_secret', spotify._client_secret)
-    config.write_file('WebAPI', 'client_id', spotify._client_id)
+    config.client_secret = spotify._client_secret
+    config.client_id = spotify._client_id
+    config.auth_token = spotify._token.access_token
+    config.expiration = spotify._token.expires_at
     if spotify._redirect_uri != config._options.redirect_uri.default:
-        config.write_file('WebAPI', 'redirect_uri', spotify._redirect_uri)
-    config.write_file('WebAPI', 'auth_token', spotify._token.access_token)
-    config.write_file('WebAPI', 'expiration', spotify._token.expires_at)
+        config.redirect_uri = spotify._redirect_uri
 
     spotify.play_video()
     window.start_event_loop(spotify.event_loop, 1000)

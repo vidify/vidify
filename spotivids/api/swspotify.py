@@ -21,7 +21,7 @@ class SwSpotifyAPI:
 
         self.artist = ""
         self.title = ""
-        self._youtube = YouTube(config.debug, config.width, config.height)
+        self._youtube = YouTube(config.debug, config.quality)
         self.player = player
 
     def connect(self) -> None:

@@ -13,33 +13,39 @@ default_path = os.path.expanduser('~/.spotivids_config')
 
 @dataclass
 class Option:
+    """
+    Lists the properties inside an option:
+        * The section name inside the config file
+        * The type of the values accepted
+        * The default value
+    """
+
     section: str
     value_type: type
     default: any
 
 
 class Options:
-    def __init__(self) -> None:
-        """
-        Listing all options with their section, type and default value.
-        """
+    """
+    Contains the main properties of all the available options, following the
+    Option dataclass above: config file section, type and default.
+    """
 
-        self.debug = Option('Defaults', bool, False)
-        self.lyrics = Option('Defaults', bool, True)
-        self.fullscreen = Option('Defaults', bool, False)
-        self.width = Option('Defaults', int, None)
-        self.height = Option('Defaults', int, None)
-        self.use_mpv = Option('Defaults', bool, False)
-        self.vlc_args = Option('Defaults', str, None)
-        self.mpv_flags = Option('Defaults', str, None)
+    debug = Option('Defaults', bool, False)
+    lyrics = Option('Defaults', bool, True)
+    fullscreen = Option('Defaults', bool, False)
+    quality = Option('Defaults', str, None)  # low, medium or high
+    use_mpv = Option('Defaults', bool, False)
+    vlc_args = Option('Defaults', str, None)
+    mpv_flags = Option('Defaults', str, None)
 
-        self.use_web_api = Option('WebAPI', bool, False)
-        self.client_id = Option('WebAPI', str, None)
-        self.client_secret = Option('WebAPI', str, None)
-        self.redirect_uri = Option('WebAPI', str,
-                                   'http://localhost:8888/callback/')
-        self.auth_token = Option('WebAPI', str, None)
-        self.expiration = Option('WebAPI', int, None)
+    use_web_api = Option('WebAPI', bool, False)
+    client_id = Option('WebAPI', str, None)
+    client_secret = Option('WebAPI', str, None)
+    redirect_uri = Option('WebAPI', str,
+                          'http://localhost:8888/callback/')
+    auth_token = Option('WebAPI', str, None)
+    expiration = Option('WebAPI', int, None)
 
 
 class Config:
@@ -52,8 +58,6 @@ class Config:
         """
         Initializing the argument parser and the config file.
         """
-
-        self._options = Options()
 
         self._argparser = argparse.ArgumentParser(
             prog="spotivids",
@@ -93,19 +97,15 @@ class Config:
             help="play videos in fullscreen mode")
 
         self._argparser.add_argument(
+            "--quality",
+            action="store", dest="quality", default=None,
+            help="the quality of the played videos. It canan be low,"
+            " medium, or high")
+
+        self._argparser.add_argument(
             "--use-mpv",
             action="store_true", dest="use_mpv", default=None,
             help="use mpv as the video player")
-
-        self._argparser.add_argument(
-            "--width",
-            action="store", dest="width", default=None,
-            help="set the maximum width for the player")
-
-        self._argparser.add_argument(
-            "--height",
-            action="store", dest="height", default=None,
-            help="set the maximum height for the player")
 
         self._argparser.add_argument(
             "-w", "--use-web-api",
@@ -151,7 +151,7 @@ class Config:
         type) from the options list.
         """
 
-        option = getattr(self._options, attr)
+        option = getattr(Options, attr)
 
         if option.value_type == bool:
             return self._file.getboolean(option.section, attr)
@@ -195,6 +195,20 @@ class Config:
 
         self._file.read(self._path)
 
+    def __setattr__(self, attr, value) -> None:
+        """
+        The attribute is set by saving it inside the object and by writing
+        the value in the config file (unless the attribute isn't an option)
+        """
+
+        self.__dict__[attr] = value
+        try:
+            option = getattr(Options, attr)
+        except AttributeError:
+            pass
+        else:
+            self.write_file(option.section, option.name, option.value)
+
     def __getattr__(self, attr) -> Union[bool, int, str]:
         """
         Return the configuration from all sources in the correct order
@@ -220,5 +234,5 @@ class Config:
                 return value
 
         # Default values
-        option = getattr(self._options, attr)
+        option = getattr(Options, attr)
         return option.default

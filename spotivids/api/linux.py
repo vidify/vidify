@@ -24,7 +24,7 @@ class DBusAPI:
         self.artist = ""
         self.title = ""
         self.is_playing = False
-        self._youtube = YouTube(config.debug, config.width, config.height)
+        self._youtube = YouTube(config.debug, config.quality)
 
     def connect(self) -> None:
         """

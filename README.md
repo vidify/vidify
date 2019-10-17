@@ -40,18 +40,15 @@ Just running `spotivids` in your terminal should work, but here's more info abou
 
 ```
 usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
-                 [--use-mpv] [--width WIDTH] [--height HEIGHT] [-w]
-                 [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
-                 [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
-                 [--mpv-flags MPV_FLAGS]
+                 [--use-mpv] [-w] [--client-id CLIENT_ID]
+                 [--client-secret CLIENT_SECRET] [--redirect-uri REDIRECT_URI]
+                 [--vlc-args VLC_ARGS] [--mpv-flags MPV_FLAGS]
 ```
 
 | Argument                         | Description         |
 |----------------------------------|---------------------|
 | `-n`, `--no-lyrics`              | do not print lyrics |
 | `-f`, `--fullscreen`             | play videos in fullscreen mode |
-| `--width <WIDTH>`                | set the width for the player |
-| `--height <HEIGHT>`              | set the height for the player |
 | `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation section](#installation) for more. |
 | `-w, --use-web-api`              | use Spotify's web API. See [the web API section](#the-web-api) for more info about how to set it up. |
 | `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |

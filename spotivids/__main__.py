@@ -20,7 +20,7 @@ def choose_platform() -> None:
         from spotivids.player.vlc import VLCPlayer
         player = VLCPlayer(config.vlc_args)
 
-    window = MainWindow(player, config.width, config.height, config.fullscreen)
+    window = MainWindow(player, config.fullscreen)
     window.show()
 
     if (BSD or LINUX) and not config.use_web_api:
