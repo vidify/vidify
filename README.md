@@ -1,9 +1,17 @@
-# Spotivids
-![travis](https://travis-ci.com/marioortizmanero/spotivids.svg?branch=master) ![pypi](https://img.shields.io/pypi/v/spotivids) ![aur](https://img.shields.io/aur/version/spotivids)
+<div align="center">
 
-A cross-platform tool to watch Youtube **music videos** and **lyrics** for the currently playing Spotify songs.
+<img src="images/icon.png" height=100 alt="logo" align="center"/>
+<h1>Spotivids</h1>
 
-![example](images/screenshot.png)
+<span>Watch Youtube <b>music videos</b> and <b>lyrics</b> for the currently playing Spotify songs</span>
+
+<img alt="Travis" src="https://travis-ci.com/marioortizmanero/spotivids.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/spotivids"> <img alt="AUR version" src="https://img.shields.io/aur/version/spotivids">
+
+<hr>
+
+<img src="images/screenshot.png" alt="Example" align="center">
+
+</div>
 
 
 ## Table of contents
@@ -107,6 +115,8 @@ You will be prompted to paste the resulting URL that was opened in your browser 
 Helpful documentation links for contributing:
 * [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv)
+
+The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/spotify-music-videos/issues/26).
 
 ### Tests
 You can run the module locally with `python -m spotivids`.
