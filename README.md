@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="images/icon.png" height=100 alt="logo" align="center"/>
+<img src="images/logo.png" height=100 alt="logo" align="center"/>
 <h1>Spotivids</h1>
 
 <span>Watch Youtube <b>music videos</b> and <b>lyrics</b> for the currently playing Spotify songs</span>

@@ -1,12 +1,12 @@
 import types
 from typing import Union, Callable
 
-from PySide2.QtWidgets import QMainWindow
+from PySide2.QtWidgets import QWidget, QHBoxLayout
 from PySide2.QtCore import QTimer
 
 
-class MainWindow(QMainWindow):
-    def __init__(self, widget: Union['VLCPlayer', 'MpvPlayer'],
+class MainWindow(QWidget):
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
                  width: int = 800, height: int = 600,
                  fullscreen: bool = False) -> None:
         """
@@ -25,7 +25,10 @@ class MainWindow(QMainWindow):
             height = 600
         self.resize(width, height)
 
-        self.setCentralWidget(widget)
+        layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        layout.addWidget(player)
 
     def start_event_loop(self, event_loop: Callable, ms: int) -> None:
         """

@@ -1,6 +1,7 @@
 import sys
 
 from PySide2.QtWidgets import QApplication
+from PySide2.QtGui import QIcon
 
 from spotivids import config, stderr_redirected, BSD, LINUX, MACOS, WINDOWS
 from spotivids.gui.window import MainWindow
@@ -12,6 +13,7 @@ def choose_platform() -> None:
     """
 
     app = QApplication()
+    app.setWindowIcon(QIcon('spotivids/gui/icon.svg'))
 
     if config.use_mpv:
         from spotivids.player.mpv import MpvPlayer
