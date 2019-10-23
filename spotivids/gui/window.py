@@ -19,11 +19,12 @@ class MainWindow(QWidget):
 
         if fullscreen:
             self.showFullScreen()
-        if width is None:
-            width = 800
-        if height is None:
-            height = 600
-        self.resize(width, height)
+        else:
+            if width is None:
+                width = 800
+            if height is None:
+                height = 600
+            self.resize(width, height)
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
