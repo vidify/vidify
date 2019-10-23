@@ -78,7 +78,7 @@ The config file is created by default at your user home directory named `.spotiv
 
 [Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
-All the available options for the config file are the same as the arguments above, except for `--config-file <PATH>`, which obviously is only an argument . Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
+All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
 Some other options are only avaliable on the config file, like `auth_token` and `expiration`, but these are only used to retain info from the WebAPI and should not be modified manually.
 
@@ -103,11 +103,11 @@ Or simply as arguments: `spotivids -w --client-id <CLIENT_ID> --client-secret <C
 
 ### How to obtain your client ID and your client secret:
 1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
-2. Create a new client ID. You can fill the descriptions as you like. Click `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
+2. Create a new client ID. You can fill the descriptions as you like. Select `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
 3. Go to `Edit Settings` and type `http://localhost:8888/callback/` (the default redirect uri) in the Redirect URIs field.
-4. You can now copy your Client ID and Client Secret and add them when you call `spotivids` by passing them as arguments or saving it directly into your config file, as shown avobe.
+4. You can now copy your Client ID and Client Secret and add them when you call `spotivids` by passing them as arguments or saving it directly into your config file, as shown above.
 
-You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth token will be saved into the config file for future usage.
+You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth info will be saved into the config file for future usage.
 
 ---
 
