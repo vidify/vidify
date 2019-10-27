@@ -1,3 +1,11 @@
+"""
+This module implements the Qt interface.
+
+A GUI is needed to have more control on the player: an initial size can be
+set, the player won't close and open everytime a new song starts, and it's
+useful for real-time configuration, like fullscreen.
+"""
+
 import types
 from typing import Union, Callable
 
@@ -34,6 +42,8 @@ class MainWindow(QWidget):
     def start_event_loop(self, event_loop: Callable, ms: int) -> None:
         """
         Starts a "manual" event loop with a timer every `ms` milliseconds.
+        This is used with the SwSpotify API and the Web API to check every
+        `ms` seconds if a change has happened, like if the song was paused.
         """
 
         timer = QTimer(self)

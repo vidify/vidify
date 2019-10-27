@@ -1,3 +1,14 @@
+"""
+The implementation of the VLC player embedded inside the GUI.
+
+This module should be the skeleton of any other player implementation,
+meaning that the functions usage and behavior should be exactly the same.
+
+VLC is the most popular cross-platform video player. It contains all the
+codecs needed to easily play videos and can play a video from an URL,
+in comparison to the Qt player.
+"""
+
 import logging
 
 from .. import LINUX, WINDOWS, MACOS
@@ -10,6 +21,11 @@ class VLCPlayer(QFrame):
     def __init__(self, vlc_args: str = "") -> None:
         """
         This VLC player is the instance where media should play.
+        It inherits from a QFrame so that it can be directly inserted into
+        the Qt GUI.
+
+        The audio is always muted, which is needed because not all the
+        youtube-dl videos are silent.
         """
 
         super().__init__()
@@ -29,9 +45,10 @@ class VLCPlayer(QFrame):
             raise Exception("VLC is not installed")
 
         if self._vlc is None:
-            raise AttributeError("VLC couldn't load. This is almost always"
-                                 " caused by an unexistent parameter passed"
-                                 " with --vlc-args")
+            msg = "VLC couldn't load. This may have been caused by an" \
+                  " incorrect installation or because an nonexistent" \
+                  " parameter was passed with --vlc-args"
+            raise AttributeError(msg)
 
         self._player = self._vlc.media_player_new()
 
@@ -75,7 +92,7 @@ class VLCPlayer(QFrame):
     def start_video(self, url: str, is_playing: bool = True) -> None:
         """
         Starts a new video in the VLC player. It can be directly played
-        with `is_playing` to avoid extra calls.
+        or paused with `is_playing` to avoid extra calls.
         """
 
         logging.info(f"Starting new video")

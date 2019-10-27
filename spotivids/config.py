@@ -1,18 +1,50 @@
+"""
+This module combines customization options from the three different sources,
+in order of priority:
+    * The argument parser
+    * The config file
+    * The default options
+"""
+
+
 import os
+import errno
 import argparse
 import configparser
 from typing import Union
 from dataclasses import dataclass
 
+from appdirs import AppDirs
+
 from spotivids.version import __version__
 
 
-# Default config path in the system
-default_path = os.path.expanduser('~/.spotivids_config')
+# Default config path in the system and its default contents
+dirs = AppDirs("spotivids", "marioom")
+DEFAULT_PATH = os.path.join(dirs.user_config_dir, "config.ini")
+DEFAULT_CONTENTS = """### spotivids config file ###
+# Official repo: https://github.com/marioortizmanero/spotivids
+# More details about the available options can be found in the README.md
+
+
+# Most options go inside this section: lyrics, fullscreen, use_mpv...
+[Defaults]
+
+
+# Contains information about the web API: use_web_api, client_id...
+[WebAPI]
+"""
 
 
 @dataclass
 class Option:
+    """
+    Dataclass to define the main properties of every object:
+        * The section in the config file
+        * The type of the values the variable can take
+        * The default value for the option
+    """
+
     section: str
     value_type: type
     default: any
@@ -21,7 +53,8 @@ class Option:
 class Options:
     def __init__(self) -> None:
         """
-        Listing all options with their section, type and default value.
+        This class lists all the available options with their section, type
+        and their default value.
         """
 
         self.debug = Option('Defaults', bool, False)
@@ -44,7 +77,7 @@ class Options:
 
 class Config:
     """
-    Object containing all configuration options from both the argument parser
+    Class containing all configuration options from both the argument parser
     and the config file.
     """
 
@@ -66,6 +99,13 @@ class Config:
         self._file = configparser.ConfigParser()
 
     def add_arguments(self) -> None:
+        """
+        Initializes all the available options for the argument parser.
+
+        The default values must be set to None, because the fallback values
+        will be determined later in the __getattr__ function.
+        """
+
         self._argparser.add_argument(
             "-v", "--version",
             action="version",
@@ -80,7 +120,7 @@ class Config:
         self._argparser.add_argument(
             "--config-file",
             action="store", dest="config_path", default=None,
-            help=f"the config file path. Default is {default_path}")
+            help=f"the config file path. Default is {DEFAULT_PATH}")
 
         self._argparser.add_argument(
             "-n", "--no-lyrics",
@@ -147,8 +187,8 @@ class Config:
 
     def read_file(self, attr: str) -> Union[bool, int, str]:
         """
-        Reads the config file data with the corresponding data (section and
-        type) from the options list.
+        Reads the value in the config file for a specified attribute. Its type
+        and section are obtained from the default options object.
         """
 
         option = getattr(self._options, attr)
@@ -162,22 +202,24 @@ class Config:
 
     def write_file(self, section: str, name: str, value: any) -> None:
         """
-        Modify a value from the config file. If the section doesn't exist,
-        create it.
+        Modifies a value from the config file. If the section doesn't exist,
+        it's created.
         """
 
         if section not in self._file.sections():
             with open(self._path, 'a') as configfile:
                 configfile.write(f'\n[{section}]')
+            # Refreshing the config file
             self._file.read(self._path)
 
         self._file[section][name] = str(value)
-
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
     def parse(self, config_path: str = None, custom_args: list = None) -> None:
         """
+        Parses the options from the arguments and config file.
+
         The config path can be passed as a function parameter or as an argument
         inside the program. If none of these exist, the default path will be
         used, defined at the top of this file.
@@ -186,12 +228,24 @@ class Config:
         """
 
         self._args = self._argparser.parse_args(custom_args)
-        self._path = config_path or self._args.config_path or default_path
+        self._path = config_path or self._args.config_path or DEFAULT_PATH
 
+        # Checking if the directory exists and creating it
+        dirname = os.path.dirname(self._path)
+        if not os.path.isdir(dirname):
+            # Checking for a race condition (not important)
+            try:
+                os.makedirs(dirname)
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
+
+        # Checking if the file exists and creating it
         if not os.path.exists(self._path):
             print("Creating config file at", self._path)
             with open(self._path, 'w') as f:
-                f.write('[Defaults]')
+                # Documentation about the config file is saved in the new file
+                f.write(DEFAULT_CONTENTS)
 
         self._file.read(self._path)
 
@@ -219,6 +273,7 @@ class Config:
             if value not in (None, ''):
                 return value
 
-        # Default values
+        # If it wasn't in the arguments or config file, the default value is
+        # returned.
         option = getattr(self._options, attr)
         return option.default

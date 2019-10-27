@@ -1,3 +1,13 @@
+"""
+Simple module to obtain the lyrics of a song.
+
+More sources other than lyricwikia could be implemented in the future. The
+problem is that most require and API key and it's not worth it. Other sources
+can be implemented with a web scrapper, but it's not reliable enough.
+Lyricwikia is actually a scrapper but its lyrics are available for free,
+in comparison to Genius.
+"""
+
 import lyricwikia
 
 from spotivids import format_name, WINDOWS

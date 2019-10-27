@@ -1,3 +1,13 @@
+"""
+This module implements the DBus API to obtain information about the Spotify
+player. It's intended for Linux but it should also work on BSD and other
+unix-like systems with DBus.
+
+The API is controlled from the `play_videos_linux` function. The overall
+usage and bevhavior of the class should be the same for all the APIs so
+that they can be used interchangeably.
+"""
+
 import sys
 import time
 import logging

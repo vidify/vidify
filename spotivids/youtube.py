@@ -1,3 +1,9 @@
+"""
+This module uses youtube-dl to obtain the actual URL of a YouTube link.
+That way, the video can be played directly with a video player like VLC
+or mpv.
+"""
+
 import youtube_dl
 
 from spotivids import format_name

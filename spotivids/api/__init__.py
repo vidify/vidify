@@ -28,7 +28,7 @@ def split_title(title: str) -> Tuple[str, str]:
         Rick Astley : Never Gonna Give You Up
     """
 
-    regex = "(.+?)(?:(?:: )|(?: : )|(?: - ))(.+)"
+    regex = r"(.+?)(?:(?:: )|(?: : )|(?: - ))(.+)"
     match = re.match(regex, title)
 
     if match is not None:

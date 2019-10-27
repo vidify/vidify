@@ -1,3 +1,18 @@
+"""
+This module implements the SwSpotify API. It's a package that can obtain
+information about Spotify without having to use the web API on Windows,
+Mac OS and Linux.
+The Linux module is implemented in a different file because in comparison
+to the Windows and Mac OS methods, it's an officially supported API and has
+more control over Spotify.
+The Windows implementation for example just reads the title of the Spotify
+window to obtain what song is playing. It's much more limited.
+
+The API is controlled from the `play_videos_swspotify` function. The overall
+usage and bevhavior of the class should be the same for all the APIs so
+that they can be used interchangeably.
+"""
+
 import time
 import logging
 from typing import Union

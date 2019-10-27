@@ -1,3 +1,8 @@
+"""
+This module has utilities used in different parts of the program, like the
+config, logger, cross-platform variables...
+"""
+
 import os
 import sys
 import logging
@@ -25,7 +30,8 @@ WINDOWS = sys.platform.startswith('win')
 @contextmanager
 def stderr_redirected(to: str = os.devnull) -> None:
     """
-    Redirecting stderr without leaks.
+    Redirecting stderr without leaks. This is used because sometimes VLC
+    will print non-critical error messages even when told to be quiet.
     """
 
     fd = sys.stderr.fileno()
@@ -48,6 +54,8 @@ def stderr_redirected(to: str = os.devnull) -> None:
 
 def format_name(artist: str, title: str) -> str:
     """
+    Formatting the song name with the artist and title.
+
     Some local songs may not have an artist name so the formatting
     has to be different.
     """

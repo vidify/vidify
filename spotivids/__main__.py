@@ -1,3 +1,8 @@
+"""
+This module chooses the player and platform and starts them. The Qt GUI is
+also initialized here.
+"""
+
 import sys
 
 from PySide2.QtWidgets import QApplication

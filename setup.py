@@ -24,20 +24,22 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users/Desktop',
         'Topic :: Multimedia :: Sound/Audio :: Players',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
     keywords='spotify music video videos lyrics spotivids',
     python_requires='>=3.7',
     install_requires=[
+        'appdirs',
         'youtube-dl',
         'python-vlc',
         'lyricwikia',
-        'spotipy',
+        'spotipy>=3.0.0',
         'PySide2',
         'pydbus; platform_system=="Linux"',
-        'SwSpotify; platform_system=="Windows" or platform_system=="Darwin"'
+        'SwSpotify>=1.1.0; platform_system=="Windows" or platform_system=="Darwin"'
     ],
     extras_require={
         'mpv': [

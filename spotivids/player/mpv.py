@@ -1,3 +1,12 @@
+"""
+This module is a generic implementation of the video player used in the
+program. It must have the same usage, functionality and behavior as the
+default player, VLC.
+
+Mpv is a good alternative to VLC because it's relatively lightweight and
+straightforward, but it's mostly used only on Linux systems.
+"""
+
 import logging
 
 from mpv import MPV
@@ -12,8 +21,11 @@ class MpvPlayer(QFrame):
         with the --mpv-args option. It doesn't inherit mpv.MPV directly
         because of naming issues.
 
-        The audio is muted, which is needed because not all the youtube-dl
-        videos are silent.
+        It inherits from a QFrame so that it can be directly added as a widget
+        in the Qt GUI.
+
+        The audio is always muted, which is needed because not all the
+        youtube-dl videos are silent.
         """
 
         super().__init__()
@@ -21,7 +33,7 @@ class MpvPlayer(QFrame):
         flags = flags.split() if flags not in (None, '') else []
         flags.extend(['mute', 'keep-open'])
         args = {}
-        if logging.level <= logging.INFO:
+        if logging.root.level <= logging.INFO:
             args['log_handler'] = print
             args['loglevel'] = 'info'
         args['wid'] = str(int(self.winId()))
@@ -71,8 +83,8 @@ class MpvPlayer(QFrame):
 
     def start_video(self, url: str, is_playing: bool = True) -> None:
         """
-        Starts a new video in the mpv player. It can be directly paused from
-        here to avoid extra calls.
+        Starts a new video in the mpv player. It can be directly played or
+        paused with `is_playing` to avoid extra calls.
         """
 
         logging.info(f"Started new video")

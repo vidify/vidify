@@ -74,7 +74,12 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
 | `--redirect-uri <REDIRECT_URI>`| optional redirect uri to get the web API authorization token. The default is http://localhost:8888/callback/ |
 
 ### The config file
-The config file is created by default at your user home directory named `.spotivids_config`. You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments.
+The config file is created by default at your usual config directory:
+* Unix: `~/.config/spotivids/config.ini` (or in `$XDG_CONFIG_HOME`, if defined)
+* Mac OS X: `~/Library/Preferences/spotivids/config.ini`
+* Windows: `C:\Users\trentm\AppData\Local\spotivids\config.ini`
+
+You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments.
 
 [Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
@@ -88,7 +93,7 @@ All platforms have a local way to get information from Spotify, but it may not b
 
 * You have to sign in and set it up manually
 * Only Spotify Premium users are able to use some functions
-* API calls are limited to 1 per second
+* API calls are limited
 
 The web API can be enabled inside the config file or passed as arguments. Example of the section inside the config file:
 
@@ -116,7 +121,9 @@ Helpful documentation links for contributing:
 * [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv)
 
-The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/spotify-music-videos/issues/26).
+The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/spotivids/issues/26).
+
+The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/marioortizmanero/spotivids/releases).
 
 ### Tests
 You can run the module locally with `python -m spotivids`.

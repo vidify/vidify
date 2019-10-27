@@ -1,3 +1,16 @@
+"""
+This module implements the official web API, using the `spotipy` module.
+The web API provides much more information about the Spotify player but
+it's limited in terms of usabilty:
+    * The user has to sign in and manually set it up
+    * Only Spotify Premium users are able to use some functions
+    * API calls are limited, so it's not as responsive
+
+The API is controlled from the `play_videos_web` function. The overall
+usage and bevhavior of the class should be the same for all the APIs so
+that they can be used interchangeably.
+"""
+
 import os
 import time
 import logging
@@ -20,8 +33,7 @@ class WebAPI:
                  expiration: int = None) -> None:
         """
         It includes `player`, the VLC or mpv window to play videos and control
-        it when the song status changes. The `Youtube` object is also needed
-        to play the videos.
+        it when the song status changes.
 
         This also handles the Spotipy authentication.
         """
@@ -31,6 +43,8 @@ class WebAPI:
         self.title = ""
         self._position = 0
         self.is_playing = False
+
+        #  The `YouTube` object is also needed to obtain the URL of the songs
         self._youtube = YouTube(config.debug, config.width, config.height)
         self._event_timestamp = time.time()
 
@@ -43,52 +57,78 @@ class WebAPI:
             redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
 
         if None in (client_id, client_secret, redirect_uri):
-            raise Exception("The auth info was incomplete")
+            raise AttributeError("The auth info was invalid")
 
+        # Spotify API credentials
         self._client_id = client_id
         self._client_secret = client_secret
         self._redirect_uri = redirect_uri
 
         # The least needed to access the currently playing song
-        scope = Scope(scopes.user_read_currently_playing)
+        self._scope = Scope(scopes.user_read_currently_playing)
 
-        # Trying to use the config auth token
+        # Trying to use the config auth token passed by parameter
         if expiration is None:
             expired = True
         else:
             expired = (expiration - int(time.time())) < 60
 
+        # Either using the existing token or generating a new one
         if auth_token not in (None, "") and not expired:
-            data = {
-                'access_token': auth_token,
-                'token_type': 'Bearer',
-                'scope': scope,
-                'expires_in': expiration - int(time.time())
-            }
-            creds = Credentials(self._client_id, self._client_secret,
-                                self._redirect_uri)
-            self._token = RefreshingToken(Token(data), creds)
+            self._token = self._get_token(auth_token, expiration)
         else:
-            print("To authorize the Spotify API, you'll have to log-in"
-                  " in the new tab that is going to open in your browser.\n"
-                  "Afterwards, just paste the contents of the URL you have"
-                  " been redirected to, something like"
-                  " 'http://localhost:8888/callback/?code=AQAa5v...'")
-            self._token = prompt_for_user_token(
-                client_id, client_secret, redirect_uri, scope)
+            self._token = self._authenticate()
 
+        # The Spotipy instance
         self._spotify = Spotify(self._token)
+
+    def _authenticate(self) -> RefreshingToken:
+        """
+        Asks the user to sign-in to Spotify and generates a self-refreshing
+        token.
+        """
+
+        print("To authorize the Spotify API, you'll have to log-in"
+              " in the new tab that is going to open in your browser.\n"
+              "Afterwards, just paste the contents of the URL you have"
+              " been redirected to, something like"
+              " 'http://localhost:8888/callback/?code=AQAa5v...'")
+        return prompt_for_user_token(self._client_id, self._client_secret,
+                                     self._redirect_uri, self._scope)
+
+    def _get_token(self, auth_token: str,
+                   expiration: int) -> RefreshingToken:
+        """
+        Generates a self-refreshing token from an already existing one
+        that hasn't expired.
+        """
+
+        data = {
+            'access_token': auth_token,
+            'token_type': 'Bearer',
+            'scope': self._scope,
+            'expires_in': expiration - int(time.time())
+        }
+        creds = Credentials(self._client_id, self._client_secret,
+                            self._redirect_uri)
+        return RefreshingToken(Token(data), creds)
 
     def connect(self) -> None:
         """
-        An initial metadata refresh is run. It raises `ConnectionNotReady`
-        if no songs are playing in that moment.
+        An initial metadata refresh is run. `ConnectionNotReady` will be
+        raised if no songs are playing in that moment.
         """
 
         self._refresh_metadata()
 
     @property
     def position(self) -> int:
+        """
+        Property that refreshes the metadata and returns the position. This
+        has to be done because the song position is constantly changing and
+        a new request has to be made.
+        """
+
         self._refresh_metadata()
         return self._position
 
@@ -114,6 +154,10 @@ class WebAPI:
         self.is_playing = metadata.is_playing
 
     def play_video(self) -> None:
+        """
+        Starts the video for the currently playing song.
+        """
+
         url = self._youtube.get_url(self.artist, self.title)
         self.player.start_video(url, self.is_playing)
         self.player.position = self.position
@@ -124,7 +168,7 @@ class WebAPI:
     def event_loop(self) -> None:
         """
         A callable event loop that checks if changes happen. This is called
-        every 0.5 seconds from the QT window.
+        every 0.5 seconds from the Qt window.
 
         It checks for changes in:
             * The playback status (playing/paused) to change the player's too
@@ -164,7 +208,7 @@ class WebAPI:
 def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
                     window: MainWindow) -> None:
     """
-    Playing videos with the Web API (optional).
+    Playing videos with the Web API.
 
     Initializes the Web API and plays the first video.
     Also starts the event loop to detect changes and play new videos.
