@@ -1,3 +1,7 @@
+"""
+This init module contains functions used throughout the different APIs.
+"""
+
 import re
 import time
 from typing import Tuple, Callable

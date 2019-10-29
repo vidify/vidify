@@ -16,14 +16,15 @@ from typing import Tuple, Union
 import pydbus
 from gi.repository import GLib
 
-from spotivids import config
 from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
+from spotivids.config import Config
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
 
 
 class DBusAPI:
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
+                 youtube: YouTube, show_lyrics: bool = True) -> None:
         """
         It includes `player`, the VLC or mpv window to play videos and control
         it when the song status changes. The `Youtube` object is also needed
@@ -34,7 +35,8 @@ class DBusAPI:
         self.artist = ""
         self.title = ""
         self.is_playing = False
-        self._youtube = YouTube(config.debug, config.width, config.height)
+        self._youtube = youtube
+        self._show_lyrics = show_lyrics
 
     def connect(self) -> None:
         """
@@ -144,7 +146,7 @@ class DBusAPI:
                 pass
             self.player.position = int((time.time_ns() - start_time) / 10**9)
 
-        if config.lyrics:
+        if self._show_lyrics:
             print_lyrics(self.artist, self.title)
 
     def _on_properties_changed(self, interface: str, properties: dict,
@@ -173,14 +175,15 @@ class DBusAPI:
                 self.player.pause = not is_playing
 
 
-def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer'],
+                      youtube: YouTube, config: Config) -> None:
     """
     Playing videos with the DBus API (Linux).
 
     Initializes the DBus API and plays the first video.
     """
 
-    spotify = DBusAPI(player)
+    spotify = DBusAPI(player, youtube, config.lyrics)
     msg = "Waiting for a Spotify session to be ready..."
     if not wait_for_connection(spotify.connect, msg):
         return

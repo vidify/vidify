@@ -19,21 +19,9 @@ from appdirs import AppDirs
 from spotivids.version import __version__
 
 
-# Default config path in the system and its default contents
+# Default config path in the system
 dirs = AppDirs("spotivids", "marioom")
 DEFAULT_PATH = os.path.join(dirs.user_config_dir, "config.ini")
-DEFAULT_CONTENTS = """### spotivids config file ###
-# Official repo: https://github.com/marioortizmanero/spotivids
-# More details about the available options can be found in the README.md
-
-
-# Most options go inside this section: lyrics, fullscreen, use_mpv...
-[Defaults]
-
-
-# Contains information about the web API: use_web_api, client_id...
-[WebAPI]
-"""
 
 
 @dataclass
@@ -51,28 +39,26 @@ class Option:
 
 
 class Options:
-    def __init__(self) -> None:
-        """
-        This class lists all the available options with their section, type
-        and their default value.
-        """
+    """
+    This class lists all the available options with their section, type
+    and their default value.
+    """
 
-        self.debug = Option('Defaults', bool, False)
-        self.lyrics = Option('Defaults', bool, True)
-        self.fullscreen = Option('Defaults', bool, False)
-        self.width = Option('Defaults', int, None)
-        self.height = Option('Defaults', int, None)
-        self.use_mpv = Option('Defaults', bool, False)
-        self.vlc_args = Option('Defaults', str, None)
-        self.mpv_flags = Option('Defaults', str, None)
+    debug = Option('Defaults', bool, False)
+    lyrics = Option('Defaults', bool, True)
+    fullscreen = Option('Defaults', bool, False)
+    width = Option('Defaults', int, None)
+    height = Option('Defaults', int, None)
+    use_mpv = Option('Defaults', bool, False)
+    vlc_args = Option('Defaults', str, None)
+    mpv_flags = Option('Defaults', str, None)
 
-        self.use_web_api = Option('WebAPI', bool, False)
-        self.client_id = Option('WebAPI', str, None)
-        self.client_secret = Option('WebAPI', str, None)
-        self.redirect_uri = Option('WebAPI', str,
-                                   'http://localhost:8888/callback/')
-        self.auth_token = Option('WebAPI', str, None)
-        self.expiration = Option('WebAPI', int, None)
+    use_web_api = Option('WebAPI', bool, False)
+    client_id = Option('WebAPI', str, None)
+    client_secret = Option('WebAPI', str, None)
+    redirect_uri = Option('WebAPI', str, 'http://localhost:8888/callback/')
+    auth_token = Option('WebAPI', str, None)
+    expiration = Option('WebAPI', int, None)
 
 
 class Config:
@@ -85,8 +71,6 @@ class Config:
         """
         Initializing the argument parser and the config file.
         """
-
-        self._options = Options()
 
         self._argparser = argparse.ArgumentParser(
             prog="spotivids",
@@ -191,7 +175,7 @@ class Config:
         and section are obtained from the default options object.
         """
 
-        option = getattr(self._options, attr)
+        option = getattr(Options, attr)
 
         if option.value_type == bool:
             return self._file.getboolean(option.section, attr)
@@ -216,7 +200,7 @@ class Config:
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
-    def parse(self, config_path: str = None, custom_args: list = None) -> None:
+    def parse(self, config_path: str = None) -> None:
         """
         Parses the options from the arguments and config file.
 
@@ -227,12 +211,12 @@ class Config:
         The config file will also be created if it isn't found.
         """
 
-        self._args = self._argparser.parse_args(custom_args)
+        self._args = self._argparser.parse_args()
         self._path = config_path or self._args.config_path or DEFAULT_PATH
 
         # Checking if the directory exists and creating it
         dirname = os.path.dirname(self._path)
-        if not os.path.isdir(dirname):
+        if not os.path.isdir(dirname) and dirname not in (None, ''):
             # Checking for a race condition (not important)
             try:
                 os.makedirs(dirname)
@@ -245,11 +229,28 @@ class Config:
             print("Creating config file at", self._path)
             with open(self._path, 'w') as f:
                 # Documentation about the config file is saved in the new file
-                f.write(DEFAULT_CONTENTS)
+                f.write("[Defaults]\n")
 
         self._file.read(self._path)
 
-    def __getattr__(self, attr) -> Union[bool, int, str]:
+    def __setattr__(self, attr: str, value: any) -> None:
+        """
+        The attribute shouldn't be set as a property of the class if it's
+        an option, since __getattr__ should be called for them.
+        At the same time, the option will be written into the config file.
+
+        For all other assignations, the value is set with the default
+        behavior.
+        """
+
+        try:
+            option = getattr(Options, attr)
+        except AttributeError:
+            self.__dict__[attr] = value
+        else:
+            self.write_file(option.section, attr, value)
+
+    def __getattr__(self, attr: str) -> Union[bool, int, str]:
         """
         Return the configuration from all sources in the correct order
         (arguments > config file > defaults)
@@ -275,5 +276,5 @@ class Config:
 
         # If it wasn't in the arguments or config file, the default value is
         # returned.
-        option = getattr(self._options, attr)
+        option = getattr(Options, attr)
         return option.default

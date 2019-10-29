@@ -2,8 +2,9 @@ import unittest
 
 import PySide2
 
-from spotivids.player.vlc import VLCPlayer
+from spotivids.youtube import YouTube
 from spotivids.api.linux import DBusAPI
+from spotivids.player.vlc import VLCPlayer
 
 
 class DBusTest(unittest.TestCase):
@@ -16,7 +17,8 @@ class DBusTest(unittest.TestCase):
         else:
             self.app = PySide2.QtGui.qApp
         player = VLCPlayer()
-        self.dbus = DBusAPI(player)
+        youtube = YouTube()
+        self.dbus = DBusAPI(player, youtube)
 
     def tearDown(self):
         del self.app

@@ -1,24 +1,12 @@
 """
 This module has utilities used in different parts of the program, like the
-config, logger, cross-platform variables...
+logger, cross-platform variables...
 """
 
 import os
 import sys
-import logging
 from contextlib import contextmanager
 
-from spotivids.config import Config
-
-
-# Initialization and parsing of the config from arguments and config file
-config = Config()
-config.parse()
-
-# Logger initialzation with precise milliseconds handler.
-logging.basicConfig(level=logging.DEBUG if config.debug else logging.ERROR,
-                    format="[%(asctime)s.%(msecs)03d] %(levelname)s:"
-                    " %(message)s", datefmt="%H:%M:%S")
 
 # Useful global variables for cross-platform and utils
 BSD = sys.platform.find('bsd') != -1

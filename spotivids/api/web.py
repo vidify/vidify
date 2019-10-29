@@ -19,15 +19,16 @@ from typing import Union
 from spotipy import Spotify, Scope, scopes, Token, Credentials
 from spotipy.util import prompt_for_user_token, RefreshingToken
 
-from spotivids import config
 from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
-from spotivids.gui.window import MainWindow
+from spotivids.config import Config
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
+from spotivids.gui.window import MainWindow
 
 
 class WebAPI:
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
+                 youtube: YouTube, show_lyrics: bool = True,
                  client_id: str = None, client_secret: str = None,
                  redirect_uri: str = None, auth_token: str = None,
                  expiration: int = None) -> None:
@@ -45,7 +46,8 @@ class WebAPI:
         self.is_playing = False
 
         #  The `YouTube` object is also needed to obtain the URL of the songs
-        self._youtube = YouTube(config.debug, config.width, config.height)
+        self._youtube = youtube
+        self._show_lyrics = show_lyrics
         self._event_timestamp = time.time()
 
         # Trying to load the env variables
@@ -162,7 +164,7 @@ class WebAPI:
         self.player.start_video(url, self.is_playing)
         self.player.position = self.position
 
-        if config.lyrics:
+        if self._show_lyrics:
             print_lyrics(self.artist, self.title)
 
     def event_loop(self) -> None:
@@ -206,7 +208,8 @@ class WebAPI:
 
 
 def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
-                    window: MainWindow) -> None:
+                    window: MainWindow, youtube: YouTube,
+                    config: Config) -> None:
     """
     Playing videos with the Web API.
 
@@ -214,8 +217,9 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
     Also starts the event loop to detect changes and play new videos.
     """
 
-    spotify = WebAPI(player, config.client_id, config.client_secret,
-                     config.redirect_uri, config.auth_token, config.expiration)
+    spotify = WebAPI(player, youtube, config.lyrics, config.client_id,
+                     config.client_secret, config.redirect_uri,
+                     config.auth_token, config.expiration)
 
     # Checks if Spotify is closed and if the auth details are valid
     msg = "Waiting for a Spotify song to play..."
@@ -223,12 +227,12 @@ def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
         return
 
     # Saves the used credentials inside the config file for future usage
-    config.write_file('WebAPI', 'client_secret', spotify._client_secret)
-    config.write_file('WebAPI', 'client_id', spotify._client_id)
+    config.client_secret = spotify._client_secret
+    config.client_id = spotify._client_id
+    config.auth_token = spotify._token.access_token
+    config.expiration = spotify._token.expires_at
     if spotify._redirect_uri != config._options.redirect_uri.default:
-        config.write_file('WebAPI', 'redirect_uri', spotify._redirect_uri)
-    config.write_file('WebAPI', 'auth_token', spotify._token.access_token)
-    config.write_file('WebAPI', 'expiration', spotify._token.expires_at)
+        config.redirect_uri = spotify._redirect_uri
 
     spotify.play_video()
     window.start_event_loop(spotify.event_loop, 1000)

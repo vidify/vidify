@@ -19,15 +19,16 @@ from typing import Union
 
 from SwSpotify import spotify, SpotifyPaused, SpotifyClosed
 
-from spotivids import config
 from spotivids.api import ConnectionNotReady, wait_for_connection
+from spotivids.config import Config
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
 from spotivids.gui.window import MainWindow
 
 
 class SwSpotifyAPI:
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer']) -> None:
+    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
+                 youtube: YouTube, show_lyrics: bool = True) -> None:
         """
         It includes `player`, the VLC or mpv window to play videos and control
         it when the song status changes. The `Youtube` object is also needed
@@ -36,8 +37,9 @@ class SwSpotifyAPI:
 
         self.artist = ""
         self.title = ""
-        self._youtube = YouTube(config.debug, config.width, config.height)
         self.player = player
+        self._youtube = youtube
+        self._show_lyrics = show_lyrics
 
     def connect(self) -> None:
         """
@@ -86,7 +88,7 @@ class SwSpotifyAPI:
             pass
         self.player.position = int((time.time_ns() - start_time) / 10**9)
 
-        if config.lyrics:
+        if self._show_lyrics:
             print_lyrics(self.artist, self.title)
 
     def event_loop(self) -> None:
@@ -115,7 +117,8 @@ class SwSpotifyAPI:
 
 
 def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'],
-                          window: MainWindow) -> None:
+                          window: MainWindow, youtube: YouTube,
+                          config: Config) -> None:
     """
     Playing videos with the SwSpotify API (Windows/macOS)
 
@@ -123,7 +126,7 @@ def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'],
     Also starts the event loop to detect changes and play new videos.
     """
 
-    spotify = SwSpotifyAPI(player)
+    spotify = SwSpotifyAPI(player, youtube, config.lyrics)
     msg = "Waiting for a Spotify session to be ready..."
     if not wait_for_connection(spotify.connect, msg):
         return
