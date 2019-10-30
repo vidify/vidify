@@ -13,6 +13,13 @@ import lyricwikia
 from spotivids import format_name, WINDOWS
 
 
+# The different error messages returned by lyricwikia
+ERROR_MESSAGES = (
+    "Unfortunately, we are not licensed to display the full lyrics for this"
+    " song at the moment. Hopefully we will be able to in the future. Until"
+    " then... how about a random page?")
+
+
 def print_lyrics(artist: str, title: str) -> None:
     """
     Using lyricwikia to get lyrics.
@@ -29,6 +36,10 @@ def print_lyrics(artist: str, title: str) -> None:
         print(f"\033[4m{name}\033[0m")
 
     try:
-        print(lyricwikia.get_lyrics(artist, title) + "\n")
+        msg = lyricwikia.get_lyrics(artist, title) + "\n"
     except (lyricwikia.LyricsNotFound, AttributeError):
-        print("No lyrics found\n")
+        msg = "No lyrics found\n"
+
+    if msg in ERROR_MESSAGES:
+        msg = "No lyrics found\n"
+    print(msg)

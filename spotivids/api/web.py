@@ -1,6 +1,6 @@
 """
 This module implements the official web API, using the `spotipy` module.
-The web API provides much more information about the Spotify player but
+The web API provides much more metadata about the Spotify player but
 it's limited in terms of usabilty:
     * The user has to sign in and manually set it up
     * Only Spotify Premium users are able to use some functions
@@ -19,11 +19,10 @@ from typing import Union
 from spotipy import Spotify, Scope, scopes, Token, Credentials
 from spotipy.util import prompt_for_user_token, RefreshingToken
 
-from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
-from spotivids.config import Config
+from spotivids.api import split_title, ConnectionNotReady
+from spotivids.config import Config, Options
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
-from spotivids.gui.window import MainWindow
 
 
 class WebAPI:
@@ -160,6 +159,7 @@ class WebAPI:
         Starts the video for the currently playing song.
         """
 
+        logging.info("Starting new video")
         url = self._youtube.get_url(self.artist, self.title)
         self.player.start_video(url, self.is_playing)
         self.player.position = self.position
@@ -207,32 +207,18 @@ class WebAPI:
         self._event_timestamp = time.time()
 
 
-def play_videos_web(player: Union['VLCPlayer', 'MpvPlayer'],
-                    window: MainWindow, youtube: YouTube,
-                    config: Config) -> None:
+def play_videos_web(spotify: WebAPI, config: Config) -> None:
     """
-    Playing videos with the Web API.
-
-    Initializes the Web API and plays the first video.
-    Also starts the event loop to detect changes and play new videos.
+    Takes an already initialized WebAPI and starts playing the videos, along
+    with other initialization steps.
     """
-
-    spotify = WebAPI(player, youtube, config.lyrics, config.client_id,
-                     config.client_secret, config.redirect_uri,
-                     config.auth_token, config.expiration)
-
-    # Checks if Spotify is closed and if the auth details are valid
-    msg = "Waiting for a Spotify song to play..."
-    if not wait_for_connection(spotify.connect, msg):
-        return
 
     # Saves the used credentials inside the config file for future usage
     config.client_secret = spotify._client_secret
     config.client_id = spotify._client_id
     config.auth_token = spotify._token.access_token
     config.expiration = spotify._token.expires_at
-    if spotify._redirect_uri != config._options.redirect_uri.default:
+    if spotify._redirect_uri != Options.redirect_uri.default:
         config.redirect_uri = spotify._redirect_uri
 
     spotify.play_video()
-    window.start_event_loop(spotify.event_loop, 1000)

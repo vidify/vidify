@@ -11,18 +11,17 @@ WINDOWS = sys.platform.startswith('win')
 ONEFILE = True
 WINDOWS_SPEC = "windows_onefile.spec" if ONEFILE else "windows.spec"
 LINUX_SPEC = "linux_onefile.spec" if ONEFILE else "linux.spec"
+if WINDOWS:
+    SPEC = WINDOWS_SPEC
+elif LINUX or BSD:
+    SPEC = LINUX_SPEC
 
 
 def main():
     print("Generating executable file with pyinstaller...")
 
-    if WINDOWS:
-        try:
-            subprocess.run(["pyinstaller", WINDOWS_SPEC, "-y"])
-        except PermissionError:
-            print("ERROR: This script has to be run with admin privileges")
-    elif LINUX or BSD:
-        subprocess.run(["pyinstaller", LINUX_SPEC, "-y"])
+    subprocess.run(["pyinstaller", SPEC, "-y"])
+
 
 if __name__ == '__main__':
     main()

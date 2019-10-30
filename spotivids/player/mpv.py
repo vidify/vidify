@@ -16,28 +16,24 @@ from PySide2.QtWidgets import QFrame
 class MpvPlayer(QFrame):
     def __init__(self, flags: str = None) -> None:
         """
-        This MPV player is the instance where media should play optionally,
-        since the default is VLC. It may be initialized with extra arguments
-        with the --mpv-args option. It doesn't inherit mpv.MPV directly
-        because of naming issues.
-
         It inherits from a QFrame so that it can be directly added as a widget
         in the Qt GUI.
-
-        The audio is always muted, which is needed because not all the
-        youtube-dl videos are silent.
         """
 
         super().__init__()
-        # mpv initialization
+
+        # Converting the flags passed by parameter (str) to a tuple
         flags = flags.split() if flags not in (None, '') else []
+        # The audio is always muted, which is needed because not all the
+        # youtube-dl videos are silent. The keep-open flag stops mpv from
+        # closing after the video is over.
         flags.extend(['mute', 'keep-open'])
+
         args = {}
         if logging.root.level <= logging.INFO:
             args['log_handler'] = print
             args['loglevel'] = 'info'
         args['wid'] = str(int(self.winId()))
-        args['vo'] = 'x11'  # May not be necessary
 
         self._mpv = MPV(*flags, **args)
 

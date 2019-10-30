@@ -3,8 +3,7 @@ This init module contains functions used throughout the different APIs.
 """
 
 import re
-import time
-from typing import Tuple, Callable
+from typing import Tuple
 
 
 class ConnectionNotReady(Exception):
@@ -40,33 +39,3 @@ def split_title(title: str) -> Tuple[str, str]:
             return match.group(1), match.group(2)
 
     return '', title
-
-
-def wait_for_connection(connect: Callable, msg: str,
-                        attempts: int = 30) -> bool:
-    """
-    Waits for a Spotify session to be opened or for a song to play.
-    Times out after `attempts` seconds to avoid infinite loops or
-    too many API/process requests.
-
-    Returns True if the connection was succesfull and False otherwise.
-    """
-
-    counter = 0
-    while counter < attempts:
-        try:
-            connect()
-        except ConnectionNotReady:
-            if counter == 0:
-                print(msg)
-            counter += 1
-            try:
-                time.sleep(1)
-            except KeyboardInterrupt:
-                break
-        else:
-            return True
-    else:
-        print("Timed out")
-
-    return False

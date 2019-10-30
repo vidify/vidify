@@ -12,6 +12,7 @@ from PySide2.QtGui import QIcon
 from spotivids import stderr_redirected, BSD, LINUX, MACOS, WINDOWS
 from spotivids.config import Config
 from spotivids.youtube import YouTube
+from spotivids.gui import Res
 from spotivids.gui.window import MainWindow
 
 
@@ -27,7 +28,7 @@ def choose_platform(config: Config) -> None:
                         " %(message)s", datefmt="%H:%M:%S")
 
     app = QApplication()
-    app.setWindowIcon(QIcon('spotivids/gui/icon.svg'))
+    app.setWindowIcon(QIcon(Res.icon))
 
     if config.use_mpv:
         from spotivids.player.mpv import MpvPlayer
@@ -42,16 +43,37 @@ def choose_platform(config: Config) -> None:
     # The YouTube object to obtain song videos
     youtube = YouTube(config.debug, config.width, config.height)
 
-    # Choosing the platform
+    # Choosing the platform: initializes the corresponding API and calls
+    # window.start(). This does three main things:
+    #   * Waits for the user to start Spotify or play a song with it
+    #     (until spotify.connect() doesn't raise errors).
+    #   * An initial function and its arguments will be called if the
+    #     connection was successful.
+    #   * An event loop may be started. The event loops check for updates
+    #     in the Spotify metadata to for example pause the video when
+    #     the song does. DBus doesn't need one because it uses GLib's loop.
+    logging.info("Initializing the API")
     if (BSD or LINUX) and not config.use_web_api:
-        from spotivids.api.linux import play_videos_linux
-        play_videos_linux(player, youtube, config)
+        from spotivids.api.linux import DBusAPI
+        spotify = DBusAPI(player, youtube, config.lyrics)
+        msg = "Waiting for a Spotify session to be ready..."
+        window.start(spotify.connect, spotify.play_video, message=msg)
     elif (WINDOWS or MACOS) and not config.use_web_api:
-        from spotivids.api.swspotify import play_videos_swspotify
-        play_videos_swspotify(player, window, youtube, config)
+        from spotivids.api.swspotify import SwSpotifyAPI
+        spotify = SwSpotifyAPI(player, youtube, config.lyrics)
+        msg = "Waiting for a Spotify song to play..."
+        window.start(spotify.connect, spotify.play_video, message=msg,
+                     event_loop=spotify.event_loop, event_interval=500)
     else:
-        from spotivids.api.web import play_videos_web
-        play_videos_web(player, window, youtube, config)
+        from spotivids.api.web import play_videos_web, WebAPI
+        spotify = WebAPI(player, youtube, config.lyrics, config.client_id,
+                         config.client_secret, config.redirect_uri,
+                         config.auth_token, config.expiration)
+        msg = "Waiting for a Spotify song to play..."
+        # `play_videos_web` also saves the credentials
+        window.start(spotify.connect, play_videos_web, spotify, config,
+                     message=msg, event_loop=spotify.event_loop,
+                     event_interval=1000)
 
     sys.exit(app.exec_())
 

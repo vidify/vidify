@@ -1,6 +1,6 @@
 """
 This module implements the SwSpotify API. It's a package that can obtain
-information about Spotify without having to use the web API on Windows,
+metadata about Spotify without having to use the web API on Windows,
 Mac OS and Linux.
 The Linux module is implemented in a different file because in comparison
 to the Windows and Mac OS methods, it's an officially supported API and has
@@ -19,11 +19,9 @@ from typing import Union
 
 from SwSpotify import spotify, SpotifyPaused, SpotifyClosed
 
-from spotivids.api import ConnectionNotReady, wait_for_connection
-from spotivids.config import Config
+from spotivids.api import ConnectionNotReady
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
-from spotivids.gui.window import MainWindow
 
 
 class SwSpotifyAPI:
@@ -79,6 +77,7 @@ class SwSpotifyAPI:
         it's roughly calculated with a timer.
         """
 
+        logging.info("Starting new video")
         start_time = time.time_ns()
         url = self._youtube.get_url(self.artist, self.title)
         self.player.start_video(url, self.is_playing)
@@ -114,21 +113,3 @@ class SwSpotifyAPI:
 
         if self.is_playing != is_playing:
             self.player.pause = not self.is_playing
-
-
-def play_videos_swspotify(player: Union['VLCPlayer', 'MpvPlayer'],
-                          window: MainWindow, youtube: YouTube,
-                          config: Config) -> None:
-    """
-    Playing videos with the SwSpotify API (Windows/macOS)
-
-    Initializes the SwSpotify API and plays the first video.
-    Also starts the event loop to detect changes and play new videos.
-    """
-
-    spotify = SwSpotifyAPI(player, youtube, config.lyrics)
-    msg = "Waiting for a Spotify session to be ready..."
-    if not wait_for_connection(spotify.connect, msg):
-        return
-    spotify.play_video()
-    window.start_event_loop(spotify.event_loop, 500)

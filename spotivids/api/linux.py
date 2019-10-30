@@ -1,5 +1,5 @@
 """
-This module implements the DBus API to obtain information about the Spotify
+This module implements the DBus API to obtain metadata about the Spotify
 player. It's intended for Linux but it should also work on BSD and other
 unix-like systems with DBus.
 
@@ -16,8 +16,7 @@ from typing import Tuple, Union
 import pydbus
 from gi.repository import GLib
 
-from spotivids.api import split_title, ConnectionNotReady, wait_for_connection
-from spotivids.config import Config
+from spotivids.api import split_title, ConnectionNotReady
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
 
@@ -47,7 +46,6 @@ class DBusAPI:
         exists or if no song is playing.
         """
 
-        logging.info("Connecting")
         self._bus = pydbus.SessionBus()
         try:
             self._obj = self._bus.get('org.mpris.MediaPlayer2.spotify',
@@ -136,6 +134,7 @@ class DBusAPI:
         so the starting offset is calculated manually and may be a bit rough.
         """
 
+        logging.info("Starting new video")
         start_time = time.time_ns()
         url = self._youtube.get_url(self.artist, self.title)
         self.player.start_video(url, self.is_playing)
@@ -173,18 +172,3 @@ class DBusAPI:
                 # Refreshes the metadata and pauses/plays the video
                 self.is_playing = is_playing
                 self.player.pause = not is_playing
-
-
-def play_videos_linux(player: Union['VLCPlayer', 'MpvPlayer'],
-                      youtube: YouTube, config: Config) -> None:
-    """
-    Playing videos with the DBus API (Linux).
-
-    Initializes the DBus API and plays the first video.
-    """
-
-    spotify = DBusAPI(player, youtube, config.lyrics)
-    msg = "Waiting for a Spotify session to be ready..."
-    if not wait_for_connection(spotify.connect, msg):
-        return
-    spotify.play_video()

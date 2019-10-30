@@ -89,7 +89,7 @@ Some other options are only avaliable on the config file, like `auth_token` and 
 
 
 ## The web API
-All platforms have a local way to get information from Spotify, but it may not be as reliable as the official web API, or may lack features in comparison to it, like better audio syncing or pausing the video. However, it also brings other downsides:
+All platforms have a local way to get metadata from Spotify, but it may not be as reliable as the official web API, or may lack features in comparison to it, like better audio syncing or pausing the video. However, it also brings other downsides:
 
 * You have to sign in and set it up manually
 * Only Spotify Premium users are able to use some functions

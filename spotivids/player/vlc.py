@@ -20,23 +20,20 @@ from PySide2.QtWidgets import QFrame
 class VLCPlayer(QFrame):
     def __init__(self, vlc_args: str = "") -> None:
         """
-        This VLC player is the instance where media should play.
         It inherits from a QFrame so that it can be directly inserted into
         the Qt GUI.
-
-        The audio is always muted, which is needed because not all the
-        youtube-dl videos are silent.
         """
 
         super().__init__()
 
-        # VLC initialization
         if vlc_args is None:
             vlc_args = ""
         if logging.root.level <= logging.INFO:
             vlc_args += " --verbose 1"
         else:
             vlc_args += " --quiet"
+        # The audio is always muted, which is needed because not all the
+        # youtube-dl videos are silent.
         vlc_args += " --no-audio"
 
         try:
