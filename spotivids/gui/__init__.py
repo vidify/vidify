@@ -18,6 +18,7 @@ class Colors:
     light = '#eff0eb'
     fg = '#282828'
     dark = '#282828'
+    lightred = '#fc9086'
 
 
 class Res:
@@ -26,6 +27,7 @@ class Res:
     """
 
     icon = "spotivids/gui/res/icon.svg"
+    cross = "spotivids/gui/res/cross.svg"
     fonts = ("spotivids/gui/res/Inter/Inter-Regular.otf",
              "spotivids/gui/res/Inter/Inter-Italic.otf",
              "spotivids/gui/res/Inter/Inter-Bold.otf",
@@ -40,5 +42,9 @@ class Fonts:
     """
 
     text = QFont("Inter", 12, QFont.Medium)
-    waitconn = QFont("Inter", 15, QFont.Bold)
-    waitconn.setItalic(True)
+    bigtext = QFont("Inter", 14, QFont.Medium)
+    title = QFont("Inter", 24, QFont.Bold)
+    title.setItalic(True)
+    header = QFont("Inter", 16, QFont.Bold)
+    header.setItalic(True)
+    bigbutton = QFont("Inter", 18, QFont.Bold)

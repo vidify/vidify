@@ -24,7 +24,7 @@ class APITest(unittest.TestCase):
 
         self.youtube = YouTube()
         # Creating the first app instance
-        if isinstance(PySide2.QtGui.qApp, type(None)):
+        if PySide2.QtGui.qApp is None:
             self.app = PySide2.QtWidgets.QApplication([])
         else:
             self.app = PySide2.QtGui.qApp

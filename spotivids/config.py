@@ -6,7 +6,6 @@ in order of priority:
     * The default options
 """
 
-
 import os
 import errno
 import argparse
@@ -180,7 +179,11 @@ class Config:
         if option.value_type == bool:
             return self._file.getboolean(option.section, attr)
         elif option.value_type == int:
-            return self._file.getint(option.section, attr)
+            # ValueError is raised if attr is ''
+            try:
+                return self._file.getint(option.section, attr)
+            except ValueError:
+                return None
         else:
             return self._file.get(option.section, attr)
 

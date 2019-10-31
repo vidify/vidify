@@ -18,10 +18,14 @@
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [Usage and configuration](#usage)
+    * [Basic usage](#usage)
     * [Advanced](#advanced)
     * [The config file](#the-config-file)
 * [The web API](#the-web-api)
+    * [Obtaining your client ID and client secret](#obtaining-your-client-id-and-client-secret)
 * [Development resources](#development)
+    * [Tests](#tests)
+    * [Current Limitations](#current-limitations)
 
 
 ## Requirements
@@ -38,13 +42,13 @@ For **Linux** users:
 ## Installation
 * You can use pip to install it: `pip3 install spotivids --user`. If you want to use mpv instead of VLC, just use `pip3 install 'spotivids[mpv]' --user` instead.
 
-* If you're on Arch Linux, you can install it from the AUR: [`spotivids`](https://aur.archlinux.org/packages/spotivids/)
+* You can download the latest stable [release](https://github.com/marioortizmanero/spotivids/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support.
 
-* You can also download the latest stable [release](https://github.com/marioortizmanero/spotivids/releases). Uncompress the `spotivids-X.Y.Z.tar.gz` file and run inside the folder: `pip3 install . --user` (or `pip3 install '.[mpv]' --user` if you want to use mpv instead of VLC)
+* If you're on Arch Linux, you can install it from the AUR: [`spotivids`](https://aur.archlinux.org/packages/spotivids/). Install [python-mpv](https://aur.archlinux.org/packages/python-mpv/) for mpv support.
 
 
 ## Usage
-Just running `spotivids` in your terminal should work, but here's more info about how to configure this module:
+I'm working towards making this program a full GUI with as little interaction with the terminal as possible. The GUI should be intuitive enough to not need a tutorial. But you can still combine the terminal usage with the GUI:
 
 ```
 usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
@@ -56,14 +60,12 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
 
 | Argument                         | Description         |
 |----------------------------------|---------------------|
-| `-n`, `--no-lyrics`              | do not print lyrics |
-| `-f`, `--fullscreen`             | play videos in fullscreen mode |
-| `--width <WIDTH>`                | set the width for the player |
-| `--height <HEIGHT>`              | set the height for the player |
+| `-n`, `--no-lyrics`              | do not print lyrics. |
+| `-f`, `--fullscreen`             | play videos in fullscreen mode. |
+| `--width <WIDTH>`                | set the width for the downloaded videos (this is useful to play low quality videos if your connection isn't good). |
+| `--height <HEIGHT>`              | set the height for the downloaded videos. |
 | `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation section](#installation) for more. |
 | `-w, --use-web-api`              | use Spotify's web API. See [the web API section](#the-web-api) for more info about how to set it up. |
-| `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-id='5fe01282e44241328a84e7c5cc169165'` |
-| `--client-secret <CLIENT_SECRET>`| your client secret ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. Example: `--client-secret='2665f6d143be47c1bc9ff284e9dfb350'` |
 
 ### Advanced:
 | Argument                         | Description         |
@@ -71,6 +73,8 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
 | `--config-file <PATH>`           | indicate the path of your config file.  |
 | `--vlc-args <VLC_ARGS>`          | custom arguments used when opening VLC. Note that some like `args='--fullscreen'` won't work in here |
 | `--mpv-flags <MPV_ARGS>`         | custom boolean flags used when opening mpv, with dashes and separated by spaces. Not intended for customization, only debugging and simple things. If you want to load non-boolean flags and such, use a config file. |
+| `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. You can also use the GUI to input it. |
+| `--client-secret <CLIENT_SECRET>`| your client secret ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. You can also use the GUI to indicate it. |
 | `--redirect-uri <REDIRECT_URI>`| optional redirect uri to get the web API authorization token. The default is http://localhost:8888/callback/ |
 
 ### The config file
@@ -79,9 +83,7 @@ The config file is created by default at your usual config directory:
 * Mac OS X: `~/Library/Preferences/spotivids/config.ini`
 * Windows: `C:\Users\trentm\AppData\Local\spotivids\config.ini`
 
-You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments.
-
-[Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
+You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments. [Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
 
 All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
@@ -95,7 +97,9 @@ All platforms have a local way to get metadata from Spotify, but it may not be a
 * Only Spotify Premium users are able to use some functions
 * API calls are limited
 
-The web API can be enabled inside the config file or passed as arguments. Example of the section inside the config file:
+The simplest way to use the web API is by passing `--use-web-api` as an argument and following the instructions in the GUI to get access.
+
+You can also enable it directly from the config file. Example of the section inside the config file:
 
 ```ini
 [WebAPI]
@@ -104,9 +108,9 @@ client_id = 5fe01282e44241328a84e7c5cc169165
 client_secret = 2665f6d143be47c1bc9ff284e9dfb350
 ```
 
-Or simply as arguments: `spotivids -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`. They will be saved in the default config file later. `auth_token` and `expiration` will be written into the config file too, but do not touch these.
+Finally, you can use arguments: `spotivids -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`. They will be saved in the default config file later. `auth_token` and `expiration` will be written into the config file too, but do not touch these.
 
-### How to obtain your client ID and your client secret:
+### Obtaining your client ID and client secret:
 1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
 2. Create a new client ID. You can fill the descriptions as you like. Select `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
 3. Go to `Edit Settings` and type `http://localhost:8888/callback/` (the default redirect uri) in the Redirect URIs field.
@@ -118,12 +122,14 @@ You will be prompted to paste the resulting URL that was opened in your browser 
 
 ## Development
 Helpful documentation links for contributing:
-* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position)
-* [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv)
+* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position), [Qt for Python](https://wiki.qt.io/Qt_for_Python).
+* [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv).
 
 The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/spotivids/issues/26).
 
 The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/marioortizmanero/spotivids/releases).
+
+Inside `dev/` you can find more information about building: [BUILDING.md](https://github.com/marioortizmanero/spotify-music-videos/blob/master/dev/BUILDING.md).
 
 ### Tests
 You can run the module locally with `python -m spotivids`.
@@ -133,4 +139,4 @@ This project uses `unittest` for testing. Run them with `python -m unittest` or 
 ### Current limitations
 * Spotify on Linux doesn't currently support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
 * Spotify's Web API doesn't allow function calls on updates like DBus, meaning that the metadata has to be manually updated every second and checked in case of changes.
-* A server is needed to get a working `redirect_uri`. So a website should be created in the future, rather than implementing it with flask on localhost only because of this.
+* A server is needed to get a working `redirect_uri` and a much easier Spotify login. So a website should be created in the future, rather than implementing it with flask on localhost only because of this. But it require some funding to host the site.

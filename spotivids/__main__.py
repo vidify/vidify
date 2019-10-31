@@ -3,6 +3,7 @@ This module chooses the player and platform and starts them. The Qt GUI is
 also initialized here.
 """
 
+import os
 import sys
 import logging
 
@@ -45,35 +46,57 @@ def choose_platform(config: Config) -> None:
 
     # Choosing the platform: initializes the corresponding API and calls
     # window.start(). This does three main things:
-    #   * Waits for the user to start Spotify or play a song with it
-    #     (until spotify.connect() doesn't raise errors).
-    #   * An initial function and its arguments will be called if the
-    #     connection was successful.
-    #   * An event loop may be started. The event loops check for updates
-    #     in the Spotify metadata to for example pause the video when
-    #     the song does. DBus doesn't need one because it uses GLib's loop.
+    #   1. Waits for the user to start Spotify or play a song with it
+    #      (until spotify.connect() doesn't raise errors).
+    #   2. An initial function and its arguments will be called if the
+    #      connection was successful.
+    #   3. An event loop may be started. The event loops check for updates
+    #      in the Spotify metadata to for example pause the video when
+    #      the song does. DBus doesn't need one because it uses GLib's loop.
     logging.info("Initializing the API")
     if (BSD or LINUX) and not config.use_web_api:
-        from spotivids.api.linux import DBusAPI
+        from spotivids.api.linux import DBusAPI, play_videos_linux
         spotify = DBusAPI(player, youtube, config.lyrics)
         msg = "Waiting for a Spotify session to be ready..."
-        window.start(spotify.connect, spotify.play_video, message=msg)
+        window.start(spotify.connect, play_videos_linux, spotify, message=msg)
+
     elif (WINDOWS or MACOS) and not config.use_web_api:
         from spotivids.api.swspotify import SwSpotifyAPI
         spotify = SwSpotifyAPI(player, youtube, config.lyrics)
         msg = "Waiting for a Spotify song to play..."
         window.start(spotify.connect, spotify.play_video, message=msg,
                      event_loop=spotify.event_loop, event_interval=500)
+
     else:
-        from spotivids.api.web import play_videos_web, WebAPI
-        spotify = WebAPI(player, youtube, config.lyrics, config.client_id,
-                         config.client_secret, config.redirect_uri,
-                         config.auth_token, config.expiration)
-        msg = "Waiting for a Spotify song to play..."
-        # `play_videos_web` also saves the credentials
-        window.start(spotify.connect, play_videos_web, spotify, config,
-                     message=msg, event_loop=spotify.event_loop,
-                     event_interval=1000)
+        from spotivids.api.web import play_videos_web, get_token, WebAPI
+        # Trying to load the env variables
+        if config.client_id is None:
+            config.client_id = os.getenv('SPOTIFY_CLIENT_ID')
+        if config.client_secret is None:
+            config.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+        if config.redirect_uri is None:
+            config.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
+
+        # Trying to reuse a previously generated token
+        token = get_token(config.auth_token, config.expiration,
+                          config.client_id, config.client_secret,
+                          config.redirect_uri)
+
+        if token is not None:
+            # If the previous token was valid, the API can already start
+            logging.info("Reusing a previously generated token")
+            spotify = WebAPI(player, youtube, token, config.lyrics)
+            msg = "Waiting for a Spotify song to play..."
+            window.start(spotify.connect, play_videos_web, spotify, config,
+                         message=msg, event_loop=spotify.event_loop,
+                         event_interval=1000)
+        else:
+            # Otherwise, the credentials are obtained with the GUI. When
+            # a valid auth token is ready, the GUI will initialize the API
+            # automatically exactly like above. The GUI won't ask for a
+            # redirect URI for now.
+            logging.info("Asking the user for credentials")
+            window.get_token(config, youtube)
 
     sys.exit(app.exec_())
 

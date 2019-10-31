@@ -11,26 +11,24 @@ usage and bevhavior of the class should be the same for all the APIs so
 that they can be used interchangeably.
 """
 
-import os
 import time
 import logging
 from typing import Union
 
 from spotipy import Spotify, Scope, scopes, Token, Credentials
-from spotipy.util import prompt_for_user_token, RefreshingToken
+from spotipy.util import RefreshingToken
+import requests  # required in spotipy
 
 from spotivids.api import split_title, ConnectionNotReady
-from spotivids.config import Config, Options
+from spotivids.config import Config
 from spotivids.lyrics import print_lyrics
 from spotivids.youtube import YouTube
 
 
 class WebAPI:
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 youtube: YouTube, show_lyrics: bool = True,
-                 client_id: str = None, client_secret: str = None,
-                 redirect_uri: str = None, auth_token: str = None,
-                 expiration: int = None) -> None:
+                 youtube: YouTube, token: Union[Token, RefreshingToken],
+                 show_lyrics: bool = True) -> None:
         """
         It includes `player`, the VLC or mpv window to play videos and control
         it when the song status changes.
@@ -44,75 +42,11 @@ class WebAPI:
         self._position = 0
         self.is_playing = False
 
-        #  The `YouTube` object is also needed to obtain the URL of the songs
         self._youtube = youtube
+        self._token = token
+        self._spotify = Spotify(self._token)
         self._show_lyrics = show_lyrics
         self._event_timestamp = time.time()
-
-        # Trying to load the env variables
-        if client_id is None:
-            client_id = os.getenv('SPOTIFY_CLIENT_ID')
-        if client_secret is None:
-            client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-        if redirect_uri is None:
-            redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
-
-        if None in (client_id, client_secret, redirect_uri):
-            raise AttributeError("The auth info was invalid")
-
-        # Spotify API credentials
-        self._client_id = client_id
-        self._client_secret = client_secret
-        self._redirect_uri = redirect_uri
-
-        # The least needed to access the currently playing song
-        self._scope = Scope(scopes.user_read_currently_playing)
-
-        # Trying to use the config auth token passed by parameter
-        if expiration is None:
-            expired = True
-        else:
-            expired = (expiration - int(time.time())) < 60
-
-        # Either using the existing token or generating a new one
-        if auth_token not in (None, "") and not expired:
-            self._token = self._get_token(auth_token, expiration)
-        else:
-            self._token = self._authenticate()
-
-        # The Spotipy instance
-        self._spotify = Spotify(self._token)
-
-    def _authenticate(self) -> RefreshingToken:
-        """
-        Asks the user to sign-in to Spotify and generates a self-refreshing
-        token.
-        """
-
-        print("To authorize the Spotify API, you'll have to log-in"
-              " in the new tab that is going to open in your browser.\n"
-              "Afterwards, just paste the contents of the URL you have"
-              " been redirected to, something like"
-              " 'http://localhost:8888/callback/?code=AQAa5v...'")
-        return prompt_for_user_token(self._client_id, self._client_secret,
-                                     self._redirect_uri, self._scope)
-
-    def _get_token(self, auth_token: str,
-                   expiration: int) -> RefreshingToken:
-        """
-        Generates a self-refreshing token from an already existing one
-        that hasn't expired.
-        """
-
-        data = {
-            'access_token': auth_token,
-            'token_type': 'Bearer',
-            'scope': self._scope,
-            'expires_in': expiration - int(time.time())
-        }
-        creds = Credentials(self._client_id, self._client_secret,
-                            self._redirect_uri)
-        return RefreshingToken(Token(data), creds)
 
     def connect(self) -> None:
         """
@@ -214,11 +148,49 @@ def play_videos_web(spotify: WebAPI, config: Config) -> None:
     """
 
     # Saves the used credentials inside the config file for future usage
-    config.client_secret = spotify._client_secret
-    config.client_id = spotify._client_id
     config.auth_token = spotify._token.access_token
     config.expiration = spotify._token.expires_at
-    if spotify._redirect_uri != Options.redirect_uri.default:
-        config.redirect_uri = spotify._redirect_uri
 
     spotify.play_video()
+
+
+def get_token(auth_token: str, expiration: int, client_id: str,
+              client_secret: str, redirect_uri: str) -> RefreshingToken:
+    """
+    Tries to generate a self-refreshing token from the parameters. They
+    could be anything so there have to be several checks to make sure the
+    returned token is valid. Otherwise, this function will return None
+    """
+
+    # Checking that the parameters are valid
+    for e in (auth_token, expiration, client_id, client_secret, redirect_uri):
+        if e in (None, ''):
+            return None
+
+    # Checking if the token is expired
+    if (expiration - int(time.time())) < 60:
+        return None
+
+    # Generating a RefreshingToken
+    scope = Scope(scopes.user_read_currently_playing)
+    data = {
+        'access_token': auth_token,
+        'token_type': 'Bearer',
+        'scope': scope,
+        'expires_in': expiration - int(time.time())
+    }
+    creds = Credentials(client_id, client_secret, redirect_uri)
+    token = RefreshingToken(Token(data), creds)
+
+    # Doing an initial request to check that it was generated correctly:
+    # an error could be raised from the requests package, or the returned
+    # value could be None
+    try:
+        spotify = Spotify(token)
+        if spotify.playback_currently_playing() is None:
+            return None
+    except (ConnectionNotReady, requests.exceptions.HTTPError):
+        return None
+
+    # If it got here, it means the generated token is valid
+    return token

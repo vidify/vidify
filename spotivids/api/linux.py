@@ -54,9 +54,6 @@ class DBusAPI:
             raise ConnectionNotReady("No Spotify session currently running")
 
         self.player_interface = self._obj['org.mpris.MediaPlayer2.Player']
-        self._loop = GLib.MainLoop()
-        self._disconnect_obj = self._obj.PropertiesChanged.connect(
-            self._on_properties_changed)
 
         try:
             self._refresh_metadata()
@@ -74,6 +71,16 @@ class DBusAPI:
             self._loop.quit()
         except AttributeError:
             pass
+
+    def start_event_loop(self) -> None:
+        """
+        Starts the GLib event loop. It is asynchronous, so unlike the web API
+        or the SwSpotify API, it doesn't need interaction with Qt.
+        """
+
+        self._loop = GLib.MainLoop()
+        self._disconnect_obj = self._obj.PropertiesChanged.connect(
+            self._on_properties_changed)
 
     def wait(self) -> None:
         """
@@ -172,3 +179,12 @@ class DBusAPI:
                 # Refreshes the metadata and pauses/plays the video
                 self.is_playing = is_playing
                 self.player.pause = not is_playing
+
+
+def play_videos_linux(spotify: DBusAPI) -> None:
+    """
+    Starts the event loop for the DBus API and plays the first video.
+    """
+
+    spotify.start_event_loop()
+    spotify.play_video()
