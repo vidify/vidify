@@ -39,7 +39,8 @@ setup(
         'spotipy>=3.0.0',
         'PySide2',
         'pydbus; platform_system=="Linux"',
-        'SwSpotify>=1.1.0; platform_system=="Windows" or platform_system=="Darwin"'
+        'pygobject; platform_system=="Linux"',
+        'SwSpotify>=1.1.1; platform_system=="Windows" or platform_system=="Darwin"'
     ],
     extras_require={
         'mpv': [

@@ -1,15 +1,17 @@
 import os
 import unittest
+import unittest.mock
 
-import PySide2
+from PySide2.QtGui import qApp
+from PySide2.QtWidgets import QApplication
 
 from spotivids import BSD, LINUX, MACOS, WINDOWS
 from spotivids.youtube import YouTube
 from spotivids.player.vlc import VLCPlayer
 
 
-runningTravis = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
-skipMsg = "Skipping this test as it won't work on the current system."
+TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
+SKIP_MSG = "Skipping this test as it won't work on the current system."
 
 
 class APITest(unittest.TestCase):
@@ -24,10 +26,10 @@ class APITest(unittest.TestCase):
 
         self.youtube = YouTube()
         # Creating the first app instance
-        if PySide2.QtGui.qApp is None:
-            self.app = PySide2.QtWidgets.QApplication([])
+        if isinstance(qApp, type(None)):
+            self.app = QApplication([])
         else:
-            self.app = PySide2.QtGui.qApp
+            self.app = qApp
         self.vlc = VLCPlayer()
 
         # What is this import doing here you may ask? A terrifying tale
@@ -42,7 +44,7 @@ class APITest(unittest.TestCase):
         del self.app
         return super().tearDown()
 
-    @unittest.skipIf(runningTravis or not (BSD or LINUX), skipMsg)
+    @unittest.skipIf(TRAVIS or not (BSD or LINUX), SKIP_MSG)
     def test_dbus(self):
         # Format metadata, bool status are tested in test_dbus
         from spotivids.api.linux import DBusAPI
@@ -53,7 +55,7 @@ class APITest(unittest.TestCase):
             dbus.play_video()
             dbus.disconnect()
 
-    @unittest.skipIf(runningTravis or not (MACOS or WINDOWS), skipMsg)
+    @unittest.skipIf(TRAVIS or not (MACOS or WINDOWS), SKIP_MSG)
     def test_swspotify(self):
         from spotivids.api.swspotify import SwSpotifyAPI
         for player in (self.vlc, self.mpv):
@@ -63,19 +65,22 @@ class APITest(unittest.TestCase):
             swspotify.play_video()
             swspotify.event_loop()
 
-    @unittest.skipIf(runningTravis, skipMsg)
+    @unittest.skipIf(TRAVIS, SKIP_MSG)
     def test_web(self):
         """
-        Client ID and Client Secret should be set up as environment variables.
-        Run something like:
-            export SPOTIFY_CLIENT_ID="..."; \
-            export SPOTIFY_CLIENT_SECRET="..."; \
-            python -m unittest
+        The web credentials have to be already in the config file, including
+        the auth token and the expiration date.
         """
 
-        from spotivids.api.web import WebAPI
-        redirect_uri = "http://localhost:8888/callback/"
-        web = WebAPI(self.vlc, self.youtube, redirect_uri=redirect_uri)
+        from spotivids.api.web import get_token, WebAPI
+        from spotivids.config import Config
+        config = Config()
+        with unittest.mock.patch('sys.argv', ['']):
+            config.parse()
+        token = get_token(config.auth_token, config.expiration,
+                          config.client_id, config.client_secret,
+                          config.redirect_uri)
+        web = WebAPI(self.vlc, self.youtube, token)
         web.connect()
         web._refresh_metadata()
         web.play_video()

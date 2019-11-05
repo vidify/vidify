@@ -4,7 +4,7 @@ initialization is easier.
 """
 
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
-                               QVBoxLayout)
+                               QVBoxLayout, QLayout, QSizePolicy)
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt, QSize, QUrl
 from PySide2.QtWebEngineWidgets import QWebEngineView
@@ -67,7 +67,6 @@ class WebBrowser(QWidget):
         """
 
         self.web_view = QWebEngineView()
-        self.web_view.setMaximumSize(QSize(800, 800))
         self.layout.addWidget(self.web_view)
 
     def setup_controls(self) -> None:
@@ -75,10 +74,9 @@ class WebBrowser(QWidget):
         The web view controls for now are just a button to go back.
         """
 
-        self.go_back_button = QPushButton("< Go back")
-        # TODO ADD ICON AND STYLE
-        # The function called by go_back_button should be set from outside
-        # this class.
+        self.go_back_button = QPushButton("← Go back")
+        self.go_back_button.setFont(Fonts.mediumbutton)
+        self.go_back_button.setStyleSheet(f"color: {Colors.fg};")
         self.layout.addWidget(self.go_back_button)
 
     @property
@@ -114,9 +112,16 @@ class WebForm(QWidget):
 
         super().__init__(*args)
 
+        # Checking that the credentials aren't None and using an empty field
+        # instead.
+        if client_id is None:
+            client_id = ""
+        if client_secret is None:
+            client_secret = ""
+
         # The main layout will now have a widget with a vertical layout inside
         # it. This way, the widget's size can be controlled.
-        self.setMaximumSize(QSize(600, 400))
+        self.setMaximumSize(QSize(600, 250))
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
@@ -132,18 +137,10 @@ class WebForm(QWidget):
         It can also show error messages.
         """
 
-        text_layout = QVBoxLayout()
-        self.layout.addLayout(text_layout)
-        header = QLabel("Please introduce your Spotify keys.\n")
-        header.setWordWrap(True)
-        header.setFont(Fonts.header)
-        header.setStyleSheet(f"color: {Colors.fg};")
-        header.setAlignment(Qt.AlignHCenter)
-        text_layout.addWidget(header)
-
         url = 'https://github.com/marioortizmanero/spotivids' \
               '#obtaining-your-client-id-and-client-secret'
         text = QLabel(
+            "<h2><i>Please introduce your Spotify keys</i></h2>"
             "If you don't know how to obtain them, please read this"
             f" <a href='{url}'>quick tutorial.</a>")
         text.setWordWrap(True)
@@ -152,7 +149,7 @@ class WebForm(QWidget):
         text.setFont(Fonts.text)
         text.setStyleSheet(f"color: {Colors.fg};")
         text.setAlignment(Qt.AlignHCenter)
-        text_layout.addWidget(text)
+        self.layout.addWidget(text)
 
     def setup_inputs(self, client_id: str, client_secret: str) -> None:
         """

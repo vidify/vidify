@@ -9,7 +9,13 @@ straightforward, but it's mostly used only on Linux systems.
 
 import logging
 
-from mpv import MPV
+try:
+    from mpv import MPV
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "No module named 'mpv'.\nTo use this player, please install spotivids"
+        " along with python-mpv. Please read the installation guide for more"
+        " details.") from None
 from PySide2.QtWidgets import QFrame
 
 

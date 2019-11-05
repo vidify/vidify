@@ -48,8 +48,9 @@ class SwSpotifyAPI:
 
         self._refresh_metadata()
         if "" in (self.artist, self.title):
-            raise ConnectionNotReady("No Spotify session currently running"
-                                     " or no song currently playing.")
+            raise ConnectionNotReady(
+                "No Spotify session currently running or no song currently"
+                " playing.") from None
 
     def _refresh_metadata(self) -> None:
         """
@@ -67,7 +68,7 @@ class SwSpotifyAPI:
         except SpotifyPaused:
             self.is_playing = False
         except SpotifyClosed:
-            raise ConnectionNotReady("No song currently playing")
+            raise ConnectionNotReady("No song currently playing") from None
 
     def play_video(self) -> None:
         """

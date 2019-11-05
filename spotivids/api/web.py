@@ -11,6 +11,7 @@ usage and bevhavior of the class should be the same for all the APIs so
 that they can be used interchangeably.
 """
 
+import os
 import time
 import logging
 from typing import Union
@@ -141,37 +142,33 @@ class WebAPI:
         self._event_timestamp = time.time()
 
 
-def play_videos_web(spotify: WebAPI, config: Config) -> None:
-    """
-    Takes an already initialized WebAPI and starts playing the videos, along
-    with other initialization steps.
-    """
-
-    # Saves the used credentials inside the config file for future usage
-    config.auth_token = spotify._token.access_token
-    config.expiration = spotify._token.expires_at
-
-    spotify.play_video()
-
-
-def get_token(auth_token: str, expiration: int, client_id: str,
-              client_secret: str, redirect_uri: str) -> RefreshingToken:
+def get_token(auth_token: str, expiration: int, client_id: str = None,
+              client_secret: str = None, redirect_uri: str = None
+              ) -> RefreshingToken:
     """
     Tries to generate a self-refreshing token from the parameters. They
     could be anything so there have to be several checks to make sure the
     returned token is valid. Otherwise, this function will return None
     """
 
-    # Checking that the parameters are valid
-    for e in (auth_token, expiration, client_id, client_secret, redirect_uri):
-        if e in (None, ''):
+    # Trying to use the env variables
+    if client_id is None:
+        client_id = os.getenv('SPOTIFY_CLIENT_ID')
+    if client_secret is None:
+        client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+    if redirect_uri is None:
+        redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
+
+    # Checking that the credentials are valid
+    for c in (auth_token, expiration, client_id, client_secret, redirect_uri):
+        if c in (None, ''):
             return None
 
     # Checking if the token is expired
     if (expiration - int(time.time())) < 60:
         return None
 
-    # Generating a RefreshingToken
+    # Generating a RefreshingToken with the parameters
     scope = Scope(scopes.user_read_currently_playing)
     data = {
         'access_token': auth_token,
@@ -186,9 +183,7 @@ def get_token(auth_token: str, expiration: int, client_id: str,
     # an error could be raised from the requests package, or the returned
     # value could be None
     try:
-        spotify = Spotify(token)
-        if spotify.playback_currently_playing() is None:
-            return None
+        Spotify(token)
     except (ConnectionNotReady, requests.exceptions.HTTPError):
         return None
 

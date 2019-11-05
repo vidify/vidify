@@ -176,22 +176,34 @@ class Config:
 
         option = getattr(Options, attr)
 
-        if option.value_type == bool:
-            return self._file.getboolean(option.section, attr)
-        elif option.value_type == int:
-            # ValueError is raised if attr is ''
-            try:
-                return self._file.getint(option.section, attr)
-            except ValueError:
-                return None
-        else:
-            return self._file.get(option.section, attr)
+        try:
+            if option.value_type == bool:
+                return self._file.getboolean(option.section, attr)
+            elif option.value_type == int:
+                # ValueError is raised if attr is '' (empty). When this
+                # happens, None should be returned instead.
+                try:
+                    return self._file.getint(option.section, attr)
+                except ValueError:
+                    return None
+            else:
+                return self._file.get(option.section, attr)
+        except ValueError as e:
+            # Showing a more detailed error than the one given by configparser
+            raise ValueError(f"Error when parsing the config file: in the"
+                             f" {option.section} section, {attr} doesn't"
+                             f" have a valid type ({e}).") from None
 
     def write_file(self, section: str, name: str, value: any) -> None:
         """
         Modifies a value from the config file. If the section doesn't exist,
         it's created.
         """
+
+        # The value's type should only be converted to a string if it's not
+        # None, in which case nothing is written.
+        if value is None:
+            return
 
         if section not in self._file.sections():
             with open(self._path, 'a') as configfile:
@@ -238,18 +250,19 @@ class Config:
 
     def __setattr__(self, attr: str, value: any) -> None:
         """
-        The attribute shouldn't be set as a property of the class if it's
-        an option, since __getattr__ should be called for them.
-        At the same time, the option will be written into the config file.
-
-        For all other assignations, the value is set with the default
-        behavior.
+        The usual __setattr__ function, but it also updates the config file
+        with the new value (unless it's None, because `configfile` does a
+        conversion to str and saves 'None' instead of '')
         """
 
+        # The value is still saved inside the object, so that the assigned
+        # value will have priority over defaults/config file/arguments
+        self.__dict__[attr] = value
         try:
+            # If this is obtained correctly, it's interpreted as an option
             option = getattr(Options, attr)
         except AttributeError:
-            self.__dict__[attr] = value
+            pass
         else:
             self.write_file(option.section, attr, value)
 

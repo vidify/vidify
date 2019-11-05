@@ -25,7 +25,7 @@ from spotipy import Credentials, Scope, scopes
 from spotipy.util import parse_code_from_url
 
 from spotivids.api import ConnectionNotReady
-from spotivids.api.web import WebAPI, play_videos_web
+from spotivids.api.web import WebAPI
 from spotivids.config import Config
 from spotivids.youtube import YouTube
 from spotivids.gui import Fonts, Res, Colors
@@ -81,7 +81,7 @@ class MainWindow(QWidget):
         # from the function called with QTimer.
         self.conn_counter = 0
         self.conn_fn = connect
-        self.conn_attempts = 30
+        self.conn_attempts = 120  # 2 minutes, at 1 connection attempt/second
         self.conn_init = init
         self.conn_init_args = init_args
         self.event_loop_fn = event_loop
@@ -90,7 +90,6 @@ class MainWindow(QWidget):
         # Creating a label with a loading message that will be shown when the
         # connection attempt is successful.
         self.loading_label = QLabel("Loading...")
-        self.loading_label.setWordWrap(True)
         self.loading_label.setFont(Fonts.title)
         self.loading_label.setStyleSheet(f"color: {Colors.fg};")
         self.loading_label.setMargin(50)
@@ -122,6 +121,8 @@ class MainWindow(QWidget):
         # Changing the loading message for the connection one if the first
         # connection attempt was unsuccessful.
         if self.conn_counter == 1:
+            self.layout.removeWidget(self.loading_label)
+            self.loading_label.hide()
             self.conn_label.show()
 
         # The APIs should raise `ConnectionNotReady` if the first attempt
@@ -140,7 +141,11 @@ class MainWindow(QWidget):
             self.conn_label.hide()
             self.layout.removeWidget(self.loading_label)
             self.loading_label.hide()
+            # Initializing the API with the function passed as a parameter
+            # and the arguments
             self.conn_init(*self.conn_init_args)
+            # Starting the event loop if it was initially passed as
+            # a parameter
             if self.event_loop_fn is not None:
                 self.start_event_loop(self.event_loop_fn, self.event_interval)
 
@@ -294,6 +299,7 @@ class MainWindow(QWidget):
             self.layout.removeWidget(self.web_form)
             self.layout.removeWidget(self.browser)
             self.browser.hide()
+            # Finally starting the Web API
             self.start_web_api()
 
     def start_web_api(self) -> None:
@@ -308,10 +314,12 @@ class MainWindow(QWidget):
         spotify = WebAPI(self.player, self._youtube, self.token,
                          self._config.lyrics)
         msg = "Waiting for a Spotify song to play..."
-        self.start(spotify.connect, play_videos_web, spotify, self._config,
-                   message=msg, event_loop=spotify.event_loop,
-                   event_interval=1000)
+        self.start(spotify.connect, spotify.play_video, message=msg,
+                   event_loop=spotify.event_loop, event_interval=1000)
 
         # The obtained credentials are saved for the future
+        logging.info("Saving the Web API credentials")
         self._config.client_secret = self.web_form.client_secret
         self._config.client_id = self.web_form.client_id
+        self._config.auth_token = self.token.access_token
+        self._config.expiration = self.token.expires_at

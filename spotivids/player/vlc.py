@@ -39,13 +39,13 @@ class VLCPlayer(QFrame):
         try:
             self._vlc = vlc.Instance(vlc_args)
         except NameError:
-            raise Exception("VLC is not installed")
+            raise Exception("VLC is not installed") from None
 
         if self._vlc is None:
-            msg = "VLC couldn't load. This may have been caused by an" \
-                  " incorrect installation or because an nonexistent" \
-                  " parameter was passed with --vlc-args"
-            raise AttributeError(msg)
+            raise AttributeError(
+                "VLC couldn't load. This may have been caused by an incorrect"
+                " installation or because an nonexistent parameter was passed"
+                " with --vlc-args") from None
 
         self._player = self._vlc.media_player_new()
 

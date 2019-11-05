@@ -28,9 +28,11 @@ def choose_platform(config: Config) -> None:
                         format="[%(asctime)s.%(msecs)03d] %(levelname)s:"
                         " %(message)s", datefmt="%H:%M:%S")
 
+    # Initializing the Qt application
     app = QApplication()
     app.setWindowIcon(QIcon(Res.icon))
 
+    # Choosing the player from the config
     if config.use_mpv:
         from spotivids.player.mpv import MpvPlayer
         player = MpvPlayer(config.mpv_flags)
@@ -38,6 +40,7 @@ def choose_platform(config: Config) -> None:
         from spotivids.player.vlc import VLCPlayer
         player = VLCPlayer(config.vlc_args)
 
+    # Opening the window with the GUI
     window = MainWindow(player, config.width, config.height, config.fullscreen)
     window.show()
 
@@ -58,25 +61,16 @@ def choose_platform(config: Config) -> None:
         from spotivids.api.linux import DBusAPI, play_videos_linux
         spotify = DBusAPI(player, youtube, config.lyrics)
         msg = "Waiting for a Spotify session to be ready..."
+        # play_videos_linux() is needed to start the event loop
         window.start(spotify.connect, play_videos_linux, spotify, message=msg)
-
     elif (WINDOWS or MACOS) and not config.use_web_api:
         from spotivids.api.swspotify import SwSpotifyAPI
         spotify = SwSpotifyAPI(player, youtube, config.lyrics)
         msg = "Waiting for a Spotify song to play..."
         window.start(spotify.connect, spotify.play_video, message=msg,
                      event_loop=spotify.event_loop, event_interval=500)
-
     else:
-        from spotivids.api.web import play_videos_web, get_token, WebAPI
-        # Trying to load the env variables
-        if config.client_id is None:
-            config.client_id = os.getenv('SPOTIFY_CLIENT_ID')
-        if config.client_secret is None:
-            config.client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-        if config.redirect_uri is None:
-            config.redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
-
+        from spotivids.api.web import get_token, WebAPI
         # Trying to reuse a previously generated token
         token = get_token(config.auth_token, config.expiration,
                           config.client_id, config.client_secret,
@@ -87,9 +81,8 @@ def choose_platform(config: Config) -> None:
             logging.info("Reusing a previously generated token")
             spotify = WebAPI(player, youtube, token, config.lyrics)
             msg = "Waiting for a Spotify song to play..."
-            window.start(spotify.connect, play_videos_web, spotify, config,
-                         message=msg, event_loop=spotify.event_loop,
-                         event_interval=1000)
+            window.start(spotify.connect, spotify.play_video, message=msg,
+                         event_loop=spotify.event_loop, event_interval=1000)
         else:
             # Otherwise, the credentials are obtained with the GUI. When
             # a valid auth token is ready, the GUI will initialize the API
@@ -102,16 +95,12 @@ def choose_platform(config: Config) -> None:
 
 
 def main() -> None:
-    """
-    Redirects stderr to /dev/null if debug is turned off, since
-    sometimes VLC will throw non-fatal errors even when configured
-    to be quiet.
-    """
-
     # Initialization and parsing of the config from arguments and config file
     config = Config()
     config.parse()
 
+    # Redirects stderr to /dev/null if debug is turned off, since sometimes
+    # VLC will print non-fatal errors even when configured to be quiet.
     if config.debug:
         choose_platform(config)
     else:

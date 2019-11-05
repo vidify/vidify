@@ -45,6 +45,8 @@ class Fonts:
     bigtext = QFont("Inter", 14, QFont.Medium)
     title = QFont("Inter", 24, QFont.Bold)
     title.setItalic(True)
-    header = QFont("Inter", 16, QFont.Bold)
+    header = QFont("Inter", 20, QFont.Bold)
     header.setItalic(True)
+
+    mediumbutton = QFont("Inter", 15, QFont.Bold)
     bigbutton = QFont("Inter", 18, QFont.Bold)
