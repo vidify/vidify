@@ -35,8 +35,8 @@ from spotivids.gui.components import WebBrowser, WebForm
 
 class MainWindow(QWidget):
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 width: int = 800, height: int = 600,
-                 fullscreen: bool = False) -> None:
+                 width: int = 800, height: int = 600, fullscreen: bool = False,
+                 stay_on_top: bool = False) -> None:
         """
         Main window with the GUI and whatever player is being used.
         """
@@ -45,6 +45,11 @@ class MainWindow(QWidget):
         self.setWindowTitle('spotivids')
         self.player = player
 
+        # Setting the window to stay on top
+        if stay_on_top:
+            self.setWindowFlags(Qt.WindowStaysOnTopHint)
+
+        # Setting the fullscreen and window size
         if fullscreen:
             self.showFullScreen()
         else:

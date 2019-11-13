@@ -41,7 +41,8 @@ def choose_platform(config: Config) -> None:
         player = VLCPlayer(config.vlc_args)
 
     # Opening the window with the GUI
-    window = MainWindow(player, config.width, config.height, config.fullscreen)
+    window = MainWindow(player, config.width, config.height, config.fullscreen,
+                        config.stay_on_top)
     window.show()
 
     # The YouTube object to obtain song videos

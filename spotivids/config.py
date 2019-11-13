@@ -46,6 +46,7 @@ class Options:
     debug = Option('Defaults', bool, False)
     lyrics = Option('Defaults', bool, True)
     fullscreen = Option('Defaults', bool, False)
+    stay_on_top = Option('Defaults', bool, False)
     width = Option('Defaults', int, None)
     height = Option('Defaults', int, None)
     use_mpv = Option('Defaults', bool, False)
@@ -114,6 +115,11 @@ class Config:
             "-f", "--fullscreen",
             action="store_true", dest="fullscreen", default=None,
             help="play videos in fullscreen mode")
+
+        self._argparser.add_argument(
+            "--stay-on-top",
+            action="store_true", dest="stay_on_top", default=None,
+            help="the window will stay on top of all apps.")
 
         self._argparser.add_argument(
             "--use-mpv",

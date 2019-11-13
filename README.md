@@ -62,6 +62,7 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
 |----------------------------------|---------------------|
 | `-n`, `--no-lyrics`              | do not print lyrics. |
 | `-f`, `--fullscreen`             | play videos in fullscreen mode. |
+| `--stay-on-top`                  | the window will stay on top of other apps. |
 | `--width <WIDTH>`                | set the width for the downloaded videos (this is useful to play low quality videos if your connection isn't good). |
 | `--height <HEIGHT>`              | set the height for the downloaded videos. |
 | `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation section](#installation) for more. |
