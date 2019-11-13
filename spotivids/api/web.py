@@ -162,10 +162,13 @@ def get_token(auth_token: str, expiration: int, client_id: str = None,
     # Checking that the credentials are valid
     for c in (auth_token, expiration, client_id, client_secret, redirect_uri):
         if c in (None, ''):
+            logging.info("Rejecting the token because one of the credentials"
+                         " provided are empty.")
             return None
 
-    # Checking if the token is expired
+    # Checking if the token is expired (less than a minute remaining)
     if (expiration - int(time.time())) < 60:
+        logging.info("Rejecting the token because it's expired")
         return None
 
     # Generating a RefreshingToken with the parameters
@@ -183,8 +186,11 @@ def get_token(auth_token: str, expiration: int, client_id: str = None,
     # an error could be raised from the requests package, or the returned
     # value could be None
     try:
-        Spotify(token)
-    except (ConnectionNotReady, requests.exceptions.HTTPError):
+        s = Spotify(token)
+        s.playback_currently_playing()
+    except (ConnectionNotReady, requests.exceptions.HTTPError) as e:
+        logging.info("Rejecting the token because of an error while trying"
+                     f" to connect to Spotify: {e}")
         return None
 
     # If it got here, it means the generated token is valid

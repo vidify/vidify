@@ -1,6 +1,6 @@
 """
 This module contains commonly used components so that their usage and
-initialization is easier.
+initialization is easier. (specially the Web API authentication widgets).
 """
 
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
@@ -10,11 +10,6 @@ from PySide2.QtCore import Qt, QSize, QUrl
 from PySide2.QtWebEngineWidgets import QWebEngineView
 
 from spotivids.gui import Fonts, Colors, Res
-
-
-# TODO:
-# Function to show error messages in the web form
-# Go back button for web browser
 
 
 class InputField(QLineEdit):
@@ -39,7 +34,7 @@ class InputField(QLineEdit):
         for instance.
         """
 
-        self.setStyleSheet(f"background-color: {Colors.lightred}")
+        self.setStyleSheet(f"background-color: {Colors.lighterror}")
 
     def undo_highlight(self):
         """
@@ -129,6 +124,7 @@ class WebForm(QWidget):
         self.setup_text()
         self.setup_inputs(client_id, client_secret)
         self.setup_button()
+        self.setup_error_msg()
 
     def setup_text(self) -> None:
         """
@@ -163,6 +159,19 @@ class WebForm(QWidget):
         self.layout.addWidget(self.input_client_id)
         self.layout.addWidget(self.input_client_secret)
 
+    def setup_error_msg(self) -> None:
+        """
+        Creates a QLabel widget under the input fields to show error messages.
+        It's hidden by default.
+        """
+
+        self.error_msg = QLabel()
+        self.error_msg.setWordWrap(True)
+        self.error_msg.setFont(Fonts.text)
+        self.error_msg.setStyleSheet(f"color: {Colors.darkerror};")
+        self.error_msg.setAlignment(Qt.AlignHCenter)
+        self.layout.addWidget(self.error_msg)
+
     def setup_button(self) -> None:
         """
         Setting up the submit button.
@@ -190,3 +199,19 @@ class WebForm(QWidget):
         """
 
         return self.input_client_secret.text().strip()
+
+    def hide_error(self) -> None:
+        """
+        Hides and removes the error message under the input fields.
+        """
+
+        self.error_msg.hide()
+        self.error_msg.setText()
+
+    def show_error(self, msg: str) -> None:
+        """
+        Displays an error mesage under the input fields.
+        """
+
+        self.error_msg.show()
+        self.error_msg.setText(msg)

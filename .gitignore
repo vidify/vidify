@@ -9,6 +9,9 @@ __pycache__/
 # venv
 pyvenv.cfg
 bin/
+etc/
+include/
+share/
 lib64
 
 # vim

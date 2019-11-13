@@ -23,6 +23,7 @@ from PySide2.QtGui import QFontDatabase
 from PySide2.QtCore import Qt, QTimer, QCoreApplication
 from spotipy import Credentials, Scope, scopes
 from spotipy.util import parse_code_from_url
+from spotipy.auth import OAuthError
 
 from spotivids.api import ConnectionNotReady
 from spotivids.api.web import WebAPI
@@ -293,8 +294,17 @@ class MainWindow(QWidget):
         except KeyError as e:
             logging.info("ERROR:" + str(e))
         else:
-            # Now the user token has to be requested to Spotify
-            self.token = self.creds.request_user_token(code, self.scope)
+            # Now the user token has to be requested to Spotify, while
+            # checking for errors to make sure the credentials were correct.
+            # This will only happen with the client secret because it's only
+            # checked when requesting the user token.
+            try:
+                self.token = self.creds.request_user_token(code, self.scope)
+            except OAuthError as e:
+                self.browser.hide()
+                self.web_form.show()
+                self.web_form.show_error(str(e))
+                return
             # Removing the GUI elements used to obtain the credentials
             self.layout.removeWidget(self.web_form)
             self.layout.removeWidget(self.browser)

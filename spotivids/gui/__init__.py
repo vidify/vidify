@@ -18,7 +18,8 @@ class Colors:
     light = '#eff0eb'
     fg = '#282828'
     dark = '#282828'
-    lightred = '#fc9086'
+    lighterror = '#fc9086'
+    darkerror = '#e33120'
 
 
 class Res:
