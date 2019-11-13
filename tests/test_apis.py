@@ -77,9 +77,9 @@ class APITest(unittest.TestCase):
         config = Config()
         with unittest.mock.patch('sys.argv', ['']):
             config.parse()
-        token = get_token(config.auth_token, config.expiration,
-                          config.client_id, config.client_secret,
-                          config.redirect_uri)
+        token = get_token(config.auth_token, config.refresh_token,
+                          config.expiration, config.client_id,
+                          config.client_secret, config.redirect_uri)
         web = WebAPI(self.vlc, self.youtube, token)
         web.connect()
         web._refresh_metadata()

@@ -73,9 +73,9 @@ def choose_platform(config: Config) -> None:
     else:
         from spotivids.api.web import get_token, WebAPI
         # Trying to reuse a previously generated token
-        token = get_token(config.auth_token, config.expiration,
-                          config.client_id, config.client_secret,
-                          config.redirect_uri)
+        token = get_token(config.auth_token, config.refresh_token,
+                          config.expiration, config.client_id,
+                          config.client_secret, config.redirect_uri)
 
         if token is not None:
             # If the previous token was valid, the API can already start

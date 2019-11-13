@@ -142,13 +142,17 @@ class WebAPI:
         self._event_timestamp = time.time()
 
 
-def get_token(auth_token: str, expiration: int, client_id: str = None,
-              client_secret: str = None, redirect_uri: str = None
+def get_token(auth_token: str, refresh_token: str, expiration: int,
+              client_id: str, client_secret: str, redirect_uri: str
               ) -> RefreshingToken:
     """
     Tries to generate a self-refreshing token from the parameters. They
     could be anything so there have to be several checks to make sure the
     returned token is valid. Otherwise, this function will return None
+
+    `refresh_token` is a special token needed to refresh `auth_token`. It's
+    needed to create the RefreshingToken so that it automatically refreshes
+    itself when it's expired.
     """
 
     # Trying to use the env variables
@@ -160,24 +164,21 @@ def get_token(auth_token: str, expiration: int, client_id: str = None,
         redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
 
     # Checking that the credentials are valid
-    for c in (auth_token, expiration, client_id, client_secret, redirect_uri):
+    for c in (auth_token, refresh_token, expiration, client_id, client_secret,
+              redirect_uri):
         if c in (None, ''):
             logging.info("Rejecting the token because one of the credentials"
-                         " provided are empty.")
+                         " provided is empty.")
+            print(refresh_token)
             return None
 
-    # Checking if the token is expired (less than a minute remaining)
-    if (expiration - int(time.time())) < 60:
-        logging.info("Rejecting the token because it's expired")
-        return None
-
     # Generating a RefreshingToken with the parameters
-    scope = Scope(scopes.user_read_currently_playing)
     data = {
         'access_token': auth_token,
         'token_type': 'Bearer',
-        'scope': scope,
-        'expires_in': expiration - int(time.time())
+        'scope': Scope(scopes.user_read_currently_playing),
+        'expires_in': expiration - int(time.time()),
+        'refresh_token': refresh_token
     }
     creds = Credentials(client_id, client_secret, redirect_uri)
     token = RefreshingToken(Token(data), creds)

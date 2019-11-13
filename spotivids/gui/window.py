@@ -342,4 +342,5 @@ class MainWindow(QWidget):
         self._config.client_secret = self.web_form.client_secret
         self._config.client_id = self.web_form.client_id
         self._config.auth_token = self.token.access_token
+        self._config.refresh_token = self.token.refresh_token
         self._config.expiration = self.token.expires_at

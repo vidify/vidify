@@ -58,6 +58,7 @@ class Options:
     client_secret = Option('WebAPI', str, None)
     redirect_uri = Option('WebAPI', str, 'http://localhost:8888/callback/')
     auth_token = Option('WebAPI', str, None)
+    refresh_token = Option('WebAPI', str, None)
     expiration = Option('WebAPI', int, None)
 
 
