@@ -22,7 +22,7 @@ from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
 from PySide2.QtCore import Qt, QTimer, QCoreApplication
 from spotipy import Credentials, Scope, scopes
-from spotipy.util import parse_code_from_url
+from spotipy.util import parse_code_from_url, RefreshingToken
 from spotipy.auth import OAuthError
 
 from spotivids.api import ConnectionNotReady
@@ -298,24 +298,29 @@ class MainWindow(QWidget):
             code = parse_code_from_url(url)
         except KeyError as e:
             logging.info("ERROR:" + str(e))
-        else:
-            # Now the user token has to be requested to Spotify, while
-            # checking for errors to make sure the credentials were correct.
-            # This will only happen with the client secret because it's only
-            # checked when requesting the user token.
-            try:
-                self.token = self.creds.request_user_token(code, self.scope)
-            except OAuthError as e:
-                self.browser.hide()
-                self.web_form.show()
-                self.web_form.show_error(str(e))
-                return
-            # Removing the GUI elements used to obtain the credentials
-            self.layout.removeWidget(self.web_form)
-            self.layout.removeWidget(self.browser)
+            return
+
+        # Now the user token has to be requested to Spotify, while
+        # checking for errors to make sure the credentials were correct.
+        # This will only happen with the client secret because it's only
+        # checked when requesting the user token.
+        try:
+            regular_token = self.creds.request_user_token(code, self.scope)
+        except OAuthError as e:
             self.browser.hide()
-            # Finally starting the Web API
-            self.start_web_api()
+            self.web_form.show()
+            self.web_form.show_error(str(e))
+            return
+
+        # A RefreshingToken is used instead of a regular Token so that
+        # it's automatically refreshed before it expires.
+        self.token = RefreshingToken(regular_token, self.creds)
+        # Removing the GUI elements used to obtain the credentials
+        self.layout.removeWidget(self.web_form)
+        self.layout.removeWidget(self.browser)
+        self.browser.hide()
+        # Finally starting the Web API
+        self.start_web_api()
 
     def start_web_api(self) -> None:
         """

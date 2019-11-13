@@ -28,7 +28,7 @@ from spotivids.youtube import YouTube
 
 class WebAPI:
     def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 youtube: YouTube, token: Union[Token, RefreshingToken],
+                 youtube: YouTube, token: RefreshingToken,
                  show_lyrics: bool = True) -> None:
         """
         It includes `player`, the VLC or mpv window to play videos and control
