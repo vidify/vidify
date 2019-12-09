@@ -22,7 +22,7 @@ exec(compile(open('spotify_videos/version.py').read(),
 setup(
     name='spotify-videos',
     version=__version__,
-    packages=['spotify-videos'],
+    packages=['spotify_videos'],
     description='Simple tool to show Youtube music videos and lyrics'
                 ' for the playing Spotify songs',
     url='https://github.com/marioortizmanero/spotify-music-videos',
