@@ -1,9 +1,61 @@
 """
 This init module contains functions used throughout the different APIs.
+
+It's also used to list, choose and control the APIs in a generic way, so that
+they can be used the same throughout the entire module.
 """
 
 import re
-from typing import Tuple
+from typing import Tuple, Callable, Optional
+from types import ModuleType
+from enum import Enum
+
+from spotivids import Platform
+
+
+class APIs(Enum):
+    """
+    Simple information about the API shown to the user to choose the initial
+    platform. The more detailed information about initializing the API and such
+    is inside the API implementation file, because importing the module would
+    cause issues with other imports inside it.
+    """
+
+    def __new__(self, value: int, description: str, icon: Optional[str],
+                platforms: Tuple[Platform], module: str) -> None:
+        obj = object.__new__(cls)
+        obj._value_ = value
+        obj.description = description
+        obj.icon = icon
+        # A tuple containing the supported platforms for this API. That way,
+        # it's only shown in these.
+        obj.platforms = platforms
+        # The module location to import (for dependency injection).
+        obj.module = module
+        return obj
+
+    SPOTIFY_LINUX = APIData(
+        1,
+        "Spotify for Linux",
+        "The official Spotify client for Linux and BSD. Recommended.",
+        None,
+        (Platform.LINUX, Platform.BSD)
+        "spotivids.api.linux")
+    SWSPOTIFY = APIData(
+        2,
+        "Spotify for Windows or Mac OS",
+        "The official Spotify client for Windows and Mac OS. Recommended.",
+        None,
+        (Platform.WINDOWS, Platform.MACOS),
+        "spotivids.api.swspotify")
+    SPOTIFY_WEB = APIData(
+        3,
+        "Spotify Web",
+        "The official Spotify Web API. Please read the installation guide"
+        " for more details on how to set it up.",
+        None,
+        [p for p in Platform],  # Supports all platforms
+        "spotivids.api.web")
 
 
 class ConnectionNotReady(Exception):

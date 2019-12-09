@@ -40,8 +40,8 @@ class WebAPI:
         self.player = player
         self.artist = ""
         self.title = ""
-        self._position = 0
         self.is_playing = False
+        self._position = 0
 
         self._youtube = youtube
         self._token = token

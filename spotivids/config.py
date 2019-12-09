@@ -43,17 +43,32 @@ class Options:
     and their default value.
     """
 
+    # Debug flag to show useful messages when things go wrong, or for the
+    # developers to code.
     debug = Option('Defaults', bool, False)
+    # Showing lyrics in the terminal.
     lyrics = Option('Defaults', bool, True)
+    # Starting the app fullscreen.
     fullscreen = Option('Defaults', bool, False)
+    # Window that always stays on top of others.
     stay_on_top = Option('Defaults', bool, False)
+    # Initial window's width.
     width = Option('Defaults', int, None)
+    # Initial window's height.
     height = Option('Defaults', int, None)
-    use_mpv = Option('Defaults', bool, False)
+    # API used. If it's None, the initial menu to choose an API will be shown
+    # to the user. The option's contents should be one of the names listed in
+    # `spotivids.api`'s `APIs` enumeration (the __init__.py file).
+    api = Option('Defaults', str, None)
+    # Player used. By default it's VLC. This option's contents should be one
+    # of the names listed in `spotivids.player`'s `Players` enumeration (the
+    # __init__.py file).
+    player = Option('Defaults', str, "vlc")
+    # Arguments and options provided for the players.
     vlc_args = Option('Defaults', str, None)
     mpv_flags = Option('Defaults', str, None)
 
-    use_web_api = Option('WebAPI', bool, False)
+    # Using the web API, and its credentials/data.
     client_id = Option('WebAPI', str, None)
     client_secret = Option('WebAPI', str, None)
     redirect_uri = Option('WebAPI', str, 'http://localhost:8888/callback/')
@@ -123,9 +138,11 @@ class Config:
             help="the window will stay on top of all apps.")
 
         self._argparser.add_argument(
-            "--use-mpv",
-            action="store_true", dest="use_mpv", default=None,
-            help="use mpv as the video player")
+            "-p", "--player",
+            action="store", dest="player", default=None,
+            help="select the player to be used. Plase read the installation"
+            " guide for a list with the available players. By default, it's"
+            " VLC.")
 
         self._argparser.add_argument(
             "--width",
@@ -138,9 +155,10 @@ class Config:
             help="set the maximum height for the player")
 
         self._argparser.add_argument(
-            "-w", "--use-web-api",
-            action="store_true", dest="use_web_api", default=None,
-            help="forcefully use Spotify's web API")
+            "-a", "--api",
+            action="store", dest="api", default=None,
+            help="select the player to be used. Please read the installation"
+            " guide for a list with the available APIs.")
 
         self._argparser.add_argument(
             "--client-id",
