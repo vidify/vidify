@@ -125,6 +125,15 @@ You will be prompted to paste the resulting URL that was opened in your browser 
 ### Spotivids doesn't work correctly with Python 3.8
 Qt started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 
+### `ModuleNotFoundError: No module named 'gi'` when using a virtual environment
+For some reason, `python-gobject` may not be available inside a virtual environment. You can create a symlink inside it with:
+
+```bash
+ln -s "/usr/lib/python3.8/site-packages/gi" "$venv_dir/lib/python3.8/site-packages"
+```
+
+or install `gobject-introspection` (or the equivalent package name) and then run `pip install pygobject` to install it with pip inside the virtual environment.
+
 ---
 
 ## Development
