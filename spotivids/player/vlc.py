@@ -10,6 +10,7 @@ in comparison to the Qt player.
 """
 
 import logging
+from typing import Optional
 
 from .. import LINUX, WINDOWS, MACOS
 
@@ -18,7 +19,7 @@ from PySide2.QtWidgets import QFrame
 
 
 class VLCPlayer(QFrame):
-    def __init__(self, vlc_args: str = "") -> None:
+    def __init__(self, vlc_args: Optional[str] = None) -> None:
         """
         It inherits from a QFrame so that it can be directly inserted into
         the Qt GUI.

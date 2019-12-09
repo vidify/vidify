@@ -10,7 +10,7 @@ import os
 import errno
 import argparse
 import configparser
-from typing import Union
+from typing import Optional, Union
 from dataclasses import dataclass
 
 from appdirs import AppDirs
@@ -222,7 +222,7 @@ class Config:
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
-    def parse(self, config_path: str = None) -> None:
+    def parse(self, config_path: Optional[str] = None) -> None:
         """
         Parses the options from the arguments and config file.
 

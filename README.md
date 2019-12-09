@@ -23,6 +23,7 @@
     * [The config file](#the-config-file)
 * [The web API](#the-web-api)
     * [Obtaining your client ID and client secret](#obtaining-your-client-id-and-client-secret)
+* [FAQ](#faq)
 * [Development resources](#development)
     * [Tests](#tests)
     * [Current Limitations](#current-limitations)
@@ -118,6 +119,11 @@ Finally, you can use arguments: `spotivids -w --client-id <CLIENT_ID> --client-s
 4. You can now copy your Client ID and Client Secret and add them when you call `spotivids` by passing them as arguments or saving it directly into your config file, as shown above.
 
 You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth info will be saved into the config file for future usage.
+
+## FAQ
+
+### Spotivids doesn't work correctly with Python 3.8
+Qt started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 
 ---
 

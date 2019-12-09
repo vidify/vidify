@@ -16,7 +16,7 @@ obtain the authorization token.
 
 import types
 import logging
-from typing import Union, Callable
+from typing import Union, Callable, Optional, Tuple
 
 from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
@@ -68,15 +68,17 @@ class MainWindow(QWidget):
         for font in Res.fonts:
             font_db.addApplicationFont(font)
 
-    def start(self, connect: Callable, init: Callable, *init_args: any,
-              event_loop: Callable = None, event_interval: int = 1000,
-              message: str = "Waiting for connection") -> None:
+    def start(self, connect: Callable([], None),
+              init: Callable([Tuple[any]], None),
+              *init_args: any, message: str = "Waiting for connection",
+              event_loop: Optional[Callable([], None)] = None,
+              event_interval: int = 1000) -> None:
         """
         Waits for a Spotify session to be opened or for a song to play.
         Times out after 30 seconds to avoid infinite loops or too many
-        API/process requests.
+        API/process requests. A custom message will be shown meanwhile.
 
-        If the connection was succesful, the `init` function will be called
+        If a `connect` call was succesful, the `init` function will be called
         with `init_args` as arguments. Otherwise, the program is closed.
 
         An event loop can also be initialized by passing `event_loop` and

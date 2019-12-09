@@ -4,14 +4,15 @@ That way, the video can be played directly with a video player like VLC
 or mpv.
 """
 
+from typing import Optional
 import youtube_dl
 
 from spotivids import format_name
 
 
 class YouTube:
-    def __init__(self, debug: bool = False, width: int = None,
-                 height: int = None) -> None:
+    def __init__(self, debug: bool = False, width: Optional[int] = None,
+                 height: Optional[int] = None) -> None:
         """
         YouTube class with config and function to get the direct url.
         """

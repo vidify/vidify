@@ -8,6 +8,7 @@ straightforward, but it's mostly used only on Linux systems.
 """
 
 import logging
+from typing import Optional
 
 try:
     from mpv import MPV
@@ -20,7 +21,7 @@ from PySide2.QtWidgets import QFrame
 
 
 class MpvPlayer(QFrame):
-    def __init__(self, flags: str = None) -> None:
+    def __init__(self, flags: Optional[str] = None) -> None:
         """
         It inherits from a QFrame so that it can be directly added as a widget
         in the Qt GUI.
