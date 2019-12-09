@@ -1,29 +1,24 @@
 """
-The implementation of the VLC player embedded inside the GUI.
-
-This module should be the skeleton of any other player implementation,
-meaning that the functions usage and behavior should be exactly the same.
-
 VLC is the most popular cross-platform video player. It contains all the
 codecs needed to easily play videos and can play a video from an URL,
 in comparison to the Qt player.
+
+For more information about the player modules, please check out
+spotivids.player.generic, which contains the abstract base class of which any
+player implementation inherits, and an explanation in detail of the methods.
 """
 
 import logging
 
-from .. import LINUX, WINDOWS, MACOS
-
 import vlc
 from PySide2.QtWidgets import QFrame
+
+from spotivids import Platform, CURRENT_PLATFORM
+from spotivids.player.generic import PlayerBase
 
 
 class VLCPlayer(QFrame):
     def __init__(self, vlc_args: str = "") -> None:
-        """
-        It inherits from a QFrame so that it can be directly inserted into
-        the Qt GUI.
-        """
-
         super().__init__()
 
         if vlc_args is None:
@@ -55,12 +50,6 @@ class VLCPlayer(QFrame):
 
     @pause.setter
     def pause(self, do_pause: bool) -> None:
-        """
-        The video will be played if `do_pause` is true, or it will be paused
-        if it's false. If it's already in the requested status, nothing
-        is done.
-        """
-
         # Saved in variable to not call self._player.is_playing() twice
         is_paused = self.pause
         logging.info("Playing/Pausing video")
@@ -71,36 +60,23 @@ class VLCPlayer(QFrame):
 
     @property
     def position(self) -> int:
-        """
-        Getting the position of the VLC player in milliseconds
-        """
-
         return self._player.get_time()
 
     @position.setter
     def position(self, ms: int) -> None:
-        """
-        Setting the position in milliseconds
-        """
-
         logging.info(f"Time set to {ms} milliseconds")
         self._player.set_time(ms)
 
-    def start_video(self, url: str, is_playing: bool = True) -> None:
-        """
-        Starts a new video in the VLC player. It can be directly played
-        or paused with `is_playing` to avoid extra calls.
-        """
-
+    def start_video(self, media: str, is_playing: bool = True) -> None:
         logging.info(f"Starting new video")
-        if LINUX:
+        if CURRENT_PLATFORM in (Platform.LINUX, Platform.BSD):
             self._player.set_xwindow(self.winId())
-        elif WINDOWS:
+        elif CURRENT_PLATFORM == Platform.WINDOWS:
             self._player.set_hwnd(self.winId())
-        elif MACOS:
+        elif CURRENT_PLATFORM == Platform.MACOS:
             self._player.set_nsobject(int(self.winId()))
 
-        self.media = self._vlc.media_new(url)
+        self.media = self._vlc.media_new(media)
         self.media.get_mrl()
         self._player.set_media(self.media)
         # VLC starts paused

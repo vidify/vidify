@@ -33,9 +33,10 @@ class SwSpotifyAPI:
         to play the videos.
         """
 
+        self.player = player
         self.artist = ""
         self.title = ""
-        self.player = player
+        self.is_playing = False
         self._youtube = youtube
         self._show_lyrics = show_lyrics
 

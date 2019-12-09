@@ -6,6 +6,7 @@ also initialized here.
 import os
 import sys
 import logging
+from importlib import import_module
 
 from PySide2.QtWidgets import QApplication
 from PySide2.QtGui import QIcon
@@ -13,11 +14,48 @@ from PySide2.QtGui import QIcon
 from spotivids import stderr_redirected, BSD, LINUX, MACOS, WINDOWS
 from spotivids.config import Config
 from spotivids.youtube import YouTube
+from spotivids.player import Players, PlayerNotFoundError
+from spotivids.player.generic import PlayerBase
+from spotivids.api import APIs
+from spotivids.api.generic import APIBase
 from spotivids.gui import Res
 from spotivids.gui.window import MainWindow
 
 
-def choose_platform(config: Config) -> None:
+def choose_player(config: Config) -> PlayerBase:
+    """
+    Choosing a player from the list.
+    """
+
+    def initialize_player(player: Players) -> PlayerBase:
+        """
+        Initializing an abstract player instance with the information inside
+        the `player` enumeration object.
+        """
+
+        # Importing the module first
+        mod = import_module(player.module)
+        # Then obtaining the player class
+        cls = getattr(mod, player.class_name)
+        # No other arguments are needed for now, so all this does is initialize
+        # the player with the config flags (if present).
+        try:
+            flags = getattr(config, player.flags_name)
+        except AttributeError:
+            obj = cls()
+        finally:
+            obj = cls(flags)
+        return obj
+
+    # Finding the config player and initializing it.
+    for player in Players:
+        if config.player.lower() == player.name.lower():
+            return initialize_player(player)
+
+    raise PlayerNotFoundError
+
+
+def choose_platform(config: Config, player: PlayerBase) -> None:
     """
     Main function: chooses a platform and player and starts the corresponding
     API function. Also initializes the logger, youtube and GUI.
@@ -32,14 +70,6 @@ def choose_platform(config: Config) -> None:
     app = QApplication()
     app.setWindowIcon(QIcon(Res.icon))
 
-    # Choosing the player from the config
-    if config.use_mpv:
-        from spotivids.player.mpv import MpvPlayer
-        player = MpvPlayer(config.mpv_flags)
-    else:
-        from spotivids.player.vlc import VLCPlayer
-        player = VLCPlayer(config.vlc_args)
-
     # Opening the window with the GUI
     window = MainWindow(player, config.width, config.height, config.fullscreen,
                         config.stay_on_top)
@@ -47,6 +77,13 @@ def choose_platform(config: Config) -> None:
 
     # The YouTube object to obtain song videos
     youtube = YouTube(config.debug, config.width, config.height)
+
+    # TODO
+    available = []
+    for API in APIData:
+        if CURRENT_PLATFORM in API.platforms:
+            # module = importlib.importlib(API.module)
+            available.append(API)
 
     # Choosing the platform: initializes the corresponding API and calls
     # window.start(). This does three main things:
@@ -95,18 +132,47 @@ def choose_platform(config: Config) -> None:
     sys.exit(app.exec_())
 
 
+@contextmanager
+def stderr_redirected(to: str = os.devnull) -> None:
+    """
+    Redirecting stderr without leaks. This is used because sometimes VLC
+    will print non-critical error messages even when told to be quiet.
+    """
+
+    fd = sys.stderr.fileno()
+
+    def _redirect_stderr(to: str) -> None:
+        sys.stderr.close()  # + implicit flush()
+        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
+        sys.stderr = os.fdopen(fd, 'w')  # Python writes to fd
+
+    with os.fdopen(os.dup(fd), 'w') as old_stderr:
+        with open(to, 'w') as file:
+            _redirect_stderr(to=file)
+        try:
+            # Allow code to be run with the redirected stderr
+            yield
+        finally:
+            # Restore stderr. Some flags may change
+            _redirect_stderr(to=old_stderr)
+
+
 def main() -> None:
     # Initialization and parsing of the config from arguments and config file
     config = Config()
     config.parse()
 
+    def init() -> None:
+        player = choose_player(config)
+        choose_api(config, p)
+
     # Redirects stderr to /dev/null if debug is turned off, since sometimes
     # VLC will print non-fatal errors even when configured to be quiet.
     if config.debug:
-        choose_platform(config)
+        init()
     else:
         with stderr_redirected():
-            choose_platform(config)
+            init()
 
 
 if __name__ == '__main__':

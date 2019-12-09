@@ -8,7 +8,7 @@ exec(compile(open('spotivids/version.py').read(),
 setup(
     name='spotivids',
     version=__version__,
-    packages=find_packages(),
+    packages=['spotivids'],
     description='Watch music videos and lyrics for the playing Spotify songs',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
@@ -39,7 +39,6 @@ setup(
         'spotipy>=3.0.0',
         'PySide2',
         'pydbus; platform_system=="Linux"',
-        'pygobject; platform_system=="Linux"',
         'SwSpotify>=1.1.1; platform_system=="Windows" or platform_system=="Darwin"'
     ],
     extras_require={

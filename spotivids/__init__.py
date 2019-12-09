@@ -6,38 +6,32 @@ logger, cross-platform variables...
 import os
 import sys
 from contextlib import contextmanager
+from enum import Enum
 
 
-# Useful global variables for cross-platform and utils
-BSD = sys.platform.find('bsd') != -1
-LINUX = sys.platform.startswith('linux')
-MACOS = sys.platform.startswith('darwin')
-WINDOWS = sys.platform.startswith('win')
-
-
-@contextmanager
-def stderr_redirected(to: str = os.devnull) -> None:
+class Platform(Enum):
     """
-    Redirecting stderr without leaks. This is used because sometimes VLC
-    will print non-critical error messages even when told to be quiet.
+    Listing the supported platforms.
     """
 
-    fd = sys.stderr.fileno()
+    LINUX = 1
+    BSD = 2
+    MACOS = 3
+    WINDOWS = 4
+    UNKNOWN = 5
 
-    def _redirect_stderr(to: str) -> None:
-        sys.stderr.close()  # + implicit flush()
-        os.dup2(to.fileno(), fd)  # fd writes to 'to' file
-        sys.stderr = os.fdopen(fd, 'w')  # Python writes to fd
 
-    with os.fdopen(os.dup(fd), 'w') as old_stderr:
-        with open(to, 'w') as file:
-            _redirect_stderr(to=file)
-        try:
-            # Allow code to be run with the redirected stderr
-            yield
-        finally:
-            # Restore stderr. Some flags may change
-            _redirect_stderr(to=old_stderr)
+# Getting the current platform as a global variable
+if sys.platform.startswith('linux'):
+    CURRENT_PLATFORM = Platform.LINUX
+elif sys.platform.startswith('darwin'):
+    CURRENT_PLATFORM = Platform.MACOS
+elif sys.platform.startswith('win'):
+    CURRENT_PALTFORM = Platform.WINDOWS
+elif sys.platform.find('bsd') != -1:
+    CURRENT_PLATFORM = Platform.BSD
+else:
+    CURRENT_PLATFORM = Platform.UNKNOWN
 
 
 def format_name(artist: str, title: str) -> str:
