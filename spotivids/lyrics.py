@@ -10,7 +10,7 @@ free, in comparison to Genius.
 
 import lyricwikia
 
-from spotivids import format_name, WINDOWS
+from spotivids import format_name, Platform, CURRENT_PLATFORM
 
 
 # The different error messages returned by LyricWikia in order to override
@@ -30,17 +30,17 @@ def print_lyrics(artist: str, title: str) -> None:
     """
 
     name = format_name(artist, title)
-
-    if WINDOWS:
-        print(f">> {name}")
+    if CURRENT_PLATFORM == Platform.WINDOWS:
+        name = f">> {name}"
     else:
-        print(f"\033[4m{name}\033[0m")
+        name = f"\033[4m{name}\033[0m"
 
     try:
-        msg = lyricwikia.get_lyrics(artist, title) + "\n"
+        lyrics = lyricwikia.get_lyrics(artist, title) + "\n"
     except (lyricwikia.LyricsNotFound, AttributeError):
-        msg = "No lyrics found\n"
+        lyrics = "No lyrics found\n"
+    else:
+        if lyrics in ERROR_MESSAGES:
+            lyrics = "No lyrics found\n"
 
-    if msg in ERROR_MESSAGES:
-        msg = "No lyrics found\n"
-    print(msg)
+    return name + lyrics

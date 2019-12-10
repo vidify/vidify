@@ -3,9 +3,10 @@ This module implements the DBus API to obtain metadata about the Spotify
 player. It's intended for Linux but it should also work on BSD and other
 unix-like systems with DBus.
 
-The API is controlled from the `play_videos_linux` function. The overall
-usage and bevhavior of the class should be the same for all the APIs so
-that they can be used interchangeably.
+This implementation is based on the generic implementation of an API. Please
+check out spotivids.api.generic for more details about how API modules
+work. This module only contains comments specific to the API, so it may be
+confusing at first glance.
 """
 
 import sys
@@ -16,34 +17,47 @@ from typing import Tuple, Union
 import pydbus
 from gi.repository import GLib
 
+from spotivids.config import Config
 from spotivids.api import split_title, ConnectionNotReady
-from spotivids.lyrics import print_lyrics
-from spotivids.youtube import YouTube
+from spotivids.api.generic import APIBase
 
 
-class DBusAPI:
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 youtube: YouTube, show_lyrics: bool = True) -> None:
-        """
-        It includes `player`, the VLC or mpv window to play videos and control
-        it when the song status changes. The `Youtube` object is also needed
-        to play the videos.
-        """
+class DBusAPI(APIBase):
+    artist: str = None
+    title: str = None
+    is_playing: bool = None
 
-        self.player = player
+    def __init__(self) -> None:
         self.artist = ""
         self.title = ""
         self.is_playing = False
-        self._youtube = youtube
-        self._show_lyrics = show_lyrics
+
+    def __del__(self) -> None:
+        """
+        Safely disconnects from the bus and loop.
+        """
+
+        logging.info("Disconnecting")
+        try:
+            self._disconnect_obj.disconnect()
+        except AttributeError:
+            pass
+
+    @property
+    def position(self) -> int:
+        """
+        This feature isn't available for the Spotify DBus API because Spotify
+        doesn't currently support the MPRIS property `Position`, so
+        `NotImplementedError` is raised instead to keep consistency with the
+        rest of the APIs.
+        """
+
+        raise NotImplementedError
 
     def connect(self) -> None:
         """
         Connects to the DBus session. Tries to access the proxy object
         and configures the call on property changes.
-
-        A `ConnectionNotReady` exception is thrown if no Spotify bus
-        exists or if no song is playing.
         """
 
         self._bus = pydbus.SessionBus()
@@ -60,40 +74,22 @@ class DBusAPI:
         except IndexError:
             raise ConnectionNotReady("No song is currently playing")
 
-    def disconnect(self) -> None:
-        """
-        Safely disconnects from the bus and loop.
-        """
-
-        logging.info("Disconnecting")
-        try:
-            self._disconnect_obj.disconnect()
-            self._loop.quit()
-        except AttributeError:
-            pass
-
     def start_event_loop(self) -> None:
         """
-        Starts the GLib event loop. It is asynchronous, so unlike the web API
-        or the SwSpotify API, it doesn't need interaction with Qt.
+        Starts the asynchronous GLib event loop.
         """
 
-        self._loop = GLib.MainLoop()
         self._disconnect_obj = self._obj.PropertiesChanged.connect(
             self._on_properties_changed)
 
-    def wait(self) -> None:
+    def event_loop(self) -> None:
         """
-        Waits for events in the DBus main loop until KeyboardInterupt
-        is detected or a new song starts
+        The DBus event loop is handled by GLib, so a manual function to check
+        for updates isn't needed. This raises `NotImplementedError` instead
+        to keep consistency with the rest of the APIs.
         """
 
-        logging.info("Starting loop")
-        try:
-            self._loop.run()
-        except KeyboardInterrupt:
-            self.disconnect()
-            sys.exit(0)
+        raise NotImplementedError
 
     def _format_metadata(self, metadata: dict) -> Tuple[str, str]:
         """
@@ -114,8 +110,7 @@ class DBusAPI:
 
     def _refresh_metadata(self) -> None:
         """
-        Refreshes the metadata and status of the player as a tuple
-        first the artist and then the title.
+        Refreshes the metadata and status of the player as a tuple.
         """
 
         metadata = self.player_interface.Metadata
@@ -127,33 +122,10 @@ class DBusAPI:
     def _bool_status(self, status: str) -> bool:
         """
         Converts a status string from DBus to a bool, to keep consistency
-        with the other API status variables and because using booleans is
-        easier and less confusing.
+        with the other API status variables.
         """
 
         return status.lower() == 'playing'
-
-    def play_video(self) -> None:
-        """
-        Plays the currently playing song's music video.
-
-        Spotify doesn't currently support the MPRIS property `Position`
-        so the starting offset is calculated manually and may be a bit rough.
-        """
-
-        logging.info("Starting new video")
-        start_time = time.time_ns()
-        url = self._youtube.get_url(self.artist, self.title)
-        self.player.start_video(url, self.is_playing)
-
-        # Waits until the player starts the video to set the offset
-        if self.is_playing:
-            while self.player.position == 0:
-                pass
-            self.player.position = int((time.time_ns() - start_time) / 10**9)
-
-        if self._show_lyrics:
-            print_lyrics(self.artist, self.title)
 
     def _on_properties_changed(self, interface: str, properties: dict,
                                signature: list) -> None:
@@ -167,7 +139,6 @@ class DBusAPI:
             artist, title = self._format_metadata(metadata)
             if self.artist != artist or self.title != title:
                 logging.info("New video detected")
-                self._loop.quit()
                 # Refreshes the metadata with the new data and plays the video
                 self.artist = artist
                 self.title = title
@@ -181,10 +152,11 @@ class DBusAPI:
                 self.player.pause = not is_playing
 
 
-def play_videos_linux(spotify: DBusAPI) -> None:
+def init(spotify: DBusAPI) -> None:
     """
     Starts the event loop for the DBus API and plays the first video.
     """
 
     spotify.start_event_loop()
     spotify.play_video()
+    return spotify

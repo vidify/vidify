@@ -6,9 +6,10 @@ it's limited in terms of usabilty:
     * Only Spotify Premium users are able to use some functions
     * API calls are limited, so it's not as responsive
 
-The API is controlled from the `play_videos_web` function. The overall
-usage and bevhavior of the class should be the same for all the APIs so
-that they can be used interchangeably.
+This implementation is based on the generic implementation of an API. Please
+check out spotivids.api.generic for more details about how API modules
+work. This module only contains comments specific to the API, so it may be
+confusing at first glance.
 """
 
 import os
@@ -16,20 +17,23 @@ import time
 import logging
 from typing import Union
 
-from spotipy import Spotify, Scope, scopes, Token, Credentials
-from spotipy.util import RefreshingToken
+from spotipy import Spotify
+from spotipy.scope import scopes
+from spotipy.auth import Token
+from spotipy.util import RefreshingToken, RefreshingCredentials
 import requests  # required in spotipy
 
 from spotivids.api import split_title, ConnectionNotReady
+from spotivids.api.generic import APIBase
 from spotivids.config import Config
-from spotivids.lyrics import print_lyrics
-from spotivids.youtube import YouTube
 
 
-class WebAPI:
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 youtube: YouTube, token: RefreshingToken,
-                 show_lyrics: bool = True) -> None:
+class WebAPI(APIBase):
+    artist: str = None
+    title: str = None
+    is_playing: bool = None
+
+    def __init__(self, token: RefreshingToken) -> None:
         """
         It includes `player`, the VLC or mpv window to play videos and control
         it when the song status changes.
@@ -37,32 +41,22 @@ class WebAPI:
         This also handles the Spotipy authentication.
         """
 
-        self.player = player
         self.artist = ""
         self.title = ""
         self.is_playing = False
         self._position = 0
-
-        self._youtube = youtube
         self._token = token
         self._spotify = Spotify(self._token)
-        self._show_lyrics = show_lyrics
         self._event_timestamp = time.time()
 
     def connect(self) -> None:
-        """
-        An initial metadata refresh is run. `ConnectionNotReady` will be
-        raised if no songs are playing in that moment.
-        """
-
         self._refresh_metadata()
 
     @property
     def position(self) -> int:
         """
-        Property that refreshes the metadata and returns the position. This
-        has to be done because the song position is constantly changing and
-        a new request has to be made.
+        _refresh_metadata() has to be called because the song position is
+        constantly changing.
         """
 
         self._refresh_metadata()
@@ -72,9 +66,6 @@ class WebAPI:
         """
         Refreshes the metadata of the player: artist, title, whether
         it's playing or not, and the current position.
-
-        Some local songs don't have an artist name so `split_title`
-        is called in an attempt to manually get it from the title.
         """
 
         metadata = self._spotify.playback_currently_playing()
@@ -83,24 +74,13 @@ class WebAPI:
         self.artist = metadata.item.artists[0].name
         self.title = metadata.item.name
 
-        if self.artist == "":
+        # Some local songs don't have an artist name so `split_title`
+        # is called in an attempt to manually get it from the title.
+        if self.artist == '':
             self.artist, self.title = split_title(self.title)
 
         self._position = metadata.progress_ms
         self.is_playing = metadata.is_playing
-
-    def play_video(self) -> None:
-        """
-        Starts the video for the currently playing song.
-        """
-
-        logging.info("Starting new video")
-        url = self._youtube.get_url(self.artist, self.title)
-        self.player.start_video(url, self.is_playing)
-        self.player.position = self.position
-
-        if self._show_lyrics:
-            print_lyrics(self.artist, self.title)
 
     def event_loop(self) -> None:
         """
@@ -128,7 +108,7 @@ class WebAPI:
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
-            self.play_video()
+            self.play_video()  # TODO use signals/events for Qt
 
         if self.is_playing != is_playing:
             self.player.pause = not self.is_playing
@@ -169,18 +149,17 @@ def get_token(auth_token: str, refresh_token: str, expiration: int,
         if c in (None, ''):
             logging.info("Rejecting the token because one of the credentials"
                          " provided is empty.")
-            print(refresh_token)
             return None
 
     # Generating a RefreshingToken with the parameters
     data = {
         'access_token': auth_token,
         'token_type': 'Bearer',
-        'scope': Scope(scopes.user_read_currently_playing),
+        'scope': scopes.user_read_currently_playing,
         'expires_in': expiration - int(time.time()),
         'refresh_token': refresh_token
     }
-    creds = Credentials(client_id, client_secret, redirect_uri)
+    creds = RefreshingCredentials(client_id, client_secret, redirect_uri)
     token = RefreshingToken(Token(data), creds)
 
     # Doing an initial request to check that it was generated correctly:

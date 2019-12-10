@@ -18,7 +18,8 @@ from spotivids import Platform, CURRENT_PLATFORM
 from spotivids.player.generic import PlayerBase
 
 
-class VLCPlayer(QFrame, PlayerBase):
+#  class VLCPlayer(QFrame, PlayerBase):
+class VLCPlayer(PlayerBase):
     def __init__(self, vlc_args: Optional[str] = None) -> None:
         super().__init__()
 
@@ -35,7 +36,7 @@ class VLCPlayer(QFrame, PlayerBase):
         try:
             self._vlc = vlc.Instance(vlc_args)
         except NameError:
-            raise Exception("VLC is not installed") from None
+            raise ImportError("VLC is not installed") from None
 
         if self._vlc is None:
             raise AttributeError(

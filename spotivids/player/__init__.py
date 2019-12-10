@@ -3,15 +3,23 @@ This init module lists the available players for the app and how to initialize
 them.
 """
 
+import importlib
 from enum import Enum
+
+from spotivids.config import Config
+from spotivids.player.generic import PlayerBase
 
 
 class Players(Enum):
     """
-    The available players enumeration.
+    The available players enumeration. It contains information about how to
+    initialize them: the module, the class name and the possible parameters
+    needed (flags from the config).
+
+    Note: all player entries must have their name in uppercase.
     """
 
-    def __new__(self, value: int, module: str, class_name: str,
+    def __new__(cls, value: int, module: str, class_name: str,
                 config_flags_name: str):
         obj = object.__new__(cls)
         obj._value_ = value
@@ -25,8 +33,8 @@ class Players(Enum):
         obj.config_flags_name = config_flags_name
         return obj
 
-    VLC = PlayerInitData(1, 'vlc_args')
-    MPV = PlayerInitData(2, 'mpv_flags')
+    VLC = (1, 'spotivids.player.vlc', 'VLCPlayer', 'vlc_args')
+    MPV = (2, 'spotivids.player.mpv', 'MpvPlayer', 'mpv_flags')
 
 
 class PlayerNotFoundError(AttributeError):
@@ -38,3 +46,30 @@ class PlayerNotFoundError(AttributeError):
         super().__init__(
             "The selected player isn't available. Please check your config"
             " or specify one by using a valid `--player` argument.")
+
+
+def initialize_player(key: str, config: Config) -> PlayerBase:
+    """
+    Choosing a player from the list and initializing an abstract player
+    instance with the information inside the `player` enumeration object.
+    """
+
+    # Finding the config player and initializing it.
+    try:
+        player = Players[key.upper()]
+    except KeyError:
+        raise PlayerNotFoundError
+
+    # Importing the module first
+    mod = importlib.import_module(player.module)
+    # Then obtaining the player class
+    cls = getattr(mod, player.class_name)
+    # No other arguments are needed for now, so all this does is initialize
+    # the player with the config flags (if present).
+    try:
+        flags = getattr(config, player.flags_name)
+    except AttributeError:
+        obj = cls()
+    else:
+        obj = cls(flags)
+    return obj

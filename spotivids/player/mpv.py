@@ -22,7 +22,7 @@ from PySide2.QtWidgets import QFrame
 from spotivids.player.generic import PlayerBase
 
 
-class MpvPlayer(PlayerBase, QFrame):
+class MpvPlayer(PlayerBase):
     def __init__(self, flags: Optional[str] = None) -> None:
         super().__init__()
 

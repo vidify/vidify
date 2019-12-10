@@ -3,20 +3,21 @@ Generic implementation of a player that can be used in this app.
 """
 
 
-from abc import ABC, abstractmethod
+from abc import ABCMeta, abstractmethod
+from PySide2.QtWidgets import QFrame
 
 
-class PlayerBase(ABC):
+class PlayerBase(QFrame):
+    __metaclass__ = ABCMeta
     """
     The abstract base class used for any player in this app.
 
     Other notes:
-        * The player's module must have a defined PlayerInitBase in the list
-        of supported players in spotivids.player (the __init__.py file).
+        * The player's module should have an entry in the list of supported
+        players in spotivids.player (the __init__.py file).
         * The player itself must inherit from `QFrame`.
         * The player should have a defined __init__ method to initialize the
-        player when an instance is created. Any optional parameters that can
-        be passed to this class must be defined in the module's PlayerInitBase.
+        player when an instance is created.
         * The player should have a defined __del__ method to terminate
         itself when the app is closed safely, if necessary.
         * The player module should have a docstring at the top with a brief

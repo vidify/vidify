@@ -1,32 +1,34 @@
 """
-This module implements the Qt interface.
+This module implements the Qt interface and is where every other module is
+put together.
 
 A GUI is needed to have more control on the player: an initial size can be
 set, the player won't close and open everytime a new song starts, and it's
 useful for real-time configuration, like fullscreen.
 
-The Web API and SwSpotify APIs need a manual event loop to check for updates,
-and they have to be obtained "asynchronously" so that Qt doesn't block. This
-means that this class has to handle event loops too.
-
-The Web API needs authorization to access to its data, so this class also
-contains methods to ask the user their client ID and client secret to
+The Spotify Web API needs authorization to access to its data, so this class
+also contains methods to ask the user their client ID and client secret to
 obtain the authorization token.
 """
 
 import types
 import logging
+import importlib
 from typing import Union, Callable, Optional, Tuple
 
 from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
 from PySide2.QtCore import Qt, QTimer, QCoreApplication
-from spotipy import Credentials, Scope, scopes
-from spotipy.util import parse_code_from_url, RefreshingToken
+# TODO only import when the web API is being used
+from spotipy.util import (parse_code_from_url, RefreshingToken,
+                          RefreshingCredentials)
 from spotipy.auth import OAuthError
+from spotivids.api.web import WebAPI, get_token
 
-from spotivids.api import ConnectionNotReady
-from spotivids.api.web import WebAPI
+from spotivids.api import APIData, get_api_data, ConnectionNotReady
+from spotivids.api.generic import APIBase
+from spotivids.player import initialize_player
+from spotivids.player.generic import PlayerBase
 from spotivids.config import Config
 from spotivids.youtube import YouTube
 from spotivids.gui import Fonts, Res, Colors
@@ -34,30 +36,23 @@ from spotivids.gui.components import WebBrowser, WebForm
 
 
 class MainWindow(QWidget):
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 width: int = 800, height: int = 600, fullscreen: bool = False,
-                 stay_on_top: bool = False) -> None:
+    def __init__(self, config: Config) -> None:
         """
         Main window with the GUI and whatever player is being used.
         """
 
         super().__init__()
         self.setWindowTitle('spotivids')
-        self.player = player
 
         # Setting the window to stay on top
-        if stay_on_top:
+        if config.stay_on_top:
             self.setWindowFlags(Qt.WindowStaysOnTopHint)
 
         # Setting the fullscreen and window size
-        if fullscreen:
+        if config.fullscreen:
             self.showFullScreen()
         else:
-            if width is None:
-                width = 800
-            if height is None:
-                height = 600
-            self.resize(width, height)
+            self.resize(config.width or 800, config.height or 600)
 
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -68,11 +63,57 @@ class MainWindow(QWidget):
         for font in Res.fonts:
             font_db.addApplicationFont(font)
 
-    def start(self, connect: Callable([], None),
-              init: Callable([Tuple[any]], None),
-              *init_args: any, message: str = "Waiting for connection",
-              event_loop: Optional[Callable([], None)] = None,
-              event_interval: int = 1000) -> None:
+        # Initializing the player and the youtube module directly.
+        self.player = initialize_player(config.player, config)
+        self.youtube = YouTube(config.debug, config.width, config.height)
+        self.config = config
+
+        # The API initialization is more complex. For more details, please
+        # check the flow diagram in spotivids.api. First we have to check if
+        # the API is saved in the config:
+        try:
+            self.api_data = get_api_data(config.api)
+        except KeyError:
+            # Otherwise, the user is prompted for an API. After choosing one,
+            # it will be initialized from outside this function.
+            self.prompt_api()
+        else:
+            # The API may need interaction with the user to obtain credentials
+            # or similar data. This function will already take care of the
+            # rest of the initialization.
+            if self.api_data.gui_init_fn is not None:
+                fn = getattr(self, self.api_data.gui_init_fn)
+                fn()
+            else:
+                self.initialize_api()
+
+    def prompt_api(self) -> None:
+        """
+        Initializing the widget to prompt the user for their API of choice.
+        """
+
+        pass
+
+    def initialize_api(self):
+        """
+        Initializes an API with the information from APIData.
+        """
+
+        mod = importlib.import_module(self.api_data.module)
+        cls = getattr(mod, self.api_data.class_name)
+        try:
+            fn = getattr(mod, 'init')
+        except ValueError:
+            fn = None
+        self.api = cls()
+        self.start(self.api.connect, fn, self.api,
+                   message=self.api_data.connect_msg,
+                   event_loop_interval=self.api_data.event_loop_interval)
+
+    def start(self, connect: Callable[[], None],
+              init: Optional[Callable[..., None]], *init_args: any,
+              message: str = "Waiting for connection",
+              event_loop_interval: int = 1000) -> None:
         """
         Waits for a Spotify session to be opened or for a song to play.
         Times out after 30 seconds to avoid infinite loops or too many
@@ -92,8 +133,7 @@ class MainWindow(QWidget):
         self.conn_attempts = 120  # 2 minutes, at 1 connection attempt/second
         self.conn_init = init
         self.conn_init_args = init_args
-        self.event_loop_fn = event_loop
-        self.event_interval = event_interval
+        self.event_loop_interval = event_loop_interval
 
         # Creating a label with a loading message that will be shown when the
         # connection attempt is successful.
@@ -135,13 +175,13 @@ class MainWindow(QWidget):
 
         # The APIs should raise `ConnectionNotReady` if the first attempt
         # to get metadata from Spotify was unsuccessful.
-        logging.info("Connection attempt " + str(self.conn_counter))
+        logging.info("Connection attempt " + str(self.conn_counter + 1))
         try:
             self.conn_fn()
         except ConnectionNotReady:
             pass
         else:
-            logging.info("Succesfully connected to Spotify")
+            logging.info("Succesfully connected to the API")
             self.setup_UI()
             # Stopping the timer and changing the label to the loading one.
             self.conn_timer.stop()
@@ -151,11 +191,16 @@ class MainWindow(QWidget):
             self.loading_label.hide()
             # Initializing the API with the function passed as a parameter
             # and the arguments
-            self.conn_init(*self.conn_init_args)
+            if self.conn_init is not None:
+                if self.conn_init_args is None:
+                    self.conn_init()
+                else:
+                    self.conn_init(*self.conn_init_args)
             # Starting the event loop if it was initially passed as
-            # a parameter
-            if self.event_loop_fn is not None:
-                self.start_event_loop(self.event_loop_fn, self.event_interval)
+            # a parameter.
+            if self.event_loop_interval is not None:
+                self.start_event_loop(self.api.event_loop,
+                                      self.event_loop_interval)
 
         self.conn_counter += 1
 
@@ -175,7 +220,8 @@ class MainWindow(QWidget):
         logging.info("Setting up the UI")
         self.layout.addWidget(self.player)
 
-    def start_event_loop(self, event_loop: Callable, ms: int) -> None:
+    def start_event_loop(self, event_loop: Callable[[], None],
+                         ms: int) -> None:
         """
         Starts a "manual" event loop with a timer every `ms` milliseconds.
         This is used with the SwSpotify API and the Web API to check every
@@ -194,7 +240,27 @@ class MainWindow(QWidget):
             timer.timeout.connect(event_loop)
         timer.start(ms)
 
-    def get_token(self, config: Config, youtube: YouTube) -> str:
+    def initialize_web_api(self) -> None:
+        token = get_token(self.config.auth_token, self.config.refresh_token,
+                          self.config.expiration, self.config.client_id,
+                          self.config.client_secret, self.config.redirect_uri)
+
+        if token is not None:
+            # If the previous token was valid, the API can already start
+            logging.info("Reusing a previously generated token")
+            self.api = WebAPI(token)
+            self.start(self.api.connect, None,
+                       message=self.api_data.connect_msg,
+                       event_interval=self.api_data.event_loop_interval)
+        else:
+            # Otherwise, the credentials are obtained with the GUI. When
+            # a valid auth token is ready, the GUI will initialize the API
+            # automatically exactly like above. The GUI won't ask for a
+            # redirect URI for now.
+            logging.info("Asking the user for credentials")
+            self.get_token()
+
+    def get_token(self) -> str:
         """
         This is called when the Web API is being used to get the credentials
         used with it.
@@ -212,13 +278,9 @@ class MainWindow(QWidget):
             * (start_web_api is called)
         """
 
-        # Data needed to setup the web API at the end
-        self._config = config
-        self._youtube = youtube
-
         # The web form for the user to input the credentials.
-        self.web_form = WebForm(self._config.client_id,
-                                self._config.client_secret)
+        self.web_form = WebForm(self.config.client_id,
+                                self.config.client_secret)
         # on_submit_creds will be called once the credentials have been input.
         self.web_form.button.clicked.connect(self.on_submit_creds)
         self.layout.addWidget(self.web_form)
@@ -270,9 +332,9 @@ class MainWindow(QWidget):
         self.browser.show()
 
         # Creating the request URL to obtain the authorization token
-        self.creds = Credentials(client_id, client_secret,
-                                 self._config.redirect_uri)
-        self.scope = Scope(scopes.user_read_currently_playing)
+        self.creds = RefreshingCredentials(client_id, client_secret,
+                                           self.config.redirect_uri)
+        self.scope = scopes.user_read_currently_playing
         url = self.creds.user_authorisation_url(self.scope)
         self.browser.url = url
 
@@ -290,7 +352,7 @@ class MainWindow(QWidget):
         logging.info(f"Now at: {url}")
 
         # If the URL isn't the Spotify response URI (localhost), do nothing
-        if url.find(self._config.redirect_uri) == -1:
+        if url.find(self.config.redirect_uri) == -1:
             return
 
         # Trying to get the auth token from the URL with Spotipy's
@@ -307,16 +369,17 @@ class MainWindow(QWidget):
         # This will only happen with the client secret because it's only
         # checked when requesting the user token.
         try:
-            regular_token = self.creds.request_user_token(code, self.scope)
+            # A RefreshingToken is used instead of a regular Token so that
+            # it's automatically refreshed before it expires. self.creds is
+            # of type `RefreshingCredentials`, so it returns always a
+            # RefreshingToken.
+            self.token = self.creds.request_user_token(code, self.scope)
         except OAuthError as e:
             self.browser.hide()
             self.web_form.show()
             self.web_form.show_error(str(e))
             return
 
-        # A RefreshingToken is used instead of a regular Token so that
-        # it's automatically refreshed before it expires.
-        self.token = RefreshingToken(regular_token, self.creds)
         # Removing the GUI elements used to obtain the credentials
         self.layout.removeWidget(self.web_form)
         self.layout.removeWidget(self.browser)
@@ -333,16 +396,14 @@ class MainWindow(QWidget):
         logging.info(f"Initializing the Web API")
 
         # Initializing the web API
-        spotify = WebAPI(self.player, self._youtube, self.token,
-                         self._config.lyrics)
-        msg = "Waiting for a Spotify song to play..."
-        self.start(spotify.connect, spotify.play_video, message=msg,
-                   event_loop=spotify.event_loop, event_interval=1000)
+        self.api = WebAPI(token)
+        self.start(self.api.connect, message=self.api_data.connect_msg,
+                   event_loop_interval=self.api_data.event_loop_interval)
 
         # The obtained credentials are saved for the future
         logging.info("Saving the Web API credentials")
-        self._config.client_secret = self.web_form.client_secret
-        self._config.client_id = self.web_form.client_id
-        self._config.auth_token = self.token.access_token
-        self._config.refresh_token = self.token.refresh_token
-        self._config.expiration = self.token.expires_at
+        self.config.client_secret = self.web_form.client_secret
+        self.config.client_id = self.web_form.client_id
+        self.config.auth_token = self.token.access_token
+        self.config.refresh_token = self.token.refresh_token
+        self.config.expiration = self.token.expires_at

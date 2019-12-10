@@ -8,9 +8,10 @@ more control over Spotify.
 The Windows implementation for example just reads the title of the Spotify
 window to obtain what song is playing. It's much more limited.
 
-The API is controlled from the `play_videos_swspotify` function. The overall
-usage and bevhavior of the class should be the same for all the APIs so
-that they can be used interchangeably.
+This implementation is based on the generic implementation of an API. Please
+check out spotivids.api.generic for more details about how API modules
+work. This module only contains comments specific to the API, so it may be
+confusing at first glance.
 """
 
 import time
@@ -19,39 +20,31 @@ from typing import Union
 
 from SwSpotify import spotify, SpotifyPaused, SpotifyClosed
 
-from spotivids.api import ConnectionNotReady
-from spotivids.lyrics import print_lyrics
-from spotivids.youtube import YouTube
+from spotivids.api import ConnectionNotReady, split_title
+from spotivids.api.generic import APIBase
 
 
-class SwSpotifyAPI:
-    def __init__(self, player: Union['VLCPlayer', 'MpvPlayer'],
-                 youtube: YouTube, show_lyrics: bool = True) -> None:
-        """
-        It includes `player`, the VLC or mpv window to play videos and control
-        it when the song status changes. The `Youtube` object is also needed
-        to play the videos.
-        """
+class SwSpotifyAPI(APIBase):
+    artist: str = None
+    title: str = None
+    is_playing: bool = None
 
-        self.player = player
+    def __init__(self) -> None:
         self.artist = ""
         self.title = ""
         self.is_playing = False
-        self._youtube = youtube
-        self._show_lyrics = show_lyrics
+
+    def position(self) -> int:
+        """
+        This feature isn't available for any of the platforms supported by
+        SwSpotify, so `NotImplementedError` is raised instead to keep
+        consistency with the rest of the APIs.
+        """
+
+        raise NotImplementedError
 
     def connect(self) -> None:
-        """
-        First metadata refresh that raises ConnectionNotReady if the artist
-        or title are empty, and from the function itself if SpotifyNotRunning
-        is thrown inside SwSpotify.
-        """
-
         self._refresh_metadata()
-        if "" in (self.artist, self.title):
-            raise ConnectionNotReady(
-                "No Spotify session currently running or no song currently"
-                " playing.") from None
 
     def _refresh_metadata(self) -> None:
         """
@@ -71,26 +64,15 @@ class SwSpotifyAPI:
         except SpotifyClosed:
             raise ConnectionNotReady("No song currently playing") from None
 
-    def play_video(self) -> None:
-        """
-        Plays the currently playing song's music video.
+        # Splitting the artist and title for local songs
+        if self.artist == '':
+            self.artist, self.title = split_title(self.title)
 
-        The SwSpotify API doesn't offer information about the position so
-        it's roughly calculated with a timer.
-        """
-
-        logging.info("Starting new video")
-        start_time = time.time_ns()
-        url = self._youtube.get_url(self.artist, self.title)
-        self.player.start_video(url, self.is_playing)
-
-        # Waits until the player starts the video to set the offset
-        while self.player.position == 0:
-            pass
-        self.player.position = int((time.time_ns() - start_time) / 10**9)
-
-        if self._show_lyrics:
-            print_lyrics(self.artist, self.title)
+        # Checking that the metadata is valid
+        if "" in (self.artist, self.title):
+            raise ConnectionNotReady(
+                "No Spotify session currently running or no song currently"
+                " playing.") from None
 
     def event_loop(self) -> None:
         """

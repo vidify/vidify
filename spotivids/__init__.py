@@ -5,7 +5,6 @@ logger, cross-platform variables...
 
 import os
 import sys
-from contextlib import contextmanager
 from enum import Enum
 
 

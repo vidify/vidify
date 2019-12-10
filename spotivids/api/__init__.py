@@ -3,59 +3,132 @@ This init module contains functions used throughout the different APIs.
 
 It's also used to list, choose and control the APIs in a generic way, so that
 they can be used the same throughout the entire module.
+
+Here's a flow diagram with how the API initialization is done inside the
+spotivids.gui.window module and this one:
+
+                +------------------ Is the API in the config? 
+                |       No 
+                |                               |
+                |                               | Yes
+                v                               v
+  +-------------------------+      +------------------------+
+  | gui.window.prompt_api   |      | api.get_api_data       |
+  |-------------------------|      |------------------------|
+  | Prompt the user for the +----->| Obtain the API's entry |
+  | API to be used          |      | in the enum, with info |
+  +-------------------------+      | to initialize it       |
+                                   +------------+-----------+
+                                                |
+                                                v
+
+                +---------------- Does it need GUI interaction?
+                |      Yes            (APIData.gui_init_fn)
+                |
+                |                               |
+                |                               | No
+                v                               v
+  +------------------------+      +--------------------------+
+  | Obtain the credentials |      | api.initialize_api       |
+  | needed by calling a    +----->|--------------------------|
+  | function found inside  |      | Initialize the API       |
+  | the APIs structure     |      | object using the APIs    |
+  +------------------------+      | entry                    |
+                                  +-------------+------------+
+                                                |
+                                                |
+                                                v
+                                  +--------------------------+
+                                  | gui.start                |
+                                  |--------------------------|
+                                  | Wait for the API connect |
+                                  | Run the init function    |
+                                  | Start event loop         |
+                                  +--------------------------+
+
+Made with http://stable.ascii-flow.appspot.com/#Draw800835900720050087
 """
 
 import re
-from typing import Tuple, Callable, Optional
-from types import ModuleType
+import logging
+import importlib
 from enum import Enum
+from types import ModuleType
+from typing import Tuple, Callable, Optional
 
 from spotivids import Platform
+from spotivids.config import Config
+from spotivids.api.generic import APIBase
 
 
-class APIs(Enum):
+class APIData(Enum):
     """
     Simple information about the API shown to the user to choose the initial
     platform. The more detailed information about initializing the API and such
     is inside the API implementation file, because importing the module would
     cause issues with other imports inside it.
+
+    Note: all API entries must have their name in uppercase.
     """
 
-    def __new__(self, value: int, description: str, icon: Optional[str],
-                platforms: Tuple[Platform], module: str) -> None:
+    def __new__(cls, value: int, short_name: str, description: str,
+                icon: Optional[str], platforms: Tuple[Platform], module: str,
+                class_name: str, connect_msg: Optional[str],
+                gui_init_fn: Optional[str],
+                event_loop_interval: Optional[int]) -> None:
         obj = object.__new__(cls)
         obj._value_ = value
+        # The short name displayed in the GUI, its description and the icon,
+        # if existent.
+        obj.short_name = short_name
         obj.description = description
         obj.icon = icon
         # A tuple containing the supported platforms for this API. That way,
         # it's only shown in these.
         obj.platforms = platforms
-        # The module location to import (for dependency injection).
+        # The module location and class name to import (for dependency
+        # injection).
         obj.module = module
+        obj.class_name = class_name
+        obj.connect_msg = connect_msg
+        obj.gui_init_fn = gui_init_fn
+        obj.event_loop_interval = event_loop_interval
         return obj
 
-    SPOTIFY_LINUX = APIData(
+    SPOTIFY_LINUX = (
         1,
         "Spotify for Linux",
         "The official Spotify client for Linux and BSD. Recommended.",
         None,
-        (Platform.LINUX, Platform.BSD)
-        "spotivids.api.linux")
-    SWSPOTIFY = APIData(
+        (Platform.LINUX, Platform.BSD),
+        "spotivids.api.linux",
+        "DBusAPI",
+        "Waiting for a Spotify session to be ready...",
+        None,
+        None)
+    SWSPOTIFY = (
         2,
         "Spotify for Windows or Mac OS",
         "The official Spotify client for Windows and Mac OS. Recommended.",
         None,
         (Platform.WINDOWS, Platform.MACOS),
-        "spotivids.api.swspotify")
-    SPOTIFY_WEB = APIData(
+        "spotivids.api.swspotify",
+        "SwSpotifyAPI",
+        "Waiting for a Spotify song to play...",
+        None,
+        500)
+    SPOTIFY_WEB = (
         3,
         "Spotify Web",
         "The official Spotify Web API. Please read the installation guide"
         " for more details on how to set it up.",
         None,
         [p for p in Platform],  # Supports all platforms
-        "spotivids.api.web")
+        "spotivids.api.web",
+        "WebAPI",
+        "Waiting for a Spotify song to play...",
+        "initialize_spotify_web_api",
+        1000)
 
 
 class ConnectionNotReady(Exception):
@@ -68,6 +141,24 @@ class ConnectionNotReady(Exception):
     def __init__(self, msg: str = "Spotify is closed or there isn't a"
                  "  currently playing track."):
         super().__init__(msg)
+
+
+def get_api_data(key: str) -> Optional[APIData]:
+    """
+    Returns an entry from the APIs from `key`. KeyError is raised if it
+    isn't found.
+    """
+
+    if key is None:
+        logging.info("Rejecting API initialization because it was None")
+        raise KeyError
+
+    try:
+        return APIData[key.upper()]
+    except KeyError:
+        logging.info("Rejecting API initialization because it wasn't found"
+                     " in the APIs enumeration.")
+        raise
 
 
 def split_title(title: str) -> Tuple[str, str]:
