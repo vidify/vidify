@@ -68,13 +68,13 @@ class Options:
     vlc_args = Option('Defaults', str, None)
     mpv_flags = Option('Defaults', str, None)
 
-    # Using the web API, and its credentials/data.
-    client_id = Option('WebAPI', str, None)
-    client_secret = Option('WebAPI', str, None)
-    redirect_uri = Option('WebAPI', str, 'http://localhost:8888/callback/')
-    auth_token = Option('WebAPI', str, None)
-    refresh_token = Option('WebAPI', str, None)
-    expiration = Option('WebAPI', int, None)
+    # Data for the Spotify Web API
+    client_id = Option('SpotifyWeb', str, None)
+    client_secret = Option('SpotifyWeb', str, None)
+    redirect_uri = Option('SpotifyWeb', str, 'http://localhost:8888/callback/')
+    auth_token = Option('SpotifyWeb', str, None)
+    refresh_token = Option('SpotifyWeb', str, None)
+    expiration = Option('SpotifyWeb', int, None)
 
 
 class Config:

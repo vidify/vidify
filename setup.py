@@ -36,17 +36,19 @@ setup(
         'youtube-dl',
         'python-vlc',
         'lyricwikia',
-        'spotipy>=3.0.0',
         'PySide2',
         'pydbus; platform_system=="Linux"',
         'SwSpotify>=1.1.1; platform_system=="Windows" or platform_system=="Darwin"'
     ],
     extras_require={
+        'dev': [
+            'flake8'
+        ],
         'mpv': [
             'python-mpv'
         ],
-        'dev': [
-            'flake8'
+        'spotify-web': [
+            'spotipy>=3.0.0',
         ]
     },
     entry_points={

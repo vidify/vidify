@@ -10,6 +10,7 @@ player implementation inherits, and an explanation in detail of the methods.
 import logging
 from typing import Optional
 
+import locale
 try:
     from mpv import MPV
 except ModuleNotFoundError:

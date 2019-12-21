@@ -127,7 +127,7 @@ class APIData(Enum):
         "spotivids.api.spotify.web",
         "SpotifyWebAPI",
         "Waiting for a Spotify song to play...",
-        "initialize_spotify_web_api",
+        "init_spotify_web_api",
         1000)
 
 

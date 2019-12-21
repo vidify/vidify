@@ -2,12 +2,9 @@ import os
 import unittest
 import unittest.mock
 
-from PySide2.QtGui import qApp
 from PySide2.QtWidgets import QApplication
 
-from spotivids import BSD, LINUX, MACOS, WINDOWS
-from spotivids.youtube import YouTube
-from spotivids.player.vlc import VLCPlayer
+from spotivids import Platform, CURRENT_PLATFORM
 
 
 TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
@@ -21,49 +18,23 @@ class APITest(unittest.TestCase):
     by Travis or an unsupported OS.
     """
 
-    def setUp(self):
-        super().setUp()
-
-        self.youtube = YouTube()
-        # Creating the first app instance
-        if isinstance(qApp, type(None)):
-            self.app = QApplication([])
-        else:
-            self.app = qApp
-        self.vlc = VLCPlayer()
-
-        # What is this import doing here you may ask? A terrifying tale
-        # of C locales and segfaults haunts this code. Too many programmers
-        # have died in agonizing pain while trying to answer that. It is still
-        # unknown to the human race to this day. For more details, visit:
-        # https://github.com/mpv-player/mpv/issues/7102#issuecomment-547626491
-        from spotivids.player.mpv import MpvPlayer
-        self.mpv = MpvPlayer()
-
-    def tearDown(self):
-        del self.app
-        return super().tearDown()
-
-    @unittest.skipIf(TRAVIS or not (BSD or LINUX), SKIP_MSG)
+    @unittest.skipIf(TRAVIS or CURRENT_PLATFORM not in (Platform.BSD,
+                     Platform.LINUX), SKIP_MSG)
     def test_dbus(self):
         # Format metadata, bool status are tested in test_dbus
-        from spotivids.api.linux import DBusAPI
-        for player in (self.vlc, self.mpv):
-            dbus = DBusAPI(player, self.youtube)
-            dbus.connect()
-            dbus._refresh_metadata()
-            dbus.play_video()
-            dbus.disconnect()
+        from spotivids.api.spotify.linux import SpotifyLinuxAPI
+        api = SpotifyLinuxAPI()
+        api.connect_api()
+        api._refresh_metadata()
 
-    @unittest.skipIf(TRAVIS or not (MACOS or WINDOWS), SKIP_MSG)
+    @unittest.skipIf(TRAVIS or CURRENT_PLATFORM not in (Platform.MACOS,
+                     Platform.WINDOWS), SKIP_MSG)
     def test_swspotify(self):
-        from spotivids.api.swspotify import SwSpotifyAPI
-        for player in (self.vlc, self.mpv):
-            swspotify = SwSpotifyAPI(player, self.youtube)
-            swspotify.connect()
-            swspotify._refresh_metadata()
-            swspotify.play_video()
-            swspotify.event_loop()
+        from spotivids.api.spotify.swspotify import SwSpotifyAPI
+        api = SwSpotifyAPI()
+        api.connect_api()
+        api._refresh_metadata()
+        api.event_loop()
 
     @unittest.skipIf(TRAVIS, SKIP_MSG)
     def test_web(self):
@@ -72,7 +43,7 @@ class APITest(unittest.TestCase):
         the auth token and the expiration date.
         """
 
-        from spotivids.api.web import get_token, WebAPI
+        from spotivids.api.spotify.web import get_token, SpotifyWebAPI
         from spotivids.config import Config
         config = Config()
         with unittest.mock.patch('sys.argv', ['']):
@@ -80,11 +51,10 @@ class APITest(unittest.TestCase):
         token = get_token(config.auth_token, config.refresh_token,
                           config.expiration, config.client_id,
                           config.client_secret, config.redirect_uri)
-        web = WebAPI(self.vlc, self.youtube, token)
-        web.connect()
-        web._refresh_metadata()
-        web.play_video()
-        web.event_loop()
+        api = SpotifyWebAPI(token)
+        api.connect_api()
+        api._refresh_metadata()
+        api.event_loop()
 
 
 if __name__ == '__main__':

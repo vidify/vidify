@@ -21,12 +21,6 @@ from typing import Callable, Optional
 from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
 from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot
-# TODO only import when the web API is being used
-from spotipy.scope import scopes
-from spotipy.util import (parse_code_from_url, RefreshingToken,
-                          RefreshingCredentials)
-from spotipy.auth import OAuthError
-from spotivids.api.spotify.web import SpotifyWebAPI, get_token
 
 from spotivids.api import APIData, get_api_data, ConnectionNotReady
 from spotivids.player import initialize_player
@@ -181,9 +175,12 @@ class MainWindow(QWidget):
             # Stopping the timer and changing the label to the loading one.
             self.conn_timer.stop()
             self.layout.removeWidget(self.conn_label)
+            del self.conn_timer
             self.conn_label.hide()
+            del self.conn_label
             self.layout.removeWidget(self.loading_label)
             self.loading_label.hide()
+            del self.loading_label
 
             # Starting the first video
             self.play_video()
@@ -245,6 +242,7 @@ class MainWindow(QWidget):
     def change_video_position(self, ms: int) -> None:
         self.player.position = ms
 
+    @Slot()
     def play_video(self) -> None:
         """
         Plays a video using the current API's data. This is called when the
@@ -263,7 +261,7 @@ class MainWindow(QWidget):
         if self.config.lyrics:
             print(get_lyrics(self.api.artist, self.api.title))
 
-    def initialize_web_api(self) -> None:
+    def init_spotify_web_api(self) -> None:
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
@@ -271,15 +269,26 @@ class MainWindow(QWidget):
             0. If the credentials are already found in the config, simply
                initialize the API using them (skipping to the last step).
                Otherwise, continue the flow.
-            ** get_token is called **
+            ** self.prompt_spotify_web_token is called **
             1. The user inputs the credentials.
-            ** on_submit_creds is called **
+            ** self.on_submit_spotify_web_creds is called **
             2. The user logs in.
-            ** on_user_login is called **
+            ** self.on_spotify_web_login is called **
             3. If the credentials were correct, the Web API is set up and
                started. Otherwise, go back to step 1.
-            ** start_web_api is called **
+            ** self.start_spotify_web_api is called **
+
+        Note: the Spotipy imports are done inside the functions so that
+        Spotipy isn't needed for whoever doesn't plan to use it.
         """
+
+        try:
+            from spotivids.api.spotify.web import get_token
+        except ModuleNotFoundError:
+            raise ModuleNotFoundError(
+                "No module named 'spotipy'.\n"
+                "To use the Spotify Web API, please install spotipy. Read"
+                " more about this in the Installation Guide.")
 
         token = get_token(self.config.auth_token, self.config.refresh_token,
                           self.config.expiration, self.config.client_id,
@@ -288,16 +297,16 @@ class MainWindow(QWidget):
         if token is not None:
             # If the previous token was valid, the API can already start.
             logging.info("Reusing a previously generated token")
-            self.start_web_api(token, save_config=False)
+            self.start_spotify_web_api(token, save_config=False)
         else:
             # Otherwise, the credentials are obtained with the GUI. When
             # a valid auth token is ready, the GUI will initialize the API
             # automatically exactly like above. The GUI won't ask for a
             # redirect URI for now.
             logging.info("Asking the user for credentials")
-            self.get_token()
+            self.prompt_spotify_web_token()
 
-    def get_token(self) -> None:
+    def prompt_spotify_web_token(self) -> None:
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
@@ -308,8 +317,10 @@ class MainWindow(QWidget):
         # The web form for the user to input the credentials.
         self.web_form = WebForm(self.config.client_id,
                                 self.config.client_secret)
-        # on_submit_creds will be called once the credentials have been input.
-        self.web_form.button.clicked.connect(self.on_submit_creds)
+        # on_submit_spotify_web creds will be called once the credentials have
+        # been input.
+        self.web_form.button.clicked.connect(
+            self.on_submit_spotify_web_creds)
         self.layout.addWidget(self.web_form)
 
         # The web browser for the user to login and grant access.
@@ -321,18 +332,21 @@ class MainWindow(QWidget):
         # clicks on the Go Back button.
         self.browser.go_back_button.pressed.connect(
             lambda: (self.browser.hide(), self.web_form.show()))
-        # Any change in the browser URL will redirect to on_user_login to
-        # check if the login was succesful.
-        self.browser.web_view.urlChanged.connect(self.on_user_login)
+        # Any change in the browser URL will redirect to on_spotify_web_login
+        # to check if the login was succesful.
+        self.browser.web_view.urlChanged.connect(self.on_spotify_web_login)
         self.layout.addWidget(self.browser)
 
-    def on_submit_creds(self) -> None:
+    def on_submit_spotify_web_creds(self) -> None:
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
         Checking if the submitted credentials were correct, and starting the
         logging-in step.
         """
+
+        from spotipy.scope import scopes
+        from spotipy.util import RefreshingCredentials
 
         # Obtaining the input data
         client_id = self.web_form.client_id
@@ -367,7 +381,7 @@ class MainWindow(QWidget):
         url = self.creds.user_authorisation_url(self.scope)
         self.browser.url = url
 
-    def on_user_login(self) -> None:
+    def on_spotify_web_login(self) -> None:
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
@@ -378,6 +392,9 @@ class MainWindow(QWidget):
         `spotipy.prompt_user_token`. It does the same thing but in a more
         automatized way, because Qt has access over the web browser too.
         """
+
+        from spotipy.util import parse_code_from_url
+        from spotipy.auth import OAuthError
 
         url = self.browser.url
         logging.info("Now at: %s", url)
@@ -416,9 +433,9 @@ class MainWindow(QWidget):
         self.layout.removeWidget(self.browser)
         self.browser.hide()
         # Finally starting the Web API
-        self.start_web_api(token)
+        self.start_spotify_web_api(token)
 
-    def start_web_api(self, token: RefreshingToken,
+    def start_spotify_web_api(self, token: 'RefreshingToken',
                       save_config: bool = True) -> None:
         """
         SPOTIFY WEB API CUSTOM FUNCTION
@@ -428,8 +445,9 @@ class MainWindow(QWidget):
         with the newly obtained ones, also saving them in the config for
         future usage (if `save_config` is true)
         """
+        from spotivids.api.spotify.web import SpotifyWebAPI
 
-        logging.info("Initializing the Web API")
+        logging.info("Initializing the Spotify Web API")
 
         # Initializing the web API
         self.api = SpotifyWebAPI(token)
@@ -439,9 +457,9 @@ class MainWindow(QWidget):
 
         # The obtained credentials are saved for the future
         if save_config:
-            logging.info("Saving the Web API credentials")
+            logging.info("Saving the Spotify Web API credentials")
             self.config.client_secret = self.web_form.client_secret
             self.config.client_id = self.web_form.client_id
             self.config.auth_token = token.access_token
             self.config.refresh_token = token.refresh_token
-            self.config.expiration = token.expires_at
+            self.config.expiration = token._token.expires_at

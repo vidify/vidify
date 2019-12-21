@@ -49,9 +49,8 @@ class WebBrowser(QWidget):
     """
     This widget contains a QWebEngineView and other simple controls.
     """
-    def __init__(self, *args) -> None:
-        super().__init__(*args)
-
+    def __init__(self) -> None:
+        super().__init__()
         self.layout = QVBoxLayout(self)
         self.setup_controls()
         self.setup_web_view()
@@ -98,14 +97,14 @@ class WebForm(QWidget):
     process in the Web API.
     """
 
-    def __init__(self, *args, client_id: str = "", client_secret: str = ""):
+    def __init__(self, client_id: str = "", client_secret: str = ""):
         """
         Loading the main components inside the form. The initial client ID
         and client secret can be passed as a parameter to have an initial
         value for them in the input fields.
         """
 
-        super().__init__(*args)
+        super().__init__()
 
         # Checking that the credentials aren't None and using an empty field
         # instead.
