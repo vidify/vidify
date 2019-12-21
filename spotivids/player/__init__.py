@@ -42,10 +42,10 @@ class PlayerNotFoundError(AttributeError):
     Exception raised when the player wasn't found.
     """
 
-    def __init__(self, msg):
-        super().__init__(
-            "The selected player isn't available. Please check your config"
-            " or specify one by using a valid `--player` argument.")
+    def __init__(self, msg: str = "The selected player isn't available."
+                                  " Please check your config or specify one by"
+                                  " using a valid `--player` argument."):
+        super().__init__(msg)
 
 
 def initialize_player(key: str, config: Config) -> PlayerBase:

@@ -3,11 +3,8 @@ Generic implementation of the API module.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Tuple, Callable, Optional
 
 from PySide2.QtCore import QObject, Signal
-
-from spotivids.player.generic import PlayerBase
 
 
 class APIBase(QObject):
@@ -19,8 +16,7 @@ class APIBase(QObject):
 
     """
     The abstract base class used for any API in this app. The API is defined
-    as an object that can provide information about the status of the player
-    
+    as an object that can provide information about the status of the player.
 
     Other notes:
         * The API's module should have an entry in the list of supported APIs
@@ -93,13 +89,4 @@ class APIBase(QObject):
         This method may not be needed in some APIs, which should raise
         `NotImplementedError` instead. This information is saved in the API
         entry inside the API list so that the event loop isn't called.
-        """
-
-    @abstractmethod
-    def play_video(self):
-        """
-        Plays a video in the API's player.
-
-        connect() has to be used before this method in order to establish a
-        connection with the API.
         """

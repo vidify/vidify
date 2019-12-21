@@ -40,7 +40,7 @@ class PlayerBase(QFrame):
         The video will be paused if `do_pause` is True, or will be played if
         it's False. If `do_pause` is already in the requested status, nothing
         should be done.
-        
+
         It's used this way because it's more versatile: a boolean can be
         provided instead of using play() or pause(), making sure the player
         does what it's told.

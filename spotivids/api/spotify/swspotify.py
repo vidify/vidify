@@ -14,9 +14,7 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import time
 import logging
-from typing import Union
 
 from SwSpotify import spotify, SpotifyPaused, SpotifyClosed
 
@@ -35,6 +33,7 @@ class SwSpotifyAPI(APIBase):
         self.title = ""
         self.is_playing = False
 
+    @property
     def position(self) -> int:
         """
         This feature isn't available for any of the platforms supported by

@@ -7,8 +7,8 @@ they can be used the same throughout the entire module.
 Here's a flow diagram with how the API initialization is done inside the
 spotivids.gui.window module and this one:
 
-                +------------------ Is the API in the config? 
-                |       No 
+                +------------------ Is the API in the config?
+                |       No
                 |                               |
                 |                               | Yes
                 v                               v
@@ -123,7 +123,7 @@ class APIData(Enum):
         "The official Spotify Web API. Please read the installation guide"
         " for more details on how to set it up.",
         None,
-        [p for p in Platform],  # Supports all platforms
+        tuple(Platform),  # Supports all platforms
         "spotivids.api.spotify.web",
         "SpotifyWebAPI",
         "Waiting for a Spotify song to play...",

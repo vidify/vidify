@@ -4,7 +4,7 @@ initialization is easier. (specially the Web API authentication widgets).
 """
 
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
-                               QVBoxLayout, QLayout, QSizePolicy)
+                               QVBoxLayout)
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt, QSize, QUrl
 from PySide2.QtWebEngineWidgets import QWebEngineView
@@ -50,7 +50,7 @@ class WebBrowser(QWidget):
     This widget contains a QWebEngineView and other simple controls.
     """
     def __init__(self, *args) -> None:
-        super().__init__()
+        super().__init__(*args)
 
         self.layout = QVBoxLayout(self)
         self.setup_controls()
@@ -98,7 +98,7 @@ class WebForm(QWidget):
     process in the Web API.
     """
 
-    def __init__(self, client_id: str = "", client_secret: str = "", *args):
+    def __init__(self, *args, client_id: str = "", client_secret: str = ""):
         """
         Loading the main components inside the form. The initial client ID
         and client secret can be passed as a parameter to have an initial

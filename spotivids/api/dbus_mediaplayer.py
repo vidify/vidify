@@ -10,15 +10,12 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import sys
-import time
 import logging
-from typing import Tuple, Union
+from typing import Tuple
 
 import pydbus
 from gi.repository import GLib
 
-from spotivids.config import Config
 from spotivids.api import split_title, ConnectionNotReady
 from spotivids.api.generic import APIBase
 
@@ -34,7 +31,7 @@ class DBusMediaPlayerAPI(APIBase):
         self.artist = ""
         self.title = ""
         self.is_playing = False
-        self.position_feature = position_feature
+        self._position_feature = position_feature
 
     def __del__(self) -> None:
         """
@@ -55,9 +52,9 @@ class DBusMediaPlayerAPI(APIBase):
         rest of the APIs.
         """
 
-        if not self.position_feature:
+        if not self._position_feature:
             raise NotImplementedError
-        return self.player_interface.Position
+        return self._player_interface.Position
 
     def connect_api(self) -> None:
         """
@@ -72,16 +69,16 @@ class DBusMediaPlayerAPI(APIBase):
         except GLib.Error:
             raise ConnectionNotReady("No MediaPlayer session currently running")
 
-        self.player_interface = self._obj['org.mpris.MediaPlayer2.Player']
+        self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
         try:
             self._refresh_metadata()
         except IndexError:
             raise ConnectionNotReady("No song is currently playing")
 
-        self.start_event_loop()
+        self._start_event_loop()
 
-    def start_event_loop(self) -> None:
+    def _start_event_loop(self) -> None:
         """
         Starts the asynchronous GLib event loop.
         """
@@ -98,7 +95,8 @@ class DBusMediaPlayerAPI(APIBase):
 
         raise NotImplementedError
 
-    def _format_metadata(self, metadata: dict) -> Tuple[str, str]:
+    @staticmethod
+    def _format_metadata(metadata: dict) -> Tuple[str, str]:
         """
         Returns the artist and title out of a raw metadata object
         as a tuple, first the artist and then the title.
@@ -120,13 +118,14 @@ class DBusMediaPlayerAPI(APIBase):
         Refreshes the metadata and status of the player as a tuple.
         """
 
-        metadata = self.player_interface.Metadata
+        metadata = self._player_interface.Metadata
         self.artist, self.title = self._format_metadata(metadata)
 
-        status = str(self.player_interface.PlaybackStatus)
+        status = str(self._player_interface.PlaybackStatus)
         self.is_playing = self._bool_status(status)
 
-    def _bool_status(self, status: str) -> bool:
+    @staticmethod
+    def _bool_status(status: str) -> bool:
         """
         Converts a status string from DBus to a bool, to keep consistency
         with the other API status variables.
@@ -157,4 +156,3 @@ class DBusMediaPlayerAPI(APIBase):
                 # Refreshes the metadata and pauses/plays the video
                 self.is_playing = is_playing
                 self.status_signal.emit(is_playing)
-

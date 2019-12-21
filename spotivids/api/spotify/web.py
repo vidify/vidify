@@ -15,7 +15,6 @@ confusing at first glance.
 import os
 import time
 import logging
-from typing import Union
 
 from spotipy import Spotify
 from spotipy.scope import scopes
@@ -25,7 +24,6 @@ import requests  # required in spotipy
 
 from spotivids.api import split_title, ConnectionNotReady
 from spotivids.api.generic import APIBase
-from spotivids.config import Config
 
 
 class SpotifyWebAPI(APIBase):
@@ -165,8 +163,11 @@ def get_token(auth_token: str, refresh_token: str, expiration: int,
         s = Spotify(token)
         s.playback_currently_playing()
     except (ConnectionNotReady, requests.exceptions.HTTPError) as e:
+        # Note: logging messages use the old formatting instead of f-strings
+        # because of efficiency (and more). If logging was disabled, Python
+        # shouldn't compute the string format.
         logging.info("Rejecting the token because of an error while trying"
-                     f" to connect to Spotify: {e}")
+                     " to connect to Spotify: %s", str(e))
         return None
 
     # If it got here, it means the generated token is valid

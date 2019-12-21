@@ -19,8 +19,8 @@ from spotivids.version import __version__
 
 
 # Default config path in the system
-dirs = AppDirs("spotivids", "marioom")
-DEFAULT_PATH = os.path.join(dirs.user_config_dir, "config.ini")
+APP_DIRS = AppDirs("spotivids", "marioom")
+DEFAULT_PATH = os.path.join(APP_DIRS.user_config_dir, "config.ini")
 
 
 @dataclass
@@ -204,15 +204,16 @@ class Config:
         try:
             if option.value_type == bool:
                 return self._file.getboolean(option.section, attr)
-            elif option.value_type == int:
+
+            if option.value_type == int:
                 # ValueError is raised if attr is '' (empty). When this
                 # happens, None should be returned instead.
                 try:
                     return self._file.getint(option.section, attr)
                 except ValueError:
                     return None
-            else:
-                return self._file.get(option.section, attr)
+
+            return self._file.get(option.section, attr)
         except ValueError as e:
             # Showing a more detailed error than the one given by configparser
             raise ValueError(f"Error when parsing the config file: in the"

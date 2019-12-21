@@ -17,7 +17,6 @@ except ModuleNotFoundError:
         "No module named 'mpv'.\n"
         "To use this player, please install spotivids along with python-mpv."
         " Read the installation guide for more details.") from None
-from PySide2.QtWidgets import QFrame
 
 from spotivids.player.generic import PlayerBase
 
@@ -69,12 +68,12 @@ class MpvPlayer(PlayerBase):
         """
 
         self._mpv.wait_for_property('seekable')
-        logging.info(f"Time set to {ms} milliseconds")
+        logging.info("Time set to %d milliseconds", ms)
         self._mpv.seek(ms / 1000, reference='absolute')
 
-    def start_video(self, url: str, is_playing: bool = True) -> None:
-        logging.info(f"Started new video")
-        self._mpv.play(url)
+    def start_video(self, media: str, is_playing: bool = True) -> None:
+        logging.info("Started new video")
+        self._mpv.play(media)
         # Mpv starts automatically playing the video
         if not is_playing:
             self.pause = True

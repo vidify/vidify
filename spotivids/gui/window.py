@@ -16,11 +16,11 @@ obtain the authorization token.
 import types
 import logging
 import importlib
-from typing import Union, Callable, Optional, Tuple
+from typing import Callable, Optional
 
 from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
-from PySide2.QtCore import Qt, QTimer, QCoreApplication, Signal, Slot
+from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot
 # TODO only import when the web API is being used
 from spotipy.scope import scopes
 from spotipy.util import (parse_code_from_url, RefreshingToken,
@@ -29,9 +29,7 @@ from spotipy.auth import OAuthError
 from spotivids.api.spotify.web import SpotifyWebAPI, get_token
 
 from spotivids.api import APIData, get_api_data, ConnectionNotReady
-from spotivids.api.generic import APIBase
 from spotivids.player import initialize_player
-from spotivids.player.generic import PlayerBase
 from spotivids.config import Config
 from spotivids.youtube import YouTube
 from spotivids.lyrics import get_lyrics
@@ -98,8 +96,6 @@ class MainWindow(QWidget):
         usage.
         """
 
-        pass
-
     def initialize_api(self) -> None:
         """
         Initializes an API with the information from APIData.
@@ -111,8 +107,7 @@ class MainWindow(QWidget):
         self.start(self.api.connect_api, message=self.api_data.connect_msg,
                    event_loop_interval=self.api_data.event_loop_interval)
 
-    def start(self, connect: Callable[[], None],
-              message: str = "Waiting for connection",
+    def start(self, connect: Callable[[], None], message: Optional[str],
               event_loop_interval: int = 1000) -> None:
         """
         Waits for a Spotify session to be opened or for a song to play.
@@ -144,7 +139,7 @@ class MainWindow(QWidget):
 
         # Creating the label to wait for connection. It starts hidden, since
         # it's only shown if the first attempt to connect fails.
-        self.conn_label = QLabel(message)
+        self.conn_label = QLabel(message or "Waiting for connection")
         self.conn_label.hide()
         self.conn_label.setWordWrap(True)
         self.conn_label.setFont(Fonts.header)
@@ -173,7 +168,7 @@ class MainWindow(QWidget):
 
         # The APIs should raise `ConnectionNotReady` if the first attempt
         # to get metadata from Spotify was unsuccessful.
-        logging.info("Connection attempt " + str(self.conn_counter + 1))
+        logging.info("Connection attempt %d", self.conn_counter + 1)
         try:
             self.conn_fn()
         except ConnectionNotReady:
@@ -248,7 +243,7 @@ class MainWindow(QWidget):
 
     @Slot(int)
     def change_video_position(self, ms: int) -> None:
-        self.player.position = self.api.position
+        self.player.position = ms
 
     def play_video(self) -> None:
         """
@@ -274,7 +269,8 @@ class MainWindow(QWidget):
 
         Starts the API initialization flow, which is the following:
             0. If the credentials are already found in the config, simply
-               initialize the API using them. Otherwise, continue.
+               initialize the API using them (skipping to the last step).
+               Otherwise, continue the flow.
             ** get_token is called **
             1. The user inputs the credentials.
             ** on_submit_creds is called **
@@ -290,12 +286,9 @@ class MainWindow(QWidget):
                           self.config.client_secret, self.config.redirect_uri)
 
         if token is not None:
-            # If the previous token was valid, the API can already start
+            # If the previous token was valid, the API can already start.
             logging.info("Reusing a previously generated token")
-            self.api = SpotifyWebAPI(token)
-            self.start(self.api.connect_api, None,
-                       message=self.api_data.connect_msg,
-                       event_loop_interval=self.api_data.event_loop_interval)
+            self.start_web_api(token, save_config=False)
         else:
             # Otherwise, the credentials are obtained with the GUI. When
             # a valid auth token is ready, the GUI will initialize the API
@@ -344,7 +337,7 @@ class MainWindow(QWidget):
         # Obtaining the input data
         client_id = self.web_form.client_id
         client_secret = self.web_form.client_secret
-        logging.info(f"Input creds: '{client_id}' & '{client_secret}'")
+        logging.info("Input creds: '%s' & '%s'", client_id, client_secret)
 
         # Checking that the data isn't empty
         empty_field = False
@@ -387,7 +380,7 @@ class MainWindow(QWidget):
         """
 
         url = self.browser.url
-        logging.info(f"Now at: {url}")
+        logging.info("Now at: %s", url)
 
         # If the URL isn't the Spotify response URI (localhost), do nothing
         if url.find(self.config.redirect_uri) == -1:
@@ -399,7 +392,7 @@ class MainWindow(QWidget):
         try:
             code = parse_code_from_url(url)
         except KeyError as e:
-            logging.info("ERROR:" + str(e))
+            logging.info("ERROR: %s", str(e))
             return
 
         # Now the user token has to be requested to Spotify, while
@@ -411,7 +404,7 @@ class MainWindow(QWidget):
             # it's automatically refreshed before it expires. self.creds is
             # of type `RefreshingCredentials`, so it returns always a
             # RefreshingToken.
-            self.token = self.creds.request_user_token(code, self.scope)
+            token = self.creds.request_user_token(code, self.scope)
         except OAuthError as e:
             self.browser.hide()
             self.web_form.show()
@@ -423,29 +416,32 @@ class MainWindow(QWidget):
         self.layout.removeWidget(self.browser)
         self.browser.hide()
         # Finally starting the Web API
-        self.start_web_api()
+        self.start_web_api(token)
 
-    def start_web_api(self) -> None:
+    def start_web_api(self, token: RefreshingToken,
+                      save_config: bool = True) -> None:
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
         Initializes the Web API, similarly to what is done in
         initialize_web_api when the credentials are already available, but
         with the newly obtained ones, also saving them in the config for
-        future usage.
+        future usage (if `save_config` is true)
         """
 
-        logging.info(f"Initializing the Web API")
+        logging.info("Initializing the Web API")
 
         # Initializing the web API
         self.api = SpotifyWebAPI(token)
-        self.start(self.api.connect_api, message=self.api_data.connect_msg,
-                   event_loop_interval=self.api_data.event_loop_interval)
+        api_data = APIData['SPOTIFY_WEB']
+        self.start(self.api.connect_api, message=api_data.connect_msg,
+                   event_loop_interval=api_data.event_loop_interval)
 
         # The obtained credentials are saved for the future
-        logging.info("Saving the Web API credentials")
-        self.config.client_secret = self.web_form.client_secret
-        self.config.client_id = self.web_form.client_id
-        self.config.auth_token = self.token.access_token
-        self.config.refresh_token = self.token.refresh_token
-        self.config.expiration = self.token.expires_at
+        if save_config:
+            logging.info("Saving the Web API credentials")
+            self.config.client_secret = self.web_form.client_secret
+            self.config.client_id = self.web_form.client_id
+            self.config.auth_token = token.access_token
+            self.config.refresh_token = token.refresh_token
+            self.config.expiration = token.expires_at

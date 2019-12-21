@@ -12,7 +12,6 @@ from PySide2.QtWidgets import QApplication
 from PySide2.QtGui import QIcon
 
 from spotivids.config import Config
-from spotivids.api.generic import APIBase
 from spotivids.gui import Res
 from spotivids.gui.window import MainWindow
 

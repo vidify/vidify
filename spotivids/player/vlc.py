@@ -12,7 +12,6 @@ import logging
 from typing import Optional
 
 import vlc
-from PySide2.QtWidgets import QFrame
 
 from spotivids import Platform, CURRENT_PLATFORM
 from spotivids.player.generic import PlayerBase
@@ -66,11 +65,11 @@ class VLCPlayer(PlayerBase):
 
     @position.setter
     def position(self, ms: int) -> None:
-        logging.info(f"Time set to {ms} milliseconds")
+        logging.info("Time set to %d milliseconds", ms)
         self._player.set_time(ms)
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
-        logging.info(f"Starting new video")
+        logging.info("Starting new video")
         if CURRENT_PLATFORM in (Platform.LINUX, Platform.BSD):
             self._player.set_xwindow(self.winId())
         elif CURRENT_PLATFORM == Platform.WINDOWS:
@@ -78,9 +77,9 @@ class VLCPlayer(PlayerBase):
         elif CURRENT_PLATFORM == Platform.MACOS:
             self._player.set_nsobject(int(self.winId()))
 
-        self.media = self._vlc.media_new(media)
-        self.media.get_mrl()
-        self._player.set_media(self.media)
+        self._media = self._vlc.media_new(media)
+        self._media.get_mrl()
+        self._player.set_media(self._media)
         # VLC starts paused
         if is_playing:
             self.pause = False
