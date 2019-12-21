@@ -28,7 +28,7 @@ from spotivids.api.generic import APIBase
 from spotivids.config import Config
 
 
-class WebAPI(APIBase):
+class SpotifyWebAPI(APIBase):
     artist: str = None
     title: str = None
     is_playing: bool = None

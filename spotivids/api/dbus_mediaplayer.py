@@ -1,6 +1,7 @@
 """
-This module implements the DBus API to obtain metadata about the Spotify
-player. It's intended for Linux but it should also work on BSD and other
+This module implements the MediaPlayer API to obtain metadata from any
+DBus MediaPlayer supported API, like Spotify.
+It's intended for Linux but it should also work on BSD and other
 unix-like systems with DBus.
 
 This implementation is based on the generic implementation of an API. Please
@@ -22,16 +23,18 @@ from spotivids.api import split_title, ConnectionNotReady
 from spotivids.api.generic import APIBase
 
 
-class DBusAPI(APIBase):
+class DBusMediaPlayerAPI(APIBase):
     artist: str = None
     title: str = None
     is_playing: bool = None
 
-    def __init__(self) -> None:
+    def __init__(self, bus_name: str, position_feature: bool = True) -> None:
         super().__init__()
+        self._bus_name = bus_name
         self.artist = ""
         self.title = ""
         self.is_playing = False
+        self.position_feature = position_feature
 
     def __del__(self) -> None:
         """
@@ -47,13 +50,14 @@ class DBusAPI(APIBase):
     @property
     def position(self) -> int:
         """
-        This feature isn't available for the Spotify DBus API because Spotify
-        doesn't currently support the MPRIS property `Position`, so
+        This feature isn't available for some players like Spotify, so
         `NotImplementedError` is raised instead to keep consistency with the
         rest of the APIs.
         """
 
-        raise NotImplementedError
+        if not self.position_feature:
+            raise NotImplementedError
+        return self.player_interface.Position
 
     def connect_api(self) -> None:
         """
@@ -63,10 +67,10 @@ class DBusAPI(APIBase):
 
         self._bus = pydbus.SessionBus()
         try:
-            self._obj = self._bus.get('org.mpris.MediaPlayer2.spotify',
+            self._obj = self._bus.get(self._bus_name,
                                       '/org/mpris/MediaPlayer2')
         except GLib.Error:
-            raise ConnectionNotReady("No Spotify session currently running")
+            raise ConnectionNotReady("No MediaPlayer session currently running")
 
         self.player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
@@ -153,3 +157,4 @@ class DBusAPI(APIBase):
                 # Refreshes the metadata and pauses/plays the video
                 self.is_playing = is_playing
                 self.status_signal.emit(is_playing)
+

@@ -26,7 +26,7 @@ from spotipy.scope import scopes
 from spotipy.util import (parse_code_from_url, RefreshingToken,
                           RefreshingCredentials)
 from spotipy.auth import OAuthError
-from spotivids.api.web import WebAPI, get_token
+from spotivids.api.spotify.web import SpotifyWebAPI, get_token
 
 from spotivids.api import APIData, get_api_data, ConnectionNotReady
 from spotivids.api.generic import APIBase
@@ -292,7 +292,7 @@ class MainWindow(QWidget):
         if token is not None:
             # If the previous token was valid, the API can already start
             logging.info("Reusing a previously generated token")
-            self.api = WebAPI(token)
+            self.api = SpotifyWebAPI(token)
             self.start(self.api.connect_api, None,
                        message=self.api_data.connect_msg,
                        event_loop_interval=self.api_data.event_loop_interval)
@@ -438,7 +438,7 @@ class MainWindow(QWidget):
         logging.info(f"Initializing the Web API")
 
         # Initializing the web API
-        self.api = WebAPI(token)
+        self.api = SpotifyWebAPI(token)
         self.start(self.api.connect_api, message=self.api_data.connect_msg,
                    event_loop_interval=self.api_data.event_loop_interval)
 

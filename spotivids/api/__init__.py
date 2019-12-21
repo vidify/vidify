@@ -101,8 +101,8 @@ class APIData(Enum):
         "The official Spotify client for Linux and BSD. Recommended.",
         None,
         (Platform.LINUX, Platform.BSD),
-        "spotivids.api.linux",
-        "DBusAPI",
+        "spotivids.api.spotify.linux",
+        "SpotifyLinuxAPI",
         "Waiting for a Spotify session to be ready...",
         None,
         None)
@@ -112,7 +112,7 @@ class APIData(Enum):
         "The official Spotify client for Windows and Mac OS. Recommended.",
         None,
         (Platform.WINDOWS, Platform.MACOS),
-        "spotivids.api.swspotify",
+        "spotivids.api.spotify.swspotify",
         "SwSpotifyAPI",
         "Waiting for a Spotify song to play...",
         None,
@@ -124,8 +124,8 @@ class APIData(Enum):
         " for more details on how to set it up.",
         None,
         [p for p in Platform],  # Supports all platforms
-        "spotivids.api.web",
-        "WebAPI",
+        "spotivids.api.spotify.web",
+        "SpotifyWebAPI",
         "Waiting for a Spotify song to play...",
         "initialize_spotify_web_api",
         1000)
