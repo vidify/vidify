@@ -42,6 +42,7 @@ class Fonts:
     Contains the fonts for the different types of text.
     """
 
+    smalltext = QFont("Inter", 10, QFont.Medium)
     text = QFont("Inter", 12, QFont.Medium)
     bigtext = QFont("Inter", 14, QFont.Medium)
     title = QFont("Inter", 24, QFont.Bold)

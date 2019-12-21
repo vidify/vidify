@@ -21,6 +21,15 @@ spotivids.gui.window module and this one:
                                    +------------+-----------+
                                                 |
                                                 v
+                                  +--------------------------+
+                                  | api.initialize_api       |
+                                  |--------------------------|
+                                  | Initialize the API       |
+                                  | object using the APIData |
+                                  | entry information        |
+                                  +-------------+------------+
+                                                |
+                                                v
 
                 +---------------- Does it need GUI interaction?
                 |      Yes            (APIData.gui_init_fn)
@@ -28,23 +37,15 @@ spotivids.gui.window module and this one:
                 |                               |
                 |                               | No
                 v                               v
-  +------------------------+      +--------------------------+
-  | Call custom function   |      | api.initialize_api       |
-  | from APIData which     +----->|--------------------------|
-  | handles initialization |      | Initialize the API       |
-  | inside the GUI window  |      | object using the APIData |
-  | (APIData.gui_init_fn)  |      | entry information        |
-  +------------------------+      +-------------+------------+
-                                                |
-                                                |
-                                                v
-                                  +--------------------------+
-                                  | gui.start                |
-                                  |--------------------------|
-                                  | Wait for the API connect |
-                                  | Run the init function    |
-                                  | Start event loop         |
-                                  +--------------------------+
+   +------------------------+     +--------------------------+
+   | Call custom function   |     | gui.start                |
+   | from APIData which     |     |--------------------------|
+   | handles initialization +---->| Wait for the API connect |
+   | inside the GUI window  |     | Run the init function    |
+   | (APIData.gui_init_fn)  |     | Start event loop         |
+   +------------------------+     +--------------------------+
+                                  
+                                  
 
 Made with http://stable.ascii-flow.appspot.com
 """
@@ -79,7 +80,7 @@ class APIData(Enum):
         obj = object.__new__(cls)
         obj._value_ = value
         # The short name displayed in the GUI, its description and the icon,
-        # if existent.
+        # if existent. The description can use HTML tags like <b>.
         obj.short_name = short_name
         obj.description = description
         obj.icon = icon
@@ -98,8 +99,9 @@ class APIData(Enum):
     SPOTIFY_LINUX = (
         1,
         "Spotify for Linux",
-        "The official Spotify client for Linux and BSD. Recommended.",
-        None,
+        "The desktop Spotify client for <b>Linux</b> and <b>BSD</b>."
+        " Recommended.",
+        "spotivids/gui/res/api_icons/spotify/linux.svg",
         (Platform.LINUX, Platform.BSD),
         "spotivids.api.spotify.linux",
         "SpotifyLinuxAPI",
@@ -108,9 +110,10 @@ class APIData(Enum):
         None)
     SWSPOTIFY = (
         2,
-        "Spotify for Windows or Mac OS",
-        "The official Spotify client for Windows and Mac OS. Recommended.",
-        None,
+        "Spotify for Windows and MacOS",
+        "The desktop Spotify client for <b>Windows</b> and <b>Mac OS</b> using"
+        " SwSpotify. Recommended.",
+        "spotivids/gui/res/api_icons/spotify/swspotify.svg",
         (Platform.WINDOWS, Platform.MACOS),
         "spotivids.api.spotify.swspotify",
         "SwSpotifyAPI",
@@ -120,9 +123,9 @@ class APIData(Enum):
     SPOTIFY_WEB = (
         3,
         "Spotify Web",
-        "The official Spotify Web API. Please read the installation guide"
-        " for more details on how to set it up.",
-        None,
+        "The official Spotify <b>Web</b> API. Read the installation guide for"
+        " more details on how to set it up.",
+        "spotivids/gui/res/api_icons/spotify/web.svg",
         tuple(Platform),  # Supports all platforms
         "spotivids.api.spotify.web",
         "SpotifyWebAPI",

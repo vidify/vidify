@@ -20,7 +20,7 @@ from typing import Callable, Optional
 
 from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
-from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot
+from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot, QSize
 
 from spotivids.api import APIData, get_api_data, ConnectionNotReady
 from spotivids.player import initialize_player
@@ -28,7 +28,7 @@ from spotivids.config import Config
 from spotivids.youtube import YouTube
 from spotivids.lyrics import get_lyrics
 from spotivids.gui import Fonts, Res, Colors
-from spotivids.gui.components import WebBrowser, WebForm
+from spotivids.gui.components import APISelection, WebBrowser, WebForm
 
 
 class MainWindow(QWidget):
@@ -39,6 +39,7 @@ class MainWindow(QWidget):
 
         super().__init__()
         self.setWindowTitle('spotivids')
+        self.setMinimumSize(QSize(560, 450))
 
         # Setting the window to stay on top
         if config.stay_on_top:
@@ -68,20 +69,13 @@ class MainWindow(QWidget):
         # check the flow diagram in spotivids.api. First we have to check if
         # the API is saved in the config:
         try:
-            self.api_data = get_api_data(config.api)
+            api_data = get_api_data(config.api)
         except KeyError:
             # Otherwise, the user is prompted for an API. After choosing one,
             # it will be initialized from outside this function.
             self.prompt_api()
         else:
-            # The API may need interaction with the user to obtain credentials
-            # or similar data. This function will already take care of the
-            # rest of the initialization.
-            if self.api_data.gui_init_fn is not None:
-                fn = getattr(self, self.api_data.gui_init_fn)
-                fn()
-            else:
-                self.initialize_api()
+            self.initialize_api(api_data)
 
     def prompt_api(self) -> None:
         """
@@ -90,16 +84,46 @@ class MainWindow(QWidget):
         usage.
         """
 
-    def initialize_api(self) -> None:
+        self.API_selection = APISelection()
+        self.API_selection.api_chosen.connect(self.on_api_selection)
+        self.layout.addWidget(self.API_selection)
+
+    def on_api_selection(self, api_str: str) -> None:
+        """
+        Method called when the API is selected after calling self.prompt_api
+        to ask the user. The provided api string must be an existent entry
+        inside the APIData enumeration.
+        """
+
+        # Removing the widget used to obtain the API string
+        self.layout.removeWidget(self.API_selection)
+        self.API_selection.hide()
+        del self.API_selection
+
+        # Saving the API in the config
+        self.config.api = api_str
+
+        # Starting the API initialization
+        api_data = APIData[api_str]
+        self.initialize_api(api_data)
+
+    def initialize_api(self, api_data: APIData) -> None:
         """
         Initializes an API with the information from APIData.
         """
 
-        mod = importlib.import_module(self.api_data.module)
-        cls = getattr(mod, self.api_data.class_name)
+        # The API may need interaction with the user to obtain credentials
+        # or similar data. This function will already take care of the
+        # rest of the initialization.
+        if api_data.gui_init_fn is not None:
+            fn = getattr(self, api_data.gui_init_fn)
+            fn()
+            return
+        mod = importlib.import_module(api_data.module)
+        cls = getattr(mod, api_data.class_name)
         self.api = cls()
-        self.start(self.api.connect_api, message=self.api_data.connect_msg,
-                   event_loop_interval=self.api_data.event_loop_interval)
+        self.start(self.api.connect_api, message=api_data.connect_msg,
+                   event_loop_interval=api_data.event_loop_interval)
 
     def start(self, connect: Callable[[], None], message: Optional[str],
               event_loop_interval: int = 1000) -> None:
@@ -432,6 +456,8 @@ class MainWindow(QWidget):
         self.layout.removeWidget(self.web_form)
         self.layout.removeWidget(self.browser)
         self.browser.hide()
+        del self.web_form
+        del self.browser
         # Finally starting the Web API
         self.start_spotify_web_api(token)
 
