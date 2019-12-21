@@ -19,18 +19,11 @@ from spotivids.gui.window import MainWindow
 
 def start_gui(config: Config) -> None:
     """
-    Main function: chooses a platform and player and starts the corresponding
-    API function. Also initializes the logger, youtube and GUI.
+    Initializing the Qt application. MainWindow takes care of initializing
+    the player and the API, and acts as the "main function" where everything
+    is put together.
     """
 
-    # Logger initialzation with precise milliseconds handler.
-    logging.basicConfig(level=logging.DEBUG if config.debug else logging.ERROR,
-                        format="[%(asctime)s.%(msecs)03d] %(levelname)s:"
-                        " %(message)s", datefmt="%H:%M:%S")
-
-    # Initializing the Qt application. MainWindow takes care of initializing
-    # the player and the API, and acts as the "main function" where everything
-    # is put together.
     app = QApplication()
     app.setWindowIcon(QIcon(Res.icon))
     window = MainWindow(config)
@@ -42,6 +35,11 @@ def main() -> None:
     # Initialization and parsing of the config from arguments and config file
     config = Config()
     config.parse()
+
+    # Logger initialzation with precise milliseconds handler.
+    logging.basicConfig(level=logging.DEBUG if config.debug else logging.ERROR,
+                        format="[%(asctime)s.%(msecs)03d] %(levelname)s:"
+                        " %(message)s", datefmt="%H:%M:%S")
 
     # Redirects stderr to /dev/null if debug is turned off, since sometimes
     # VLC will print non-fatal errors even when configured to be quiet.

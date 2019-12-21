@@ -21,19 +21,18 @@ ERROR_MESSAGES = (
     " then... how about a random page?")
 
 
-def print_lyrics(artist: str, title: str) -> None:
+def get_lyrics(artist: str, title: str) -> str:
     """
-    Using lyricwikia to get lyrics.
-
-    Colors are not displayed on Windows because it doesn't support ANSI
-    escape codes and importing colorama isn't worth it currently.
+    Using lyricwikia to obtain the song lyrics.
     """
 
     name = format_name(artist, title)
+    # Colors are not displayed on Windows because it doesn't support ANSI
+    # escape codes and importing colorama isn't worth it currently.
     if CURRENT_PLATFORM == Platform.WINDOWS:
-        name = f">> {name}"
+        name = f">> {name}\n"
     else:
-        name = f"\033[4m{name}\033[0m"
+        name = f"\033[4m{name}\033[0m\n"
 
     try:
         lyrics = lyricwikia.get_lyrics(artist, title) + "\n"

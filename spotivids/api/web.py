@@ -34,13 +34,7 @@ class WebAPI(APIBase):
     is_playing: bool = None
 
     def __init__(self, token: RefreshingToken) -> None:
-        """
-        It includes `player`, the VLC or mpv window to play videos and control
-        it when the song status changes.
-
-        This also handles the Spotipy authentication.
-        """
-
+        super().__init__()
         self.artist = ""
         self.title = ""
         self.is_playing = False
@@ -49,7 +43,7 @@ class WebAPI(APIBase):
         self._spotify = Spotify(self._token)
         self._event_timestamp = time.time()
 
-    def connect(self) -> None:
+    def connect_api(self) -> None:
         self._refresh_metadata()
 
     @property
@@ -108,15 +102,17 @@ class WebAPI(APIBase):
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
-            self.play_video()  # TODO use signals/events for Qt
+            #  self.play_video()
 
         if self.is_playing != is_playing:
-            self.player.pause = not self.is_playing
+            #  self.player.pause = not self.is_playing
+            pass
 
         playback_diff = self._position - position
         calls_diff = int((time.time() - self._event_timestamp) * 1000)
         if playback_diff >= (calls_diff + 100) or playback_diff < 0:
-            self.player.position = self._position
+            #  self.player.position = self._position
+            pass
 
         # The time passed between calls is refreshed
         self._event_timestamp = time.time()

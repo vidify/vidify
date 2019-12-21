@@ -22,9 +22,9 @@ class YouTube:
             'quiet': not debug
         }
         if width is not None:
-            self.options['format'] += f"[width<={width}]"
+            self.options['format'] += f'[width<={width}]'
         if height is not None:
-            self.options['format'] += f"[height<={height}]"
+            self.options['format'] += f'[height<={height}]'
 
     def get_url(self, artist: str, title: str) -> str:
         """

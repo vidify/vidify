@@ -5,11 +5,17 @@ Generic implementation of the API module.
 from abc import ABCMeta, abstractmethod
 from typing import Tuple, Callable, Optional
 
+from PySide2.QtCore import QObject, Signal
+
 from spotivids.player.generic import PlayerBase
 
 
-class APIBase:
+class APIBase(QObject):
     __metaclass__ = ABCMeta
+
+    new_song_signal = Signal()
+    status_signal = Signal(bool)
+    position_signal = Signal(int)
 
     """
     The abstract base class used for any API in this app. The API is defined
@@ -62,7 +68,7 @@ class APIBase:
         """
 
     @abstractmethod
-    def connect(self):
+    def connect_api(self):
         """
         Initializes the connection with the API.
 
@@ -70,6 +76,9 @@ class APIBase:
         connect didn't succeed. For example, if the player isn't open or if no
         songs are playing at that moment. This means that this function
         shouldn't block while waiting for the API to be ready.
+
+        Note: the name has to be connect_api instead of connect because it
+        would override the Qt Signal's connect function.
         """
 
     @abstractmethod

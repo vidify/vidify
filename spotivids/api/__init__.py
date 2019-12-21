@@ -29,12 +29,12 @@ spotivids.gui.window module and this one:
                 |                               | No
                 v                               v
   +------------------------+      +--------------------------+
-  | Obtain the credentials |      | api.initialize_api       |
-  | needed by calling a    +----->|--------------------------|
-  | function found inside  |      | Initialize the API       |
-  | the APIs structure     |      | object using the APIs    |
-  +------------------------+      | entry                    |
-                                  +-------------+------------+
+  | Call custom function   |      | api.initialize_api       |
+  | from APIData which     +----->|--------------------------|
+  | handles initialization |      | Initialize the API       |
+  | inside the GUI window  |      | object using the APIData |
+  | (APIData.gui_init_fn)  |      | entry information        |
+  +------------------------+      +-------------+------------+
                                                 |
                                                 |
                                                 v
@@ -46,7 +46,7 @@ spotivids.gui.window module and this one:
                                   | Start event loop         |
                                   +--------------------------+
 
-Made with http://stable.ascii-flow.appspot.com/#Draw800835900720050087
+Made with http://stable.ascii-flow.appspot.com
 """
 
 import re
@@ -63,12 +63,12 @@ from spotivids.api.generic import APIBase
 
 class APIData(Enum):
     """
-    Simple information about the API shown to the user to choose the initial
-    platform. The more detailed information about initializing the API and such
-    is inside the API implementation file, because importing the module would
-    cause issues with other imports inside it.
+    Information structure about the different APIs supported in this module.
+    It contains information about the API and how to initialize it, following
+    the top of this module's flow diagram with dependency injection.
 
     Note: all API entries must have their name in uppercase.
+    TODO: check uppercase names, check that all modules have an init function.
     """
 
     def __new__(cls, value: int, short_name: str, description: str,
@@ -143,7 +143,7 @@ class ConnectionNotReady(Exception):
         super().__init__(msg)
 
 
-def get_api_data(key: str) -> Optional[APIData]:
+def get_api_data(key: str) -> APIData:
     """
     Returns an entry from the APIs from `key`. KeyError is raised if it
     isn't found.

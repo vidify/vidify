@@ -30,6 +30,7 @@ class SwSpotifyAPI(APIBase):
     is_playing: bool = None
 
     def __init__(self) -> None:
+        super().__init__()
         self.artist = ""
         self.title = ""
         self.is_playing = False
@@ -43,7 +44,7 @@ class SwSpotifyAPI(APIBase):
 
         raise NotImplementedError
 
-    def connect(self) -> None:
+    def connect_api(self) -> None:
         self._refresh_metadata()
 
     def _refresh_metadata(self) -> None:
@@ -93,7 +94,8 @@ class SwSpotifyAPI(APIBase):
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
-            self.play_video()
+            #  self.play_video()
 
         if self.is_playing != is_playing:
-            self.player.pause = not self.is_playing
+            #  self.player.pause = not self.is_playing
+            pass

@@ -28,6 +28,7 @@ class DBusAPI(APIBase):
     is_playing: bool = None
 
     def __init__(self) -> None:
+        super().__init__()
         self.artist = ""
         self.title = ""
         self.is_playing = False
@@ -54,7 +55,7 @@ class DBusAPI(APIBase):
 
         raise NotImplementedError
 
-    def connect(self) -> None:
+    def connect_api(self) -> None:
         """
         Connects to the DBus session. Tries to access the proxy object
         and configures the call on property changes.
@@ -73,6 +74,8 @@ class DBusAPI(APIBase):
             self._refresh_metadata()
         except IndexError:
             raise ConnectionNotReady("No song is currently playing")
+
+        self.start_event_loop()
 
     def start_event_loop(self) -> None:
         """
@@ -142,21 +145,11 @@ class DBusAPI(APIBase):
                 # Refreshes the metadata with the new data and plays the video
                 self.artist = artist
                 self.title = title
-                self.play_video()
+                self.new_song_signal.emit()
 
         if 'PlaybackStatus' in properties:
             is_playing = self._bool_status(properties['PlaybackStatus'])
             if self.is_playing != is_playing:
                 # Refreshes the metadata and pauses/plays the video
                 self.is_playing = is_playing
-                self.player.pause = not is_playing
-
-
-def init(spotify: DBusAPI) -> None:
-    """
-    Starts the event loop for the DBus API and plays the first video.
-    """
-
-    spotify.start_event_loop()
-    spotify.play_video()
-    return spotify
+                self.status_signal.emit(is_playing)

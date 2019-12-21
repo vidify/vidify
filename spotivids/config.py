@@ -193,7 +193,7 @@ class Config:
             help="custom boolean flags used when opening mpv, with dashes"
             " and separated by spaces.")
 
-    def read_file(self, attr: str) -> Union[bool, int, str]:
+    def read_file(self, attr: str) -> Optional[Union[bool, int, str]]:
         """
         Reads the value in the config file for a specified attribute. Its type
         and section are obtained from the default options object.

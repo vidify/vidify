@@ -10,7 +10,7 @@ from spotivids.config import Config
 from spotivids.player.generic import PlayerBase
 
 
-class Players(Enum):
+class PlayerData(Enum):
     """
     The available players enumeration. It contains information about how to
     initialize them: the module, the class name and the possible parameters
@@ -56,7 +56,7 @@ def initialize_player(key: str, config: Config) -> PlayerBase:
 
     # Finding the config player and initializing it.
     try:
-        player = Players[key.upper()]
+        player = PlayerData[key.upper()]
     except KeyError:
         raise PlayerNotFoundError
 
