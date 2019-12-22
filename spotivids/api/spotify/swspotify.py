@@ -93,8 +93,7 @@ class SwSpotifyAPI(APIBase):
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
-            #  self.play_video()
+            self.new_song_signal.emit()
 
         if self.is_playing != is_playing:
-            #  self.player.pause = not self.is_playing
-            pass
+            self.status_signal.emit(self.is_playing)

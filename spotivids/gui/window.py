@@ -77,6 +77,17 @@ class MainWindow(QWidget):
         else:
             self.initialize_api(api_data)
 
+    def setup_UI(self) -> None:
+        """
+        Loads the UI components, the main one being the video player.
+        This is called after the connection has been established with
+        `start()`
+        """
+
+        logging.info("Setting up the UI")
+        self.setStyleSheet(f"background-color:{Colors.bg};")
+        self.layout.addWidget(self.player)
+
     def prompt_api(self) -> None:
         """
         Initializing the widget to prompt the user for their API of choice.
@@ -168,10 +179,10 @@ class MainWindow(QWidget):
 
         # Creating the QTimer to check for connection every second.
         self.conn_timer = QTimer(self)
-        self.conn_timer.timeout.connect(self._wait_for_connection)
+        self.conn_timer.timeout.connect(self.wait_for_connection)
         self.conn_timer.start(1000)
 
-    def _wait_for_connection(self) -> None:
+    def wait_for_connection(self) -> None:
         """
         Function called by start() to check every second if the connection
         has been established.
@@ -194,8 +205,6 @@ class MainWindow(QWidget):
         else:
             logging.info("Succesfully connected to the API")
 
-            self.setup_UI()
-
             # Stopping the timer and changing the label to the loading one.
             self.conn_timer.stop()
             self.layout.removeWidget(self.conn_label)
@@ -205,6 +214,9 @@ class MainWindow(QWidget):
             self.layout.removeWidget(self.loading_label)
             self.loading_label.hide()
             del self.loading_label
+
+            # Loading the player and more
+            self.setup_UI()
 
             # Starting the first video
             self.play_video()
@@ -227,16 +239,6 @@ class MainWindow(QWidget):
             print("Timed out waiting for Spotify")
             self.conn_timer.stop()
             QCoreApplication.exit(1)
-
-    def setup_UI(self) -> None:
-        """
-        Loads the UI components, the main one being the video player.
-        This is called after the connection has been established with
-        `start()`
-        """
-
-        logging.info("Setting up the UI")
-        self.layout.addWidget(self.player)
 
     def start_event_loop(self, event_loop: Callable[[], None],
                          ms: int) -> None:
@@ -454,10 +456,11 @@ class MainWindow(QWidget):
 
         # Removing the GUI elements used to obtain the credentials
         self.layout.removeWidget(self.web_form)
+        self.web_form.hide()
         self.layout.removeWidget(self.browser)
         self.browser.hide()
-        del self.web_form
         del self.browser
+
         # Finally starting the Web API
         self.start_spotify_web_api(token)
 
@@ -489,3 +492,11 @@ class MainWindow(QWidget):
             self.config.auth_token = token.access_token
             self.config.refresh_token = token.refresh_token
             self.config.expiration = token._token.expires_at
+
+        # The web form is removed after saving the data. It may not exist
+        # because start_spotify_web_api was called directly, so errors are
+        # taken into account.
+        try:
+            del self.web_form
+        except AttributeError:
+            pass

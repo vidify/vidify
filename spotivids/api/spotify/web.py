@@ -100,17 +100,15 @@ class SpotifyWebAPI(APIBase):
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
-            #  self.play_video()
+            self.new_song_signal.emit()
 
         if self.is_playing != is_playing:
-            #  self.player.pause = not self.is_playing
-            pass
+            self.status_signal(self.is_playing)
 
         playback_diff = self._position - position
         calls_diff = int((time.time() - self._event_timestamp) * 1000)
         if playback_diff >= (calls_diff + 100) or playback_diff < 0:
-            #  self.player.position = self._position
-            pass
+            self.position_signal.emit(self._position)
 
         # The time passed between calls is refreshed
         self._event_timestamp = time.time()
@@ -162,7 +160,7 @@ def get_token(auth_token: str, refresh_token: str, expiration: int,
     try:
         s = Spotify(token)
         s.playback_currently_playing()
-    except (ConnectionNotReady, requests.exceptions.HTTPError) as e:
+    except requests.exceptions.HTTPError as e:
         # Note: logging messages use the old formatting instead of f-strings
         # because of efficiency (and more). If logging was disabled, Python
         # shouldn't compute the string format.
