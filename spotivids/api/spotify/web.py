@@ -15,11 +15,17 @@ confusing at first glance.
 import os
 import time
 import logging
+from typing import Optional
 
-from spotipy import Spotify
-from spotipy.scope import scopes
+try:
+    from spotipy import Spotify
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        "No module named 'spotipy'.\n"
+        "To use the Spotify Web API, please install spotipy. Read more about"
+        " this in the Installation Guide.")
 from spotipy.auth import Token
-from spotipy.util import RefreshingToken, RefreshingCredentials
+from spotipy.util import RefreshingToken, request_refreshed_token
 import requests  # required in spotipy
 
 from spotivids.api import split_title, ConnectionNotReady
@@ -114,20 +120,21 @@ class SpotifyWebAPI(APIBase):
         self._event_timestamp = time.time()
 
 
-def get_token(auth_token: str, refresh_token: str, expiration: int,
-              client_id: str, client_secret: str, redirect_uri: str
-              ) -> RefreshingToken:
+def get_token(refresh_token: Optional[str], client_id: Optional[str],
+              client_secret: Optional[str], redirect_uri: Optional[str]
+              ) -> Optional[RefreshingToken]:
     """
-    Tries to generate a self-refreshing token from the parameters. They
-    could be anything so there have to be several checks to make sure the
-    returned token is valid. Otherwise, this function will return None
+    Tries to generate a self-refreshing token from the parameters. The
+    authentication token itself isn't even saved in the config because it
+    expires in an hour. Instead, the refresh token is used to generate a new
+    token whenever the app is launched.
 
-    `refresh_token` is a special token needed to refresh `auth_token`. It's
-    needed to create the RefreshingToken so that it automatically refreshes
-    itself when it's expired.
+    `refresh_token` is a special token used to refresh or generate a token.
+    It's useful to create a RefreshingToken rather than a regular Token so
+    that it automatically refreshes itself when it's expired.
     """
 
-    # Trying to use the env variables
+    # Trying to use the environment variables
     if client_id is None:
         client_id = os.getenv('SPOTIFY_CLIENT_ID')
     if client_secret is None:
@@ -135,38 +142,15 @@ def get_token(auth_token: str, refresh_token: str, expiration: int,
     if redirect_uri is None:
         redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
 
-    # Checking that the credentials are valid
-    for c in (auth_token, refresh_token, expiration, client_id, client_secret,
-              redirect_uri):
+    # Checking that the credentials are valid. The refresh token isn't really
+    # needed because spotipy.request_refreshed_token already obtains it
+    # from the refresh token.
+    for c in (refresh_token, client_id, client_secret, redirect_uri):
         if c in (None, ''):
             logging.info("Rejecting the token because one of the credentials"
                          " provided is empty.")
             return None
 
     # Generating a RefreshingToken with the parameters
-    data = {
-        'access_token': auth_token,
-        'token_type': 'Bearer',
-        'scope': scopes.user_read_currently_playing,
-        'expires_in': expiration - int(time.time()),
-        'refresh_token': refresh_token
-    }
-    creds = RefreshingCredentials(client_id, client_secret, redirect_uri)
-    token = RefreshingToken(Token(data), creds)
-
-    # Doing an initial request to check that it was generated correctly:
-    # an error could be raised from the requests package, or the returned
-    # value could be None
-    try:
-        s = Spotify(token)
-        s.playback_currently_playing()
-    except requests.exceptions.HTTPError as e:
-        # Note: logging messages use the old formatting instead of f-strings
-        # because of efficiency (and more). If logging was disabled, Python
-        # shouldn't compute the string format.
-        logging.info("Rejecting the token because of an error while trying"
-                     " to connect to Spotify: %s", str(e))
-        return None
-
-    # If it got here, it means the generated token is valid
-    return token
+    return request_refreshed_token(client_id, client_secret, redirect_uri,
+                                   refresh_token)

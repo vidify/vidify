@@ -72,9 +72,7 @@ class Options:
     client_id = Option('SpotifyWeb', str, None)
     client_secret = Option('SpotifyWeb', str, None)
     redirect_uri = Option('SpotifyWeb', str, 'http://localhost:8888/callback/')
-    auth_token = Option('SpotifyWeb', str, None)
     refresh_token = Option('SpotifyWeb', str, None)
-    expiration = Option('SpotifyWeb', int, None)
 
 
 class Config:

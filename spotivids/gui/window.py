@@ -3,14 +3,10 @@ This module implements the Qt interface and is where every other module is
 put together.
 
 The API and player modules are mixed using Qt events:
-    * Position changes -> player.position (property)
-    * Status changes -> player.is_playing (property)
-    * Song changes -> MainWindow.play_video() (method)
+    * Position changes -> MainWindow.change_video_position(ms)
+    * Status changes -> MainWindow.change_video_status(status)
+    * Song changes -> MainWindow.play_video()
 These events are generated inside the APIs.
-
-The Spotify Web API needs authorization to access to its data, so this class
-also contains methods to ask the user their client ID and client secret to
-obtain the authorization token.
 """
 
 import types
@@ -28,7 +24,7 @@ from spotivids.config import Config
 from spotivids.youtube import YouTube
 from spotivids.lyrics import get_lyrics
 from spotivids.gui import Fonts, Res, Colors
-from spotivids.gui.components import APISelection, WebBrowser, WebForm
+from spotivids.gui.components import APISelection
 
 
 class MainWindow(QWidget):
@@ -291,33 +287,14 @@ class MainWindow(QWidget):
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
-        Starts the API initialization flow, which is the following:
-            0. If the credentials are already found in the config, simply
-               initialize the API using them (skipping to the last step).
-               Otherwise, continue the flow.
-            ** self.prompt_spotify_web_token is called **
-            1. The user inputs the credentials.
-            ** self.on_submit_spotify_web_creds is called **
-            2. The user logs in.
-            ** self.on_spotify_web_login is called **
-            3. If the credentials were correct, the Web API is set up and
-               started. Otherwise, go back to step 1.
-            ** self.start_spotify_web_api is called **
-
         Note: the Spotipy imports are done inside the functions so that
-        Spotipy isn't needed for whoever doesn't plan to use it.
+        Spotipy isn't needed for whoever doesn't plan to use the Spotify
+        Web API.
         """
 
-        try:
-            from spotivids.api.spotify.web import get_token
-        except ModuleNotFoundError:
-            raise ModuleNotFoundError(
-                "No module named 'spotipy'.\n"
-                "To use the Spotify Web API, please install spotipy. Read"
-                " more about this in the Installation Guide.")
+        from spotivids.api.spotify.web import get_token
 
-        token = get_token(self.config.auth_token, self.config.refresh_token,
-                          self.config.expiration, self.config.client_id,
+        token = get_token(self.config.refresh_token, self.config.client_id,
                           self.config.client_secret, self.config.redirect_uri)
 
         if token is not None:
@@ -340,129 +317,15 @@ class MainWindow(QWidget):
         used with it.
         """
 
-        # The web form for the user to input the credentials.
-        self.web_form = WebForm(self.config.client_id,
-                                self.config.client_secret)
-        # on_submit_spotify_web creds will be called once the credentials have
-        # been input.
-        self.web_form.button.clicked.connect(
-            self.on_submit_spotify_web_creds)
-        self.layout.addWidget(self.web_form)
+        from spotivids.gui.api.spotify_web import SpotifyWebPrompt
 
-        # The web browser for the user to login and grant access.
-        # It's hidden at the beggining and will appear once the credentials
-        # are input.
-        self.browser = WebBrowser()
-        self.browser.hide()
-        # The initial screen with the web form will be shown if the user
-        # clicks on the Go Back button.
-        self.browser.go_back_button.pressed.connect(
-            lambda: (self.browser.hide(), self.web_form.show()))
-        # Any change in the browser URL will redirect to on_spotify_web_login
-        # to check if the login was succesful.
-        self.browser.web_view.urlChanged.connect(self.on_spotify_web_login)
-        self.layout.addWidget(self.browser)
-
-    def on_submit_spotify_web_creds(self) -> None:
-        """
-        SPOTIFY WEB API CUSTOM FUNCTION
-
-        Checking if the submitted credentials were correct, and starting the
-        logging-in step.
-        """
-
-        from spotipy.scope import scopes
-        from spotipy.util import RefreshingCredentials
-
-        # Obtaining the input data
-        client_id = self.web_form.client_id
-        client_secret = self.web_form.client_secret
-        logging.info("Input creds: '%s' & '%s'", client_id, client_secret)
-
-        # Checking that the data isn't empty
-        empty_field = False
-        if client_id == '':
-            self.web_form.input_client_id.highlight()
-            empty_field = True
-        else:
-            self.web_form.input_client_id.undo_highlight()
-
-        if client_secret == '':
-            self.web_form.input_client_secret.highlight()
-            empty_field = True
-        else:
-            self.web_form.input_client_secret.undo_highlight()
-
-        if empty_field:
-            return
-
-        # Hiding the form and showing the web browser for the next step
-        self.web_form.hide()
-        self.browser.show()
-
-        # Creating the request URL to obtain the authorization token
-        self.creds = RefreshingCredentials(client_id, client_secret,
-                                           self.config.redirect_uri)
-        self.scope = scopes.user_read_currently_playing
-        url = self.creds.user_authorisation_url(self.scope)
-        self.browser.url = url
-
-    def on_spotify_web_login(self) -> None:
-        """
-        SPOTIFY WEB API CUSTOM FUNCTION
-
-        This function is called once the user has logged into Spotify to
-        obtain the access token.
-
-        Part of this function is a reimplementation of
-        `spotipy.prompt_user_token`. It does the same thing but in a more
-        automatized way, because Qt has access over the web browser too.
-        """
-
-        from spotipy.util import parse_code_from_url
-        from spotipy.auth import OAuthError
-
-        url = self.browser.url
-        logging.info("Now at: %s", url)
-
-        # If the URL isn't the Spotify response URI (localhost), do nothing
-        if url.find(self.config.redirect_uri) == -1:
-            return
-
-        # Trying to get the auth token from the URL with Spotipy's
-        # parse_code_from_url(), which throws a KeyError if the URL doesn't
-        # contain an auth token or if it contains more than one.
-        try:
-            code = parse_code_from_url(url)
-        except KeyError as e:
-            logging.info("ERROR: %s", str(e))
-            return
-
-        # Now the user token has to be requested to Spotify, while
-        # checking for errors to make sure the credentials were correct.
-        # This will only happen with the client secret because it's only
-        # checked when requesting the user token.
-        try:
-            # A RefreshingToken is used instead of a regular Token so that
-            # it's automatically refreshed before it expires. self.creds is
-            # of type `RefreshingCredentials`, so it returns always a
-            # RefreshingToken.
-            token = self.creds.request_user_token(code, self.scope)
-        except OAuthError as e:
-            self.browser.hide()
-            self.web_form.show()
-            self.web_form.show_error(str(e))
-            return
-
-        # Removing the GUI elements used to obtain the credentials
-        self.layout.removeWidget(self.web_form)
-        self.web_form.hide()
-        self.layout.removeWidget(self.browser)
-        self.browser.hide()
-        del self.browser
-
-        # Finally starting the Web API
-        self.start_spotify_web_api(token)
+        # The SpotifyWebPrompt handles the interaction with the user and
+        # emits a `done` signal when it's done.
+        self._spotify_web_prompt = SpotifyWebPrompt(self.config.client_id,
+                                                    self.config.client_secret,
+                                                    self.config.redirect_uri)
+        self._spotify_web_prompt.done.connect(self.start_spotify_web_api)
+        self.layout.addWidget(self._spotify_web_prompt, Qt.AlignCenter)
 
     def start_spotify_web_api(self, token: 'RefreshingToken',
                       save_config: bool = True) -> None:
@@ -487,16 +350,16 @@ class MainWindow(QWidget):
         # The obtained credentials are saved for the future
         if save_config:
             logging.info("Saving the Spotify Web API credentials")
-            self.config.client_secret = self.web_form.client_secret
-            self.config.client_id = self.web_form.client_id
-            self.config.auth_token = token.access_token
+            self.config.client_secret = self._spotify_web_prompt.client_secret
+            self.config.client_id = self._spotify_web_prompt.client_id
             self.config.refresh_token = token.refresh_token
-            self.config.expiration = token._token.expires_at
 
-        # The web form is removed after saving the data. It may not exist
-        # because start_spotify_web_api was called directly, so errors are
-        # taken into account.
+        # The credentials prompt widget is removed after saving the data. It
+        # may not exist because start_spotify_web_api was called directly,
+        # so errors are taken into account.
         try:
-            del self.web_form
+            self.layout.removeWidget(self._spotify_web_prompt)
+            self._spotify_web_prompt.hide()
+            del self._spotify_web_prompt
         except AttributeError:
             pass
