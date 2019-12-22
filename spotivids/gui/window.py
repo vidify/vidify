@@ -57,6 +57,7 @@ class MainWindow(QWidget):
             font_db.addApplicationFont(font)
 
         # Initializing the player and the youtube module directly.
+        logging.info("Using %s as the player", config.player)
         self.player = initialize_player(config.player, config)
         self.youtube = YouTube(config.debug, config.width, config.height)
         self.config = config
@@ -69,36 +70,18 @@ class MainWindow(QWidget):
         except KeyError:
             # Otherwise, the user is prompted for an API. After choosing one,
             # it will be initialized from outside this function.
-            self.prompt_api()
+            logging.info("API not found: prompting the user")
+            self.API_selection = APISelection()
+            self.API_selection.api_chosen.connect(self.on_api_selection)
+            self.layout.addWidget(self.API_selection)
         else:
+            logging.info("Using %s as the API", config.api)
             self.initialize_api(api_data)
-
-    def setup_UI(self) -> None:
-        """
-        Loads the UI components, the main one being the video player.
-        This is called after the connection has been established with
-        `start()`
-        """
-
-        logging.info("Setting up the UI")
-        self.setStyleSheet(f"background-color:{Colors.bg};")
-        self.layout.addWidget(self.player)
-
-    def prompt_api(self) -> None:
-        """
-        Initializing the widget to prompt the user for their API of choice.
-        This will also save the selected API in the config file for future
-        usage.
-        """
-
-        self.API_selection = APISelection()
-        self.API_selection.api_chosen.connect(self.on_api_selection)
-        self.layout.addWidget(self.API_selection)
 
     def on_api_selection(self, api_str: str) -> None:
         """
-        Method called when the API is selected after calling self.prompt_api
-        to ask the user. The provided api string must be an existent entry
+        Method called when the API is selected with APISelection.
+        The provided api string must be an existent entry
         inside the APIData enumeration.
         """
 
@@ -212,7 +195,8 @@ class MainWindow(QWidget):
             del self.loading_label
 
             # Loading the player and more
-            self.setup_UI()
+            self.setStyleSheet(f"background-color:{Colors.bg};")
+            self.layout.addWidget(self.player)
 
             # Starting the first video
             self.play_video()
@@ -272,7 +256,7 @@ class MainWindow(QWidget):
         loop handler whenever a new song is detected.
         """
 
-        logging.info("Starting new video")
+        logging.info("Playing a new video")
         url = self.youtube.get_url(self.api.artist, self.api.title)
         self.player.start_video(url, self.api.is_playing)
         try:
@@ -328,14 +312,12 @@ class MainWindow(QWidget):
         self.layout.addWidget(self._spotify_web_prompt, Qt.AlignCenter)
 
     def start_spotify_web_api(self, token: 'RefreshingToken',
-                      save_config: bool = True) -> None:
+                              save_config: bool = True) -> None:
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
-        Initializes the Web API, similarly to what is done in
-        initialize_web_api when the credentials are already available, but
-        with the newly obtained ones, also saving them in the config for
-        future usage (if `save_config` is true)
+        Initializes the Web API, also saving them in the config for future
+        usage (if `save_config` is true).
         """
         from spotivids.api.spotify.web import SpotifyWebAPI
 

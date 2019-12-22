@@ -96,4 +96,5 @@ class SwSpotifyAPI(APIBase):
             self.new_song_signal.emit()
 
         if self.is_playing != is_playing:
+            logging.info("Status change detected")
             self.status_signal.emit(self.is_playing)

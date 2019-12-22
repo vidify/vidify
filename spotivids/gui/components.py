@@ -10,8 +10,9 @@ from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
 from PySide2.QtGui import QIcon
 from PySide2.QtCore import Qt, QSize, QUrl, Signal, Slot
 from PySide2.QtSvg import QSvgWidget
+from PySide2.QtWebEngineWidgets import QWebEngineView
 
-from spotivids import CURRENT_PLATFORM, Platform
+from spotivids import CURRENT_PLATFORM
 from spotivids.api import APIData
 from spotivids.gui import Fonts, Colors, Res
 
@@ -71,6 +72,7 @@ class APISelection(QWidget):
     def __init__(self, *args) -> None:
         super().__init__(*args)
 
+        logging.info("Initializing the API selection widget")
         self.layout = QVBoxLayout(self)
         group = QGroupBox("Please choose a media player:")
         group.setFont(Fonts.bigtext)
@@ -87,6 +89,7 @@ class APISelection(QWidget):
             self.cards.append(card)
             # Inserting the cards in the widget, with a maximum of `max_cols`
             # columns and starting at the first row.
+            logging.info("Adding API card: %s (enabled=%s)", api.name, enabled)
             layout.addWidget(card, (num // self.max_cols), num % self.max_cols)
 
     @Slot()
@@ -131,3 +134,49 @@ class InputField(QLineEdit):
         """
 
         self.setStyleSheet(f"background-color: {Colors.bg}")
+
+
+class WebBrowser(QWidget):
+    """
+    This widget contains a QWebEngineView and other simple controls.
+    """
+    def __init__(self, *args) -> None:
+        super().__init__(*args)
+        self.layout = QVBoxLayout(self)
+        self.setup_controls()
+        self.setup_web_view()
+
+    def setup_web_view(self) -> None:
+        """
+        The web view itself, with a fixed size.
+        """
+
+        self.web_view = QWebEngineView()
+        self.layout.addWidget(self.web_view)
+
+    def setup_controls(self) -> None:
+        """
+        The web view controls for now are just a button to go back.
+        """
+
+        self.go_back_button = QPushButton("← Go back")
+        self.go_back_button.setFont(Fonts.mediumbutton)
+        self.go_back_button.setStyleSheet(f"color: {Colors.fg};")
+        self.layout.addWidget(self.go_back_button)
+
+    @property
+    def url(self) -> str:
+        """
+        Returns the web view's browser as a string. The first url() returns
+        a QUrl and the second the string with the URL.
+        """
+
+        return self.web_view.url().url()
+
+    @url.setter
+    def url(self, url: str) -> None:
+        """
+        Sets the web view's URL to `url`.
+        """
+
+        self.web_view.setUrl(QUrl(url))

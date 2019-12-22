@@ -10,7 +10,10 @@ player implementation inherits, and an explanation in detail of the methods.
 import logging
 from typing import Optional
 
-import locale
+# Importing locale is necessary since PySide2 stomps over the locale settings
+# needed by libmpv. This needs to happen after importing PyQT before creating
+# the first mpv.MPV instance.
+import locale  # noqa: F401
 try:
     from mpv import MPV
 except ModuleNotFoundError:

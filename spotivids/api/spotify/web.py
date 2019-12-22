@@ -24,9 +24,7 @@ except ModuleNotFoundError:
         "No module named 'spotipy'.\n"
         "To use the Spotify Web API, please install spotipy. Read more about"
         " this in the Installation Guide.")
-from spotipy.auth import Token
 from spotipy.util import RefreshingToken, request_refreshed_token
-import requests  # required in spotipy
 
 from spotivids.api import split_title, ConnectionNotReady
 from spotivids.api.generic import APIBase
@@ -109,11 +107,13 @@ class SpotifyWebAPI(APIBase):
             self.new_song_signal.emit()
 
         if self.is_playing != is_playing:
+            logging.info("Status change detected")
             self.status_signal(self.is_playing)
 
         playback_diff = self._position - position
         calls_diff = int((time.time() - self._event_timestamp) * 1000)
         if playback_diff >= (calls_diff + 100) or playback_diff < 0:
+            logging.info("Position change detected")
             self.position_signal.emit(self._position)
 
         # The time passed between calls is refreshed

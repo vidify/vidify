@@ -12,21 +12,12 @@ spotivids.gui.window module and this one:
                 |                               |
                 |                               | Yes
                 v                               v
-  +-------------------------+      +------------------------+
-  | gui.window.prompt_api   |      | api.get_api_data       |
-  |-------------------------|      |------------------------|
-  | Prompt the user for the +----->| Obtain the API's entry |
-  | API to be used          |      | in the enum, with info |
-  +-------------------------+      | to initialize it       |
-                                   +------------+-----------+
-                                                |
-                                                v
-                                  +--------------------------+
-                                  | api.initialize_api       |
-                                  |--------------------------|
-                                  | Initialize the API       |
-                                  | object using the APIData |
-                                  | entry information        |
+  +-------------------------+     +--------------------------+
+  | initialize APISelection |     | api.initialize_api       |
+  |-------------------------|     |--------------------------|
+  | Prompt the user for the +---->| Initialize the API       |
+  | API to be used          |     | object using the APIData |
+  +-------------------------+     | entry information        |
                                   +-------------+------------+
                                                 |
                                                 v
@@ -44,22 +35,16 @@ spotivids.gui.window module and this one:
    | inside the GUI window  |     | Run the init function    |
    | (APIData.gui_init_fn)  |     | Start event loop         |
    +------------------------+     +--------------------------+
-                                  
-                                  
 
 Made with http://stable.ascii-flow.appspot.com
 """
 
 import re
 import logging
-import importlib
 from enum import Enum
-from types import ModuleType
-from typing import Tuple, Callable, Optional
+from typing import Tuple, Optional
 
 from spotivids import Platform
-from spotivids.config import Config
-from spotivids.api.generic import APIBase
 
 
 class APIData(Enum):

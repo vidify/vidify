@@ -67,7 +67,8 @@ class DBusMediaPlayerAPI(APIBase):
             self._obj = self._bus.get(self._bus_name,
                                       '/org/mpris/MediaPlayer2')
         except GLib.Error:
-            raise ConnectionNotReady("No MediaPlayer session currently running")
+            raise ConnectionNotReady(
+                "No MediaPlayer session currently running")
 
         self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
@@ -153,6 +154,7 @@ class DBusMediaPlayerAPI(APIBase):
         if 'PlaybackStatus' in properties:
             is_playing = self._bool_status(properties['PlaybackStatus'])
             if self.is_playing != is_playing:
+                logging.info("Status change detected")
                 # Refreshes the metadata and pauses/plays the video
                 self.is_playing = is_playing
                 self.status_signal.emit(is_playing)

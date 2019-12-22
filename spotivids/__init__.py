@@ -3,7 +3,6 @@ This module has utilities used in different parts of the program, like the
 logger, cross-platform variables...
 """
 
-import os
 import sys
 from enum import Enum
 

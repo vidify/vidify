@@ -6,15 +6,14 @@ import logging
 
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
                                QVBoxLayout)
-from PySide2.QtCore import Qt, QSize, Signal, Slot, QUrl
-from PySide2.QtWebEngineWidgets import QWebEngineView
+from PySide2.QtCore import Qt, QSize, Signal
 from spotipy.scope import scopes
 from spotipy.util import (RefreshingCredentials, RefreshingToken,
                           parse_code_from_url)
 from spotipy.auth import OAuthError
 
 from spotivids.gui import Fonts, Colors
-from spotivids.gui.components import InputField
+from spotivids.gui.components import InputField, WebBrowser
 
 
 class SpotifyWebPrompt(QWidget):
@@ -49,8 +48,8 @@ class SpotifyWebPrompt(QWidget):
         self.layout.setSpacing(0)
 
         # The web form for the user to input the credentials.
-        self.web_form = WebForm(client_id=client_id,
-                                client_secret=client_secret)
+        self.web_form = SpotifyWebForm(client_id=client_id,
+                                       client_secret=client_secret)
         # on_submit_spotify_web creds will be called once the credentials have
         # been input.
         self.web_form.button.clicked.connect(self.on_submit_creds)
@@ -170,53 +169,7 @@ class SpotifyWebPrompt(QWidget):
         self.done.emit(token)
 
 
-class WebBrowser(QWidget):
-    """
-    This widget contains a QWebEngineView and other simple controls.
-    """
-    def __init__(self, *args) -> None:
-        super().__init__(*args)
-        self.layout = QVBoxLayout(self)
-        self.setup_controls()
-        self.setup_web_view()
-
-    def setup_web_view(self) -> None:
-        """
-        The web view itself, with a fixed size.
-        """
-
-        self.web_view = QWebEngineView()
-        self.layout.addWidget(self.web_view)
-
-    def setup_controls(self) -> None:
-        """
-        The web view controls for now are just a button to go back.
-        """
-
-        self.go_back_button = QPushButton("← Go back")
-        self.go_back_button.setFont(Fonts.mediumbutton)
-        self.go_back_button.setStyleSheet(f"color: {Colors.fg};")
-        self.layout.addWidget(self.go_back_button)
-
-    @property
-    def url(self) -> str:
-        """
-        Returns the web view's browser as a string. The first url() returns
-        a QUrl and the second the string with the URL.
-        """
-
-        return self.web_view.url().url()
-
-    @url.setter
-    def url(self, url: str) -> None:
-        """
-        Sets the web view's URL to `url`.
-        """
-
-        self.web_view.setUrl(QUrl(url))
-
-
-class WebForm(QWidget):
+class SpotifyWebForm(QWidget):
     """
     This form is used to obtain the credentials needed for the authorization
     process in the Web API.
