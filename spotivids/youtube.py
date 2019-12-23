@@ -39,6 +39,8 @@ class YouTube:
         if height is not None:
             self.options['format'] += f'[height<={height}]'
 
+        self._youtube = YoutubeDL(self.options)
+
     def get_url(self, artist: str, title: str) -> str:
         """
         Getting the youtube direct link with youtube-dl.
@@ -52,12 +54,11 @@ class YouTube:
 
         name = f"ytsearch:{format_name(artist, title)} Official Video"
 
-        with YoutubeDL(self.options) as ydl:
-            try:
-                info = ydl.extract_info(name, download=False)
-            except DownloadError as e:
-                logging.info("Raising VideoNotFoundError because YouTube-dl"
-                             " wasn't able to obtain the video: %s", str(e))
-                raise VideoNotFoundError
+        try:
+            info = self._youtube.extract_info(name, download=False)
+        except DownloadError as e:
+            logging.info("Raising VideoNotFoundError because YouTube-dl"
+                         " wasn't able to obtain the video: %s", str(e))
+            raise VideoNotFoundError
 
         return info['entries'][0]['url']

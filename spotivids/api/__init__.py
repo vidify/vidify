@@ -81,16 +81,16 @@ class APIData(Enum):
         obj.event_loop_interval = event_loop_interval
         return obj
 
-    SPOTIFY_LINUX = (
+    MPRIS_LINUX = (
         1,
-        "Spotify for Linux",
-        "The desktop Spotify client for <b>Linux</b> and <b>BSD</b>."
-        " Recommended.",
-        "spotivids/gui/res/api_icons/spotify/linux.svg",
+        "Linux Media Players",
+        "Any MPRIS compatible media player: Spotify, Rhythmbox... for "
+        "<b>Linux</b> and <b>BSD</b>. Recommended.",
+        "spotivids/gui/res/api_icons/mpris.svg",
         (Platform.LINUX, Platform.BSD),
-        "spotivids.api.spotify.linux",
-        "SpotifyLinuxAPI",
-        "Waiting for a Spotify session to be ready...",
+        "spotivids.api.mpris",
+        "MPRISAPI",
+        "Waiting for a song to play on any MPRIS player...",
         None,
         None)
     SWSPOTIFY = (

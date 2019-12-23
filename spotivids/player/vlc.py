@@ -45,6 +45,14 @@ class VLCPlayer(PlayerBase):
 
         self._player = self._vlc.media_player_new()
 
+    def __del__(self) -> None:
+        try:
+            # Avoids a segmentation fault when closing the app.
+            self._player.stop()
+            del self._player
+        except AttributeError:
+            pass
+
     @property
     def pause(self) -> bool:
         return not self._player.is_playing()
@@ -65,7 +73,7 @@ class VLCPlayer(PlayerBase):
 
     @position.setter
     def position(self, ms: int) -> None:
-        logging.info("Time set to %d milliseconds", ms)
+        logging.info("Position set to %d milliseconds", ms)
         self._player.set_time(ms)
 
     def start_video(self, media: str, is_playing: bool = True) -> None:

@@ -72,8 +72,8 @@ class MainWindow(QWidget):
             # it will be initialized from outside this function.
             logging.info("API not found: prompting the user")
             self.API_selection = APISelection()
-            self.API_selection.api_chosen.connect(self.on_api_selection)
             self.layout.addWidget(self.API_selection)
+            self.API_selection.api_chosen.connect(self.on_api_selection)
         else:
             logging.info("Using %s as the API", config.api)
             self.initialize_api(api_data)
@@ -219,7 +219,7 @@ class MainWindow(QWidget):
 
         # If the maximum amount of attempts is reached, the app is closed.
         if self.conn_counter >= self.conn_attempts:
-            print("Timed out waiting for Spotify")
+            print("Timed out waiting for the connection")
             self.conn_timer.stop()
             QCoreApplication.exit(1)
 

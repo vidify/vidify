@@ -1,8 +1,8 @@
 """
-This module implements the MediaPlayer API to obtain metadata from any
-DBus MediaPlayer supported API, like Spotify.
-It's intended for Linux but it should also work on BSD and other
-unix-like systems with DBus.
+This module implements the MediaPlayer API to obtain metadata from any DBus
+MPRIS supported API, like Spotify or Rhythmbox.
+It's intended for Linux but it should also work on BSD and other unix-like
+systems with DBus.
 
 This implementation is based on the generic implementation of an API. Please
 check out spotivids.api.generic for more details about how API modules
@@ -20,18 +20,16 @@ from spotivids.api import split_title, ConnectionNotReady
 from spotivids.api.generic import APIBase
 
 
-class DBusMediaPlayerAPI(APIBase):
+class MPRISAPI(APIBase):
     artist: str = None
     title: str = None
     is_playing: bool = None
 
-    def __init__(self, bus_name: str, position_feature: bool = True) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self._bus_name = bus_name
         self.artist = ""
         self.title = ""
         self.is_playing = False
-        self._position_feature = position_feature
 
     def __del__(self) -> None:
         """
@@ -47,14 +45,18 @@ class DBusMediaPlayerAPI(APIBase):
     @property
     def position(self) -> int:
         """
+        Returns the position in milliseconds. The MPRIS specification states
+        that the provided position should be in microseconds, so it's divided
+        by 1000.
+
         This feature isn't available for some players like Spotify, so
         `NotImplementedError` is raised instead to keep consistency with the
         rest of the APIs.
         """
 
-        if not self._position_feature:
+        if self._no_position:
             raise NotImplementedError
-        return self._player_interface.Position
+        return self._player_interface.Position // 1000
 
     def connect_api(self) -> None:
         """
@@ -63,13 +65,13 @@ class DBusMediaPlayerAPI(APIBase):
         """
 
         self._bus = pydbus.SessionBus()
-        try:
-            self._obj = self._bus.get(self._bus_name,
-                                      '/org/mpris/MediaPlayer2')
-        except GLib.Error:
-            raise ConnectionNotReady(
-                "No MediaPlayer session currently running")
+        self._bus_name, self._obj = self._get_player()
 
+        # Some MPRIS players don't support the position feature, so this
+        # checks if it's in the blacklist to act accordingly when the
+        # position is requested.
+        position_blacklist = ('org.mpris.MediaPlayer2.spotify')
+        self._no_position = self._bus_name in position_blacklist
         self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
         try:
@@ -78,6 +80,42 @@ class DBusMediaPlayerAPI(APIBase):
             raise ConnectionNotReady("No song is currently playing")
 
         self._start_event_loop()
+
+    def _get_player(self) -> Tuple[str, 'CompositeObject']:
+        """
+        Method used to find the available players in the DBus bus. It returns
+        the bus' name and object if it was found, or raises ConnectionNotReady
+        otherwise.
+        """
+
+        logging.info("Looking for players")
+
+        # Iterating through every bus name and checking that it's valid.
+        for bus_name in self._bus.get(".DBus", "DBus").ListNames():
+            # It must be from MediaPlayer2
+            if bus_name.startswith('org.mpris.MediaPlayer2'):
+                # Trying to obtain the bus object
+                try:
+                    obj = self._bus.get(bus_name, '/org/mpris/MediaPlayer2')
+                except GLib.Error as e:
+                    logging.info("Skipping %s because of error: %s",
+                                 bus_name, str(e))
+                    continue
+
+                # And making sure that it's playing at the moment (otherwise
+                # only the first player found would be returned, but it could
+                # not be the one actually being used).
+                if not self._bool_status(obj.PlaybackStatus):
+                    logging.info("Skipping %s because it's not playing at"
+                                 " the moment", bus_name)
+                    continue
+
+                logging.info("Using %s", bus_name)
+                return bus_name, obj
+
+        # ConnectionNotReady is raised at the end, in case that no valid
+        # players were found.
+        raise ConnectionNotReady("No players found")
 
     def _start_event_loop(self) -> None:
         """
@@ -109,7 +147,7 @@ class DBusMediaPlayerAPI(APIBase):
         artist = metadata['xesam:artist'][0]
         title = metadata['xesam:title']
 
-        if artist == '':
+        if artist in ('', 'Unknown'):
             artist, title = split_title(title)
 
         return artist, title
@@ -139,6 +177,10 @@ class DBusMediaPlayerAPI(APIBase):
         """
         Function called from DBus on event changes like the song or if it
         has been paused.
+
+        The MPRIS standard indicates that the PropertiesChanged signal is not
+        emitted when the position changes, so it won't be taken into account
+        below.
         """
 
         if 'Metadata' in properties:

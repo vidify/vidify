@@ -72,7 +72,7 @@ class MpvPlayer(PlayerBase):
         """
 
         self._mpv.wait_for_property('seekable')
-        logging.info("Time set to %d milliseconds", ms)
+        logging.info("Position set to %d milliseconds", ms)
         self._mpv.seek(ms / 1000, reference='absolute')
 
     def start_video(self, media: str, is_playing: bool = True) -> None:

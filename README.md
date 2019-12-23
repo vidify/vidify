@@ -43,12 +43,12 @@ An API is simply a source of information about the music playing on a device. Fo
 
 | Name                                         | Wiki link | PyPi install | Description |
 |----------------------------------------------|:---------:|--------------|-------------|
-| Spotify for Linux (`spotify_linux`)          | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-for-Linux) | Default (see wiki) | The Spotify desktop app for Linux. |
+| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Linux-Media-Players) | Default (see wiki) | Any MPRIS compatible media player for Linux or BSD (99% of the media players). |
 | Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-for-Windows-and-MacOS) | Default | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
 | Spotify Web (`spotify_web`)                  | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-Web-API) | Default | The official Spotify Web API. Check the wiki for more details. |
 | Unknown (any other string)                   | - | - | If you use any other string with `--api`, the initial screen to choose an API will appear. This is temporary until the GUI menu is implemented. |
 
-The internal name inside parenthesis is used for the [arguments](#usage) and the [config](#the-config-file) options. `--api spotify_linux` would enable the Spotify for Linux API, for instance.
+The internal name inside parenthesis is used for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would enable the Linux Media Players API, for instance.
 
 ### The players
 The embedded video players inside the app. External players are used because they have better support and already come with codecs installed. The default one is VLC because it's more popular, but you can use others if you have the player installed, and the PyPi extra dependencies. For example, to install Vidify with Mpv support, you'd run `pip install --user vidify[mpv]`.
