@@ -27,6 +27,7 @@ def get_lyrics(artist: str, title: str) -> str:
     """
 
     name = format_name(artist, title)
+
     # Colors are not displayed on Windows because it doesn't support ANSI
     # escape codes and importing colorama isn't worth it currently.
     if CURRENT_PLATFORM == Platform.WINDOWS:

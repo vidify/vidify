@@ -36,6 +36,7 @@ class Res:
              "spotivids/gui/res/Inter/Inter-Medium.otf",
              "spotivids/gui/res/Inter/Inter-MediumItalic.otf")
     default_api_icon = "spotivids/gui/res/api_icons/default.svg"
+    default_video = "spotivids/gui/res/default_video.mp4"
 
 
 class Fonts:

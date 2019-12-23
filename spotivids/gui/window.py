@@ -21,7 +21,7 @@ from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot, QSize
 from spotivids.api import APIData, get_api_data, ConnectionNotReady
 from spotivids.player import initialize_player
 from spotivids.config import Config
-from spotivids.youtube import YouTube
+from spotivids.youtube import YouTube, VideoNotFoundError
 from spotivids.lyrics import get_lyrics
 from spotivids.gui import Fonts, Res, Colors
 from spotivids.gui.components import APISelection
@@ -257,18 +257,35 @@ class MainWindow(QWidget):
         Plays a video using the current API's data. This is called when the
         API is first initialized from this GUI, and afterwards from the event
         loop handler whenever a new song is detected.
+
+        If an error was detected when downloading the video, the default one
+        is shown instead.
         """
 
         logging.info("Playing a new video")
-        url = self.youtube.get_url(self.api.artist, self.api.title)
+        try:
+            url = self.youtube.get_url(self.api.artist, self.api.title)
+        except VideoNotFoundError:
+            url = Res.default_video
+            success = False
+        else:
+            success = True
+
         self.player.start_video(url, self.api.is_playing)
+
         try:
             self.player.position = self.api.position
         except NotImplementedError:
             self.player.position = 0
 
         if self.config.lyrics:
-            print(get_lyrics(self.api.artist, self.api.title))
+            if success:
+                print(get_lyrics(self.api.artist, self.api.title))
+            else:
+                print("The video wasn't found, either because of an issue with"
+                      " your internet connection or because the provided data"
+                      " was invalid. For more information, enable the debug"
+                      " mode.")
 
     def init_spotify_web_api(self) -> None:
         """
