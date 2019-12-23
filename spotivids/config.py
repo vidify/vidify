@@ -95,6 +95,8 @@ class Config:
         self.add_arguments()
 
         self._file = configparser.ConfigParser()
+        self._args = None
+        self._path = None
 
     def add_arguments(self) -> None:
         """

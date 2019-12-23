@@ -4,6 +4,7 @@ initialization is easier. (specially the Web API authentication widgets).
 """
 
 import logging
+from typing import Optional
 
 from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
                                QVBoxLayout, QGridLayout, QGroupBox)
@@ -24,7 +25,7 @@ class APICard(QGroupBox):
     """
 
     def __init__(self, api_name: str, title: str, description: str,
-                 icon: str, enabled: bool = True) -> None:
+                 icon: Optional[str], enabled: bool = True) -> None:
         """
         A card with the API's basic info. `api_name` is the APIData's name for
         the API. `title`, `description` and `icon` are parameters inside
@@ -43,8 +44,8 @@ class APICard(QGroupBox):
         self.setup_text(description)
         self.setup_button(enabled)
 
-    def setup_icon(self, icon: str) -> None:
-        icon = QSvgWidget(icon)
+    def setup_icon(self, icon: Optional[str]) -> None:
+        icon = QSvgWidget(icon or Res.default_api_icon)
         self.layout.addWidget(icon)
 
     def setup_text(self, description: str) -> None:
@@ -56,6 +57,12 @@ class APICard(QGroupBox):
         self.layout.addWidget(text)
 
     def setup_button(self, enabled: bool) -> None:
+        """
+        The button will be disabled but still shown if `enabled` is false.
+        This is used when the current platform isn't in the API's supported
+        platforms.
+        """
+
         self.button = QPushButton("USE" if enabled else "Not available")
         self.button.setEnabled(enabled)
         self.button.setFont(Fonts.text)
@@ -140,6 +147,7 @@ class WebBrowser(QWidget):
     """
     This widget contains a QWebEngineView and other simple controls.
     """
+
     def __init__(self, *args) -> None:
         super().__init__(*args)
         self.layout = QVBoxLayout(self)

@@ -108,7 +108,7 @@ class SpotifyWebAPI(APIBase):
 
         if self.is_playing != is_playing:
             logging.info("Status change detected")
-            self.status_signal(self.is_playing)
+            self.status_signal.emit(self.is_playing)
 
         playback_diff = self._position - position
         calls_diff = int((time.time() - self._event_timestamp) * 1000)

@@ -97,7 +97,7 @@ class MainWindow(QWidget):
         api_data = APIData[api_str]
         self.initialize_api(api_data)
 
-    def initialize_api(self, api_data: APIData) -> None:
+    def initialize_api(self, api_data: APIData, do_start: bool = True) -> None:
         """
         Initializes an API with the information from APIData.
         """
@@ -112,8 +112,11 @@ class MainWindow(QWidget):
         mod = importlib.import_module(api_data.module)
         cls = getattr(mod, api_data.class_name)
         self.api = cls()
-        self.start(self.api.connect_api, message=api_data.connect_msg,
-                   event_loop_interval=api_data.event_loop_interval)
+        # Some custom API initializations may not want to start the API
+        # inside this function.
+        if do_start:
+            self.start(self.api.connect_api, message=api_data.connect_msg,
+                       event_loop_interval=api_data.event_loop_interval)
 
     def start(self, connect: Callable[[], None], message: Optional[str],
               event_loop_interval: int = 1000) -> None:
@@ -277,6 +280,7 @@ class MainWindow(QWidget):
         """
 
         from spotivids.api.spotify.web import get_token
+        from spotivids.gui.api.spotify_web import SpotifyWebPrompt
 
         token = get_token(self.config.refresh_token, self.config.client_id,
                           self.config.client_secret, self.config.redirect_uri)
@@ -291,25 +295,13 @@ class MainWindow(QWidget):
             # automatically exactly like above. The GUI won't ask for a
             # redirect URI for now.
             logging.info("Asking the user for credentials")
-            self.prompt_spotify_web_token()
-
-    def prompt_spotify_web_token(self) -> None:
-        """
-        SPOTIFY WEB API CUSTOM FUNCTION
-
-        This is called when the Web API is being used to get the credentials
-        used with it.
-        """
-
-        from spotivids.gui.api.spotify_web import SpotifyWebPrompt
-
-        # The SpotifyWebPrompt handles the interaction with the user and
-        # emits a `done` signal when it's done.
-        self._spotify_web_prompt = SpotifyWebPrompt(self.config.client_id,
-                                                    self.config.client_secret,
-                                                    self.config.redirect_uri)
-        self._spotify_web_prompt.done.connect(self.start_spotify_web_api)
-        self.layout.addWidget(self._spotify_web_prompt, Qt.AlignCenter)
+            # The SpotifyWebPrompt handles the interaction with the user and
+            # emits a `done` signal when it's done.
+            self._spotify_web_prompt = SpotifyWebPrompt(
+                self.config.client_id, self.config.client_secret,
+                self.config.redirect_uri)
+            self._spotify_web_prompt.done.connect(self.start_spotify_web_api)
+            self.layout.addWidget(self._spotify_web_prompt, Qt.AlignCenter)
 
     def start_spotify_web_api(self, token: 'RefreshingToken',
                               save_config: bool = True) -> None:
