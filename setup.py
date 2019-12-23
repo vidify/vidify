@@ -32,11 +32,12 @@ setup(
     keywords='spotify music video videos lyrics spotivids',
     python_requires='>=3.7',
     install_requires=[
-        'appdirs',
+        'PySide2',
         'youtube-dl',
         'python-vlc',
+        'appdirs',
         'lyricwikia',
-        'PySide2',
+        'spotipy>=3.0'
         'pydbus; platform_system=="Linux"',
         'SwSpotify>=1.1.1; platform_system=="Windows" or platform_system=="Darwin"'
     ],
@@ -46,9 +47,6 @@ setup(
         ],
         'mpv': [
             'python-mpv'
-        ],
-        'spotify-web': [
-            'spotipy>=3.0.0',
         ]
     },
     entry_points={

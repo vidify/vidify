@@ -2,8 +2,7 @@
 
 <img src="images/logo.png" height=100 alt="logo" align="center"/>
 <h1>Spotivids</h1>
-
-<span>Watch Youtube <b>music videos</b> and <b>lyrics</b> for the currently playing Spotify songs</span>
+<span>Watch <b>music videos</b> and <b>lyrics</b> for the songs playing on your computer</span>
 
 <img alt="Travis" src="https://travis-ci.com/marioortizmanero/spotivids.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/spotivids"> <img alt="AUR version" src="https://img.shields.io/aur/version/spotivids">
 
@@ -17,12 +16,9 @@
 ## Table of contents
 * [Requirements](#requirements)
 * [Installation](#installation)
+    * [The APIs](#the-apis)
+    * [The Players](#the-players)
 * [Usage and configuration](#usage)
-    * [Basic usage](#usage)
-    * [Advanced](#advanced)
-    * [The config file](#the-config-file)
-* [The web API](#the-web-api)
-    * [Obtaining your client ID and client secret](#obtaining-your-client-id-and-client-secret)
 * [FAQ](#faq)
 * [Development resources](#development)
     * [Tests](#tests)
@@ -31,29 +27,50 @@
 
 ## Requirements
 * Python 3.7+
-* VLC or mpv to play the videos
-
-For **Linux** users:
-
-* [PyGI](https://pygobject.readthedocs.io/en/latest/) (not packaged on PyPi, you need to install it from your distribution's repository - it's usually called python-gi, python-gobject or pygobject). Here's a quick [tutorial](https://pygobject.readthedocs.io/en/latest/getting_started.html) on how to install it on most systems.
-
-* [GLib](https://developer.gnome.org/glib/). You most likely have it installed already.
-
+* Other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
 
 ## Installation
-* You can use pip to install it: `pip3 install spotivids --user`. If you want to use mpv instead of VLC, just use `pip3 install 'spotivids[mpv]' --user` instead.
+* The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1, extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
+* You can download the latest stable [release](https://github.com/marioortizmanero/spotivids/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
+* Linux:
+    * Arch Linux: you can install it from the AUR: [`spotivids`](https://aur.archlinux.org/packages/spotivids/). Read the optional dependencies to use more APIs and players. Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
+    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [dev-python/spotify-music-videos](https://packages.gentoo.org/packages/dev-python/spotify-music-videos).
+    * Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.
 
-* You can download the latest stable [release](https://github.com/marioortizmanero/spotivids/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support.
 
-* If you're on Arch Linux, you can install it from the AUR: [`spotivids`](https://aur.archlinux.org/packages/spotivids/). Install [python-mpv](https://aur.archlinux.org/packages/python-mpv/) for mpv support.
+### The APIs
+An API is simply a source of information about the music playing on a device. For example, the Spotify desktop client, or iTunes. This app is built to support any API as easily as possible, because there are many different ways to play music. Here are the currently supported ones:
 
+| Name                                         | Wiki link | PyPi install | Description |
+|----------------------------------------------|:---------:|--------------|-------------|
+| Spotify for Linux (`spotify_linux`)          | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-for-Linux) | Default (see wiki) | The Spotify desktop app for Linux. |
+| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-for-Windows-and-MacOS) | Default | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-Web-API) | Default | The official Spotify Web API. Check the wiki for more details. |
+| Unknown (any other string)                   | - | - | If you use any other string with `--api`, the initial screen to choose an API will appear. This is temporary until the GUI menu is implemented. |
+
+The internal name inside parenthesis is used for the [arguments](#usage) and the [config](#the-config-file) options. `--api spotify_linux` would enable the Spotify for Linux API, for instance.
+
+### The players
+The embedded video players inside the app. External players are used because they have better support and already come with codecs installed. The default one is VLC because it's more popular, but you can use others if you have the player installed, and the PyPi extra dependencies. For example, to install Vidify with Mpv support, you'd run `pip install --user vidify[mpv]`.
+
+| Name           | PyPi install | Description                                           | Arguments/config options                      |
+|----------------|--------------|-------------------------------------------------------|-----------------------------------------------|
+| VLC (`vlc`)    | Default      | The default video player. Widely used and very solid. |`--vlc-args <VLC_ARGS>`                        |
+| Mpv (`mpv`)    | `mpv`        | A simple and portable video player.                   | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
+
+For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name between parenthesis. Use `--player mpv` or save it in your config file for future usage:
+
+```ini
+[Defaults]
+player = mpv
+```
 
 ## Usage
-I'm working towards making this program a full GUI with as little interaction with the terminal as possible. The GUI should be intuitive enough to not need a tutorial. But you can still combine the terminal usage with the GUI:
+The app has an interface that will guide you through the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
 
 ```
 usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
-                 [--use-mpv] [--width WIDTH] [--height HEIGHT] [-w]
+                 [--stay-on-top] [-p PLAYER] [--width WIDTH] [--height HEIGHT] [-a API]
                  [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
                  [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
                  [--mpv-flags MPV_FLAGS]
@@ -63,62 +80,23 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
 |----------------------------------|---------------------|
 | `-n`, `--no-lyrics`              | do not print lyrics. |
 | `-f`, `--fullscreen`             | play videos in fullscreen mode. |
-| `--stay-on-top`                  | the window will stay on top of other apps. |
-| `--width <WIDTH>`                | set the width for the downloaded videos (this is useful to play low quality videos if your connection isn't good). |
+| `--stay-on-top`                  | the app window will stay on top of other apps. |
+| `--width <WIDTH>`                | set the width for the downloaded videos (this is useful to play lower quality videos if your connection isn't good). |
 | `--height <HEIGHT>`              | set the height for the downloaded videos. |
-| `--use-mpv`                      | use [mpv](https://mpv.io/) instead of [VLC](https://www.videolan.org/vlc/index.html) to play videos. Note: requires `python-mpv`, see the [installation section](#installation) for more. |
-| `-w, --use-web-api`              | use Spotify's web API. See [the web API section](#the-web-api) for more info about how to set it up. |
-
-### Advanced:
-| Argument                         | Description         |
-|----------------------------------|---------------------|
-| `--config-file <PATH>`           | indicate the path of your config file.  |
-| `--vlc-args <VLC_ARGS>`          | custom arguments used when opening VLC. Note that some like `args='--fullscreen'` won't work in here |
-| `--mpv-flags <MPV_ARGS>`         | custom boolean flags used when opening mpv, with dashes and separated by spaces. Not intended for customization, only debugging and simple things. If you want to load non-boolean flags and such, use a config file. |
-| `--client-id <CLIENT_ID>`        | your client ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. You can also use the GUI to input it. |
-| `--client-secret <CLIENT_SECRET>`| your client secret ID. Mandatory if the web API is being used. Check the [web API section](#the-web-api) to learn how to obtain yours. You can also use the GUI to indicate it. |
-| `--redirect-uri <REDIRECT_URI>`| optional redirect uri to get the web API authorization token. The default is http://localhost:8888/callback/ |
+| `-a, --api`                      | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
+| `-p`, `--player`                 | specify the player to use. See the [Players section](#the-players) for more info about the supported players. |
+| `--config-file <PATH>`           | indicate the path of your [config file](#the-config-file).  |
 
 ### The config file
-The config file is created by default at your usual config directory:
-* Unix: `~/.config/spotivids/config.ini` (or in `$XDG_CONFIG_HOME`, if defined)
-* Mac OS X: `~/Library/Preferences/spotivids/config.ini`
-* Windows: `C:\Users\trentm\AppData\Local\spotivids\config.ini`
+The configuration file is created by default at your usual config directory:
 
-You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments. [Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section. The web API related options are inside `[WebAPI]`.
+* Linux: `~/.config/spotivids/config.ini` (or in `$XDG_CONFIG_HOME`, if defined)
+* Mac OS X: `~/Library/Preferences/spotivids/config.ini`
+* Windows: `C:\Users\<username>\AppData\Local\spotivids\config.ini`
+
+You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments, but keeps your settings for future usage. [Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section.
 
 All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
-
-Some other options are only avaliable on the config file, like `auth_token` and `expiration`, but these are only used to retain info from the WebAPI and should not be modified manually.
-
-
-## The web API
-All platforms have a local way to get metadata from Spotify, but it may not be as reliable as the official web API, or may lack features in comparison to it, like better audio syncing or pausing the video. However, it also brings other downsides:
-
-* You have to sign in and set it up manually
-* Only Spotify Premium users are able to use some functions
-* API calls are limited
-
-The simplest way to use the web API is by passing `--use-web-api` as an argument and following the instructions in the GUI to get access.
-
-You can also enable it directly from the config file. Example of the section inside the config file:
-
-```ini
-[WebAPI]
-use_web_api = true
-client_id = 5fe01282e44241328a84e7c5cc169165
-client_secret = 2665f6d143be47c1bc9ff284e9dfb350
-```
-
-Finally, you can use arguments: `spotivids -w --client-id <CLIENT_ID> --client-secret <CLIENT_SECRET>`. They will be saved in the default config file later. `auth_token` and `expiration` will be written into the config file too, but do not touch these.
-
-### Obtaining your client ID and client secret:
-1. Go to the [Spotify Developers Dashboard](https://developer.spotify.com/dashboard/applications)
-2. Create a new client ID. You can fill the descriptions as you like. Select `No` when asked if it's a commercial integration and accept the Terms and Conditions in the next step.
-3. Go to `Edit Settings` and type `http://localhost:8888/callback/` (the default redirect uri) in the Redirect URIs field.
-4. You can now copy your Client ID and Client Secret and add them when you call `spotivids` by passing them as arguments or saving it directly into your config file, as shown above.
-
-You will be prompted to paste the resulting URL that was opened in your browser into the program. It will be a broken website but all you need is the URL. After doing it, the authorization process will be complete. The auth info will be saved into the config file for future usage.
 
 ## FAQ
 
@@ -151,8 +129,3 @@ Inside `dev/` you can find more information about building: [BUILDING.md](https:
 You can run the module locally with `python -m spotivids`.
 
 This project uses `unittest` for testing. Run them with `python -m unittest` or `python -m unittest discover -s tests`
-
-### Current limitations
-* Spotify on Linux doesn't currently support the MPRIS property `Position` so the starting offset is calculated manually and may be a bit rough.
-* Spotify's Web API doesn't allow function calls on updates like DBus, meaning that the metadata has to be manually updated every second and checked in case of changes.
-* A server is needed to get a working `redirect_uri` and a much easier Spotify login. So a website should be created in the future, rather than implementing it with flask on localhost only because of this. But it require some funding to host the site.
