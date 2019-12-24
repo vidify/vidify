@@ -69,11 +69,10 @@ player = mpv
 The app has an interface that will guide you through the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
 
 ```
-usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_PATH] [-n] [-f]
-                 [--stay-on-top] [-p PLAYER] [--width WIDTH] [--height HEIGHT] [-a API]
-                 [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
-                 [--redirect-uri REDIRECT_URI] [--vlc-args VLC_ARGS]
-                 [--mpv-flags MPV_FLAGS]
+usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-on-top]
+                 [--width WIDTH] [--height HEIGHT] [-a API] [-p PLAYER] [--vlc-args VLC_ARGS]
+                 [--mpv-flags MPV_FLAGS] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
+                 [--redirect-uri REDIRECT_URI]
 ```
 
 | Argument                         | Description         |

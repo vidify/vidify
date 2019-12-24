@@ -19,10 +19,9 @@ class PlayerData(Enum):
     Note: all player entries must have their name in uppercase.
     """
 
-    def __new__(cls, value: int, module: str, class_name: str,
-                config_flags_name: str):
+    def __new__(cls, module: str, class_name: str, config_flags_name: str
+                ) -> object:
         obj = object.__new__(cls)
-        obj._value_ = value
         # The module location to import (for dependency injection).
         obj.module = module
         # The player's class name inside its module.
@@ -33,8 +32,8 @@ class PlayerData(Enum):
         obj.config_flags_name = config_flags_name
         return obj
 
-    VLC = (1, 'spotivids.player.vlc', 'VLCPlayer', 'vlc_args')
-    MPV = (2, 'spotivids.player.mpv', 'MpvPlayer', 'mpv_flags')
+    VLC = ('spotivids.player.vlc', 'VLCPlayer', 'vlc_args')
+    MPV = ('spotivids.player.mpv', 'MpvPlayer', 'mpv_flags')
 
 
 class PlayerNotFoundError(AttributeError):

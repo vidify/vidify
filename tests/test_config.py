@@ -25,7 +25,7 @@ class ConfigTest(unittest.TestCase):
             print("Removed dummy config file")
 
         with unittest.mock.patch('sys.argv', ['']):
-            self.config.parse(config_path=TEST_PATH)
+            self.config.parse(config_file=TEST_PATH)
 
     def tearDown(self):
         try:

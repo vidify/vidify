@@ -11,8 +11,8 @@ import os
 import errno
 import argparse
 import configparser
-from typing import Optional, Union
-from dataclasses import dataclass
+from enum import Enum
+from typing import Optional, Union, Tuple
 
 from appdirs import AppDirs
 
@@ -24,55 +24,180 @@ APP_DIRS = AppDirs("spotivids", "marioom")
 DEFAULT_PATH = os.path.join(APP_DIRS.user_config_dir, "config.ini")
 
 
-@dataclass
-class Option:
+class Options(Enum):
     """
-    Dataclass to define the main properties of every object:
-        * The section in the config file
-        * The type of the values the variable can take
-        * The default value for the option
+    Enumeration to define the main properties of every option, so that the
+    config file options and the arguments can be mixed together inside Config.
     """
 
-    section: str
-    value_type: type
-    default: any
+    def __new__(cls, description: str, args: Optional[Tuple[str]],
+                arg_action: str, section: Optional[str], value_type: type,
+                default: any) -> object:
+        obj = object.__new__(cls)
 
+        # Description used in the argument parser help message.
+        obj.description = description
+        # Arguments that the option can take, like ("-p", "--player"), if it's
+        # available for the argument parser. Otherwise, it's None.
+        obj.args = args
+        # The argparse action: 'store', 'store_true'. Will be ignored if `args`
+        # is None.
+        obj.arg_action = arg_action
+        # The section in the config file, like 'Defaults'. If it's not
+        # available on the config file, it's None.
+        obj.section = section
+        # The option's type on both the argument parser and the config file.
+        obj.type = value_type
+        # The default value that the option takes when it's not found in the
+        # arguments or config file.
+        obj.default = default
 
-class Options:
-    """
-    This class lists all the available options with their section, type
-    and their default value.
-    """
+        return obj
 
     # Debug flag to show useful messages when things go wrong, or for the
     # developers to code.
-    debug = Option('Defaults', bool, False)
-    # Showing lyrics in the terminal.
-    lyrics = Option('Defaults', bool, True)
+    # Note: for the argument options with a single identifier, a comma has to
+    # be used at the end to specify that it's a tuple.
+    debug = (
+        "display debug messages",
+        ('--debug',),
+        'store_true',
+        'Defaults',
+        bool,
+        False)
+
+    # Custom config file, only available for the argument parser.
+    config_file = (
+        f"the config file path. Default is {DEFAULT_PATH}",
+        ('--config-file',),
+        'store',
+        None,
+        str,
+        None)
+
+    # Showing the lyrics. For the argument parser, it's a negated option,
+    # meaning that it has to be set to False in the config file to be
+    # equivalent.
+    lyrics = (
+        "do not print lyrics",
+        ('-n', '--no-lyrics'),
+        'store_false',
+        'Defaults',
+        bool,
+        True)
+
     # Starting the app fullscreen.
-    fullscreen = Option('Defaults', bool, False)
+    fullscreen = (
+        "open the app in fullscreen mode",
+        ('-f', '--fullscreen'),
+        'store_true',
+        'Defaults',
+        bool,
+        False)
+
     # Window that always stays on top of others.
-    stay_on_top = Option('Defaults', bool, False)
+    stay_on_top = (
+        "the window will stay on top of all apps.",
+        ('--stay-on-top',),
+        'store_true',
+        'Defaults',
+        bool,
+        False)
+
     # Initial window's width.
-    width = Option('Defaults', int, None)
+    width = (
+        "set the maximum width for the player. This is helpful to download"
+        " lower res videos if your connection isn't too good.",
+        ('--width',),
+        'store',
+        'Defaults',
+        int,
+        None)
+
     # Initial window's height.
-    height = Option('Defaults', int, None)
+    height = (
+        "set the maximum height for the player",
+        ('--height',),
+        'store',
+        'Defaults',
+        int,
+        None)
+
     # API used. If it's None, the initial menu to choose an API will be shown
     # to the user. The option's contents should be one of the names listed in
     # `spotivids.api`'s APIData enumeration.
-    api = Option('Defaults', str, None)
+    api = (
+        "select the API use. Please read the installation guide for a list"
+        "with the available APIs with detailed information about them.",
+        ('-a', '--api'),
+        'store',
+        'Defaults',
+        str,
+        None)
+
     # Player used. By default it's VLC. This option's contents should be one
     # of the names listed in `spotivids.player`'s PlayerData enumeration.
-    player = Option('Defaults', str, "vlc")
+    player = (
+        "select the player to be used. Plase read the installation guide for"
+        " a list with the available players. By default, it's VLC.",
+        ('-p', '--player'),
+        'store',
+        'Defaults',
+        str,
+        "vlc")
+
     # Arguments and options provided for the players.
-    vlc_args = Option('Defaults', str, None)
-    mpv_flags = Option('Defaults', str, None)
+    vlc_args = (
+        "custom arguments used when opening VLC.",
+        ('--vlc-args',),
+        'store',
+        'Defaults',
+        str,
+        None)
+
+    mpv_flags = (
+        "custom boolean flags used when opening mpv, with dashes and"
+        " separated by spaces.",
+        ('--mpv-flags',),
+        'store',
+        'Defaults',
+        str,
+        None)
 
     # Data for the Spotify Web API
-    client_id = Option('SpotifyWeb', str, None)
-    client_secret = Option('SpotifyWeb', str, None)
-    redirect_uri = Option('SpotifyWeb', str, 'http://localhost:8888/callback/')
-    refresh_token = Option('SpotifyWeb', str, None)
+    client_id = (
+        "your client ID key for the Spotify Web API. Check the README to"
+        " learn how to obtain yours. Example:"
+        " --client-id='5fe01282e44241328a84e7c5cc169165'",
+        ('--client-id',),
+        'store',
+        'SpotifyWeb',
+        str,
+        None)
+    client_secret = (
+        "your client secret key for the Spotify Web API. Check the wiki to"
+        " learn how to obtain yours. Example:"
+        " --client-secret='2665f6d143be47c1bc9ff284e9dfb350'",
+        ('--client-secret',),
+        'store',
+        'SpotifyWeb',
+        str,
+        None)
+    redirect_uri = (
+        "optional redirect uri for the Spotify Web API to get the"
+        " authorization token. The default is http://localhost:8888/callback/",
+        ('--redirect-uri',),
+        'store',
+        'SpotifyWeb',
+        str,
+        'http://localhost:8888/callback/')
+    refresh_token = (
+        None,
+        None,
+        None,
+        'SpotifyWeb',
+        str,
+        None)
 
 
 class Config:
@@ -88,10 +213,8 @@ class Config:
 
         self._argparser = argparse.ArgumentParser(
             prog="spotivids",
-            description="Windows and macOS users must pass --client-id"
-            " and --client-secret to use the web API."
-            " Read more about how to obtain them in the README at"
-            " https://github.com/marioortizmanero/spotivids")
+            description="Read more about the options in the README and the"
+            " wiki at https://github.com/marioortizmanero/spotivids")
         self.add_arguments()
 
         self._file = configparser.ConfigParser()
@@ -112,86 +235,20 @@ class Config:
             version=f"%(prog)s {__version__}",
             help="show program's version number and exit")
 
-        self._argparser.add_argument(
-            "--debug",
-            action="store_true", dest="debug", default=None,
-            help="display debug messages")
+        for opt in Options:
+            if opt.args is None:
+                continue
 
-        self._argparser.add_argument(
-            "--config-file",
-            action="store", dest="config_path", default=None,
-            help=f"the config file path. Default is {DEFAULT_PATH}")
+            # Creating a dictionary with the keyword arguments for
+            # ArgumentParser.add_argument.
+            kwargs = {'action': opt.arg_action, 'dest': opt.name,
+                      'default': None, 'help': opt.description}
+            # The type mustn't be specified if the action already implies it's
+            # a boolean.
+            if opt.arg_action not in ('store_false', 'store_true'):
+                kwargs['type'] = opt.type
 
-        self._argparser.add_argument(
-            "-n", "--no-lyrics",
-            action="store_false", dest="lyrics", default=None,
-            help="do not print lyrics")
-
-        self._argparser.add_argument(
-            "-f", "--fullscreen",
-            action="store_true", dest="fullscreen", default=None,
-            help="play videos in fullscreen mode")
-
-        self._argparser.add_argument(
-            "--stay-on-top",
-            action="store_true", dest="stay_on_top", default=None,
-            help="the window will stay on top of all apps.")
-
-        self._argparser.add_argument(
-            "-a", "--api",
-            action="store", dest="api", default=None,
-            help="select the player to be used. Please read the installation"
-            " guide for a list with the available APIs.")
-
-        self._argparser.add_argument(
-            "-p", "--player",
-            action="store", dest="player", default=None,
-            help="select the player to be used. Plase read the installation"
-            " guide for a list with the available players. By default, it's"
-            " VLC.")
-
-        self._argparser.add_argument(
-            "--width",
-            action="store", dest="width", default=None,
-            help="set the maximum width for the player")
-
-        self._argparser.add_argument(
-            "--height",
-            action="store", dest="height", default=None,
-            help="set the maximum height for the player")
-
-        self._argparser.add_argument(
-            "--client-id",
-            action="store", dest="client_id", default=None,
-            help="your client ID. Mandatory if the web API is being used."
-            " Check the README to learn how to obtain yours."
-            " Example: --client-id='5fe01282e44241328a84e7c5cc169165'")
-
-        self._argparser.add_argument(
-            "--client-secret",
-            action="store", dest="client_secret", default=None,
-            help="your client secret ID."
-            " Mandatory if the web API is being used."
-            " Check the README to learn how to obtain yours."
-            " Example: --client-secret='2665f6d143be47c1bc9ff284e9dfb350'")
-
-        self._argparser.add_argument(
-            "--redirect-uri",
-            action="store", dest="redirect_uri", default=None,
-            help="optional redirect uri to get the authorization token."
-            " The default is http://localhost:8888/callback/")
-
-        self._argparser.add_argument(
-            "--vlc-args",
-            action="store", dest="vlc_args", default=None,
-            help="custom arguments used when opening VLC."
-            " --vlc-args='--video-on-top' is very helpful, for example.")
-
-        self._argparser.add_argument(
-            "--mpv-flags",
-            action="store", dest="mpv_flags", default=None,
-            help="custom boolean flags used when opening mpv, with dashes"
-            " and separated by spaces.")
+            self._argparser.add_argument(*opt.args, **kwargs)
 
     def read_file(self, attr: str) -> Optional[Union[bool, int, str]]:
         """
@@ -201,11 +258,15 @@ class Config:
 
         option = getattr(Options, attr)
 
+        # Checking that it's an option available in the config file.
+        if option.section is None:
+            return None
+
         try:
-            if option.value_type == bool:
+            if option.type == bool:
                 return self._file.getboolean(option.section, attr)
 
-            if option.value_type == int:
+            if option.type == int:
                 # ValueError is raised if attr is '' (empty). When this
                 # happens, None should be returned instead.
                 try:
@@ -241,7 +302,7 @@ class Config:
         with open(self._path, 'w') as configfile:
             self._file.write(configfile)
 
-    def parse(self, config_path: Optional[str] = None) -> None:
+    def parse(self, config_file: Optional[str] = None) -> None:
         """
         Parses the options from the arguments and config file.
 
@@ -253,7 +314,7 @@ class Config:
         """
 
         self._args = self._argparser.parse_args()
-        self._path = config_path or self._args.config_path or DEFAULT_PATH
+        self._path = config_file or self._args.config_file or DEFAULT_PATH
 
         # Checking if the directory exists and creating it
         dirname = os.path.dirname(self._path)

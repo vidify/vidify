@@ -16,7 +16,7 @@ from typing import Callable, Optional
 
 from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
-from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot, QSize
+from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot
 
 from spotivids.api import APIData, get_api_data, ConnectionNotReady
 from spotivids.player import initialize_player

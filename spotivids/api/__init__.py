@@ -54,16 +54,13 @@ class APIData(Enum):
     the top of this module's flow diagram with dependency injection.
 
     Note: all API entries must have their name in uppercase.
-    TODO: check uppercase names, check that all modules have an init function.
     """
 
-    def __new__(cls, value: int, short_name: str, description: str,
-                icon: Optional[str], platforms: Tuple[Platform], module: str,
-                class_name: str, connect_msg: Optional[str],
-                gui_init_fn: Optional[str],
-                event_loop_interval: Optional[int]) -> None:
+    def __new__(cls, short_name: str, description: str, icon: Optional[str],
+                platforms: Tuple[Platform], module: str, class_name: str,
+                connect_msg: Optional[str], gui_init_fn: Optional[str],
+                event_loop_interval: Optional[int]) -> object:
         obj = object.__new__(cls)
-        obj._value_ = value
         # The short name displayed in the GUI, its description and the icon,
         # if existent. The description can use HTML tags like <b>.
         obj.short_name = short_name
@@ -82,7 +79,6 @@ class APIData(Enum):
         return obj
 
     MPRIS_LINUX = (
-        1,
         "Linux Media Players",
         "Any MPRIS compatible media player: Spotify, Rhythmbox... for "
         "<b>Linux</b> and <b>BSD</b>. Recommended.",
@@ -94,7 +90,6 @@ class APIData(Enum):
         None,
         None)
     SWSPOTIFY = (
-        2,
         "Spotify for Windows and MacOS",
         "The desktop Spotify client for <b>Windows</b> and <b>Mac OS</b> using"
         " SwSpotify. Recommended.",
@@ -106,7 +101,6 @@ class APIData(Enum):
         None,
         500)
     SPOTIFY_WEB = (
-        3,
         "Spotify Web",
         "The official Spotify <b>Web</b> API. Read the installation guide for"
         " more details on how to set it up.",
