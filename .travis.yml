@@ -15,7 +15,8 @@ before_install:
          mpv libmpv-dev
 
 install:
-    - pip3 install '.[mpv, dev]'
+    - pip3 install .[mpv,dev]
+    - pip3 install swspotify
 
 # Lint with PEP8 and run tests
 script: 

@@ -25,7 +25,7 @@ if sys.platform.startswith('linux'):
 elif sys.platform.startswith('darwin'):
     CURRENT_PLATFORM = Platform.MACOS
 elif sys.platform.startswith('win'):
-    CURRENT_PALTFORM = Platform.WINDOWS
+    CURRENT_PLATFORM = Platform.WINDOWS
 elif sys.platform.find('bsd') != -1:
     CURRENT_PLATFORM = Platform.BSD
 else:

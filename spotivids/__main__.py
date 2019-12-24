@@ -49,8 +49,9 @@ def main() -> None:
     if config.debug:
         start_gui(config)
     else:
-        with redirect_stderr(os.devnull):
-            start_gui(config)
+        with open(os.devnull, 'wb') as f:
+            with redirect_stderr(f):
+                start_gui(config)
 
 
 if __name__ == '__main__':

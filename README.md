@@ -110,7 +110,10 @@ For some reason, `python-gobject` may not be available inside a virtual environm
 ln -s "/usr/lib/python3.8/site-packages/gi" "$venv_dir/lib/python3.8/site-packages"
 ```
 
-or install `gobject-introspection` (or the equivalent package name) and then run `pip install pygobject` to install it with pip inside the virtual environment.
+or install it with pip following [this guide](https://pygobject.readthedocs.io/en/latest/getting_started.html).
+
+### Vidify doesn't recognize some downloaded songs
+If the song doesn't have a metadata field with the title and the artist (the latter is optional), Vidify is unable to know what song is playing. Try to modify the metadata of your downloaded songs with VLC or any other tool.
 
 ---
 

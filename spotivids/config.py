@@ -1,6 +1,7 @@
 """
 This module combines customization options from the three different sources,
 in order of priority:
+    * __setattr__
     * The argument parser
     * The config file
     * The default options
@@ -58,11 +59,10 @@ class Options:
     height = Option('Defaults', int, None)
     # API used. If it's None, the initial menu to choose an API will be shown
     # to the user. The option's contents should be one of the names listed in
-    # `spotivids.api`'s `APIs` enumeration (the __init__.py file).
+    # `spotivids.api`'s APIData enumeration.
     api = Option('Defaults', str, None)
     # Player used. By default it's VLC. This option's contents should be one
-    # of the names listed in `spotivids.player`'s `Players` enumeration (the
-    # __init__.py file).
+    # of the names listed in `spotivids.player`'s PlayerData enumeration.
     player = Option('Defaults', str, "vlc")
     # Arguments and options provided for the players.
     vlc_args = Option('Defaults', str, None)
@@ -138,6 +138,12 @@ class Config:
             help="the window will stay on top of all apps.")
 
         self._argparser.add_argument(
+            "-a", "--api",
+            action="store", dest="api", default=None,
+            help="select the player to be used. Please read the installation"
+            " guide for a list with the available APIs.")
+
+        self._argparser.add_argument(
             "-p", "--player",
             action="store", dest="player", default=None,
             help="select the player to be used. Plase read the installation"
@@ -153,12 +159,6 @@ class Config:
             "--height",
             action="store", dest="height", default=None,
             help="set the maximum height for the player")
-
-        self._argparser.add_argument(
-            "-a", "--api",
-            action="store", dest="api", default=None,
-            help="select the player to be used. Please read the installation"
-            " guide for a list with the available APIs.")
 
         self._argparser.add_argument(
             "--client-id",

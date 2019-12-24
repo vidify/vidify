@@ -140,12 +140,23 @@ class MPRISAPI(APIBase):
         Returns the artist and title out of a raw metadata object
         as a tuple, first the artist and then the title.
 
+        If the MPRIS player can't obtain the title and artist fields, an
+        empty string is used instead. It will be handled correctly in the main
+        window.
+
         Some local songs don't have an artist name, so it has to be
         obtained with `split_title` from the title.
         """
 
-        artist = metadata['xesam:artist'][0]
-        title = metadata['xesam:title']
+        try:
+            title = metadata['xesam:title']
+        except KeyError:
+            title = ''
+
+        try:
+            artist = metadata['xesam:artist'][0]
+        except KeyError:
+            artist = ''
 
         if artist in ('', 'Unknown'):
             artist, title = split_title(title)

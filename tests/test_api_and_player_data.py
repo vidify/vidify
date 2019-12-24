@@ -22,7 +22,7 @@ app = QApplication()
 win = MainWindow(config)
 
 
-class ConsistencyTest(unittest.TestCase):
+class DataStructuresTest(unittest.TestCase):
     def test_uppercase_names(self):
         """
         Checking that the names in the API and Player enumerations are all

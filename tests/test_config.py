@@ -28,7 +28,12 @@ class ConfigTest(unittest.TestCase):
             self.config.parse(config_path=TEST_PATH)
 
     def tearDown(self):
-        os.remove(TEST_PATH)
+        try:
+            os.remove(TEST_PATH)
+        except FileNotFoundError:
+            pass
+        else:
+            print("Removed dummy config file")
 
     def test_order(self):
         """

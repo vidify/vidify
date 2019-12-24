@@ -5,6 +5,8 @@ fonts.
 In the future, these properties could be modified if dark mode was enabled.
 """
 
+from spotivids import Platform, CURRENT_PLATFORM
+
 from PySide2.QtGui import QFont
 
 
@@ -18,6 +20,7 @@ class Colors:
     light = '#eff0eb'
     fg = '#282828'
     dark = '#282828'
+    black = '#000000'
     lighterror = '#fc9086'
     darkerror = '#e33120'
 
@@ -27,7 +30,9 @@ class Res:
     Contains the paths for all the resources used in this program.
     """
 
-    icon = "spotivids/gui/res/icon.svg"
+    icon = "spotivids/gui/res/icon16x16.ico" \
+            if CURRENT_PLATFORM == Platform.WINDOWS \
+            else "spotivids/gui/res/icon.svg"
     cross = "spotivids/gui/res/cross.svg"
     fonts = ("spotivids/gui/res/Inter/Inter-Regular.otf",
              "spotivids/gui/res/Inter/Inter-Italic.otf",
