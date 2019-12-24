@@ -5,7 +5,7 @@ It's also used to list, choose and control the APIs in a generic way, so that
 they can be used the same throughout the entire module.
 
 Here's a flow diagram with how the API initialization is done inside the
-spotivids.gui.window module and this one:
+vidify.gui.window module and this one:
 
                 +------------------ Is the API in the config?
                 |       No
@@ -44,7 +44,7 @@ import logging
 from enum import Enum
 from typing import Tuple, Optional
 
-from spotivids import Platform
+from vidify import Platform
 
 
 class APIData(Enum):
@@ -82,9 +82,9 @@ class APIData(Enum):
         "Linux Media Players",
         "Any MPRIS compatible media player: Spotify, Rhythmbox... for "
         "<b>Linux</b> and <b>BSD</b>. Recommended.",
-        "spotivids/gui/res/api_icons/mpris.svg",
+        "vidify/gui/res/api_icons/mpris.svg",
         (Platform.LINUX, Platform.BSD),
-        "spotivids.api.mpris",
+        "vidify.api.mpris",
         "MPRISAPI",
         "Waiting for a song to play on any MPRIS player...",
         None,
@@ -93,9 +93,9 @@ class APIData(Enum):
         "Spotify for Windows and MacOS",
         "The desktop Spotify client for <b>Windows</b> and <b>Mac OS</b> using"
         " SwSpotify. Recommended.",
-        "spotivids/gui/res/api_icons/spotify/swspotify.svg",
+        "vidify/gui/res/api_icons/spotify/swspotify.svg",
         (Platform.WINDOWS, Platform.MACOS),
-        "spotivids.api.spotify.swspotify",
+        "vidify.api.spotify.swspotify",
         "SwSpotifyAPI",
         "Waiting for a Spotify song to play...",
         None,
@@ -104,9 +104,9 @@ class APIData(Enum):
         "Spotify Web",
         "The official Spotify <b>Web</b> API. Read the installation guide for"
         " more details on how to set it up.",
-        "spotivids/gui/res/api_icons/spotify/web.svg",
+        "vidify/gui/res/api_icons/spotify/web.svg",
         tuple(Platform),  # Supports all platforms
-        "spotivids.api.spotify.web",
+        "vidify.api.spotify.web",
         "SpotifyWebAPI",
         "Waiting for a Spotify song to play...",
         "init_spotify_web_api",

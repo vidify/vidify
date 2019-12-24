@@ -1,8 +1,8 @@
 import os
 import unittest
 
-from spotivids import CURRENT_PLATFORM, Platform
-from spotivids import Platform, CURRENT_PLATFORM
+from vidify import CURRENT_PLATFORM, Platform
+from vidify import Platform, CURRENT_PLATFORM
 
 
 TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
@@ -13,7 +13,7 @@ class SwSpotifyTest(unittest.TestCase):
     @unittest.skipIf(TRAVIS or CURRENT_PLATFORM not in (Platform.MACOS,
                      Platform.WINDOWS), SKIP_MSG)
     def test_simple(self):
-        from spotivids.api.spotify.swspotify import SwSpotifyAPI
+        from vidify.api.spotify.swspotify import SwSpotifyAPI
         api = SwSpotifyAPI()
         api.connect_api()
         api._refresh_metadata()

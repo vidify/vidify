@@ -2,8 +2,8 @@
 
 block_cipher = None
 
-a = Analysis(['..\\spotivids\\__main__.py'],
-             pathex=['C:\\Users\\quini\\Downloads\\spotify-music-videos'],
+a = Analysis(['..\\vidify\\__main__.py'],
+             pathex=['C:\\Users\\quini\\Downloads\\vidify'],
              binaries=[],
              datas=[('C:/Program Files/VideoLAN/VLC/libvlc.dll', '.'),
                     ('C:/Program Files/VideoLAN/VLC/axvlc.dll', '.'),
@@ -26,9 +26,9 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
           a.scripts,
           [],
-          icon='../spotivids/gui/res/icon.ico',
+          icon='../vidify/gui/res/icon.ico',
           exclude_binaries=True,
-          name='spotivids',
+          name='vidify',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -42,4 +42,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='spotivids')
+               name='vidify')

@@ -3,8 +3,8 @@ import unittest
 
 from PySide2.QtWidgets import QApplication
 
-from spotivids import CURRENT_PLATFORM, Platform
-from spotivids.api.mpris import MPRISAPI
+from vidify import CURRENT_PLATFORM, Platform
+from vidify.api.mpris import MPRISAPI
 
 api = MPRISAPI()
 TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
@@ -15,7 +15,7 @@ class MPRISTest(unittest.TestCase):
     @unittest.skipIf(TRAVIS or CURRENT_PLATFORM not in (Platform.BSD,
                      Platform.LINUX), SKIP_MSG)
     def test_simple(self):
-        from spotivids.api.mpris import MPRISAPI
+        from vidify.api.mpris import MPRISAPI
         api = MPRISAPI()
         api.connect_api()
         api._refresh_metadata()

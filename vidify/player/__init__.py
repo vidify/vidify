@@ -6,8 +6,8 @@ them.
 import importlib
 from enum import Enum
 
-from spotivids.config import Config
-from spotivids.player.generic import PlayerBase
+from vidify.config import Config
+from vidify.player.generic import PlayerBase
 
 
 class PlayerData(Enum):
@@ -32,8 +32,8 @@ class PlayerData(Enum):
         obj.config_flags_name = config_flags_name
         return obj
 
-    VLC = ('spotivids.player.vlc', 'VLCPlayer', 'vlc_args')
-    MPV = ('spotivids.player.mpv', 'MpvPlayer', 'mpv_flags')
+    VLC = ('vidify.player.vlc', 'VLCPlayer', 'vlc_args')
+    MPV = ('vidify.player.mpv', 'MpvPlayer', 'mpv_flags')
 
 
 class PlayerNotFoundError(AttributeError):

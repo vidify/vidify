@@ -4,7 +4,7 @@ import unittest
 import unittest.mock
 import configparser
 
-from spotivids.config import Options, Config
+from vidify.config import Options, Config
 
 
 # Using a dummy config file

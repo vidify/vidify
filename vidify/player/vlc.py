@@ -4,7 +4,7 @@ codecs needed to easily play videos and can play a video from an URL,
 in comparison to the Qt player.
 
 For more information about the player modules, please check out
-spotivids.player.generic, which contains the abstract base class of which any
+vidify.player.generic, which contains the abstract base class of which any
 player implementation inherits, and an explanation in detail of the methods.
 """
 
@@ -13,8 +13,8 @@ from typing import Optional
 
 import vlc
 
-from spotivids import Platform, CURRENT_PLATFORM
-from spotivids.player.generic import PlayerBase
+from vidify import Platform, CURRENT_PLATFORM
+from vidify.player.generic import PlayerBase
 
 
 #  class VLCPlayer(QFrame, PlayerBase):

@@ -11,9 +11,9 @@ from contextlib import redirect_stderr
 from PySide2.QtWidgets import QApplication
 from PySide2.QtGui import QIcon
 
-from spotivids.config import Config
-from spotivids.gui import Res
-from spotivids.gui.window import MainWindow
+from vidify.config import Config
+from vidify.gui import Res
+from vidify.gui.window import MainWindow
 
 
 def start_gui(config: Config) -> None:

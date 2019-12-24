@@ -14,7 +14,7 @@ class PlayerBase(QFrame):
 
     Other notes:
         * The player's module should have an entry in the list of supported
-        players in spotivids.player (the __init__.py file).
+        players in vidify.player (the __init__.py file).
         * The player itself must inherit from `QFrame`.
         * The player should have a defined __init__ method to initialize the
         player when an instance is created.

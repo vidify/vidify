@@ -12,8 +12,8 @@ from spotipy.util import (RefreshingCredentials, RefreshingToken,
                           parse_code_from_url)
 from spotipy.auth import OAuthError
 
-from spotivids.gui import Fonts, Colors
-from spotivids.gui.components import InputField, WebBrowser
+from vidify.gui import Fonts, Colors
+from vidify.gui.components import InputField, WebBrowser
 
 
 class SpotifyWebPrompt(QWidget):
@@ -211,7 +211,7 @@ class SpotifyWebForm(QWidget):
         It can also show error messages.
         """
 
-        url = 'https://github.com/marioortizmanero/spotivids' \
+        url = 'https://github.com/marioortizmanero/vidify' \
               '#obtaining-your-client-id-and-client-secret'
         text = QLabel(
             "<h2><i>Please introduce your Spotify keys</i></h2>"

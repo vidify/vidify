@@ -1,10 +1,10 @@
 <div align="center">
 
 <img src="images/logo.png" height=100 alt="logo" align="center"/>
-<h1>Spotivids</h1>
+<h1>Vidify</h1>
 <span>Watch <b>music videos</b> and <b>lyrics</b> for the songs playing on your computer</span>
 
-<img alt="Travis" src="https://travis-ci.com/marioortizmanero/spotivids.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/spotivids"> <img alt="AUR version" src="https://img.shields.io/aur/version/spotivids">
+<img alt="Travis" src="https://travis-ci.com/marioortizmanero/vidify.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/vidify"> <img alt="AUR version" src="https://img.shields.io/aur/version/vidify">
 
 <hr>
 
@@ -31,10 +31,10 @@
 
 ## Installation
 * The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1, extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
-* You can download the latest stable [release](https://github.com/marioortizmanero/spotivids/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
+* You can download the latest stable [release](https://github.com/marioortizmanero/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
 * Linux:
-    * Arch Linux: you can install it from the AUR: [`spotivids`](https://aur.archlinux.org/packages/spotivids/). Read the optional dependencies to use more APIs and players. Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
-    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [dev-python/spotify-music-videos](https://packages.gentoo.org/packages/dev-python/spotify-music-videos).
+    * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Read the optional dependencies to use more APIs and players. Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
+    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [dev-python/vidify](https://packages.gentoo.org/packages/dev-python/vidify).
     * Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.
 
 
@@ -43,9 +43,9 @@ An API is simply a source of information about the music playing on a device. Fo
 
 | Name                                         | Wiki link | PyPi install | Description |
 |----------------------------------------------|:---------:|--------------|-------------|
-| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Linux-Media-Players) | Default (see wiki) | Any MPRIS compatible media player for Linux or BSD (99% of the media players). |
-| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-for-Windows-and-MacOS) | Default | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/marioortizmanero/spotify-music-videos/wiki/Spotify-Web-API) | Default | The official Spotify Web API. Check the wiki for more details. |
+| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/marioortizmanero/vidify/wiki/Linux-Media-Players) | Default (see wiki) | Any MPRIS compatible media player for Linux or BSD (99% of the media players). |
+| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-for-Windows-and-MacOS) | Default | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-Web-API) | Default | The official Spotify Web API. Check the wiki for more details. |
 | Unknown (any other string)                   | - | - | If you use any other string with `--api`, the initial screen to choose an API will appear. This is temporary until the GUI menu is implemented. |
 
 The internal name inside parenthesis is used for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would enable the Linux Media Players API, for instance.
@@ -69,7 +69,7 @@ player = mpv
 The app has an interface that will guide you through the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
 
 ```
-usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-on-top]
+usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-on-top]
                  [--width WIDTH] [--height HEIGHT] [-a API] [-p PLAYER] [--vlc-args VLC_ARGS]
                  [--mpv-flags MPV_FLAGS] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
                  [--redirect-uri REDIRECT_URI]
@@ -89,17 +89,17 @@ usage: spotivids [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--st
 ### The config file
 The configuration file is created by default at your usual config directory:
 
-* Linux: `~/.config/spotivids/config.ini` (or in `$XDG_CONFIG_HOME`, if defined)
-* Mac OS X: `~/Library/Preferences/spotivids/config.ini`
-* Windows: `C:\Users\<username>\AppData\Local\spotivids\config.ini`
+* Linux: `~/.config/vidify/config.ini` (or in `$XDG_CONFIG_HOME`, if defined)
+* Mac OS X: `~/Library/Preferences/vidify/config.ini`
+* Windows: `C:\Users\<username>\AppData\Local\vidify\config.ini`
 
-You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments, but keeps your settings for future usage. [Here's an example of one](https://github.com/marioortizmanero/spotivids/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section.
+You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments, but keeps your settings for future usage. [Here's an example of one](https://github.com/marioortizmanero/vidify/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section.
 
 All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
 ## FAQ
 
-### Spotivids doesn't work correctly with Python 3.8
+### Vidify doesn't work correctly with Python 3.8
 Qt started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 
 ### `ModuleNotFoundError: No module named 'gi'` when using a virtual environment
@@ -121,13 +121,13 @@ Helpful documentation links for contributing:
 * [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position), [Qt for Python](https://wiki.qt.io/Qt_for_Python).
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv).
 
-The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/spotivids/issues/26).
+The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/vidify/issues/26).
 
-The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/marioortizmanero/spotivids/releases).
+The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/marioortizmanero/vidify/releases).
 
-Inside `dev/` you can find more information about building: [BUILDING.md](https://github.com/marioortizmanero/spotify-music-videos/blob/master/dev/BUILDING.md).
+Inside `dev/` you can find more information about building: [BUILDING.md](https://github.com/marioortizmanero/vidify/blob/master/dev/BUILDING.md).
 
 ### Tests
-You can run the module locally with `python -m spotivids`.
+You can run the module locally with `python -m vidify`.
 
 This project uses `unittest` for testing. Run them with `python -m unittest` or `python -m unittest discover -s tests`

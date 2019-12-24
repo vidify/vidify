@@ -2,8 +2,8 @@ import os
 import unittest
 import unittest.mock
 
-from spotivids import CURRENT_PLATFORM, Platform
-from spotivids import Platform, CURRENT_PLATFORM
+from vidify import CURRENT_PLATFORM, Platform
+from vidify import Platform, CURRENT_PLATFORM
 
 
 TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
@@ -18,8 +18,8 @@ class SpotifyWebTest(unittest.TestCase):
         the auth token and the expiration date.
         """
 
-        from spotivids.api.spotify.web import get_token, SpotifyWebAPI
-        from spotivids.config import Config
+        from vidify.api.spotify.web import get_token, SpotifyWebAPI
+        from vidify.config import Config
         config = Config()
         with unittest.mock.patch('sys.argv', ['']):
             config.parse()

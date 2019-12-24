@@ -9,7 +9,7 @@ The Windows implementation for example just reads the title of the Spotify
 window to obtain what song is playing. It's much more limited.
 
 This implementation is based on the generic implementation of an API. Please
-check out spotivids.api.generic for more details about how API modules
+check out vidify.api.generic for more details about how API modules
 work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
@@ -18,8 +18,8 @@ import logging
 
 from SwSpotify import spotify, SpotifyPaused, SpotifyClosed
 
-from spotivids.api import ConnectionNotReady, split_title
-from spotivids.api.generic import APIBase
+from vidify.api import ConnectionNotReady, split_title
+from vidify.api.generic import APIBase
 
 
 class SwSpotifyAPI(APIBase):

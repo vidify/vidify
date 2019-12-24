@@ -7,7 +7,7 @@ In the future, these properties could be modified if dark mode was enabled.
 
 from PySide2.QtGui import QFont
 
-from spotivids import Platform, CURRENT_PLATFORM
+from vidify import Platform, CURRENT_PLATFORM
 
 
 class Colors:
@@ -30,18 +30,18 @@ class Res:
     Contains the paths for all the resources used in this program.
     """
 
-    icon = "spotivids/gui/res/icon16x16.ico" \
+    icon = "vidify/gui/res/icon16x16.ico" \
         if CURRENT_PLATFORM == Platform.WINDOWS \
-        else "spotivids/gui/res/icon.svg"
-    cross = "spotivids/gui/res/cross.svg"
-    fonts = ("spotivids/gui/res/Inter/Inter-Regular.otf",
-             "spotivids/gui/res/Inter/Inter-Italic.otf",
-             "spotivids/gui/res/Inter/Inter-Bold.otf",
-             "spotivids/gui/res/Inter/Inter-BoldItalic.otf",
-             "spotivids/gui/res/Inter/Inter-Medium.otf",
-             "spotivids/gui/res/Inter/Inter-MediumItalic.otf")
-    default_api_icon = "spotivids/gui/res/api_icons/default.svg"
-    default_video = "spotivids/gui/res/default_video.mp4"
+        else "vidify/gui/res/icon.svg"
+    cross = "vidify/gui/res/cross.svg"
+    fonts = ("vidify/gui/res/Inter/Inter-Regular.otf",
+             "vidify/gui/res/Inter/Inter-Italic.otf",
+             "vidify/gui/res/Inter/Inter-Bold.otf",
+             "vidify/gui/res/Inter/Inter-BoldItalic.otf",
+             "vidify/gui/res/Inter/Inter-Medium.otf",
+             "vidify/gui/res/Inter/Inter-MediumItalic.otf")
+    default_api_icon = "vidify/gui/res/api_icons/default.svg"
+    default_video = "vidify/gui/res/default_video.mp4"
 
 
 class Fonts:

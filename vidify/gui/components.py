@@ -13,9 +13,9 @@ from PySide2.QtCore import Qt, QSize, QUrl, Signal, Slot
 from PySide2.QtSvg import QSvgWidget
 from PySide2.QtWebEngineWidgets import QWebEngineView
 
-from spotivids import CURRENT_PLATFORM
-from spotivids.api import APIData
-from spotivids.gui import Fonts, Colors, Res
+from vidify import CURRENT_PLATFORM
+from vidify.api import APIData
+from vidify.gui import Fonts, Colors, Res
 
 
 class APICard(QGroupBox):

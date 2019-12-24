@@ -9,7 +9,7 @@ from typing import Optional
 
 from youtube_dl import YoutubeDL, DownloadError
 
-from spotivids import format_name
+from vidify import format_name
 
 
 class VideoNotFoundError(Exception):

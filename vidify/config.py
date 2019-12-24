@@ -16,11 +16,11 @@ from typing import Optional, Union, Tuple
 
 from appdirs import AppDirs
 
-from spotivids.version import __version__
+from vidify.version import __version__
 
 
 # Default config path in the system
-APP_DIRS = AppDirs("spotivids", "marioom")
+APP_DIRS = AppDirs("vidify", "marioom")
 DEFAULT_PATH = os.path.join(APP_DIRS.user_config_dir, "config.ini")
 
 
@@ -125,7 +125,7 @@ class Options(Enum):
 
     # API used. If it's None, the initial menu to choose an API will be shown
     # to the user. The option's contents should be one of the names listed in
-    # `spotivids.api`'s APIData enumeration.
+    # `vidify.api`'s APIData enumeration.
     api = (
         "select the API use. Please read the installation guide for a list"
         "with the available APIs with detailed information about them.",
@@ -136,7 +136,7 @@ class Options(Enum):
         None)
 
     # Player used. By default it's VLC. This option's contents should be one
-    # of the names listed in `spotivids.player`'s PlayerData enumeration.
+    # of the names listed in `vidify.player`'s PlayerData enumeration.
     player = (
         "select the player to be used. Plase read the installation guide for"
         " a list with the available players. By default, it's VLC.",
@@ -212,9 +212,9 @@ class Config:
         """
 
         self._argparser = argparse.ArgumentParser(
-            prog="spotivids",
+            prog="vidify",
             description="Read more about the options in the README and the"
-            " wiki at https://github.com/marioortizmanero/spotivids")
+            " wiki at https://github.com/marioortizmanero/vidify")
         self.add_arguments()
 
         self._file = configparser.ConfigParser()

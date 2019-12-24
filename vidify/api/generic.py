@@ -20,7 +20,7 @@ class APIBase(QObject):
 
     Other notes:
         * The API's module should have an entry in the list of supported APIs
-        in spotivids.api (the __init__.py file).
+        in vidify.api (the __init__.py file).
         * The API's __init__ function mustn't be blocking, since it's handled
         by the GUI.
         * The API module should have a docstring at the top introducing the

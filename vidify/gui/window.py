@@ -18,13 +18,13 @@ from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
 from PySide2.QtGui import QFontDatabase
 from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot
 
-from spotivids.api import APIData, get_api_data, ConnectionNotReady
-from spotivids.player import initialize_player
-from spotivids.config import Config
-from spotivids.youtube import YouTube, VideoNotFoundError
-from spotivids.lyrics import get_lyrics
-from spotivids.gui import Fonts, Res, Colors
-from spotivids.gui.components import APISelection
+from vidify.api import APIData, get_api_data, ConnectionNotReady
+from vidify.player import initialize_player
+from vidify.config import Config
+from vidify.youtube import YouTube, VideoNotFoundError
+from vidify.lyrics import get_lyrics
+from vidify.gui import Fonts, Res, Colors
+from vidify.gui.components import APISelection
 
 
 class MainWindow(QWidget):
@@ -34,7 +34,7 @@ class MainWindow(QWidget):
         """
 
         super().__init__()
-        self.setWindowTitle('spotivids')
+        self.setWindowTitle('vidify')
 
         # Setting the window to stay on top
         if config.stay_on_top:
@@ -62,7 +62,7 @@ class MainWindow(QWidget):
         self.config = config
 
         # The API initialization is more complex. For more details, please
-        # check the flow diagram in spotivids.api. First we have to check if
+        # check the flow diagram in vidify.api. First we have to check if
         # the API is saved in the config:
         try:
             api_data = get_api_data(config.api)
@@ -292,8 +292,8 @@ class MainWindow(QWidget):
         Web API.
         """
 
-        from spotivids.api.spotify.web import get_token
-        from spotivids.gui.api.spotify_web import SpotifyWebPrompt
+        from vidify.api.spotify.web import get_token
+        from vidify.gui.api.spotify_web import SpotifyWebPrompt
 
         token = get_token(self.config.refresh_token, self.config.client_id,
                           self.config.client_secret, self.config.redirect_uri)
@@ -324,7 +324,7 @@ class MainWindow(QWidget):
         Initializes the Web API, also saving them in the config for future
         usage (if `save_config` is true).
         """
-        from spotivids.api.spotify.web import SpotifyWebAPI
+        from vidify.api.spotify.web import SpotifyWebAPI
 
         logging.info("Initializing the Spotify Web API")
 

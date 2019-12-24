@@ -1,6 +1,6 @@
 import unittest
 
-from spotivids.youtube import YouTube, VideoNotFoundError
+from vidify.youtube import YouTube, VideoNotFoundError
 
 
 youtube = YouTube()

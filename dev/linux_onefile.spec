@@ -2,8 +2,8 @@
 
 block_cipher = None
 
-a = Analysis(['../spotivids/__main__.py'],
-             pathex=['/home/mario/Programming/spotivids/dev'],
+a = Analysis(['../vidify/__main__.py'],
+             pathex=['/home/mario/Programming/vidify/dev'],
              binaries=[],
              datas=[('/usr/lib/libmpv.so', '.'),
                     ('/usr/lib/libvlc.so', '.'),
@@ -31,8 +31,8 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='spotivids',
-          icon="../spotivids/gui/res/icon.svg",
+          name='vidify',
+          icon="../vidify/gui/res/icon.svg",
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,

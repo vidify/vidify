@@ -3,7 +3,7 @@ Mpv is a good alternative to VLC because it's relatively lightweight and
 straightforward, but it's mostly used only on Linux systems.
 
 For more information about the player modules, please check out
-spotivids.player.generic, which contains the abstract base class of which any
+vidify.player.generic, which contains the abstract base class of which any
 player implementation inherits, and an explanation in detail of the methods.
 """
 
@@ -19,10 +19,10 @@ try:
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
         "No module named 'mpv'.\n"
-        "To use this player, please install spotivids along with python-mpv."
+        "To use this player, please install vidify along with python-mpv."
         " Read the installation guide for more details.") from None
 
-from spotivids.player.generic import PlayerBase
+from vidify.player.generic import PlayerBase
 
 
 class MpvPlayer(PlayerBase):

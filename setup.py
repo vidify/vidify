@@ -1,18 +1,18 @@
 from setuptools import setup, find_packages
 
 
-# Get version inside spotivids/version.py without importing the package
-exec(compile(open('spotivids/version.py').read(),
-             'spotivids/version.py', 'exec'))
+# Get version inside vidify/version.py without importing the package
+exec(compile(open('vidify/version.py').read(),
+             'vidify/version.py', 'exec'))
 
 setup(
-    name='spotivids',
+    name='vidify',
     version=__version__,
-    packages=['spotivids'],
+    packages=['vidify'],
     description='Watch music videos for the songs playing on your computer',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/marioortizmanero/spotivids',
+    url='https://github.com/marioortizmanero/vidify',
     license='LGPL',
 
     author='Mario O.M.',
@@ -29,7 +29,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    keywords='spotify music video videos lyrics spotivids',
+    keywords='spotify music video player videos lyrics linux windows macos',
     python_requires='>=3.7',
     install_requires=[
         'PySide2',
@@ -50,6 +50,6 @@ setup(
         ]
     },
     entry_points={
-        'console_scripts': ['spotivids = spotivids.__main__:main']
+        'console_scripts': ['vidify = vidify.__main__:main']
     }
 )

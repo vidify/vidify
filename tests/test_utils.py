@@ -1,6 +1,6 @@
 import unittest
 
-from spotivids.api import split_title
+from vidify.api import split_title
 
 class TestUtils(unittest.TestCase):
     def test_split_title(self):

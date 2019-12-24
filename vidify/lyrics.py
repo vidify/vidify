@@ -10,7 +10,7 @@ free, in comparison to Genius.
 
 import lyricwikia
 
-from spotivids import format_name, Platform, CURRENT_PLATFORM
+from vidify import format_name, Platform, CURRENT_PLATFORM
 
 
 # The different error messages returned by LyricWikia in order to override

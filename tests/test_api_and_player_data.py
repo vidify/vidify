@@ -9,11 +9,11 @@ import unittest
 
 from PySide2.QtWidgets import QApplication
 
-from spotivids import Platform
-from spotivids.gui.window import MainWindow
-from spotivids.api import APIData, get_api_data
-from spotivids.player import PlayerData, PlayerNotFoundError, initialize_player
-from spotivids.config import Config, Options
+from vidify import Platform
+from vidify.gui.window import MainWindow
+from vidify.api import APIData, get_api_data
+from vidify.player import PlayerData, PlayerNotFoundError, initialize_player
+from vidify.config import Config, Options
 
 
 config = Config()

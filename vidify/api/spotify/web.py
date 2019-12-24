@@ -7,7 +7,7 @@ it's limited in terms of usabilty:
     * API calls are limited, so it's not as responsive
 
 This implementation is based on the generic implementation of an API. Please
-check out spotivids.api.generic for more details about how API modules
+check out vidify.api.generic for more details about how API modules
 work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
@@ -26,8 +26,8 @@ except ModuleNotFoundError:
         " this in the Installation Guide.")
 from spotipy.util import RefreshingToken, request_refreshed_token
 
-from spotivids.api import split_title, ConnectionNotReady
-from spotivids.api.generic import APIBase
+from vidify.api import split_title, ConnectionNotReady
+from vidify.api.generic import APIBase
 
 
 class SpotifyWebAPI(APIBase):
