@@ -17,7 +17,6 @@ from vidify import Platform, CURRENT_PLATFORM
 from vidify.player.generic import PlayerBase
 
 
-#  class VLCPlayer(QFrame, PlayerBase):
 class VLCPlayer(PlayerBase):
     def __init__(self, vlc_args: Optional[str] = None) -> None:
         super().__init__()

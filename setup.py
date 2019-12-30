@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 # Get version inside vidify/version.py without importing the package
@@ -9,7 +9,7 @@ setup(
     name='vidify',
     version=__version__,
     packages=['vidify'],
-    description='Watch music videos for the songs playing on your computer',
+    description='Watch music videos for the songs playing on your device',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/marioortizmanero/vidify',
@@ -24,7 +24,8 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users/Desktop',
         'Topic :: Multimedia :: Sound/Audio :: Players',
-        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
+        'License :: OSI Approved :: GNU Lesser General Public License v3'
+        ' (LGPLv3)',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
@@ -39,7 +40,8 @@ setup(
         'lyricwikia',
         #  'spotipy>=3.0',
         'pydbus; platform_system=="Linux"',
-        'SwSpotify>=1.1.1; platform_system=="Windows" or platform_system=="Darwin"'
+        'SwSpotify>=1.1.1; platform_system=="Windows"'
+        ' or platform_system=="Darwin"'
     ],
     extras_require={
         'dev': [

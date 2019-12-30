@@ -57,7 +57,7 @@ def initialize_player(key: str, config: Config) -> PlayerBase:
     try:
         player = PlayerData[key.upper()]
     except KeyError:
-        raise PlayerNotFoundError
+        raise PlayerNotFoundError from None
 
     # Importing the module first
     mod = importlib.import_module(player.module)

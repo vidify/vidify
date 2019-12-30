@@ -24,7 +24,7 @@ except ModuleNotFoundError:
         "No module named 'spotipy'.\n"
         "To use the Spotify Web API, please install spotipy. Read more about"
         " this in the Installation Guide.")
-from spotipy.util import RefreshingToken, request_refreshed_token
+from spotipy.util import RefreshingToken, refresh_user_token
 
 from vidify.api import split_title, ConnectionNotReady
 from vidify.api.generic import APIBase
@@ -143,8 +143,8 @@ def get_token(refresh_token: Optional[str], client_id: Optional[str],
         redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
 
     # Checking that the credentials are valid. The refresh token isn't really
-    # needed because spotipy.request_refreshed_token already obtains it
-    # from the refresh token.
+    # needed because spotipy.refresh_user_token already obtains it from the
+    # refresh token.
     for c in (refresh_token, client_id, client_secret, redirect_uri):
         if c in (None, ''):
             logging.info("Rejecting the token because one of the credentials"
@@ -152,5 +152,5 @@ def get_token(refresh_token: Optional[str], client_id: Optional[str],
             return None
 
     # Generating a RefreshingToken with the parameters
-    return request_refreshed_token(client_id, client_secret, redirect_uri,
-                                   refresh_token)
+    return refresh_user_token(client_id, client_secret, redirect_uri,
+                              refresh_token)

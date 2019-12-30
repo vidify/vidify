@@ -4,7 +4,6 @@ players. This makes sure that their parameters are valid and consistent
 throughout the entire module.
 """
 
-import importlib
 import unittest
 
 from PySide2.QtWidgets import QApplication

@@ -2,9 +2,6 @@ import os
 import unittest
 import unittest.mock
 
-from vidify import CURRENT_PLATFORM, Platform
-from vidify import Platform, CURRENT_PLATFORM
-
 
 TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
 SKIP_MSG = "Skipping this test as it won't work on the current system."

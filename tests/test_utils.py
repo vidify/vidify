@@ -2,6 +2,7 @@ import unittest
 
 from vidify.api import split_title
 
+
 class TestUtils(unittest.TestCase):
     def test_split_title(self):
         """

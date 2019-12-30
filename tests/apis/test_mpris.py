@@ -1,8 +1,6 @@
 import os
 import unittest
 
-from PySide2.QtWidgets import QApplication
-
 from vidify import CURRENT_PLATFORM, Platform
 from vidify.api.mpris import MPRISAPI
 

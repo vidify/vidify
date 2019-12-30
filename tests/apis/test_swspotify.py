@@ -1,7 +1,6 @@
 import os
 import unittest
 
-from vidify import CURRENT_PLATFORM, Platform
 from vidify import Platform, CURRENT_PLATFORM
 
 

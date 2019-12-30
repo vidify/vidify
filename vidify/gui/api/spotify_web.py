@@ -152,7 +152,7 @@ class SpotifyWebPrompt(QWidget):
             # it's automatically refreshed before it expires. self.creds is
             # of type `RefreshingCredentials`, so it returns always a
             # RefreshingToken.
-            token = self.creds.request_user_token(code, self.scope)
+            token = self.creds.request_user_token(code)
         except OAuthError as e:
             self.browser.hide()
             self.web_form.show()
@@ -211,8 +211,7 @@ class SpotifyWebForm(QWidget):
         It can also show error messages.
         """
 
-        url = 'https://github.com/marioortizmanero/vidify' \
-              '#obtaining-your-client-id-and-client-secret'
+        url = 'https://github.com/marioortizmanero/vidify/wiki/Spotify-Web-API'
         text = QLabel(
             "<h2><i>Please introduce your Spotify keys</i></h2>"
             "If you don't know how to obtain them, please read this"
