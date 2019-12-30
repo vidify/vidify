@@ -30,7 +30,7 @@
 * Other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
 
 ## Installation
-* The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1, extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
+* The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1,extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
 * You can download the latest stable [release](https://github.com/marioortizmanero/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
 * Linux:
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Read the optional dependencies to use more APIs and players. Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
@@ -41,24 +41,24 @@
 ### The APIs
 An API is simply a source of information about the music playing on a device. For example, the Spotify desktop client, or iTunes. This app is built to support any API as easily as possible, because there are many different ways to play music. Here are the currently supported ones:
 
-| Name                                         | Wiki link | PyPi install | Description |
-|----------------------------------------------|:---------:|--------------|-------------|
-| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/marioortizmanero/vidify/wiki/Linux-Media-Players) | Default (see wiki) | Any MPRIS compatible media player for Linux or BSD (99% of the media players). |
-| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-for-Windows-and-MacOS) | Default | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-Web-API) | Default | The official Spotify Web API. Check the wiki for more details. |
-| Unknown (any other string)                   | - | - | If you use any other string with `--api`, the initial screen to choose an API will appear. This is temporary until the GUI menu is implemented. |
+| Name                                         | Wiki link                                                                           | Extra requirements | Description |
+|----------------------------------------------|:-----------------------------------------------------------------------------------:|--------------------|-------------|
+| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/marioortizmanero/vidify/wiki/Linux-Media-Players)           | None (see wiki)    | Any MPRIS compatible media player for Linux or BSD (99% of the media players, like Spotify, Clementine, VLC...). |
+| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-for-Windows-and-MacOS) | None               | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-Web-API)               | None               | The official Spotify Web API. Check the wiki for more details on how to use it. |
+| Unknown (any other string)                   | -                                                                                   | -                  | If you use any other string with `--api`, the initial screen to choose an API will appear. This is temporary until the GUI menu is implemented. |
 
 The internal name inside parenthesis is used for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would enable the Linux Media Players API, for instance.
 
 ### The players
-The embedded video players inside the app. External players are used because they have better support and already come with codecs installed. The default one is VLC because it's more popular, but you can use others if you have the player installed, and the PyPi extra dependencies. For example, to install Vidify with Mpv support, you'd run `pip install --user vidify[mpv]`.
+The embedded video players inside the app. External players are used because they have better support and already come with codecs installed. The default one is VLC because it's more popular, but you can use others if you have the player installed, and the PyPi extra dependencies. For example, to install Vidify with Mpv support, you'd run `pip install --user vidify[mpv]`, or just installing `python-mpv` in your system.
 
-| Name           | PyPi install | Description                                           | Arguments/config options                      |
-|----------------|--------------|-------------------------------------------------------|-----------------------------------------------|
-| VLC (`vlc`)    | Default      | The default video player. Widely used and very solid. |`--vlc-args <VLC_ARGS>`                        |
-| Mpv (`mpv`)    | `mpv`        | A simple and portable video player.                   | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
+| Name           | Extra requirements | Description                                           | Arguments/config options                      |
+|----------------|--------------------|-------------------------------------------------------|-----------------------------------------------|
+| VLC (`vlc`)    | Default            | The default video player. Widely used and very solid. |`--vlc-args <VLC_ARGS>`                        |
+| Mpv (`mpv`)    | `python-mpv`       | A simple and portable video player.                   | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
 
-For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name between parenthesis. Use `--player mpv` or save it in your config file for future usage:
+For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name. You can use `--player mpv` or save it in your config file for future usage:
 
 ```ini
 [Defaults]
@@ -66,7 +66,7 @@ player = mpv
 ```
 
 ## Usage
-The app has an interface that will guide you through the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
+The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
 
 ```
 usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-on-top]
@@ -82,7 +82,7 @@ usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-
 | `--stay-on-top`                  | the app window will stay on top of other apps. |
 | `--width <WIDTH>`                | set the width for the downloaded videos (this is useful to play lower quality videos if your connection isn't good). |
 | `--height <HEIGHT>`              | set the height for the downloaded videos. |
-| `-a, --api`                      | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
+| `-a`, `--api`                    | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
 | `-p`, `--player`                 | specify the player to use. See the [Players section](#the-players) for more info about the supported players. |
 | `--config-file <PATH>`           | indicate the path of your [config file](#the-config-file).  |
 
@@ -130,4 +130,4 @@ Inside `dev/` you can find more information about building: [BUILDING.md](https:
 ### Tests
 You can run the module locally with `python -m vidify`.
 
-This project uses `unittest` for testing. Run them with `python -m unittest` or `python -m unittest discover -s tests`
+This project uses `unittest` for testing. Run them with `python -m unittest`.
