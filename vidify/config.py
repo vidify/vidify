@@ -146,6 +146,16 @@ class Options(Enum):
         str,
         "vlc")
 
+    audiosync = (
+        "enable automatic audio synchronization. You may need to install"
+        " additional dependencies. Read the installation guide for more"
+        " information.",
+        ('--audiosync'),
+        'store_true',
+        'Defaults',
+        bool,
+        False)
+
     # Arguments and options provided for the players.
     vlc_args = (
         "custom arguments used when opening VLC.",

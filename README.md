@@ -18,6 +18,7 @@
 * [Installation](#installation)
     * [The APIs](#the-apis)
     * [The Players](#the-players)
+    * [Audio Synchronization](#audio-synchronization)
 * [Usage and configuration](#usage)
 * [FAQ](#faq)
 * [Development resources](#development)
@@ -25,11 +26,9 @@
     * [Current Limitations](#current-limitations)
 
 
-## Requirements
-* Python 3.7+
-* Other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
-
 ## Installation
+You'll need Python 3.7+, and other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
+
 * The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1,extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
 * You can download the latest stable [release](https://github.com/marioortizmanero/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
 * Linux:
@@ -65,6 +64,23 @@ For now, the only way to specify what player to use is with [arguments](#usage) 
 player = mpv
 ```
 
+### Audio synchronization
+Vidify has an audio synchronization feature currently under testing. The full repository is in [marioortizmanero/vidify-audiosync](https://github.com/marioortizmanero/vidify-audiosync), being a separate repo so that it can be installed optionally, and to keep Vidify modular.
+
+This feature is only available on Linux for now. You can install it with `pip install vidify[audiosync]`, after installing the dependencies listed in the repository above:
+
+* FFTW: `libfftw3` on Debian-based distros.
+* ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
+
+It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR.
+
+Finally, you can activate the feature with `--audiosync` or inside your [config file](#the-config-file):
+
+```ini
+[Defaults]
+audiosync = true
+```
+
 ## Usage
 The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
 
@@ -84,6 +100,7 @@ usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-
 | `--height <HEIGHT>`              | set the height for the downloaded videos. |
 | `-a`, `--api`                    | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
 | `-p`, `--player`                 | specify the player to use. See the [Players section](#the-players) for more info about the supported players. |
+| `--audiosync`                    | enables the [Audio Synchronization](#audio-synchronization) feature (disabled by default). |
 | `--config-file <PATH>`           | indicate the path of your [config file](#the-config-file).  |
 
 ### The config file
