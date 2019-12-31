@@ -34,7 +34,7 @@
 * You can download the latest stable [release](https://github.com/marioortizmanero/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
 * Linux:
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Read the optional dependencies to use more APIs and players. Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
-    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [dev-python/vidify](https://packages.gentoo.org/packages/dev-python/vidify).
+    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [media-video/vidify](https://packages.gentoo.org/packages/media-video/vidify).
     * Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.
 
 
