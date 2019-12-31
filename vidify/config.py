@@ -150,7 +150,7 @@ class Options(Enum):
         "enable automatic audio synchronization. You may need to install"
         " additional dependencies. Read the installation guide for more"
         " information.",
-        ('--audiosync'),
+        ('--audiosync',),
         'store_true',
         'Defaults',
         bool,

@@ -50,12 +50,12 @@ class MPRISAPI(APIBase):
         by 1000.
 
         This feature isn't available for some players like Spotify, so
-        `NotImplementedError` is raised instead to keep consistency with the
-        rest of the APIs.
+        0 is returned instead to keep consistency with the rest of the APIs.
         """
 
         if self._no_position:
             raise NotImplementedError
+
         return self._player_interface.Position // 1000
 
     def connect_api(self) -> None:
@@ -202,7 +202,12 @@ class MPRISAPI(APIBase):
                 # Refreshes the metadata with the new data and plays the video
                 self.artist = artist
                 self.title = title
-                self.new_song_signal.emit()
+                try:
+                    position = self.position
+                except NotImplementedError:
+                    position = 0
+
+                self.new_song_signal.emit(self.artist, self.title, position)
 
         if 'PlaybackStatus' in properties:
             is_playing = self._bool_status(properties['PlaybackStatus'])

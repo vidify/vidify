@@ -10,7 +10,7 @@ from PySide2.QtCore import QObject, Signal
 class APIBase(QObject):
     __metaclass__ = ABCMeta
 
-    new_song_signal = Signal()
+    new_song_signal = Signal(str, str, int)
     status_signal = Signal(bool)
     position_signal = Signal(int)
 

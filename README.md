@@ -71,6 +71,7 @@ This feature is only available on Linux for now. You can install it with `pip in
 
 * FFTW: `libfftw3` on Debian-based distros.
 * ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
+* youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
 
 It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR.
 
@@ -80,6 +81,10 @@ Finally, you can activate the feature with `--audiosync` or inside your [config 
 [Defaults]
 audiosync = true
 ```
+
+Note: if the audiosync module is seemingly doing nothing, or returning zero as the lag always, make sure that the sink being recorded is the one where the music is playing too. Here's an example on Pavucontrol:
+
+![pavucontrol](images/pavucontrol-audiosync.png)
 
 ## Usage
 The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
