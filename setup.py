@@ -37,7 +37,7 @@ setup(
     keywords='spotify music video player videos lyrics linux windows macos',
     python_requires='>=3.7',
     install_requires=[
-        'PySide2',
+        'QtPy',
         'youtube-dl',
         'python-vlc',
         'appdirs',

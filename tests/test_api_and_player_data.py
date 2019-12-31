@@ -6,7 +6,7 @@ throughout the entire module.
 
 import unittest
 
-from PySide2.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication
 
 from vidify import Platform
 from vidify.gui.window import MainWindow
@@ -17,7 +17,7 @@ from vidify.config import Config, Options
 
 config = Config()
 config.parse()
-app = QApplication()
+app = QApplication(['vidify'])
 win = MainWindow(config)
 
 

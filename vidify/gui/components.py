@@ -6,12 +6,12 @@ initialization is easier. (specially the Web API authentication widgets).
 import logging
 from typing import Optional
 
-from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
-                               QVBoxLayout, QGridLayout, QGroupBox)
-from PySide2.QtGui import QIcon
-from PySide2.QtCore import Qt, QSize, QUrl, Signal, Slot
-from PySide2.QtSvg import QSvgWidget
-from PySide2.QtWebEngineWidgets import QWebEngineView
+from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
+                            QVBoxLayout, QGridLayout, QGroupBox)
+from qtpy.QtGui import QIcon
+from qtpy.QtCore import Qt, QSize, QUrl, Signal, Slot
+from qtpy.QtSvg import QSvgWidget
+from qtpy.QtWebEngineWidgets import QWebEngineView
 
 from vidify import CURRENT_PLATFORM
 from vidify.api import APIData

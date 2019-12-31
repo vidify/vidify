@@ -4,9 +4,9 @@ Custom API implementation to ask the user for the Spotify Web credentials.
 
 import logging
 
-from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
-                               QVBoxLayout)
-from PySide2.QtCore import Qt, QSize, Signal
+from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
+                            QVBoxLayout)
+from qtpy.QtCore import Qt, QSize, Signal
 from spotipy.scope import scopes
 from spotipy.util import (RefreshingCredentials, RefreshingToken,
                           parse_code_from_url)

@@ -5,7 +5,7 @@ fonts.
 In the future, these properties could be modified if dark mode was enabled.
 """
 
-from PySide2.QtGui import QFont
+from qtpy.QtGui import QFont
 
 from vidify import Platform, CURRENT_PLATFORM
 
