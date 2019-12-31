@@ -14,13 +14,13 @@ class TestYoutube(unittest.TestCase):
         """
 
         with self.assertRaises(VideoNotFoundError):
-            youtube.get_url(None, None)
+            youtube.get_video(None, None)
         with self.assertRaises(VideoNotFoundError):
-            youtube.get_url(None, '')
+            youtube.get_video(None, '')
         with self.assertRaises(VideoNotFoundError):
-            youtube.get_url('', None)
+            youtube.get_video('', None)
         with self.assertRaises(VideoNotFoundError):
-            youtube.get_url('', '')
+            youtube.get_video('', '')
 
     def test_video_not_found(self):
         """
@@ -30,7 +30,7 @@ class TestYoutube(unittest.TestCase):
         """
 
         with self.assertRaises(VideoNotFoundError):
-            youtube.get_url(
+            youtube.get_video(
                 "Hopefully this video name doesn't appear as a YouTube video"
                 " \"result because the title\" is \"too long.\"",
                 "I don't really have another way to test this but I'm going to"

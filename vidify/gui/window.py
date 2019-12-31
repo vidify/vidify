@@ -244,23 +244,48 @@ class MainWindow(QWidget):
             timer.timeout.connect(event_loop)
         timer.start(ms)
 
+    @Slot(int)
+    def on_audiosync_done(self, lag: int) -> None:
+        """
+        Slot used after the audiosync function has finished. It sets the
+        returned lag on the player.
+        """
+
+        logging.info("Audiosync module returned %d", lag)
+        # If the delay is negative, it means that the recorded audio is
+        # the one that's delayed. If this delay is larger than the current
+        # player position, the player position is set to zero after the lag
+        # has passed.
+        if self.player.position < lag:
+            wait = lag - self.player.position
+            self.sync_timer = QTimer(self)
+            self.sync_timer.singleShot(
+                wait, lambda: self.change_video_position(0))
+        else:
+            self.player.position = self.player.position - lag
+
     @Slot(bool)
     def change_video_status(self, is_playing: bool) -> None:
+        """
+        Slot used for API updates of the video status.
+        """
+
         self.player.pause = not is_playing
 
     @Slot(int)
     def change_video_position(self, ms: int) -> None:
-        self.player.position = ms
+        """
+        Slot used for API updates of the video position.
+        """
 
-    def reset_video_position(self) -> None:
-        self.player.position = 0
+        self.player.position = ms
 
     @Slot(str, str, int)
     def play_video(self, artist: str, title: str, position: int = 0) -> None:
         """
-        Plays a video using the current API's data. This is called when the
-        API is first initialized from this GUI, and afterwards from the event
-        loop handler whenever a new song is detected.
+        Slot used to play a video. This is called when the API is first
+        initialized from this GUI, and afterwards from the event loop handler
+        whenever a new song is detected.
 
         If an error was detected when downloading the video, the default one
         is shown instead.
@@ -272,33 +297,15 @@ class MainWindow(QWidget):
         # so that there's as little delay as possible when the audio is
         # recorded.
         if self.config.audiosync:
-            # This can be improved if audiosync uses a class instead of a
-            # function. The object could be saved as self.audiosync when
-            # the GUI is initialized, doing the import there only once.
-            try:
-                import vidify_audiosync as audiosync
-            except ImportError:
-                raise ImportError(
-                    "No module named 'vidify_audiosync'.\n"
-                    "To use audio synchronization, please install"
-                    " vidify_audiosync and its dependencies. Read more about"
-                    " it in the installation guide.") from None
-
-            # The 'Official Video' part should be added in a different function
+            from vidify.audiosync import AudiosyncWorker
+            self.audiosync = AudiosyncWorker(
+                f"{format_name(artist, title)} Official Video")
+            # TODO: if this option is enable in the middle of the execution,
+            # this will raise an AttributeError.
+            # The 'Official Video' part could be added in a different function
             # that the youtube module can use too, for consistency
-            full_name = format_name(artist, title) + " Official Video"
-            # This call should be a QThread
-            lag = audiosync.get_lag(full_name)
-            logging.info("Audiosync module returned %d", lag)
-            # If the delay is negative, it means that the recorded audio is
-            # the one that's delayed. In the future, the position should be
-            # changed after the delay has passed with a QTimer that calls
-            # self.change_position.
-            if lag < 0:
-                self.sync_timer = QTimer(self)
-                self.sync_timer.singleShot(-lag, self.reset_video_position)
-            else:
-                position = lag
+            self.audiosync.done.connect(self.on_audiosync_done)
+            self.audiosync.start()
 
         try:
             url = self.youtube.get_video(artist, title)
