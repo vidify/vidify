@@ -9,11 +9,8 @@ player implementation inherits, and an explanation in detail of the methods.
 
 import logging
 from typing import Optional
+import locale
 
-# Importing locale is necessary since PySide2 stomps over the locale settings
-# needed by libmpv. This needs to happen after importing PyQT before creating
-# the first mpv.MPV instance.
-import locale  # noqa: F401
 try:
     from mpv import MPV
 except ModuleNotFoundError:
@@ -23,6 +20,12 @@ except ModuleNotFoundError:
         " Read the installation guide for more details.") from None
 
 from vidify.player.generic import PlayerBase
+
+
+# Importing locale is necessary since PySide2 stomps over the locale settings
+# needed by libmpv. This needs to happen after importing PyQT before creating
+# the first mpv.MPV instance, so it's in global context.
+locale.setlocale(locale.LC_NUMERIC, 'C')
 
 
 class MpvPlayer(PlayerBase):
@@ -41,6 +44,7 @@ class MpvPlayer(PlayerBase):
             args['log_handler'] = print
             args['loglevel'] = 'info'
         args['wid'] = str(int(self.winId()))
+        args['vo'] = 'x11'
 
         self._mpv = MPV(*flags, **args)
 
