@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 # Get version inside vidify/version.py without importing the package
@@ -8,12 +8,16 @@ exec(compile(open('vidify/version.py').read(),
 setup(
     name='vidify',
     version=__version__,
-    packages=['vidify'],
+    packages=find_packages(exclude=('tests*', 'dev*')),
     description='Watch music videos for the songs playing on your device',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/marioortizmanero/vidify',
     license='LGPL',
+
+    package_data={'vidify': ['gui/res/*',
+                             'gui/res/**/*',
+                             'gui/res/**/**/*']},
 
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
