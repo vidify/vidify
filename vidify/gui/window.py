@@ -14,9 +14,9 @@ import logging
 import importlib
 from typing import Callable, Optional
 
-from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
-from PySide2.QtGui import QFontDatabase
-from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot
+from qtpy.QtWidgets import QWidget, QLabel, QHBoxLayout
+from qtpy.QtGui import QFontDatabase
+from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot
 
 from vidify.api import APIData, get_api_data, ConnectionNotReady
 from vidify.player import initialize_player

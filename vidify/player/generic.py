@@ -4,7 +4,7 @@ Generic implementation of a player that can be used in this app.
 
 
 from abc import ABCMeta, abstractmethod
-from PySide2.QtWidgets import QFrame
+from qtpy.QtWidgets import QFrame
 
 
 class PlayerBase(QFrame):

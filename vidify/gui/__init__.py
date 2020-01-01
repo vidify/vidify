@@ -7,7 +7,7 @@ In the future, these properties could be modified if dark mode was enabled.
 
 import os
 
-from PySide2.QtGui import QFont
+from qtpy.QtGui import QFont
 
 from vidify import Platform, CURRENT_PLATFORM
 

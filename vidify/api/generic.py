@@ -4,7 +4,7 @@ Generic implementation of the API module.
 
 from abc import ABCMeta, abstractmethod
 
-from PySide2.QtCore import QObject, Signal
+from qtpy.QtCore import QObject, Signal
 
 
 class APIBase(QObject):

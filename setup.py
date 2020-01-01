@@ -1,9 +1,34 @@
 from setuptools import setup, find_packages
+from pkg_resources import DistributionNotFound, get_distribution
+
+
+def get_dist(pkgname):
+    try:
+        return get_distribution(pkgname)
+    except DistributionNotFound:
+        return None
 
 
 # Get version inside vidify/version.py without importing the package
 exec(compile(open('vidify/version.py').read(),
              'vidify/version.py', 'exec'))
+
+install_deps = [
+    'QtPy',
+    'youtube-dl',
+    'python-vlc',
+    'appdirs',
+    'lyricwikia',
+    #  'spotipy>=3.0',
+    'pydbus; platform_system=="Linux"',
+    'SwSpotify>=1.1.1; platform_system=="Windows"'
+    ' or platform_system=="Darwin"'
+]
+
+if ((get_dist('PyQt5') is None or get_dist('PyQtWebEngine') is None)
+        and get_dist('PySide2') is None):
+    install_deps.append('PyQt5')
+    install_deps.append('PyQtWebEngine')
 
 setup(
     name='vidify',
@@ -36,17 +61,7 @@ setup(
     ],
     keywords='spotify music video player videos lyrics linux windows macos',
     python_requires='>=3.7',
-    install_requires=[
-        'PySide2',
-        'youtube-dl',
-        'python-vlc',
-        'appdirs',
-        'lyricwikia',
-        #  'spotipy>=3.0',
-        'pydbus; platform_system=="Linux"',
-        'SwSpotify>=1.1.1; platform_system=="Windows"'
-        ' or platform_system=="Darwin"'
-    ],
+    install_requires=install_deps,
     extras_require={
         'dev': [
             'flake8'
