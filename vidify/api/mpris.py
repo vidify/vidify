@@ -70,7 +70,7 @@ class MPRISAPI(APIBase):
         # Some MPRIS players don't support the position feature, so this
         # checks if it's in the blacklist to act accordingly when the
         # position is requested.
-        position_blacklist = ('org.mpris.MediaPlayer2.spotify')
+        position_blacklist = ('org.mpris.MediaPlayer2.spotify',)
         self._no_position = self._bus_name in position_blacklist
         self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
@@ -202,7 +202,11 @@ class MPRISAPI(APIBase):
                 # Refreshes the metadata with the new data and plays the video
                 self.artist = artist
                 self.title = title
-                self.new_song_signal.emit()
+                try:
+                    position = self.position
+                except NotImplementedError:
+                    position = 0
+                self.new_song_signal.emit(self.artist, self.title, position)
 
         if 'PlaybackStatus' in properties:
             is_playing = self._bool_status(properties['PlaybackStatus'])
