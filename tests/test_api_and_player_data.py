@@ -8,7 +8,7 @@ import unittest
 
 from qtpy.QtWidgets import QApplication
 
-from vidify import Platform
+from vidify import CURRENT_PLATFORM, Platform
 from vidify.gui.window import MainWindow
 from vidify.api import APIData, get_api_data
 from vidify.player import PlayerData, PlayerNotFoundError, initialize_player
@@ -39,13 +39,18 @@ class DataStructuresTest(unittest.TestCase):
         """
         Checking that all the class names and modules listed in the APIData
         and Player structures exist.
+
+        This is only done with the APIs supported by the current operating
+        system though, so for a full coverage this test should be done on
+        all supported platforms.
         """
 
         # The API has 2 different functions, one to obtain the APIData entry
         # (get_player_data), and another to initialize the API
         # (initialize_api). Both are tested this way.
         for api in APIData:
-            win.initialize_api(get_api_data(api.name), do_start=False)
+            if CURRENT_PLATFORM in api.platforms:
+                win.initialize_api(get_api_data(api.name), do_start=False)
 
         for player in PlayerData:
             initialize_player(player.name, config)

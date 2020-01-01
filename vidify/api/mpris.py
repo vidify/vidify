@@ -39,7 +39,7 @@ class MPRISAPI(APIBase):
         logging.info("Disconnecting")
         try:
             self._disconnect_obj.disconnect()
-        except AttributeError:
+        except (AttributeError, RuntimeError):
             pass
 
     @property
