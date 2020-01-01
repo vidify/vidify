@@ -21,7 +21,7 @@ from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot
 from vidify.api import APIData, get_api_data, ConnectionNotReady
 from vidify.player import initialize_player
 from vidify.config import Config
-from vidify.youtube import YouTube, VideoNotFoundError
+from vidify.youtube import YouTubeDLWorker
 from vidify.lyrics import get_lyrics
 from vidify.gui import Fonts, Res, Colors
 from vidify.gui.components import APISelection
@@ -55,10 +55,9 @@ class MainWindow(QWidget):
         for font in Res.fonts:
             font_db.addApplicationFont(font)
 
-        # Initializing the player and the youtube module directly.
-        logging.info("Using %s as the player", config.player)
+        # Initializing the player and saving the config object in the window.
         self.player = initialize_player(config.player, config)
-        self.youtube = YouTube(config.debug, config.width, config.height)
+        logging.info("Using %s as the player", config.player)
         self.config = config
 
         # The API initialization is more complex. For more details, please
@@ -258,15 +257,32 @@ class MainWindow(QWidget):
         is shown instead.
         """
 
-        logging.info("Playing a new video")
-        try:
-            url = self.youtube.get_url(self.api.artist, self.api.title)
-        except VideoNotFoundError:
-            url = Res.default_video
-            success = False
-        else:
-            success = True
+        logging.info("Initializing YoutubeDL for asynchronous I/O")
 
+        # Checking that the artist and title are valid
+        if self.api.artist in (None, '') and self.api.title in (None, ''):
+            logging.info("The provided artist and title are empty.")
+            self._on_youtubedl_fail()
+
+        # Launching the thread with YouTube-DL
+        self.youtubedl = YouTubeDLWorker(
+            self.api.artist, self.api.title, self.config.debug,
+            self.config.width, self.config.height)
+        self.youtubedl.done.connect(self.on_youtubedl_done)
+        self.youtubedl.fail.connect(self.on_youtubedl_fail)
+        self.youtubedl.start()
+
+    @Slot()
+    def on_youtubedl_fail(self) -> None:
+        self.player.start_video(Res.default_video, self.api.is_playing)
+        if self.config.lyrics:
+            print("The video wasn't found, either because of an issue with"
+                  " your internet connection or because the provided data"
+                  " was invalid. For more information, enable the debug"
+                  " mode.")
+
+    @Slot(str)
+    def on_youtubedl_done(self, url: str) -> None:
         self.player.start_video(url, self.api.is_playing)
 
         try:
@@ -275,13 +291,7 @@ class MainWindow(QWidget):
             self.player.position = 0
 
         if self.config.lyrics:
-            if success:
-                print(get_lyrics(self.api.artist, self.api.title))
-            else:
-                print("The video wasn't found, either because of an issue with"
-                      " your internet connection or because the provided data"
-                      " was invalid. For more information, enable the debug"
-                      " mode.")
+            print(get_lyrics(self.api.artist, self.api.title))
 
     def init_spotify_web_api(self) -> None:
         """

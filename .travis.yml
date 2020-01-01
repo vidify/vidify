@@ -17,9 +17,10 @@ before_install:
 
 install:
     - pip3 install .[mpv,dev]
+      # Pygobject is needed for virtual environments and Travis CI. See the
+      # FAQ section in the README.
     - pip3 install pygobject
     - pip3 install git+https://github.com/felix-hilden/spotipy.git
-    - pip3 install swspotify
 
 # Lint with PEP8 and run tests
 script: 

@@ -99,8 +99,8 @@ All the available options for the config file are the same as the arguments list
 
 ## FAQ
 
-### Vidify doesn't work correctly with Python 3.8
-Qt started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
+### Vidify doesn't work correctly with Python 3.8 and PySide2
+PySide2 started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 
 ### `ModuleNotFoundError: No module named 'gi'` when using a virtual environment
 For some reason, `python-gobject` may not be available inside a virtual environment. You can create a symlink inside it with:

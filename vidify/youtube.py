@@ -2,33 +2,34 @@
 This module uses youtube-dl to obtain the actual URL of a YouTube link.
 That way, the video can be played directly with a video player like VLC
 or mpv.
+
+It also works with Qt asynchronously, sending a signal once it's done
+calling youtube-dl.
 """
 
 import logging
 from typing import Optional
 
 from youtube_dl import YoutubeDL, DownloadError
+from qtpy.QtCore import QThread, Signal
 
 from vidify import format_name
 
 
-class VideoNotFoundError(Exception):
-    """
-    Exception raised when the video wasn't found because of any reason.
-    """
+class YouTubeDLWorker(QThread):
+    done = Signal(str)
+    fail = Signal()
 
-    def __init__(self, msg: str = "The requested video was not found, either"
-                                  " because the provided metadata wasn't"
-                                  " valid"):
-        super().__init__(msg)
-
-
-class YouTube:
-    def __init__(self, debug: bool = False, width: Optional[int] = None,
-                 height: Optional[int] = None) -> None:
+    def __init__(self, artist: str, title: str, debug: bool = False,
+                 width: Optional[int] = None, height: Optional[int] = None
+                 ) -> None:
         """
-        YouTube class with config and function to get the direct url.
+        YouTube-DL class with config and function to get the direct url.
         """
+
+        super().__init__()
+
+        self.query = f"ytsearch:{format_name(artist, title)} Official Video"
 
         self.options = {
             'format': 'bestvideo',
@@ -39,26 +40,37 @@ class YouTube:
         if height is not None:
             self.options['format'] += f'[height<={height}]'
 
-        self._youtube = YoutubeDL(self.options)
-
-    def get_url(self, artist: str, title: str) -> str:
+    def __del__(self) -> None:
         """
-        Getting the youtube direct link with youtube-dl.
+        Avoids a segmentation fault when the app is closed while this thread
+        is in execution. It simply waits for this to finish and closes itself
+        afterwards.
+
+        The problem is that Python doesn't guarantee that __del__ is called
+        when the interpreter exits:
+        https://docs.python.org/3.8/reference/datamodel.html#object.__del__
+        so sometimes this message still may appear:
+            QThread: Destroyed while thread is still running
+            zsh: abort (core dumped)  python -m vidify --debug
         """
-
-        # Checking that the artist and title are valid
-        if artist in (None, '') and title in (None, ''):
-            logging.info("Raising VideoNotFoundError because the provided"
-                         " artist and title are empty.")
-            raise VideoNotFoundError
-
-        name = f"ytsearch:{format_name(artist, title)} Official Video"
 
         try:
-            info = self._youtube.extract_info(name, download=False)
-        except DownloadError as e:
-            logging.info("Raising VideoNotFoundError because YouTube-dl"
-                         " wasn't able to obtain the video: %s", str(e))
-            raise VideoNotFoundError
+            self.exit()
+            self.wait()
+        except RuntimeError:
+            pass
 
-        return info['entries'][0]['url']
+    def run(self) -> None:
+        """
+        Getting the youtube direct link with youtube-dl asynchronously.
+        """
+
+        with YoutubeDL(self.options) as ytdl:
+            try:
+                info = ytdl.extract_info(self.query, download=False)
+            except DownloadError as e:
+                logging.info("YouTube-dl wasn't able to obtain the video: %s",
+                             str(e))
+                self.fail.emit()
+            else:
+                self.done.emit(info['entries'][0]['url'])
