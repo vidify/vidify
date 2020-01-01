@@ -49,8 +49,8 @@ class MPRISAPI(APIBase):
         that the provided position should be in microseconds, so it's divided
         by 1000.
 
-        This feature isn't available for some players like Spotify, so
-        0 is returned instead to keep consistency with the rest of the APIs.
+        `NotImplementedError` is raised instead to keep consistency with the
+        rest of the APIs.
         """
 
         if self._no_position:
