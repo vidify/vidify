@@ -53,7 +53,7 @@ class SpotifyWebPrompt(QWidget):
         # on_submit_spotify_web creds will be called once the credentials have
         # been input.
         self.web_form.button.clicked.connect(self.on_submit_creds)
-        self.layout.addWidget(self.web_form, Qt.AlignCenter)
+        self.layout.addWidget(self.web_form)
 
         # The web browser for the user to login and grant access.
         # It's hidden at the beggining and will appear once the credentials
@@ -67,7 +67,7 @@ class SpotifyWebPrompt(QWidget):
         # Any change in the browser URL will redirect to on__login to check if
         # the login was succesful.
         self.browser.web_view.urlChanged.connect(self.on_login)
-        self.layout.addWidget(self.browser, Qt.AlignCenter)
+        self.layout.addWidget(self.browser)
 
     @property
     def client_id(self) -> str:

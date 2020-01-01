@@ -328,7 +328,7 @@ class MainWindow(QWidget):
                 self.config.client_id, self.config.client_secret,
                 self.config.redirect_uri)
             self._spotify_web_prompt.done.connect(self.start_spotify_web_api)
-            self.layout.addWidget(self._spotify_web_prompt, Qt.AlignCenter)
+            self.layout.addWidget(self._spotify_web_prompt)
 
     def start_spotify_web_api(self, token: 'RefreshingToken',
                               save_config: bool = True) -> None:

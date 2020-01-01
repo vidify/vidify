@@ -27,6 +27,7 @@ install:
 jobs:
     include:
         - stage: linter
+          python: '3.8'
           script: flake8 . --ignore='F821,W503,E731'
 
 # Lint with PEP8 and run tests
