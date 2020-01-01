@@ -60,7 +60,7 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     keywords='spotify music video player videos lyrics linux windows macos',
-    python_requires='>=3.7',
+    python_requires='>=3.6',
     install_requires=install_deps,
     extras_require={
         'dev': [

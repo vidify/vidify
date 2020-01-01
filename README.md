@@ -26,7 +26,7 @@
 
 
 ## Requirements
-* Python 3.7+
+* Python 3.6+
 * Other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
 
 ## Installation
