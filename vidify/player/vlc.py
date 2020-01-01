@@ -44,14 +44,6 @@ class VLCPlayer(PlayerBase):
 
         self._player = self._vlc.media_player_new()
 
-    def __del__(self) -> None:
-        try:
-            # Avoids a segmentation fault when closing the app.
-            self._player.stop()
-            del self._player
-        except AttributeError:
-            pass
-
     @property
     def pause(self) -> bool:
         return not self._player.is_playing()
