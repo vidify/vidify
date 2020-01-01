@@ -60,8 +60,12 @@ class Res:
     icon = res_path("icon16x16.ico") \
         if CURRENT_PLATFORM == Platform.WINDOWS \
         else res_path("icon.svg")
-    default_api_icon = res_path("api_icons/default.svg")
     cross = res_path("cross.svg")
+
+    default_api_icon = res_path("api_icons/default.svg")
+    mpris_linux_icon = res_path("api_icons/mpris.svg")
+    swspotify_icon = res_path("api_icons/spotify/swspotify.svg")
+    spotify_web_icon = res_path("api_icons/spotify/web.svg")
 
 
 class Fonts:
