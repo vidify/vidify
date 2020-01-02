@@ -64,7 +64,7 @@ class APIBase(QObject):
         """
 
     @abstractmethod
-    def connect_api(self):
+    def connect_api(self) -> None:
         """
         Initializes the connection with the API.
 
@@ -78,7 +78,7 @@ class APIBase(QObject):
         """
 
     @abstractmethod
-    def event_loop(self):
+    def event_loop(self) -> None:
         """
         Runs an iteration of the event loop.
 

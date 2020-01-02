@@ -126,7 +126,7 @@ class ConnectionNotReady(Exception):
         super().__init__(msg)
 
 
-def get_api_data(key: str) -> APIData:
+def get_api_data(key: Optional[str]) -> APIData:
     """
     Returns an entry from the APIs from `key`. KeyError is raised if it
     isn't found.

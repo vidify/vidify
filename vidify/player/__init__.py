@@ -36,17 +36,6 @@ class PlayerData(Enum):
     MPV = ('vidify.player.mpv', 'MpvPlayer', 'mpv_flags')
 
 
-class PlayerNotFoundError(AttributeError):
-    """
-    Exception raised when the player wasn't found.
-    """
-
-    def __init__(self, msg: str = "The selected player isn't available."
-                                  " Please check your config or specify one by"
-                                  " using a valid `--player` argument."):
-        super().__init__(msg)
-
-
 def initialize_player(key: str, config: Config) -> PlayerBase:
     """
     Choosing a player from the list and initializing an abstract player
@@ -57,8 +46,9 @@ def initialize_player(key: str, config: Config) -> PlayerBase:
     try:
         player = PlayerData[key.upper()]
     except KeyError:
-        raise PlayerNotFoundError from None
-
+        raise AttributeError(
+            "The selected player isn't available. Please check your config or"
+            " specify one by using a valid `--player` argument.") from None
     # Importing the module first
     mod = importlib.import_module(player.module)
     # Then obtaining the player class

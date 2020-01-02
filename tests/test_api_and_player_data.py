@@ -46,8 +46,8 @@ class DataStructuresTest(unittest.TestCase):
         """
 
         # The API has 2 different functions, one to obtain the APIData entry
-        # (get_player_data), and another to initialize the API
-        # (initialize_api). Both are tested this way.
+        # (get_api_data), and another to initialize the API (initialize_api).
+        # Both are tested this way.
         for api in APIData:
             if CURRENT_PLATFORM in api.platforms:
                 win.initialize_api(get_api_data(api.name), do_start=False)

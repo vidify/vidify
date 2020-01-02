@@ -5,11 +5,12 @@ logger, cross-platform variables...
 
 import sys
 from enum import Enum
+from typing import Optional
 
 
 class Platform(Enum):
     """
-    Listing the supported platforms.
+    Listing the supported platforms in an enumeration.
     """
 
     LINUX = 1
@@ -32,7 +33,7 @@ else:
     CURRENT_PLATFORM = Platform.UNKNOWN
 
 
-def format_name(artist: str, title: str) -> str:
+def format_name(artist: Optional[str], title: Optional[str]) -> str:
     """
     Formatting the song name with the artist and title.
 

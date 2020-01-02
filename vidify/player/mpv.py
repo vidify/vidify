@@ -7,9 +7,9 @@ vidify.player.generic, which contains the abstract base class of which any
 player implementation inherits, and an explanation in detail of the methods.
 """
 
+import locale
 import logging
 from typing import Optional
-import locale
 
 try:
     from mpv import MPV
