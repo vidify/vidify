@@ -50,6 +50,7 @@ class APICard(QGroupBox):
 
     def setup_text(self, description: str) -> None:
         text = QLabel(description)
+        text.setStyleSheet("padding: 10px")
         text.setWordWrap(True)
         text.setFont(Fonts.smalltext)
         text.setAlignment(Qt.AlignHCenter)
