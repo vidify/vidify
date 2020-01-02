@@ -141,7 +141,6 @@ class MainWindow(QWidget):
         # connection attempt is successful.
         self.loading_label = QLabel("Loading...")
         self.loading_label.setFont(Fonts.title)
-        self.loading_label.setStyleSheet(f"color: {Colors.fg};")
         self.loading_label.setMargin(50)
         self.loading_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.loading_label)
@@ -152,7 +151,6 @@ class MainWindow(QWidget):
         self.conn_label.hide()
         self.conn_label.setWordWrap(True)
         self.conn_label.setFont(Fonts.header)
-        self.conn_label.setStyleSheet(f"color: {Colors.fg};")
         self.conn_label.setMargin(50)
         self.conn_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.conn_label)

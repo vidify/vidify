@@ -52,7 +52,6 @@ class APICard(QGroupBox):
         text = QLabel(description)
         text.setWordWrap(True)
         text.setFont(Fonts.smalltext)
-        text.setStyleSheet(f"color: {Colors.fg};")
         text.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(text)
 
@@ -119,8 +118,6 @@ class InputField(QLineEdit):
         super().__init__(*args)
 
         self.setFont(Fonts.bigtext)
-        self.setStyleSheet(f"color: {Colors.fg};"
-                           f"background-color: {Colors.bg}")
 
         # A clear button
         clear = self.addAction(QIcon(Res.cross), QLineEdit.TrailingPosition)
@@ -136,11 +133,11 @@ class InputField(QLineEdit):
 
     def undo_highlight(self) -> None:
         """
-        Undos the red highlight applied when its contents were wrong, back to
+        Undo the red highlight applied when its contents were wrong, back to
         the default color.
         """
 
-        self.setStyleSheet(f"background-color: {Colors.bg}")
+        self.setStyleSheet("")
 
 
 class WebBrowser(QWidget):
@@ -169,7 +166,6 @@ class WebBrowser(QWidget):
 
         self.go_back_button = QPushButton("← Go back")
         self.go_back_button.setFont(Fonts.mediumbutton)
-        self.go_back_button.setStyleSheet(f"color: {Colors.fg};")
         self.layout.addWidget(self.go_back_button)
 
     @property

@@ -24,9 +24,7 @@ class Colors:
     future when dark mode is implemented.
     """
 
-    bg = '#eff0eb'
     light = '#eff0eb'
-    fg = '#282828'
     dark = '#282828'
     black = '#000000'
     lighterror = '#fc9086'

@@ -220,7 +220,6 @@ class SpotifyWebForm(QWidget):
         text.setOpenExternalLinks(True)
         text.setTextInteractionFlags(Qt.TextBrowserInteraction)
         text.setFont(Fonts.text)
-        text.setStyleSheet(f"color: {Colors.fg};")
         text.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(text)
 
@@ -257,8 +256,6 @@ class SpotifyWebForm(QWidget):
 
         self.button = QPushButton("SUBMIT")
         self.button.setFont(Fonts.bigbutton)
-        self.button.setStyleSheet(f"color: {Colors.fg};"
-                                  f"background-color: {Colors.bg};")
         self.layout.addWidget(self.button)
 
     @property
