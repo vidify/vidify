@@ -36,8 +36,17 @@ def format_name(artist: str, title: str) -> str:
     """
     Formatting the song name with the artist and title.
 
-    Some local songs may not have an artist name so the formatting
-    has to be different.
+    Some songs may not have an artist name or title so the formatting has to
+    use all it has.
     """
 
-    return title if artist in (None, '') else f"{artist} - {title}"
+    is_empty = lambda x: x in (None, '')
+
+    if is_empty(artist) and is_empty(title):
+        return ''
+    elif is_empty(artist):
+        return title
+    elif is_empty(title):
+        return artist
+    else:
+        return f"{artist} - {title}"

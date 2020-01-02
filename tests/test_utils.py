@@ -1,5 +1,6 @@
 import unittest
 
+from vidify import format_name
 from vidify.api import split_title
 
 
@@ -34,6 +35,28 @@ class TestUtils(unittest.TestCase):
         artist, title = split_title(title)
         self.assertEqual(title, real_title)
         self.assertEqual(artist, real_artist)
+
+    def test_format_name(self):
+        """
+        Simple test for the format_name function in vidify.__init__.
+        """
+
+        artist = "Rick Astley"
+        title = "Never Gonna Give You Up"
+
+        self.assertEqual(format_name(artist, title),
+                         "Rick Astley - Never Gonna Give You Up")
+
+        self.assertEqual(format_name(None, title), title)
+        self.assertEqual(format_name('', title), title)
+
+        self.assertEqual(format_name(artist, None), artist)
+        self.assertEqual(format_name(artist, ''), artist)
+
+        self.assertEqual(format_name(None, None), '')
+        self.assertEqual(format_name(None, ''), '')
+        self.assertEqual(format_name('', None), '')
+        self.assertEqual(format_name('', ''), '')
 
 
 if __name__ == '__main__':
