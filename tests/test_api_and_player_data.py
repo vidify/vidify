@@ -6,18 +6,18 @@ throughout the entire module.
 
 import unittest
 
-from PySide2.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication
 
-from vidify import Platform
+from vidify import CURRENT_PLATFORM, Platform
 from vidify.gui.window import MainWindow
 from vidify.api import APIData, get_api_data
-from vidify.player import PlayerData, PlayerNotFoundError, initialize_player
+from vidify.player import PlayerData, initialize_player
 from vidify.config import Config, Options
 
 
 config = Config()
 config.parse()
-app = QApplication()
+app = QApplication(['vidify'])
 win = MainWindow(config)
 
 
@@ -39,20 +39,25 @@ class DataStructuresTest(unittest.TestCase):
         """
         Checking that all the class names and modules listed in the APIData
         and Player structures exist.
+
+        This is only done with the APIs supported by the current operating
+        system though, so for a full coverage this test should be done on
+        all supported platforms.
         """
 
         # The API has 2 different functions, one to obtain the APIData entry
-        # (get_player_data), and another to initialize the API
-        # (initialize_api). Both are tested this way.
+        # (get_api_data), and another to initialize the API (initialize_api).
+        # Both are tested this way.
         for api in APIData:
-            win.initialize_api(get_api_data(api.name), do_start=False)
+            if CURRENT_PLATFORM in api.platforms:
+                win.initialize_api(get_api_data(api.name), do_start=False)
 
         for player in PlayerData:
             initialize_player(player.name, config)
 
-        # Also checking that PlayerNotFound is raised when an unexisting
+        # Also checking that AttributeError is raised when an unexisting
         # player is provided.
-        with self.assertRaises(PlayerNotFoundError):
+        with self.assertRaises(AttributeError):
             initialize_player('player-does-not-exist', config)
 
         # If the API isn't found, KeyError should be raised.

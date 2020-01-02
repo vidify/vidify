@@ -26,15 +26,20 @@
     * [Current Limitations](#current-limitations)
 
 
+## Requirements
+* Python 3.6+
+* Other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
+
 ## Installation
 You'll need Python 3.7+, and other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
 
 * The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1,extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
 * You can download the latest stable [release](https://github.com/marioortizmanero/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
 * Linux:
-    * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Read the optional dependencies to use more APIs and players. Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
-    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [dev-python/vidify](https://packages.gentoo.org/packages/dev-python/vidify).
-    * Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.
+    * Any distro: you can use snap to install it: `snap install vidify`
+    * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
+    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [media-video/vidify](https://packages.gentoo.org/packages/media-video/vidify).
+    * *Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.*
 
 
 ### The APIs
@@ -121,8 +126,8 @@ All the available options for the config file are the same as the arguments list
 
 ## FAQ
 
-### Vidify doesn't work correctly with Python 3.8
-Qt started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
+### Vidify doesn't work correctly with Python 3.8 and PySide2
+PySide2 started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 
 ### `ModuleNotFoundError: No module named 'gi'` when using a virtual environment
 For some reason, `python-gobject` may not be available inside a virtual environment. You can create a symlink inside it with:
@@ -146,8 +151,6 @@ Helpful documentation links for contributing:
 The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/vidify/issues/26).
 
 The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/marioortizmanero/vidify/releases).
-
-Inside `dev/` you can find more information about building: [BUILDING.md](https://github.com/marioortizmanero/vidify/blob/master/dev/BUILDING.md).
 
 ### Tests
 You can run the module locally with `python -m vidify`.

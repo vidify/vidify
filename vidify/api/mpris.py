@@ -39,7 +39,7 @@ class MPRISAPI(APIBase):
         logging.info("Disconnecting")
         try:
             self._disconnect_obj.disconnect()
-        except AttributeError:
+        except (AttributeError, RuntimeError):
             pass
 
     @property
@@ -70,7 +70,7 @@ class MPRISAPI(APIBase):
         # Some MPRIS players don't support the position feature, so this
         # checks if it's in the blacklist to act accordingly when the
         # position is requested.
-        position_blacklist = ('org.mpris.MediaPlayer2.spotify')
+        position_blacklist = ('org.mpris.MediaPlayer2.spotify',)
         self._no_position = self._bus_name in position_blacklist
         self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
@@ -206,7 +206,6 @@ class MPRISAPI(APIBase):
                     position = self.position
                 except NotImplementedError:
                     position = 0
-
                 self.new_song_signal.emit(self.artist, self.title, position)
 
         if 'PlaybackStatus' in properties:

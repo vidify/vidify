@@ -7,9 +7,9 @@ vidify.player.generic, which contains the abstract base class of which any
 player implementation inherits, and an explanation in detail of the methods.
 """
 
+import locale
 import logging
 from typing import Optional
-import locale
 
 try:
     from mpv import MPV
@@ -22,7 +22,7 @@ except ModuleNotFoundError:
 from vidify.player.generic import PlayerBase
 
 
-# Importing locale is necessary since PySide2 stomps over the locale settings
+# Importing locale is necessary since qtpy stomps over the locale settings
 # needed by libmpv. This needs to happen after importing PyQT before creating
 # the first mpv.MPV instance, so it's in global context.
 locale.setlocale(locale.LC_NUMERIC, 'C')

@@ -4,9 +4,9 @@ Custom API implementation to ask the user for the Spotify Web credentials.
 
 import logging
 
-from PySide2.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
-                               QVBoxLayout)
-from PySide2.QtCore import Qt, QSize, Signal
+from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
+                            QVBoxLayout)
+from qtpy.QtCore import Qt, QSize, Signal
 from spotipy.scope import scopes
 from spotipy.util import (RefreshingCredentials, RefreshingToken,
                           parse_code_from_url)
@@ -53,7 +53,7 @@ class SpotifyWebPrompt(QWidget):
         # on_submit_spotify_web creds will be called once the credentials have
         # been input.
         self.web_form.button.clicked.connect(self.on_submit_creds)
-        self.layout.addWidget(self.web_form, Qt.AlignCenter)
+        self.layout.addWidget(self.web_form)
 
         # The web browser for the user to login and grant access.
         # It's hidden at the beggining and will appear once the credentials
@@ -67,7 +67,7 @@ class SpotifyWebPrompt(QWidget):
         # Any change in the browser URL will redirect to on__login to check if
         # the login was succesful.
         self.browser.web_view.urlChanged.connect(self.on_login)
-        self.layout.addWidget(self.browser, Qt.AlignCenter)
+        self.layout.addWidget(self.browser)
 
     @property
     def client_id(self) -> str:
@@ -220,7 +220,6 @@ class SpotifyWebForm(QWidget):
         text.setOpenExternalLinks(True)
         text.setTextInteractionFlags(Qt.TextBrowserInteraction)
         text.setFont(Fonts.text)
-        text.setStyleSheet(f"color: {Colors.fg};")
         text.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(text)
 
@@ -257,8 +256,6 @@ class SpotifyWebForm(QWidget):
 
         self.button = QPushButton("SUBMIT")
         self.button.setFont(Fonts.bigbutton)
-        self.button.setStyleSheet(f"color: {Colors.fg};"
-                                  f"background-color: {Colors.bg};")
         self.layout.addWidget(self.button)
 
     @property

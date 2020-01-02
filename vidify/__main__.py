@@ -8,8 +8,8 @@ import sys
 import logging
 from contextlib import redirect_stderr
 
-from PySide2.QtWidgets import QApplication
-from PySide2.QtGui import QIcon
+from qtpy.QtWidgets import QApplication
+from qtpy.QtGui import QIcon
 
 from vidify.config import Config
 from vidify.gui import Res
@@ -23,7 +23,7 @@ def start_gui(config: Config) -> None:
     is put together.
     """
 
-    app = QApplication()
+    app = QApplication(['vidify'])
     app.setWindowIcon(QIcon(Res.icon))
     window = MainWindow(config)
     window.show()

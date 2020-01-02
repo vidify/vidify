@@ -14,15 +14,15 @@ import logging
 import importlib
 from typing import Callable, Optional
 
-from PySide2.QtWidgets import QWidget, QLabel, QHBoxLayout
-from PySide2.QtGui import QFontDatabase
-from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot
+from qtpy.QtWidgets import QWidget, QLabel, QHBoxLayout
+from qtpy.QtGui import QFontDatabase
+from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot
 
 from vidify import format_name
 from vidify.api import APIData, get_api_data, ConnectionNotReady
 from vidify.player import initialize_player
 from vidify.config import Config
-from vidify.youtube import YouTube, VideoNotFoundError
+from vidify.youtube import YouTubeDLWorker
 from vidify.lyrics import get_lyrics
 from vidify.gui import Fonts, Res, Colors
 from vidify.gui.components import APISelection
@@ -56,10 +56,9 @@ class MainWindow(QWidget):
         for font in Res.fonts:
             font_db.addApplicationFont(font)
 
-        # Initializing the player and the youtube module directly.
-        logging.info("Using %s as the player", config.player)
+        # Initializing the player and saving the config object in the window.
         self.player = initialize_player(config.player, config)
-        self.youtube = YouTube(config.debug, config.width, config.height)
+        logging.info("Using %s as the player", config.player)
         self.config = config
 
         # The API initialization is more complex. For more details, please
@@ -143,7 +142,6 @@ class MainWindow(QWidget):
         # connection attempt is successful.
         self.loading_label = QLabel("Loading...")
         self.loading_label.setFont(Fonts.title)
-        self.loading_label.setStyleSheet(f"color: {Colors.fg};")
         self.loading_label.setMargin(50)
         self.loading_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.loading_label)
@@ -154,7 +152,6 @@ class MainWindow(QWidget):
         self.conn_label.hide()
         self.conn_label.setWordWrap(True)
         self.conn_label.setFont(Fonts.header)
-        self.conn_label.setStyleSheet(f"color: {Colors.fg};")
         self.conn_label.setMargin(50)
         self.conn_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.conn_label)
@@ -244,6 +241,90 @@ class MainWindow(QWidget):
             timer.timeout.connect(event_loop)
         timer.start(ms)
 
+    @Slot(bool)
+    def change_video_status(self, is_playing: bool) -> None:
+        """
+        Slot used for API updates of the video status.
+        """
+
+        self.player.pause = not is_playing
+
+    @Slot(int)
+    def change_video_position(self, ms: int) -> None:
+        """
+        Slot used for API updates of the video position.
+        """
+
+        self.player.position = ms
+
+    @Slot(str, str, int)
+    def play_video(self, artist: str, title: str, position: int) -> None:
+        """
+        Slot used to play a video. This is called when the API is first
+        initialized from this GUI, and afterwards from the event loop handler
+        whenever a new song is detected.
+
+        If an error was detected when downloading the video, the default one
+        is shown instead.
+        """
+
+        # Checking that the artist and title are valid first of all
+        if self.api.artist in (None, '') and self.api.title in (None, ''):
+            logging.info("The provided artist and title are empty.")
+            self._on_youtubedl_fail()
+            return
+
+        # Loading the audio synchronization feature before anything else
+        if self.config.audiosync:
+            logging.info("Running the audiosync thread")
+            from vidify.audiosync import AudiosyncWorker
+            # The 'Official Video' part could be added in a different function
+            # that the youtube module can use too, for consistency
+            self.audiosync = AudiosyncWorker(
+                f"{format_name(artist, title)} Official Video")
+            self.audiosync.done.connect(self.on_audiosync_done)
+            self.audiosync.start()
+
+        # Launching the thread with YouTube-DL to obtain the video URL
+        # without blocking the GUI.
+        logging.info("Running the youtube-dl thread")
+        self.youtubedl = YouTubeDLWorker(
+            self.api.artist, self.api.title, self.config.debug,
+            self.config.width, self.config.height)
+        self.youtubedl.done.connect(self.on_youtubedl_done)
+        self.youtubedl.fail.connect(self.on_youtubedl_fail)
+        self.youtubedl.start()
+
+    @Slot()
+    def on_youtubedl_fail(self) -> None:
+        """
+        If Youtube-dl for whatever reason failed to load the video, a fallback
+        error video is shown, along with a message to let the user know what
+        happened.
+        """
+
+        self.player.start_video(Res.default_video, self.api.is_playing)
+        print("The video wasn't found, either because of an issue with your"
+              " internet connection or because the provided data was invalid."
+              " For more information, enable the debug mode.")
+
+    @Slot(str)
+    def on_youtubedl_done(self, url: str) -> None:
+        """
+        Obtains the video URL from the Youtube-dl thread and starts playing
+        the video. Also shows the lyrics if enabled. The position of the video
+        isn't set if it's using audiosync, because this is done by the
+        AudiosyncWorker thread.
+        """
+
+        self.player.start_video(url, self.api.is_playing)
+        if not config.audiosync:
+            self.player.position = position
+        # Finally, the lyrics are displayed. If the video wasn't found, an
+        # error message is shown.
+        if self.config.lyrics:
+            print(get_lyrics(self.api.artist, self.api.title))
+
     @Slot(int)
     def on_audiosync_done(self, lag: int) -> None:
         """
@@ -263,71 +344,6 @@ class MainWindow(QWidget):
                 wait, lambda: self.change_video_position(0))
         else:
             self.player.position = self.player.position - lag
-
-    @Slot(bool)
-    def change_video_status(self, is_playing: bool) -> None:
-        """
-        Slot used for API updates of the video status.
-        """
-
-        self.player.pause = not is_playing
-
-    @Slot(int)
-    def change_video_position(self, ms: int) -> None:
-        """
-        Slot used for API updates of the video position.
-        """
-
-        self.player.position = ms
-
-    @Slot(str, str, int)
-    def play_video(self, artist: str, title: str, position: int = 0) -> None:
-        """
-        Slot used to play a video. This is called when the API is first
-        initialized from this GUI, and afterwards from the event loop handler
-        whenever a new song is detected.
-
-        If an error was detected when downloading the video, the default one
-        is shown instead.
-        """
-
-        logging.info("Playing a new video")
-
-        # Loading the audio synchronization feature before playing the video
-        # so that there's as little delay as possible when the audio is
-        # recorded.
-        if self.config.audiosync:
-            from vidify.audiosync import AudiosyncWorker
-            self.audiosync = AudiosyncWorker(
-                f"{format_name(artist, title)} Official Video")
-            # TODO: if this option is enable in the middle of the execution,
-            # this will raise an AttributeError.
-            # The 'Official Video' part could be added in a different function
-            # that the youtube module can use too, for consistency
-            self.audiosync.done.connect(self.on_audiosync_done)
-            self.audiosync.start()
-
-        try:
-            url = self.youtube.get_video(artist, title)
-        except VideoNotFoundError:
-            url = Res.default_video
-            success = False
-        else:
-            success = True
-
-        self.player.start_video(url, self.api.is_playing)
-        self.player.position = position
-
-        # Finally, the lyrics are displayed. If the video wasn't found, an
-        # error message is shown.
-        if self.config.lyrics:
-            if success:
-                print(get_lyrics(self.api.artist, self.api.title))
-            else:
-                print("The video wasn't found, either because of an issue with"
-                      " your internet connection or because the provided data"
-                      " was invalid. For more information, enable the debug"
-                      " mode.")
 
     def init_spotify_web_api(self) -> None:
         """
@@ -360,7 +376,7 @@ class MainWindow(QWidget):
                 self.config.client_id, self.config.client_secret,
                 self.config.redirect_uri)
             self._spotify_web_prompt.done.connect(self.start_spotify_web_api)
-            self.layout.addWidget(self._spotify_web_prompt, Qt.AlignCenter)
+            self.layout.addWidget(self._spotify_web_prompt)
 
     def start_spotify_web_api(self, token: 'RefreshingToken',
                               save_config: bool = True) -> None:

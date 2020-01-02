@@ -1,19 +1,53 @@
-from setuptools import setup
+from setuptools import setup, find_packages
+from pkg_resources import DistributionNotFound, get_distribution
+
+
+def is_installed(pkgname: str) -> bool:
+    try:
+        get_distribution(pkgname)
+        return True
+    except DistributionNotFound:
+        return False
 
 
 # Get version inside vidify/version.py without importing the package
 exec(compile(open('vidify/version.py').read(),
              'vidify/version.py', 'exec'))
 
+install_deps = [
+    'QtPy',
+    'youtube-dl',
+    'python-vlc',
+    'appdirs',
+    'lyricwikia',
+    #  'spotipy>=3.0',
+    'pydbus; platform_system=="Linux"',
+    'SwSpotify>=1.1.1; platform_system=="Windows"'
+    ' or platform_system=="Darwin"'
+]
+
+# If PySide2 is installed and PyQt5 is not, append PySide2 to dependencies
+if is_installed('PySide2') and not is_installed('PyQt5'):
+    install_deps.append('PySide2')
+# If PySide2 is not installed, or if both PyQt5 and PySide2 are installed
+# Use QtPy's default: PyQt5
+else:
+    install_deps.append('PyQt5')
+    install_deps.append('PyQtWebEngine')
+
 setup(
     name='vidify',
     version=__version__,
-    packages=['vidify'],
+    packages=find_packages(exclude=('tests*', 'dev*')),
     description='Watch music videos for the songs playing on your device',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/marioortizmanero/vidify',
     license='LGPL',
+
+    package_data={'vidify': ['gui/res/*',
+                             'gui/res/*/*',
+                             'gui/res/*/*/*']},
 
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
@@ -31,18 +65,8 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     keywords='spotify music video player videos lyrics linux windows macos',
-    python_requires='>=3.7',
-    install_requires=[
-        'PySide2',
-        'youtube-dl',
-        'python-vlc',
-        'appdirs',
-        'lyricwikia',
-        #  'spotipy>=3.0',
-        'pydbus; platform_system=="Linux"',
-        'SwSpotify>=1.1.1; platform_system=="Windows"'
-        ' or platform_system=="Darwin"'
-    ],
+    python_requires='>=3.6',
+    install_requires=install_deps,
     extras_require={
         'dev': [
             'flake8'

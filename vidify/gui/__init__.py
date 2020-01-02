@@ -5,9 +5,17 @@ fonts.
 In the future, these properties could be modified if dark mode was enabled.
 """
 
-from PySide2.QtGui import QFont
+import os
+
+from qtpy.QtGui import QFont
 
 from vidify import Platform, CURRENT_PLATFORM
+
+
+# The vidify installation path's resources folder, having in account that this
+# module is vidify.gui and that the resources folder is vidify.gui.res.
+RESOURCES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              'res')
 
 
 class Colors:
@@ -16,13 +24,21 @@ class Colors:
     future when dark mode is implemented.
     """
 
-    bg = '#eff0eb'
     light = '#eff0eb'
-    fg = '#282828'
     dark = '#282828'
     black = '#000000'
     lighterror = '#fc9086'
     darkerror = '#e33120'
+
+
+def res_path(rel_path: str) -> str:
+    """
+    Converts a path relative to the vidify module to an absolute path in
+    respect to the user's installation. That way, the module can be launched
+    from directories other than the main one.
+    """
+
+    return os.path.join(RESOURCES_PATH, rel_path)
 
 
 class Res:
@@ -30,18 +46,24 @@ class Res:
     Contains the paths for all the resources used in this program.
     """
 
-    icon = "vidify/gui/res/icon16x16.ico" \
+    fonts = (res_path("Inter/Inter-Regular.otf"),
+             res_path("Inter/Inter-Italic.otf"),
+             res_path("Inter/Inter-Bold.otf"),
+             res_path("Inter/Inter-BoldItalic.otf"),
+             res_path("Inter/Inter-Medium.otf"),
+             res_path("Inter/Inter-MediumItalic.otf"))
+
+    default_video = res_path("default_video.mp4")
+
+    icon = res_path("icon16x16.ico") \
         if CURRENT_PLATFORM == Platform.WINDOWS \
-        else "vidify/gui/res/icon.svg"
-    cross = "vidify/gui/res/cross.svg"
-    fonts = ("vidify/gui/res/Inter/Inter-Regular.otf",
-             "vidify/gui/res/Inter/Inter-Italic.otf",
-             "vidify/gui/res/Inter/Inter-Bold.otf",
-             "vidify/gui/res/Inter/Inter-BoldItalic.otf",
-             "vidify/gui/res/Inter/Inter-Medium.otf",
-             "vidify/gui/res/Inter/Inter-MediumItalic.otf")
-    default_api_icon = "vidify/gui/res/api_icons/default.svg"
-    default_video = "vidify/gui/res/default_video.mp4"
+        else res_path("icon.svg")
+    cross = res_path("cross.svg")
+
+    default_api_icon = res_path("api_icons/default.svg")
+    mpris_linux_icon = res_path("api_icons/mpris.svg")
+    swspotify_icon = res_path("api_icons/spotify/swspotify.svg")
+    spotify_web_icon = res_path("api_icons/spotify/web.svg")
 
 
 class Fonts:

@@ -45,6 +45,7 @@ from enum import Enum
 from typing import Tuple, Optional
 
 from vidify import Platform
+from vidify.gui import Res
 
 
 class APIData(Enum):
@@ -82,7 +83,7 @@ class APIData(Enum):
         "Linux Media Players",
         "Any MPRIS compatible media player: Spotify, Rhythmbox... for "
         "<b>Linux</b> and <b>BSD</b>. Recommended.",
-        "vidify/gui/res/api_icons/mpris.svg",
+        Res.mpris_linux_icon,
         (Platform.LINUX, Platform.BSD),
         "vidify.api.mpris",
         "MPRISAPI",
@@ -93,7 +94,7 @@ class APIData(Enum):
         "Spotify for Windows and MacOS",
         "The desktop Spotify client for <b>Windows</b> and <b>Mac OS</b> using"
         " SwSpotify. Recommended.",
-        "vidify/gui/res/api_icons/spotify/swspotify.svg",
+        Res.swspotify_icon,
         (Platform.WINDOWS, Platform.MACOS),
         "vidify.api.spotify.swspotify",
         "SwSpotifyAPI",
@@ -104,7 +105,7 @@ class APIData(Enum):
         "Spotify Web",
         "The official Spotify <b>Web</b> API. Read the installation guide for"
         " more details on how to set it up.",
-        "vidify/gui/res/api_icons/spotify/web.svg",
+        Res.spotify_web_icon,
         tuple(Platform),  # Supports all platforms
         "vidify.api.spotify.web",
         "SpotifyWebAPI",
@@ -125,7 +126,7 @@ class ConnectionNotReady(Exception):
         super().__init__(msg)
 
 
-def get_api_data(key: str) -> APIData:
+def get_api_data(key: Optional[str]) -> APIData:
     """
     Returns an entry from the APIs from `key`. KeyError is raised if it
     isn't found.

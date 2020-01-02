@@ -74,6 +74,88 @@ class ConfigTest(unittest.TestCase):
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
+        # Arguments again (without changing true_value from now on, since
+        # it should stay the same as the last one with __setattr__)
+        invalid_value = "not_this_value"
+        args = [sys.argv[0], f"{arg}={invalid_value}"]
+        with unittest.mock.patch('sys.argv', args):
+            self.config.parse(TEST_PATH)
+        conf_value = getattr(self.config, attr)
+        self.assertEqual(conf_value, true_value)
+
+        # Config file again. Same as above.
+        self.config.write_file(section, attr, invalid_value)
+        with unittest.mock.patch('sys.argv', ['']):
+            self.config.parse(TEST_PATH)
+        conf_value = getattr(self.config, attr)
+        self.assertEqual(conf_value, true_value)
+
+    def test_arguments_and_options_consistency(self):
+        """
+        Makes sure that all arguments in the options are equivalent to their
+        name in the config file. This is not done automatically in the config
+        file to simplify it, but it should be checked.
+        """
+
+        for option in Options:
+            # Not all options are arguments
+            if option.args is None:
+                continue
+
+            # Checking the number of arguments
+            self.assertTrue(len(option.args) > 0)
+            self.assertTrue(len(option.args) <= 2)
+
+            # Arguments formatting is valid
+            if len(option.args) == 2:
+                self.assertTrue(option.args[0].startswith('-'))
+            self.assertTrue(option.args[len(option.args) - 1].startswith('--'))
+
+            # Consistency with the arguments: converting it to an option:
+            # --vlc-args -> vlc_args. If 'store_false' is used, it should
+            # have a `no` as the prefix to indicate it.
+            opt = option.name
+            arg = option.args[len(option.args) - 1]
+            arg = arg[2:]
+            arg = arg.replace('-', '_')
+            if option.arg_action == 'store_false':
+                arg = 'no_' + arg
+            self.assertEqual(opt, option.name)
+
+            # If it's an argument, the description and arg_action shouldn't be
+            # empty
+            self.assertNotIsInstance(option.description, type(None))
+            self.assertNotEqual(option.description, '')
+            self.assertNotIsInstance(option.arg_action, type(None))
+            self.assertNotEqual(option.arg_action, '')
+
+    def test_argument_actions(self):
+        """
+        Makes sure that the argument actions make sense.
+        """
+
+        for option in Options:
+            # Not all options are arguments
+            if option.args is None:
+                continue
+
+            # store_true and store_false should be of type boolean
+            if option.arg_action in ('store_true', 'store_false'):
+                self.assertEqual(option.type, bool)
+
+    def test_option_defaults(self):
+        """
+        Checks that the default value is of the type indicated as the default
+        or None.
+        """
+
+        for option in Options:
+            # Some options don't have a default
+            if option.default is None:
+                continue
+
+            self.assertIsInstance(option.default, option.type)
+
     def test_write(self):
         """
         Check if the config file is modified correctly.

@@ -12,7 +12,7 @@
    version="1.1"
    viewBox="0 0 168 168"
    id="svg3763"
-   sodipodi:docname="linux.svg"
+   sodipodi:docname="mpris.svg"
    inkscape:version="0.92.4 5da689c313, 2019-01-14">
   <metadata
      id="metadata3769">
@@ -27,7 +27,20 @@
     </rdf:RDF>
   </metadata>
   <defs
-     id="defs3767" />
+     id="defs3767">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath4708">
+      <rect
+         ry="7.3642473"
+         y="-0.0037103265"
+         x="-8.5311403e-05"
+         height="167.99701"
+         width="167.99701"
+         id="rect4710"
+         style="fill:#f9f9f9;fill-opacity:1;stroke-width:1.13148677" />
+    </clipPath>
+  </defs>
   <sodipodi:namedview
      pagecolor="#ffffff"
      bordercolor="#666666"
@@ -41,9 +54,9 @@
      inkscape:window-height="1047"
      id="namedview3765"
      showgrid="false"
-     inkscape:zoom="2"
-     inkscape:cx="71.036952"
-     inkscape:cy="71.656792"
+     inkscape:zoom="5.6568542"
+     inkscape:cx="125.15805"
+     inkscape:cy="23.188978"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -55,8 +68,8 @@
      id="rect54"
      width="167.99701"
      height="167.99701"
-     x="-8.5311403e-05"
-     y="-0.0037103265"
+     x="0.0014953613"
+     y="0.0014953613"
      ry="7.3642473" />
   <rect
      id="rect3783"
@@ -73,7 +86,8 @@
      height="22.169491"
      x="53.288139"
      y="145.83051"
-     ry="0" />
+     ry="0"
+     clip-path="url(#clipPath4708)" />
   <rect
      style="fill:#241c1c;fill-opacity:1;stroke-width:0.45069748"
      id="rect3793-3"
