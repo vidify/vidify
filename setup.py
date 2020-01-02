@@ -2,11 +2,12 @@ from setuptools import setup, find_packages
 from pkg_resources import DistributionNotFound, get_distribution
 
 
-def get_dist(pkgname):
+def is_installed(pkgname: str) -> bool:
     try:
-        return get_distribution(pkgname)
+        get_distribution(pkgname)
+        return True
     except DistributionNotFound:
-        return None
+        return False
 
 
 # Get version inside vidify/version.py without importing the package
@@ -25,8 +26,12 @@ install_deps = [
     ' or platform_system=="Darwin"'
 ]
 
-if ((get_dist('PyQt5') is None or get_dist('PyQtWebEngine') is None)
-        and get_dist('PySide2') is None):
+# If PySide2 is installed and PyQt5 is not, append PySide2 to dependencies
+if is_installed('PySide2') and not is_installed('PyQt5'):
+    install_deps.append('PySide2')
+# If PySide2 is not installed, or if both PyQt5 and PySide2 are installed
+# Use QtPy's default: PyQt5
+else:
     install_deps.append('PyQt5')
     install_deps.append('PyQtWebEngine')
 
@@ -41,8 +46,8 @@ setup(
     license='LGPL',
 
     package_data={'vidify': ['gui/res/*',
-                             'gui/res/**/*',
-                             'gui/res/**/**/*']},
+                             'gui/res/*/*',
+                             'gui/res/*/*/*']},
 
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
