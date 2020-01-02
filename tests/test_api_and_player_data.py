@@ -11,7 +11,7 @@ from qtpy.QtWidgets import QApplication
 from vidify import CURRENT_PLATFORM, Platform
 from vidify.gui.window import MainWindow
 from vidify.api import APIData, get_api_data
-from vidify.player import PlayerData, PlayerNotFoundError, initialize_player
+from vidify.player import PlayerData, initialize_player
 from vidify.config import Config, Options
 
 
@@ -55,9 +55,9 @@ class DataStructuresTest(unittest.TestCase):
         for player in PlayerData:
             initialize_player(player.name, config)
 
-        # Also checking that PlayerNotFound is raised when an unexisting
+        # Also checking that AttributeError is raised when an unexisting
         # player is provided.
-        with self.assertRaises(PlayerNotFoundError):
+        with self.assertRaises(AttributeError):
             initialize_player('player-does-not-exist', config)
 
         # If the API isn't found, KeyError should be raised.
