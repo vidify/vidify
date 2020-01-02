@@ -24,14 +24,10 @@ install:
     - pip3 install pyqt5 pyqtwebengine pyside2
     - pip3 install git+https://github.com/felix-hilden/spotipy.git
 
-jobs:
-    include:
-        - stage: linter
-          python: '3.8'
-          script: flake8 . --ignore='F821,W503,E731'
-
 # Lint with PEP8 and run tests
 script: 
+      # Running the linter
+    - flake8 . --ignore='F821,W503,E731'
       # Testing with both Python bindings
     - QT_API=PyQt5 python -m unittest
     - QT_API=PySide2 python -m unittest
