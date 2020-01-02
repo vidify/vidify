@@ -49,13 +49,13 @@ class MPRISAPI(APIBase):
         that the provided position should be in microseconds, so it's divided
         by 1000.
 
+        This feature isn't available for some players like Spotify, so
         `NotImplementedError` is raised instead to keep consistency with the
         rest of the APIs.
         """
 
         if self._no_position:
             raise NotImplementedError
-
         return self._player_interface.Position // 1000
 
     def connect_api(self) -> None:

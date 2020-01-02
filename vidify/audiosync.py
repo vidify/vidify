@@ -13,7 +13,7 @@ except ImportError:
         "No module named 'vidify_audiosync'.\n"
         "To use audio synchronization, please install vidify_audiosync and"
         " its dependencies. Read more about it in the installation guide.")
-from PySide2.QtCore import QThread, Signal
+from qtpy.QtCore import QThread, Signal
 
 
 class AudiosyncWorker(QThread):

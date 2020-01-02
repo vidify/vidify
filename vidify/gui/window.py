@@ -318,7 +318,7 @@ class MainWindow(QWidget):
         """
 
         self.player.start_video(url, self.api.is_playing)
-        if not config.audiosync:
+        if not self.config.audiosync:
             self.player.position = position
         # Finally, the lyrics are displayed. If the video wasn't found, an
         # error message is shown.
