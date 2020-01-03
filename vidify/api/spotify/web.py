@@ -104,7 +104,7 @@ class SpotifyWebAPI(APIBase):
         # anything else that may not actually be true.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
-            self.new_song_signal.emit(self.artist, self.title, self._position)
+            self.new_song_signal.emit(self.artist, self.title, 0)
 
         if self.is_playing != is_playing:
             logging.info("Status change detected")

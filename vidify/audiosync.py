@@ -6,6 +6,10 @@ the GUI on the background. It's optional, so this is only used when the user
 passes --audiosync as a parameter, or indicates it in the config file.
 """
 
+import time
+import logging
+from typing import Optional
+
 try:
     import vidify_audiosync as audiosync
 except ImportError:
@@ -19,11 +23,17 @@ from qtpy.QtCore import QThread, Signal
 class AudiosyncWorker(QThread):
     done = Signal(int)
 
-    def __init__(self, title: str):
+    def __init__(self, title: str, start: Optional[float] = None) -> None:
+        """
+        A start timestamp can be passed to calculate the delay that passed
+        until the module actually starts recording when run() is called.
+        """
+
         super().__init__()
         self.youtube_title = title
+        self.start_time = start
 
-    def __del__(self):
+    def __del__(self) -> None:
         """
         This method isn't guaranteed to be called after the app is closed, but
         it will safely wait until the thread is done to finish.
@@ -32,11 +42,17 @@ class AudiosyncWorker(QThread):
         self.quit()
         self.wait()
 
-    def run(self):
+    def run(self) -> None:
         """
         The run function simply executes the C extension as fast as possible
         and emits the signal with the obtained lag afterwards.
         """
 
+        if self.start_time not in (None, 0):
+            # The delay is calculated in milliseconds too.
+            delay = round((time.time() - self.start_time) * 1000)
+        else:
+            delay = 0
         lag = audiosync.get_lag(self.youtube_title)
-        self.done.emit(lag)
+        self.done.emit(lag + delay)
+        logging.info("Returned the lag with a delay of %s ms", delay)
