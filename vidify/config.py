@@ -146,6 +146,35 @@ class Options(Enum):
         str,
         "vlc")
 
+    # The audio synchronization feature. It will try to automatically
+    # synchronize the video playing with the system recorded audio. Currently
+    # only available on Linux.
+    audiosync = (
+        "enable automatic audio synchronization. You may need to install"
+        " additional dependencies. Read the installation guide for more"
+        " information. Note: this feature is still in the alpha stage."
+        " It's recommended to use Mpv for precision.",
+        ('--audiosync',),
+        'store_true',
+        'Defaults',
+        bool,
+        False)
+
+    # Option to tweak the audio synchronization extension. This delay is
+    # approximately the time taken until the extension starts recording the
+    # video. Usually it's about 200ms, but it depends on the hardware so
+    # it's left as an option.
+    audiosync_calibration = (
+        "the audio synchronization's precision may depend on your hardware."
+        " You can calibrate the delay it has in milliseconds with this. The"
+        " value for this feature will be added to what audiosync returns,"
+        " so it can be positive or negative.",
+        ('--audiosync-calibration',),
+        'store',
+        'Defaults',
+        int,
+        -175)
+
     # Arguments and options provided for the players.
     vlc_args = (
         "custom arguments used when opening VLC.",

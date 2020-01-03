@@ -17,14 +17,15 @@ from vidify import format_name
 
 
 class YouTubeDLWorker(QThread):
-    done = Signal(str)
+    success = Signal(str)
     fail = Signal()
 
     def __init__(self, artist: str, title: str, debug: bool = False,
                  width: Optional[int] = None, height: Optional[int] = None
                  ) -> None:
         """
-        YouTube-DL class with config and function to get the direct url.
+        YouTube class with config and function to get the direct url to
+        the video.
         """
 
         super().__init__()
@@ -73,4 +74,4 @@ class YouTubeDLWorker(QThread):
                              str(e))
                 self.fail.emit()
             else:
-                self.done.emit(info['entries'][0]['url'])
+                self.success.emit(info['entries'][0]['url'])

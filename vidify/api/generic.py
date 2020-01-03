@@ -10,7 +10,7 @@ from qtpy.QtCore import QObject, Signal
 class APIBase(QObject):
     __metaclass__ = ABCMeta
 
-    new_song_signal = Signal(str, str, int)
+    new_song_signal = Signal(str, str, float)
     status_signal = Signal(bool)
     position_signal = Signal(int)
 

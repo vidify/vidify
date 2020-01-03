@@ -10,6 +10,7 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
+import time
 import logging
 from typing import Tuple
 
@@ -158,6 +159,8 @@ class MPRISAPI(APIBase):
         except KeyError:
             artist = ''
 
+        # Some players use `Unknown` when the artist or title metadata
+        # is empty.
         if artist in ('', 'Unknown'):
             artist, title = split_title(title)
 
@@ -194,24 +197,25 @@ class MPRISAPI(APIBase):
         below.
         """
 
+        # The time when this function started is saved for the audiosync
+        # feature.
+        start_time = time.time()
+
         if 'Metadata' in properties:
             metadata = properties['Metadata']
             artist, title = self._format_metadata(metadata)
             if self.artist != artist or self.title != title:
+                # Refreshes the metadata with the new data and sends the
+                # signal to play the next video.
                 logging.info("New video detected")
-                # Refreshes the metadata with the new data and plays the video
                 self.artist = artist
                 self.title = title
-                try:
-                    position = self.position
-                except NotImplementedError:
-                    position = 0
-                self.new_song_signal.emit(self.artist, self.title, position)
+                self.new_song_signal.emit(artist, title, start_time)
 
         if 'PlaybackStatus' in properties:
             is_playing = self._bool_status(properties['PlaybackStatus'])
             if self.is_playing != is_playing:
-                logging.info("Status change detected")
                 # Refreshes the metadata and pauses/plays the video
-                self.is_playing = is_playing
                 self.status_signal.emit(is_playing)
+                logging.info("Status change detected")
+                self.is_playing = is_playing

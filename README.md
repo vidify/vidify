@@ -18,6 +18,7 @@
 * [Installation](#installation)
     * [The APIs](#the-apis)
     * [The Players](#the-players)
+    * [Audio Synchronization](#audio-synchronization)
 * [Usage and configuration](#usage)
 * [FAQ](#faq)
 * [Development resources](#development)
@@ -66,6 +67,28 @@ For now, the only way to specify what player to use is with [arguments](#usage) 
 player = mpv
 ```
 
+### Audio synchronization
+Vidify has an audio synchronization feature currently under testing. The full repository is in [marioortizmanero/vidify-audiosync](https://github.com/marioortizmanero/vidify-audiosync), being a separate repo so that it can be installed optionally, and to keep Vidify modular.
+
+This feature is only available on Linux for now. And this feature is much more precise on a lightweight video player like Mpv. You can install it with `pip install vidify[audiosync]`, along with the following dependencies:
+
+* FFTW: `libfftw3` on Debian-based distros.
+* ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
+* youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
+
+It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR.
+
+Finally, you can activate the feature with `--audiosync` or inside your [config file](#the-config-file):
+
+```ini
+[Defaults]
+audiosync = true
+```
+
+*Note: if the audiosync module is seemingly doing nothing, or returning zero as the lag always, make sure that the sink being recorded is the one where the music is playing too. Here's an example on Pavucontrol (it's usually called 'Monitor of ---':*
+
+![pavucontrol](images/pavucontrol-audiosync.png)
+
 ## Usage
 The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
 
@@ -85,6 +108,7 @@ usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-
 | `--height <HEIGHT>`              | set the height for the downloaded videos. |
 | `-a`, `--api`                    | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
 | `-p`, `--player`                 | specify the player to use. See the [Players section](#the-players) for more info about the supported players. |
+| `--audiosync`                    | enables the [Audio Synchronization](#audio-synchronization) feature (disabled by default). |
 | `--config-file <PATH>`           | indicate the path of your [config file](#the-config-file).  |
 
 ### The config file
