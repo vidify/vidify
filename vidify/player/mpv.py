@@ -66,7 +66,7 @@ class MpvPlayer(PlayerBase):
     @property
     def position(self) -> int:
         time = self._mpv.playback_time
-        return time if time is not None else 0
+        return round(time * 1000) if time is not None else 0
 
     @position.setter
     def position(self, ms: int) -> None:
@@ -77,7 +77,7 @@ class MpvPlayer(PlayerBase):
 
         self._mpv.wait_for_property('seekable')
         logging.info("Position set to %d milliseconds", ms)
-        self._mpv.seek(ms / 1000, reference='absolute')
+        self._mpv.seek(round(ms / 1000, 2), reference='absolute')
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
         logging.info("Started new video")

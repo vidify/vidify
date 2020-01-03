@@ -271,7 +271,7 @@ class MainWindow(QWidget):
         # Checking that the artist and title are valid first of all
         if self.api.artist in (None, '') and self.api.title in (None, ''):
             logging.info("The provided artist and title are empty.")
-            self._on_youtubedl_fail()
+            self.on_youtubedl_fail()
             return
 
         # Loading the audio synchronization feature before anything else
@@ -353,10 +353,9 @@ class MainWindow(QWidget):
             # the player position is set to zero after the lag has passed
             # with a timer.
             if self.player.position < -lag:
-                pos = self.player.position
                 self.sync_timer = QTimer(self)
                 self.sync_timer.singleShot(
-                    -lag, lambda: self.change_video_position(pos))
+                    -lag, lambda: self.change_video_position(0))
             else:
                 self.player.position += lag
 

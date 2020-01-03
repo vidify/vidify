@@ -146,6 +146,9 @@ class Options(Enum):
         str,
         "vlc")
 
+    # The audio synchronization feature. It will try to automatically
+    # synchronize the video playing with the system recorded audio. Currently
+    # only available on Linux.
     audiosync = (
         "enable automatic audio synchronization. You may need to install"
         " additional dependencies. Read the installation guide for more"

@@ -44,8 +44,8 @@ class AudiosyncWorker(QThread):
 
     def run(self) -> None:
         """
-        The run function simply executes the C extension as fast as possible
-        and emits the signal with the obtained lag afterwards.
+        The run function simply executes the C extension and emits the signal
+        with the obtained lag afterwards.
         """
 
         if self.start_time not in (None, 0):
@@ -54,5 +54,7 @@ class AudiosyncWorker(QThread):
         else:
             delay = 0
         lag = audiosync.get_lag(self.youtube_title)
-        self.done.emit(lag + delay)
-        logging.info("Returned the lag with a delay of %s ms", delay)
+        # The delay is only added when the returned value is different than
+        # zero.
+        self.done.emit(lag if lag == 0 else lag + delay)
+        logging.info("Returned the lag with a delay of %d ms", delay)

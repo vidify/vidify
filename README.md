@@ -31,8 +31,6 @@
 * Other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
 
 ## Installation
-You'll need Python 3.7+, and other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
-
 * The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1,extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
 * You can download the latest stable [release](https://github.com/marioortizmanero/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
 * Linux:
