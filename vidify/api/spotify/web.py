@@ -121,8 +121,7 @@ class SpotifyWebAPI(APIBase):
 
 
 def get_token(refresh_token: Optional[str], client_id: Optional[str],
-              client_secret: Optional[str], redirect_uri: Optional[str]
-              ) -> Optional[RefreshingToken]:
+              client_secret: Optional[str]) -> Optional[RefreshingToken]:
     """
     Tries to generate a self-refreshing token from the parameters. The
     authentication token itself isn't even saved in the config because it
@@ -139,18 +138,15 @@ def get_token(refresh_token: Optional[str], client_id: Optional[str],
         client_id = os.getenv('SPOTIFY_CLIENT_ID')
     if client_secret is None:
         client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-    if redirect_uri is None:
-        redirect_uri = os.getenv('SPOTIFY_REDIRECT_URI')
 
     # Checking that the credentials are valid. The refresh token isn't really
     # needed because spotipy.refresh_user_token already obtains it from the
     # refresh token.
-    for c in (refresh_token, client_id, client_secret, redirect_uri):
+    for c in (refresh_token, client_id, client_secret):
         if c in (None, ''):
             logging.info("Rejecting the token because one of the credentials"
                          " provided is empty.")
             return None
 
     # Generating a RefreshingToken with the parameters
-    return refresh_user_token(client_id, client_secret, redirect_uri,
-                              refresh_token)
+    return refresh_user_token(client_id, client_secret, refresh_token)

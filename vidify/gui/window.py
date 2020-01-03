@@ -401,7 +401,7 @@ class MainWindow(QWidget):
         from vidify.gui.api.spotify_web import SpotifyWebPrompt
 
         token = get_token(self.config.refresh_token, self.config.client_id,
-                          self.config.client_secret, self.config.redirect_uri)
+                          self.config.client_secret)
 
         if token is not None:
             # If the previous token was valid, the API can already start.
