@@ -1,14 +1,11 @@
 """
-The Audiosync module.
-
 Wraps the vidify_audiosync module in a QThread so that it can be used from
 the GUI on the background. It's optional, so this is only used when the user
 passes --audiosync as a parameter, or indicates it in the config file.
-"""
 
-import time
-import logging
-from typing import Optional
+Check out the README.md and see the official repo for more information:
+https://github.com/marioortizmanero/vidify-audiosync
+"""
 
 try:
     import vidify_audiosync as audiosync

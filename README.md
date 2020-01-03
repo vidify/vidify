@@ -85,7 +85,7 @@ Finally, you can activate the feature with `--audiosync` or inside your [config 
 audiosync = true
 ```
 
-Note: if the audiosync module is seemingly doing nothing, or returning zero as the lag always, make sure that the sink being recorded is the one where the music is playing too. Here's an example on Pavucontrol:
+*Note: if the audiosync module is seemingly doing nothing, or returning zero as the lag always, make sure that the sink being recorded is the one where the music is playing too. Here's an example on Pavucontrol (it's usually called 'Monitor of ---':*
 
 ![pavucontrol](images/pavucontrol-audiosync.png)
 
