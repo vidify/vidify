@@ -271,7 +271,7 @@ class MainWindow(QWidget):
 
         # This delay is used to know the elapsed time until the video
         # actually starts playing, used in the audiosync feature.
-        self.start_timestamp = start_time
+        self.yt_timestamp = start_time
 
         # Checking that the artist and title are valid first of all
         if self.api.artist in (None, '') and self.api.title in (None, ''):
@@ -324,7 +324,10 @@ class MainWindow(QWidget):
         """
 
         self.player.start_video(url, self.api.is_playing)
-        self.player_delay = round((time.time() - self.start_timestamp) * 1000)
+        # The youtube-dl delay: it has to download the metadata.
+        self.yt_delay = round((time.time() - self.yt_timestamp) * 1000)
+        # The player delay: it doesn't start the video instantaneously.
+        self.player_timestamp = time.time()
         if not self.config.audiosync:
             try:
                 self.player.position = self.api.position
@@ -340,7 +343,13 @@ class MainWindow(QWidget):
         """
         Slot used after the audiosync function has finished. It sets the
         returned lag in milliseconds on the player.
+
         """
+
+        # TODO: What to do when the audiosync finishes before the video
+        # starts playing? 
+        # This function currently assumes that on_youtubedl_done has been
+        # called previously.
 
         logging.info("Audiosync module returned %d ms", lag)
         if lag == 0:
@@ -352,11 +361,16 @@ class MainWindow(QWidget):
         # Adding the user's custom audiosync delay
         lag += self.config.audiosync_calibration
 
-        # TODO: What to do when the audiosync finishes before the video
-        # starts playing?
-        if self.player_delay is not None:
-            lag += self.player_delay
-            logging.info("Total delay is %d", lag)
+        # Adding the time the youtube-dl thread took to download the metadata
+        # and start playing the video.
+        lag += self.yt_delay
+        # Calculating the time the player took to actually start playing
+        # the video. The player_delay should be the same as the current player
+        # position.
+        elapsed = round((time.time() - self.player_timestamp) * 1000)
+        player_delay = elapsed - self.player.position
+        lag += player_delay
+        logging.info("Total delay is %d ms", lag)
 
         if lag > 0:
             # If the delay is negative, it means that the recorded audio is
@@ -373,8 +387,6 @@ class MainWindow(QWidget):
                     -lag, lambda: self.change_video_position(0))
             else:
                 self.player.position += lag
-
-        self.player_delay = None
 
     def init_spotify_web_api(self) -> None:
         """

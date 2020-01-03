@@ -70,7 +70,7 @@ player = mpv
 ### Audio synchronization
 Vidify has an audio synchronization feature currently under testing. The full repository is in [marioortizmanero/vidify-audiosync](https://github.com/marioortizmanero/vidify-audiosync), being a separate repo so that it can be installed optionally, and to keep Vidify modular.
 
-This feature is only available on Linux for now. You can install it with `pip install vidify[audiosync]`, after installing the dependencies listed in the repository above:
+This feature is only available on Linux for now. And this feature is much more precise on a lightweight video player like Mpv. You can install it with `pip install vidify[audiosync]`, along with the following dependencies:
 
 * FFTW: `libfftw3` on Debian-based distros.
 * ffmpeg: `ffmpeg` on most repositories. It must be available on your path.

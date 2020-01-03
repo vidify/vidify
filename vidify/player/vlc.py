@@ -29,7 +29,9 @@ class VLCPlayer(PlayerBase):
             vlc_args += " --quiet"
         # The audio is always muted, which is needed because not all the
         # youtube-dl videos are silent.
-        vlc_args += " --no-audio"
+        # Needed for the audiosync feature: set the Group of Pictures size to
+        # one, so that seeking is more precise.
+        vlc_args += " --no-audio --sout-x264-min-keyint 1"
 
         try:
             self._vlc = vlc.Instance(vlc_args)
