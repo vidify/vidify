@@ -17,7 +17,7 @@ from vidify import format_name
 
 
 class YouTubeDLWorker(QThread):
-    done = Signal(str)
+    success = Signal(str)
     fail = Signal()
 
     def __init__(self, artist: str, title: str, debug: bool = False,
@@ -74,4 +74,4 @@ class YouTubeDLWorker(QThread):
                              str(e))
                 self.fail.emit()
             else:
-                self.done.emit(info['entries'][0]['url'])
+                self.success.emit(info['entries'][0]['url'])

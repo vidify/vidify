@@ -269,10 +269,6 @@ class MainWindow(QWidget):
         is shown instead.
         """
 
-        # This delay is used to know the elapsed time until the video
-        # actually starts playing, used in the audiosync feature.
-        self.yt_timestamp = start_time
-
         # Checking that the artist and title are valid first of all
         if self.api.artist in (None, '') and self.api.title in (None, ''):
             logging.info("The provided artist and title are empty.")
@@ -281,23 +277,25 @@ class MainWindow(QWidget):
 
         # Loading the audio synchronization feature before anything else
         if self.config.audiosync:
-            logging.info("Running the audiosync thread")
+            logging.info("Starting the audiosync thread")
             from vidify.audiosync import AudiosyncWorker
-            # The 'Official Video' part could be added in a different function
-            # that the youtube module can use too, for consistency
             self.audiosync = AudiosyncWorker(
-                f"{format_name(artist, title)} Official Video",
-                start=start_time)
+                f"{format_name(artist, title)} Official Video")
             self.audiosync.done.connect(self.on_audiosync_done)
             self.audiosync.start()
 
+        # This delay is used to know the elapsed time until the video
+        # actually starts playing, used in the audiosync feature.
+        self.yt_timestamp = start_time
+        self.yt_success = False
+
         # Launching the thread with YouTube-DL to obtain the video URL
         # without blocking the GUI.
-        logging.info("Running the youtube-dl thread")
+        logging.info("Starting the youtube-dl thread")
         self.youtubedl = YouTubeDLWorker(
             self.api.artist, self.api.title, self.config.debug,
             self.config.width, self.config.height)
-        self.youtubedl.done.connect(self.on_youtubedl_done)
+        self.youtubedl.success.connect(self.on_yt_success)
         self.youtubedl.fail.connect(self.on_youtubedl_fail)
         self.youtubedl.start()
 
@@ -315,7 +313,7 @@ class MainWindow(QWidget):
               " For more information, enable the debug mode.")
 
     @Slot(str)
-    def on_youtubedl_done(self, url: str) -> None:
+    def on_yt_success(self, url: str) -> None:
         """
         Obtains the video URL from the Youtube-dl thread and starts playing
         the video. Also shows the lyrics if enabled. The position of the video
@@ -324,6 +322,9 @@ class MainWindow(QWidget):
         """
 
         self.player.start_video(url, self.api.is_playing)
+        # Notifying the audiosync thread that youtube-dl succesfully obtained
+        # the video.
+        self.yt_success = True
         # The youtube-dl delay: it has to download the metadata.
         self.yt_delay = round((time.time() - self.yt_timestamp) * 1000)
         # The player delay: it doesn't start the video instantaneously.
@@ -344,34 +345,39 @@ class MainWindow(QWidget):
         Slot used after the audiosync function has finished. It sets the
         returned lag in milliseconds on the player.
 
+        This assumes that the song wasn't paused until this issue is fixed:
+        https://github.com/marioortizmanero/vidify-audiosync/issues/12
         """
 
-        # TODO: What to do when the audiosync finishes before the video
-        # starts playing? 
-        # This function currently assumes that on_youtubedl_done has been
-        # called previously.
-
         logging.info("Audiosync module returned %d ms", lag)
+
+        # If the returned value is 0, nothing is done. This is the extension's
+        # way of indicating that it wasn't able to find the lag, or that they
+        # are perfectly synchronized, in which case nothing should be done
+        # either. Or at least until #13 in vidify-audiosync is fixed.
         if lag == 0:
-            # If the returned value is 0, nothing is done. It's the extension's
-            # way of indicating that it wasn't able to find the lag, or that
-            # they are perfectly synchronized
+            logging.info("Not applying sync results as they are zero")
             return
 
-        # Adding the user's custom audiosync delay
+        # The user's custom audiosync delay. This is basically the time taken
+        # until the module started recording (which may depend on the user
+        # hardware and other things). Thus, it will almost always be a
+        # negative value.
         lag += self.config.audiosync_calibration
+        # If by the time this audiosync thread has finished the
+        # on_yt_success function hasn't been called, no delays related to
+        # the player or YoutubeDL will be applied.
+        if self.yt_success:
+            # Adding the time the youtube-dl thread took to download the
+            # metadata and start playing the video.
+            lag += self.yt_delay
+            # Calculating the time the player took to actually start playing
+            # the video.
+            elapsed = round((time.time() - self.player_timestamp) * 1000)
+            player_delay = elapsed - self.player.position
+            lag += player_delay
 
-        # Adding the time the youtube-dl thread took to download the metadata
-        # and start playing the video.
-        lag += self.yt_delay
-        # Calculating the time the player took to actually start playing
-        # the video. The player_delay should be the same as the current player
-        # position.
-        elapsed = round((time.time() - self.player_timestamp) * 1000)
-        player_delay = elapsed - self.player.position
-        lag += player_delay
         logging.info("Total delay is %d ms", lag)
-
         if lag > 0:
             # If the delay is negative, it means that the recorded audio is
             # delayed, because it has to be displaced to the left. Otherwise,

@@ -23,15 +23,14 @@ from qtpy.QtCore import QThread, Signal
 class AudiosyncWorker(QThread):
     done = Signal(int)
 
-    def __init__(self, title: str, start: Optional[float] = None) -> None:
+    def __init__(self, title: str) -> None:
         """
-        A start timestamp can be passed to calculate the delay that passed
-        until the module actually starts recording when run() is called.
+        The vidify-audiosync call automatically obtains the YouTube audio
+        track.
         """
 
         super().__init__()
         self.youtube_title = title
-        self.start_time = start
 
     def __del__(self) -> None:
         """
@@ -47,13 +46,5 @@ class AudiosyncWorker(QThread):
         with the obtained lag afterwards.
         """
 
-        if self.start_time not in (None, 0):
-            # The delay is calculated in milliseconds too.
-            thread_delay = round((time.time() - self.start_time) * 1000)
-        else:
-            thread_delay = 0
         lag = audiosync.get_lag(self.youtube_title)
-        # The delay is only added when the returned value is different than
-        # zero.
-        self.done.emit(lag if lag == 0 else lag + thread_delay)
-        logging.info("Returned the lag with a delay of %d ms", thread_delay)
+        self.done.emit(lag)
