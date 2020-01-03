@@ -152,12 +152,25 @@ class Options(Enum):
     audiosync = (
         "enable automatic audio synchronization. You may need to install"
         " additional dependencies. Read the installation guide for more"
-        " information.",
+        " information. Note: this feature is still in the alpha stage.",
         ('--audiosync',),
         'store_true',
         'Defaults',
         bool,
         False)
+
+    # Option to tweak the audio synchronization extension. The default value
+    # is for a more or less decent computer.
+    audiosync_calibration = (
+        "the audio synchronization's precision may depend on your hardware."
+        " You can calibrate the delay it has in milliseconds with this. The"
+        " value for this feature will be added to what audiosync returns,"
+        " so it can be positive or negative."
+        ('--audiosync-calibration',),
+        'store',
+        'Defaults',
+        int,
+        3400)
 
     # Arguments and options provided for the players.
     vlc_args = (

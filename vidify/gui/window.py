@@ -349,6 +349,9 @@ class MainWindow(QWidget):
             # they are perfectly synchronized
             return
 
+        # Adding the user's custom audiosync delay
+        lag += self.config.audiosync_calibration
+
         # TODO: What to do when the audiosync finishes before the video
         # starts playing?
         if self.player_delay is not None:
