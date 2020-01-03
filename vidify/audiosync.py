@@ -24,8 +24,19 @@ class AudiosyncWorker(QThread):
         self.youtube_title = title
 
     def __del__(self):
-        self.terminate()  # Maybe a better solution?
+        """
+        This method isn't guaranteed to be called after the app is closed, but
+        it will safely wait until the thread is done to finish.
+        """
+
+        self.quit()
+        self.wait()
 
     def run(self):
+        """
+        The run function simply executes the C extension as fast as possible
+        and emits the signal with the obtained lag afterwards.
+        """
+
         lag = audiosync.get_lag(self.youtube_title)
         self.done.emit(lag)

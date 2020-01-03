@@ -267,6 +267,7 @@ class MainWindow(QWidget):
         If an error was detected when downloading the video, the default one
         is shown instead.
         """
+        # TODO: passing the position may be useless.
 
         # Checking that the artist and title are valid first of all
         if self.api.artist in (None, '') and self.api.title in (None, ''):
@@ -319,6 +320,10 @@ class MainWindow(QWidget):
 
         self.player.start_video(url, self.api.is_playing)
         if not self.config.audiosync:
+            try:
+                position = self.api.position
+            except NotImplementedError:
+                position = 0
             self.player.position = position
         # Finally, the lyrics are displayed. If the video wasn't found, an
         # error message is shown.
@@ -329,21 +334,31 @@ class MainWindow(QWidget):
     def on_audiosync_done(self, lag: int) -> None:
         """
         Slot used after the audiosync function has finished. It sets the
-        returned lag on the player.
+        returned lag in milliseconds on the player.
         """
 
         logging.info("Audiosync module returned %d", lag)
-        # If the delay is negative, it means that the recorded audio is
-        # the one that's delayed. If this delay is larger than the current
-        # player position, the player position is set to zero after the lag
-        # has passed.
-        if self.player.position < lag:
-            wait = lag - self.player.position
-            self.sync_timer = QTimer(self)
-            self.sync_timer.singleShot(
-                wait, lambda: self.change_video_position(0))
+        if lag == 0:
+            # If the returned value is 0, nothing is done. It's the extension's
+            # way of indicating that it wasn't able to find the lag, or that
+            # they are perfectly synchronized
+            return
+        elif lag > 0:
+            # If the delay is negative, it means that the recorded audio is
+            # delayed, because it has to be displaced to the left. Otherwise,
+            # the displacement is done to the right.
+            self.player.position += lag
         else:
-            self.player.position = self.player.position - lag
+            # If a negative delay is larger than the current player position,
+            # the player position is set to zero after the lag has passed
+            # with a timer.
+            if self.player.position < -lag:
+                pos = self.player.position
+                self.sync_timer = QTimer(self)
+                self.sync_timer.singleShot(
+                    -lag, lambda: self.change_video_position(pos))
+            else:
+                self.player.position += lag
 
     def init_spotify_web_api(self) -> None:
         """
