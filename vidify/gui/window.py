@@ -255,7 +255,8 @@ class MainWindow(QWidget):
         Slot used for API updates of the video position.
         """
 
-        self.player.position = ms
+        if not self.config.audiosync:
+            self.player.position = ms
 
     @Slot(str, str, float)
     def play_video(self, artist: str, title: str, start_time: float) -> None:
@@ -267,6 +268,10 @@ class MainWindow(QWidget):
         If an error was detected when downloading the video, the default one
         is shown instead.
         """
+
+        # This delay is used to know the elapsed time until the video
+        # actually starts playing, used in the audiosync feature.
+        self.start_timestamp = start_time
 
         # Checking that the artist and title are valid first of all
         if self.api.artist in (None, '') and self.api.title in (None, ''):
@@ -319,12 +324,12 @@ class MainWindow(QWidget):
         """
 
         self.player.start_video(url, self.api.is_playing)
+        self.player_delay = round((time.time() - self.start_timestamp) * 1000)
         if not self.config.audiosync:
             try:
-                position = self.api.position
+                self.player.position = self.api.position
             except NotImplementedError:
-                position = 0
-            self.player.position = position
+                self.player.position = 0
         # Finally, the lyrics are displayed. If the video wasn't found, an
         # error message is shown.
         if self.config.lyrics:
@@ -337,13 +342,20 @@ class MainWindow(QWidget):
         returned lag in milliseconds on the player.
         """
 
-        logging.info("Audiosync module returned %d", lag)
+        logging.info("Audiosync module returned %d ms", lag)
         if lag == 0:
             # If the returned value is 0, nothing is done. It's the extension's
             # way of indicating that it wasn't able to find the lag, or that
             # they are perfectly synchronized
             return
-        elif lag > 0:
+
+        # TODO: What to do when the audiosync finishes before the video
+        # starts playing?
+        if self.player_delay is not None:
+            lag += self.player_delay
+            logging.info("Total delay is %d", lag)
+
+        if lag > 0:
             # If the delay is negative, it means that the recorded audio is
             # delayed, because it has to be displaced to the left. Otherwise,
             # the displacement is done to the right.
@@ -358,6 +370,8 @@ class MainWindow(QWidget):
                     -lag, lambda: self.change_video_position(0))
             else:
                 self.player.position += lag
+
+        self.player_delay = None
 
     def init_spotify_web_api(self) -> None:
         """

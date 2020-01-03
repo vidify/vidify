@@ -40,7 +40,6 @@ class AudiosyncWorker(QThread):
         """
 
         self.quit()
-        self.wait()
 
     def run(self) -> None:
         """
@@ -50,11 +49,11 @@ class AudiosyncWorker(QThread):
 
         if self.start_time not in (None, 0):
             # The delay is calculated in milliseconds too.
-            delay = round((time.time() - self.start_time) * 1000)
+            thread_delay = round((time.time() - self.start_time) * 1000)
         else:
-            delay = 0
+            thread_delay = 0
         lag = audiosync.get_lag(self.youtube_title)
         # The delay is only added when the returned value is different than
         # zero.
-        self.done.emit(lag if lag == 0 else lag + delay)
-        logging.info("Returned the lag with a delay of %d ms", delay)
+        self.done.emit(lag if lag == 0 else lag + thread_delay)
+        logging.info("Returned the lag with a delay of %d ms", thread_delay)
