@@ -275,6 +275,10 @@ class MainWindow(QWidget):
             self.on_youtubedl_fail()
             return
 
+        # This delay is used to know the elapsed time until the video
+        # actually starts playing, used in the audiosync feature.
+        self.timestamp = start_time
+
         # Loading the audio synchronization feature before anything else
         if self.config.audiosync:
             logging.info("Starting the audiosync thread")
@@ -284,11 +288,6 @@ class MainWindow(QWidget):
             self.audiosync.success.connect(self.on_audiosync_success)
             self.audiosync.failed.connect(self.on_audiosync_fail)
             self.audiosync.start()
-
-        # This delay is used to know the elapsed time until the video
-        # actually starts playing, used in the audiosync feature.
-        self.yt_timestamp = start_time
-        self.yt_success = False
 
         # Launching the thread with YouTube-DL to obtain the video URL
         # without blocking the GUI.
@@ -323,13 +322,6 @@ class MainWindow(QWidget):
         """
 
         self.player.start_video(url, self.api.is_playing)
-        # Notifying the audiosync thread that youtube-dl succesfully obtained
-        # the video.
-        self.yt_success = True
-        # The youtube-dl delay: it has to download the metadata.
-        self.yt_delay = round((time.time() - self.yt_timestamp) * 1000)
-        # The player delay: it doesn't start the video instantaneously.
-        self.player_timestamp = time.time()
         if not self.config.audiosync:
             try:
                 self.player.position = self.api.position
@@ -352,23 +344,16 @@ class MainWindow(QWidget):
 
         logging.info("Audiosync module returned %d ms", lag)
 
+        # The current API position according to what's being recorded.
+        playback_delay = round((time.time() - self.timestamp) * 1000) \
+            - self.player.position
+        lag += playback_delay
+
         # The user's custom audiosync delay. This is basically the time taken
         # until the module started recording (which may depend on the user
         # hardware and other things). Thus, it will almost always be a
         # negative value.
         lag += self.config.audiosync_calibration
-        # If by the time this audiosync thread has finished the
-        # on_yt_success function hasn't been called, no delays related to
-        # the player or YoutubeDL will be applied.
-        if self.yt_success:
-            # Adding the time the youtube-dl thread took to download the
-            # metadata and start playing the video.
-            lag += self.yt_delay
-            # Calculating the time the player took to actually start playing
-            # the video.
-            elapsed = round((time.time() - self.player_timestamp) * 1000)
-            player_delay = elapsed - self.player.position
-            lag += player_delay
 
         logging.info("Total delay is %d ms", lag)
         if lag == 0:

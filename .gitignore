@@ -14,8 +14,17 @@ include/
 share/
 lib64
 
-# vim
+# Vim
 *.*~
+
+# Custom
+# Audiosync debug output
+images/144000*.png
+images/288000*.png
+images/480000*.png
+images/720000*.png
+images/960000*.png
+images/1440000*.png
 
 # Distribution / packaging
 .Python

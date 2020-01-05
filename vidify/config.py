@@ -166,14 +166,13 @@ class Options(Enum):
     # it's left as an option.
     audiosync_calibration = (
         "the audio synchronization's precision may depend on your hardware."
-        " You can calibrate the delay it has in milliseconds with this. The"
-        " value for this feature will be added to what audiosync returns,"
-        " so it can be positive or negative.",
+        " You can calibrate the delay in milliseconds returned with this."
+        " It can be positive or negative. The default is -800.",
         ('--audiosync-calibration',),
         'store',
         'Defaults',
         int,
-        -150)
+        -800)
 
     # Arguments and options provided for the players.
     vlc_args = (

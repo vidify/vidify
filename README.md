@@ -76,7 +76,7 @@ This feature is only available on Linux for now. And this feature is much more p
 * ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
 * youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
 
-It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR.
+It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR, and it comes pre-installed in the vidify snap.
 
 Finally, you can activate the feature with `--audiosync` or inside your [config file](#the-config-file):
 
@@ -85,7 +85,9 @@ Finally, you can activate the feature with `--audiosync` or inside your [config 
 audiosync = true
 ```
 
-*Note: if the audiosync module is seemingly doing nothing, or returning zero as the lag always, make sure that the sink being recorded is the one where the music is playing too. Here's an example on Pavucontrol (it's usually called 'Monitor of ---':*
+You can calibrate the audiosync results with the option `--audiosync-calibration` or `audiosync_calibration`. By default it's -800 milliseconds, but it may depend on your hardware.
+
+*Note: if the audiosync module is seemingly doing nothing, or returning zero as the lag always, make sure that the sink being recorded is the one where the music is playing too. Here's an example on Pavucontrol (it's usually called 'Monitor of ...'):*
 
 ![pavucontrol](images/pavucontrol-audiosync.png)
 
@@ -94,9 +96,10 @@ The app has an interface that will guide you through most of the set-up, but you
 
 ```
 usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-on-top]
-                 [--width WIDTH] [--height HEIGHT] [-a API] [-p PLAYER] [--vlc-args VLC_ARGS]
-                 [--mpv-flags MPV_FLAGS] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
-                 [--redirect-uri REDIRECT_URI]
+              [--width WIDTH] [--height HEIGHT] [-a API] [-p PLAYER] [--audiosync]
+              [--audiosync-calibration AUDIOSYNC_CALIBRATION] [--vlc-args VLC_ARGS]
+              [--mpv-flags MPV_FLAGS] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
+              [--redirect-uri REDIRECT_URI]
 ```
 
 | Argument                         | Description         |
@@ -109,6 +112,7 @@ usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-
 | `-a`, `--api`                    | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
 | `-p`, `--player`                 | specify the player to use. See the [Players section](#the-players) for more info about the supported players. |
 | `--audiosync`                    | enables the [Audio Synchronization](#audio-synchronization) feature (disabled by default). |
+| `--audiosync-calibration`        | You can calibrate the delay in milliseconds audiosync returns with this. It can be positive or negative. The default is -800. |
 | `--config-file <PATH>`           | indicate the path of your [config file](#the-config-file).  |
 
 ### The config file
