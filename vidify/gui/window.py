@@ -25,7 +25,7 @@ from vidify.player import initialize_player
 from vidify.config import Config
 from vidify.youtube import YouTubeDLWorker
 from vidify.lyrics import get_lyrics
-from vidify.gui import Fonts, Res, Colors
+from vidify.gui import Fonts, Res
 from vidify.gui.components import APISelection, Drawer
 
 

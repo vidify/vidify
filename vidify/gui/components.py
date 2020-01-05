@@ -218,6 +218,7 @@ class Drawer(QFrame):
         self.button.clicked.disconnect()
         self.button.clicked.connect(self.hide_drawer)
 
+
 class DrawerBox(QFrame):
     def __init__(self, *args, **kwargs) -> None:
         """
@@ -274,6 +275,7 @@ class DrawerBox(QFrame):
         label.setFont(Fonts.link)
         self.github.addWidget(label)
         self.layout.addLayout(self.github)
+
 
 class DrawerButton(QPushButton):
     def __init__(self, *args, **kwargs) -> None:
