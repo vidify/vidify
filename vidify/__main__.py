@@ -10,9 +10,10 @@ from contextlib import redirect_stderr
 
 from qtpy.QtWidgets import QApplication
 from qtpy.QtGui import QIcon
+import qdarkstyle
 
 from vidify.config import Config
-from vidify.gui import Res
+from vidify.gui import set_dark_mode, Res
 from vidify.gui.window import MainWindow
 
 
@@ -24,6 +25,11 @@ def start_gui(config: Config) -> None:
     """
 
     app = QApplication(['vidify'])
+    # Setting dark mode if enabled
+    if config.dark_mode:
+        logging.info("Enabling dark mode")
+        app.setStyleSheet(qdarkstyle.load_stylesheet_from_environment())
+        set_dark_mode()
     app.setWindowIcon(QIcon(Res.icon))
     window = MainWindow(config)
     window.show()

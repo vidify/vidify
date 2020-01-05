@@ -16,6 +16,7 @@ exec(compile(open('vidify/version.py').read(),
 
 install_deps = [
     'QtPy',
+    'qdarkstyle',
     'youtube-dl',
     'python-vlc',
     'appdirs',

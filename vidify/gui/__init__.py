@@ -18,7 +18,7 @@ RESOURCES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                               'res')
 
 
-class Colors:
+class ColorsBase:
     """
     Contains the theme colors in hexadecimal. This will be useful in the
     future when dark mode is implemented.
@@ -41,7 +41,7 @@ def res_path(rel_path: str) -> str:
     return os.path.join(RESOURCES_PATH, rel_path)
 
 
-class Res:
+class ResBase:
     """
     Contains the paths for all the resources used in this program.
     """
@@ -65,8 +65,16 @@ class Res:
     swspotify_icon = res_path("api_icons/spotify/swspotify.svg")
     spotify_web_icon = res_path("api_icons/spotify/web.svg")
 
+    def set_dark_mode(self) -> None:
+        """
+        If this function is called, all resources dependent on light mode
+        will change to dark mode.
+        """
 
-class Fonts:
+        self.cross = res_path("dark_mode_cross.svg")
+
+
+class FontsBase:
     """
     Contains the fonts for the different types of text.
     """
@@ -81,3 +89,20 @@ class Fonts:
 
     mediumbutton = QFont("Inter", 15, QFont.Bold)
     bigbutton = QFont("Inter", 18, QFont.Bold)
+
+
+# The classes are initialized so that they can be dynamically modified from
+# other modules acting as global variables, and other utilities like dark
+# mode.
+Res = ResBase()
+Colors = ColorsBase()
+Fonts = FontsBase()
+
+
+def set_dark_mode() -> None:
+    """
+    This function will set the dark mode for all properties listed in this
+    module.
+    """
+
+    Res.set_dark_mode()

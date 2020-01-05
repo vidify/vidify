@@ -95,7 +95,7 @@ You can calibrate the audiosync results with the option `--audiosync-calibration
 The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
 
 ```
-usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-on-top]
+usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--dark-mode] [--stay-on-top]
               [--width WIDTH] [--height HEIGHT] [-a API] [-p PLAYER] [--audiosync]
               [--audiosync-calibration AUDIOSYNC_CALIBRATION] [--vlc-args VLC_ARGS]
               [--mpv-flags MPV_FLAGS] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
@@ -106,6 +106,7 @@ usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--stay-
 |----------------------------------|---------------------|
 | `-n`, `--no-lyrics`              | do not print lyrics. |
 | `-f`, `--fullscreen`             | play videos in fullscreen mode. |
+| `--dark-mode`                    | enables dark mode for the GUI. |
 | `--stay-on-top`                  | the app window will stay on top of other apps. |
 | `--width <WIDTH>`                | set the width for the downloaded videos (this is useful to play lower quality videos if your connection isn't good). |
 | `--height <HEIGHT>`              | set the height for the downloaded videos. |

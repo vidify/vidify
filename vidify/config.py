@@ -95,6 +95,15 @@ class Options(Enum):
         bool,
         False)
 
+    # The dark mode
+    dark_mode = (
+        "activate the dark mode",
+        ('--dark-mode',),
+        'store_true',
+        'Defaults',
+        bool,
+        False)
+
     # Window that always stays on top of others.
     stay_on_top = (
         "the window will stay on top of all apps.",
