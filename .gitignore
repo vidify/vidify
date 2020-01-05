@@ -6,6 +6,26 @@ __pycache__/
 # C extensions
 *.so
 
+# venv
+pyvenv.cfg
+bin/
+etc/
+include/
+share/
+lib64
+
+# Vim
+*.*~
+
+# Custom
+# Audiosync debug output
+images/144000*.png
+images/288000*.png
+images/480000*.png
+images/720000*.png
+images/960000*.png
+images/1440000*.png
+
 # Distribution / packaging
 .Python
 build/
@@ -31,7 +51,7 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-*.spec
+# *.spec
 
 # Installer logs
 pip-log.txt

@@ -2,7 +2,9 @@ sudo: required
 
 language: python
 python:
+    - '3.6'
     - '3.7'
+    - '3.8'
 
 services:
   - xvfb
@@ -10,19 +12,25 @@ services:
 before_install:
     - sudo add-apt-repository -y ppa:mc3man/mpv-tests
     - sudo apt-get update
-    - sudo apt-get -y install python3-pip libdbus-glib-1-dev libcairo2-dev 
-         libglib2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 vlc libvlc-dev
-         mpv libmpv-dev
-    - sudo pip3 install --upgrade pip
-    - pip3 install pygobject
+    - sudo apt-get -y install libdbus-glib-1-dev libcairo2-dev libglib2.0-dev
+         libgirepository1.0-dev gir1.2-gtk-3.0 libvlc-dev libmpv-dev vlc mpv
 
 install:
-    - pip3 install '.[mpv, dev]'
+    - pip3 install .[mpv,dev]
+      # Pygobject is needed for virtual environments and Travis CI. See the
+      # FAQ section in the README.
+    - pip3 install pygobject
+      # Both Qt bindings are installed to test them.
+    - pip3 install pyqt5 pyqtwebengine pyside2
+    - pip3 install git+https://github.com/felix-hilden/spotipy.git
 
 # Lint with PEP8 and run tests
 script: 
+      # Running the linter
     - flake8 . --ignore='F821,W503,E731'
-    - python -m unittest
+      # Testing with both Python bindings
+    - QT_API=PyQt5 python -m unittest
+    - QT_API=PySide2 python -m unittest
 
 notifications:
     email: false
