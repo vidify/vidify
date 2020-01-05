@@ -18,7 +18,8 @@ from qtpy.QtCore import QThread, Signal
 
 
 class AudiosyncWorker(QThread):
-    done = Signal(int)
+    success = Signal(int)
+    failed = Signal()
 
     def __init__(self, title: str) -> None:
         """
@@ -43,5 +44,8 @@ class AudiosyncWorker(QThread):
         with the obtained lag afterwards.
         """
 
-        lag = audiosync.get_lag(self.youtube_title)
-        self.done.emit(lag)
+        lag, success = audiosync.get_lag(self.youtube_title)
+        if success:
+            self.success.emit(lag)
+        else:
+            self.failed.emit()

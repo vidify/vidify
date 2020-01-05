@@ -281,7 +281,8 @@ class MainWindow(QWidget):
             from vidify.audiosync import AudiosyncWorker
             self.audiosync = AudiosyncWorker(
                 f"{format_name(artist, title)} Official Video")
-            self.audiosync.done.connect(self.on_audiosync_done)
+            self.audiosync.success.connect(self.on_audiosync_success)
+            self.audiosync.failed.connect(self.on_audiosync_fail)
             self.audiosync.start()
 
         # This delay is used to know the elapsed time until the video
@@ -340,7 +341,7 @@ class MainWindow(QWidget):
             print(get_lyrics(self.api.artist, self.api.title))
 
     @Slot(int)
-    def on_audiosync_done(self, lag: int) -> None:
+    def on_audiosync_success(self, lag: int) -> None:
         """
         Slot used after the audiosync function has finished. It sets the
         returned lag in milliseconds on the player.
@@ -350,14 +351,6 @@ class MainWindow(QWidget):
         """
 
         logging.info("Audiosync module returned %d ms", lag)
-
-        # If the returned value is 0, nothing is done. This is the extension's
-        # way of indicating that it wasn't able to find the lag, or that they
-        # are perfectly synchronized, in which case nothing should be done
-        # either. Or at least until #13 in vidify-audiosync is fixed.
-        if lag == 0:
-            logging.info("Not applying sync results as they are zero")
-            return
 
         # The user's custom audiosync delay. This is basically the time taken
         # until the module started recording (which may depend on the user
@@ -378,10 +371,9 @@ class MainWindow(QWidget):
             lag += player_delay
 
         logging.info("Total delay is %d ms", lag)
-        if lag > 0:
-            # If the delay is negative, it means that the recorded audio is
-            # delayed, because it has to be displaced to the left. Otherwise,
-            # the displacement is done to the right.
+        if lag == 0:
+            return
+        elif lag > 0:
             self.player.position += lag
         else:
             # If a negative delay is larger than the current player position,
@@ -393,6 +385,10 @@ class MainWindow(QWidget):
                     -lag, lambda: self.change_video_position(0))
             else:
                 self.player.position += lag
+
+    @Slot()
+    def on_audiosync_fail(self) -> None:
+        logging.info("Audiosync module failed to return the lag")
 
     def init_spotify_web_api(self) -> None:
         """

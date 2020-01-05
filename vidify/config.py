@@ -173,7 +173,7 @@ class Options(Enum):
         'store',
         'Defaults',
         int,
-        -175)
+        -150)
 
     # Arguments and options provided for the players.
     vlc_args = (
