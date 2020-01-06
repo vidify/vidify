@@ -62,6 +62,13 @@ class MainWindow(QWidget):
         logging.info("Using %s as the player", config.player)
         self.config = config
 
+        # The audiosync feature is optional until it's more stable.
+        if self.config.audiosync:
+            from vidify.audiosync import AudiosyncWorker
+            self.audiosync = AudiosyncWorker()
+        else:
+            self.audiosync = None
+
         # The API initialization is more complex. For more details, please
         # check the flow diagram in vidify.api. First we have to check if
         # the API is saved in the config:
@@ -248,6 +255,12 @@ class MainWindow(QWidget):
         """
 
         self.player.pause = not is_playing
+        # If there is an audiosync thread running, this will pause the sound
+        # recording and youtube downloading.
+        try:
+            self.audiosync.is_running = is_playing
+        except AttributeError:
+            pass
 
     @Slot(int)
     def change_video_position(self, ms: int) -> None:
@@ -281,10 +294,20 @@ class MainWindow(QWidget):
 
         # Loading the audio synchronization feature before anything else
         if self.config.audiosync:
+            # First trying to stop the previous audiosync thread, as only
+            # one audiosync thread can be running at once. If it wasn't
+            # initialized, the worker is created.
+            logging.info("Stopping the previous audiosync thread")
+            try:
+                self.audiosync.stop()
+                self.audiosync.wait()
+            except AttributeError:
+                from vidify.audiosync import AudiosyncWorker
+                self.audiosync = AudiosyncWorker()
+
             logging.info("Starting the audiosync thread")
-            from vidify.audiosync import AudiosyncWorker
-            self.audiosync = AudiosyncWorker(
-                f"{format_name(artist, title)} Official Video")
+            self.audiosync.youtube_title = f"{format_name(artist, title)}" \
+                " Official Video"
             self.audiosync.success.connect(self.on_audiosync_success)
             self.audiosync.failed.connect(self.on_audiosync_fail)
             self.audiosync.start()

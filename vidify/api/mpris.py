@@ -216,6 +216,6 @@ class MPRISAPI(APIBase):
             is_playing = self._bool_status(properties['PlaybackStatus'])
             if self.is_playing != is_playing:
                 # Refreshes the metadata and pauses/plays the video
-                self.status_signal.emit(is_playing)
                 logging.info("Status change detected")
+                self.status_signal.emit(is_playing)
                 self.is_playing = is_playing

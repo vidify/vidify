@@ -7,6 +7,9 @@ Check out the README.md and see the official repo for more information:
 https://github.com/marioortizmanero/vidify-audiosync
 """
 
+import logging
+from typing import Optional
+
 try:
     import vidify_audiosync as audiosync
 except ImportError:
@@ -21,7 +24,7 @@ class AudiosyncWorker(QThread):
     success = Signal(int)
     failed = Signal()
 
-    def __init__(self, title: str) -> None:
+    def __init__(self, title: Optional[str] = None) -> None:
         """
         The vidify-audiosync call automatically obtains the YouTube audio
         track.
@@ -29,6 +32,7 @@ class AudiosyncWorker(QThread):
 
         super().__init__()
         self.youtube_title = title
+        self._is_running = False
 
     def __del__(self) -> None:
         """
@@ -36,7 +40,35 @@ class AudiosyncWorker(QThread):
         it will safely wait until the thread is done to finish.
         """
 
-        self.quit()
+        self.abort()
+
+    def abort(self) -> None:
+        """
+        This function will abort the audiosync thread. If it wasn't running,
+        nothing is done.
+        """
+
+        audiosync.abort()
+        self._is_running = False
+
+    @property
+    def is_running(self) -> bool:
+        return self._is_running
+
+    @is_running.setter
+    def is_running(self, do_run: bool) -> None:
+        """
+        This function will pause or resume the ffmpeg recording and
+        downloader. If start() wasn't called before this function is called,
+        nothing is done.
+        """
+
+        logging.info("Setting audiosync is_running to %r", do_run)
+        if do_run:
+            audiosync.resume()
+        else:
+            audiosync.pause()
+        self._is_running = do_run
 
     def run(self) -> None:
         """
@@ -44,8 +76,10 @@ class AudiosyncWorker(QThread):
         with the obtained lag afterwards.
         """
 
-        lag, success = audiosync.get_lag(self.youtube_title)
+        self._is_running = True
+        lag, success = audiosync.run(self.youtube_title)
         if success:
             self.success.emit(lag)
         else:
             self.failed.emit()
+        self._is_running = False
