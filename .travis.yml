@@ -10,10 +10,9 @@ services:
   - xvfb
 
 before_install:
-    - sudo add-apt-repository -y ppa:mc3man/mpv-tests
     - sudo apt-get update
     - sudo apt-get -y install libdbus-glib-1-dev libcairo2-dev libglib2.0-dev
-         libgirepository1.0-dev gir1.2-gtk-3.0 libvlc-dev libmpv-dev vlc mpv
+         libgirepository1.0-dev gir1.2-gtk-3.0 libvlc-dev libmpv-dev vlc
 
 install:
     - pip3 install .[mpv,dev]

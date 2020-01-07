@@ -185,24 +185,24 @@ class ConfigTest(unittest.TestCase):
         conf.read(TEST_PATH)
         self.assertEqual(conf[section][key], true_value)
 
-    def test_none_returned(self):
+    def test_default_returned(self):
         """
-        Checking that `None` is returned when the value doesn't exist.
-        This will create the following empty field:
+        Checking that the default value is returned when the value doesn't
+        exist, rather than None. This will create the following empty field:
 
         [Defaults]
         lyrics =
 
         Here `lyrics` should be True instead of None, because the value
-        inside the file was None and it used the default one instead.
+        inside the file was None and it used the default value instead.
         One test is done for each type of variable: bool, int and str.
         """
 
-        for key in ('lyrics', 'width', 'client_id'):
+        for opt in Options:
             with open(self.config._path, 'w') as configfile:
-                configfile.write(f"[Defaults]\n{key} =\n")
-            value = getattr(self.config, key)
-            true_value = getattr(Options, key).default
+                configfile.write(f"[Defaults]\n{opt.name} =\n")
+            value = getattr(self.config, opt.name)
+            true_value = opt.default
             self.assertEqual(value, true_value)
 
     def test_types_written(self):

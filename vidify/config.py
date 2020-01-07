@@ -296,20 +296,17 @@ class Config:
         option = getattr(Options, attr)
 
         # Checking that it's an option available in the config file.
-        if option.section is None:
+        if option.section in (None, ''):
             return None
 
+        # Trying all the different types. If a conversion error happens, a
+        # ValueError is raised.
         try:
             if option.type == bool:
                 return self._file.getboolean(option.section, attr)
 
             if option.type == int:
-                # ValueError is raised if attr is '' (empty). When this
-                # happens, None should be returned instead.
-                try:
-                    return self._file.getint(option.section, attr)
-                except ValueError:
-                    return None
+                return self._file.getint(option.section, attr)
 
             return self._file.get(option.section, attr)
         except ValueError as e:
@@ -325,7 +322,9 @@ class Config:
         """
 
         # The value's type should only be converted to a string if it's not
-        # None, in which case nothing is written.
+        # None, in which case nothing is written. This is because converting
+        # None to str doesn't raise an error. Instead, the literal 'None'
+        # is written.
         if value is None:
             return
 
@@ -356,7 +355,7 @@ class Config:
         # Checking if the directory exists and creating it
         dirname = os.path.dirname(self._path)
         if not os.path.isdir(dirname) and dirname not in (None, ''):
-            # Checking for a race condition (not important)
+            # Checking for a race condition
             try:
                 os.makedirs(dirname)
             except OSError as e:
@@ -367,7 +366,6 @@ class Config:
         if not os.path.exists(self._path):
             print("Creating config file at", self._path)
             with open(self._path, 'w') as f:
-                # Documentation about the config file is saved in the new file
                 f.write("[Defaults]\n")
 
         self._file.read(self._path)
@@ -375,25 +373,30 @@ class Config:
     def __setattr__(self, attr: str, value: any) -> None:
         """
         The usual __setattr__ function, but it also updates the config file
-        with the new value (unless it's None, because `configfile` does a
-        conversion to str and saves 'None' instead of '')
+        with the value (unless it's None).
         """
 
         # The value is still saved inside the object, so that the assigned
         # value will have priority over defaults/config file/arguments
         self.__dict__[attr] = value
+
+        # If this doesn't raise AttributeError, it's interpreted as an option,
+        # otherwise it's an argument and it shouldn't be written.
         try:
-            # If this is obtained correctly, it's interpreted as an option
             option = getattr(Options, attr)
         except AttributeError:
             pass
         else:
             self.write_file(option.section, attr, value)
 
-    def __getattr__(self, attr: str) -> Union[bool, int, str]:
+    def __getattr__(self, attr: str) -> Optional[Union[bool, int, str]]:
         """
-        Return the configuration from all sources in the correct order
-        (arguments > config file > defaults)
+        Return the configuration from all sources in the correct order:
+            arguments > config file > defaults
+
+        __getattr__ isn't called by definition if the attribute exists in
+        the object, so any value that was set with __setattr__ previously
+        will have priority.
         """
 
         # Arguments
@@ -402,7 +405,7 @@ class Config:
         except AttributeError:
             pass
         else:
-            if value not in (None, ''):
+            if value is not None:
                 return value
 
         # Config file
@@ -411,7 +414,7 @@ class Config:
         except (configparser.NoOptionError, configparser.NoSectionError):
             pass
         else:
-            if value not in (None, ''):
+            if value is not None:
                 return value
 
         # If it wasn't in the arguments or config file, the default value is

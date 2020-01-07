@@ -45,6 +45,8 @@ class MpvPlayer(PlayerBase):
             args['loglevel'] = 'info'
         args['wid'] = str(int(self.winId()))
         args['vo'] = 'x11'
+        args['input_default_bindings'] = False
+        args['config'] = False
 
         self._mpv = MPV(*flags, **args)
 
