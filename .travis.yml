@@ -22,6 +22,7 @@ addons:
     - vlc
 
 install:
+    - pip3 install -U pip
     - pip3 install .[mpv,dev]
       # Pygobject is needed for virtual environments and Travis CI. See the
       # FAQ section in the README.
