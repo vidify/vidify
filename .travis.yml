@@ -9,10 +9,17 @@ python:
 services:
   - xvfb
 
-before_install:
-    - sudo apt-get update
-    - sudo apt-get -y install libdbus-glib-1-dev libcairo2-dev libglib2.0-dev
-         libgirepository1.0-dev gir1.2-gtk-3.0 libvlc-dev libmpv-dev vlc
+addons:
+  apt:
+    packages:
+    - libdbus-glib-1-dev
+    - libcairo2-dev
+    - libglib2.0-dev
+    - libgirepository1.0-dev
+    - gir1.2-gtk-3.0
+    - libmpv-dev
+    - libvlc-dev
+    - vlc
 
 install:
     - pip3 install .[mpv,dev]
