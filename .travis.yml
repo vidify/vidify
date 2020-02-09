@@ -7,19 +7,22 @@ python:
     - '3.8'
 
 services:
-  - xvfb
+    - xvfb
 
 addons:
-  apt:
-    packages:
-    - libdbus-glib-1-dev
-    - libcairo2-dev
-    - libglib2.0-dev
-    - libgirepository1.0-dev
-    - gir1.2-gtk-3.0
-    - libmpv-dev
-    - libvlc-dev
-    - vlc
+    apt:
+        sources:
+            - sourceline: 'ppa:mc3man/mpv-tests'
+        packages:
+            - libdbus-glib-1-dev
+            - libcairo2-dev
+            - libglib2.0-dev
+            - libgirepository1.0-dev
+            - gir1.2-gtk-3.0
+            - libmpv-dev
+            - libvlc-dev
+            - vlc
+            - mpv
 
 install:
     - pip3 install -U pip

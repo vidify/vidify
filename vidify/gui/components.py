@@ -36,7 +36,7 @@ class APICard(QGroupBox):
 
         self.api_name = api_name
         self.setFont(Fonts.smalltext)
-        self.setFixedSize(QSize(250,350))
+        self.setFixedSize(QSize(250, 350))
         self.layout = QVBoxLayout(self)
         self.setup_icon(icon)
         self.setup_text(description)
