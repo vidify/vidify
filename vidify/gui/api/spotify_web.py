@@ -7,10 +7,10 @@ import logging
 from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
                             QVBoxLayout)
 from qtpy.QtCore import Qt, QSize, Signal
-from spotipy.scope import scopes
-from spotipy.util import (RefreshingCredentials, RefreshingToken,
-                          parse_code_from_url)
-from spotipy.auth import OAuthError
+from tekore.scope import scopes
+from tekore.auth.refreshing import RefreshingCredentials, RefreshingToken
+from tekore.util import parse_code_from_url
+from tekore.auth.expiring import OAuthError
 
 from vidify.gui import Fonts, Colors
 from vidify.gui.components import InputField, WebBrowser
@@ -123,7 +123,7 @@ class SpotifyWebPrompt(QWidget):
         obtain the access token.
 
         Part of this function is a reimplementation of
-        `spotipy.prompt_user_token`. It does the same thing but in a more
+        `tekore.prompt_user_token`. It does the same thing but in a more
         automatized way, because Qt has access over the web browser too.
         """
 
@@ -134,7 +134,7 @@ class SpotifyWebPrompt(QWidget):
         if url.find(self.redirect_uri) == -1:
             return
 
-        # Trying to get the auth token from the URL with Spotipy's
+        # Trying to get the auth token from the URL with Tekore's
         # parse_code_from_url(), which throws a KeyError if the URL doesn't
         # contain an auth token or if it contains more than one.
         try:

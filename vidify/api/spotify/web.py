@@ -1,5 +1,5 @@
 """
-This module implements the official web API, using the `spotipy` module.
+This module implements the official web API, using the `tekore` module.
 The web API provides much more metadata about the Spotify player but
 it's limited in terms of usabilty:
     * The user has to sign in and manually set it up
@@ -18,13 +18,14 @@ import logging
 from typing import Optional
 
 try:
-    from spotipy import Spotify
+    from tekore import Spotify
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
-        "No module named 'spotipy'.\n"
-        "To use the Spotify Web API, please install spotipy. Read more about"
+        "No module named 'tekore'.\n"
+        "To use the Spotify Web API, please install tekore. Read more about"
         " this in the Installation Guide.")
-from spotipy.util import RefreshingToken, refresh_user_token
+from tekore.auth.refreshing import RefreshingToken
+from tekore.util import refresh_user_token
 
 from vidify.api import split_title, ConnectionNotReady
 from vidify.api.generic import APIBase
@@ -140,7 +141,7 @@ def get_token(refresh_token: Optional[str], client_id: Optional[str],
         client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
 
     # Checking that the credentials are valid. The refresh token isn't really
-    # needed because spotipy.refresh_user_token already obtains it from the
+    # needed because tekore.refresh_user_token already obtains it from the
     # refresh token.
     for c in (refresh_token, client_id, client_secret):
         if c in (None, ''):

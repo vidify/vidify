@@ -21,7 +21,7 @@ install_deps = [
     'python-vlc',
     'appdirs',
     'lyricwikia',
-    #  'spotipy>=3.0',
+    'tekore',
     'pydbus; platform_system=="Linux"',
     'SwSpotify>=1.1.1; platform_system=="Windows"'
     ' or platform_system=="Darwin"'

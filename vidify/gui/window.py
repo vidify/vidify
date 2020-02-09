@@ -402,8 +402,8 @@ class MainWindow(QWidget):
         """
         SPOTIFY WEB API CUSTOM FUNCTION
 
-        Note: the Spotipy imports are done inside the functions so that
-        Spotipy isn't needed for whoever doesn't plan to use the Spotify
+        Note: the Tekore imports are done inside the functions so that
+        Tekore isn't needed for whoever doesn't plan to use the Spotify
         Web API.
         """
 
