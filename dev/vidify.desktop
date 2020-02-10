@@ -7,5 +7,5 @@ Exec=vidify
 Icon=vidify
 Terminal=true
 Type=Application
-Categories=Video;
+Categories=AudioVideo;Video
 StartupNotify=false
