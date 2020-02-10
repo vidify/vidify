@@ -1,4 +1,4 @@
-include gui/res/*
-include gui/res/*/*
-include gui/res/*/*/*
+include vidify/gui/res/*
+include vidify/gui/res/*/*
+include vidify/gui/res/*/*/*
 include dev/vidify.desktop
