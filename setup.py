@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 from pkg_resources import DistributionNotFound, get_distribution
+from sys import platform
 
 
 def is_installed(pkgname: str) -> bool:
@@ -36,6 +37,12 @@ else:
     install_deps.append('PyQt5')
     install_deps.append('PyQtWebEngine')
 
+if platform.startswith('linux'):
+    datafiles = [('share/applications', ['dev/vidify.desktop']),
+                 ('share/pixmaps', ['dev/vidify.svg'])]
+else:
+    datafiles = []
+
 setup(
     name='vidify',
     version=__version__,
@@ -49,6 +56,8 @@ setup(
     package_data={'vidify': ['gui/res/*',
                              'gui/res/*/*',
                              'gui/res/*/*/*']},
+
+    data_files=datafiles,
 
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
