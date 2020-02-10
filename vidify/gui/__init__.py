@@ -41,17 +41,30 @@ def res_path(rel_path: str) -> str:
     return os.path.join(RESOURCES_PATH, rel_path)
 
 
+def res_font(name: str) -> str:
+    """
+    Utility function to select a font depending on the user's system.
+    The `name` parameter shouldn't include the extension, since that's
+    what this function selects.
+    """
+
+    extension = ".ttf" if CURRENT_PLATFORM == Platform.WINDOWS \
+        else ".otf"
+
+    return res_path(name) + extension
+
+
 class ResBase:
     """
     Contains the paths for all the resources used in this program.
     """
 
-    fonts = (res_path("Inter/Inter-Regular.otf"),
-             res_path("Inter/Inter-Italic.otf"),
-             res_path("Inter/Inter-Bold.otf"),
-             res_path("Inter/Inter-BoldItalic.otf"),
-             res_path("Inter/Inter-Medium.otf"),
-             res_path("Inter/Inter-MediumItalic.otf"))
+    fonts = (res_font("Inter/Inter-Regular"),
+             res_font("Inter/Inter-Italic"),
+             res_font("Inter/Inter-Bold"),
+             res_font("Inter/Inter-BoldItalic"),
+             res_font("Inter/Inter-Medium"),
+             res_font("Inter/Inter-MediumItalic"))
 
     default_video = res_path("default_video.mp4")
 

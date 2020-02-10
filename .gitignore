@@ -13,6 +13,7 @@ etc/
 include/
 share/
 lib64
+Scripts/
 
 # Vim
 *.*~

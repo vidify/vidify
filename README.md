@@ -121,7 +121,7 @@ The configuration file is created by default at your usual config directory:
 
 * Linux: `~/.config/vidify/config.ini` (or in `$XDG_CONFIG_HOME`, if defined)
 * Mac OS X: `~/Library/Preferences/vidify/config.ini`
-* Windows: `C:\Users\<username>\AppData\Local\vidify\config.ini`
+* Windows: `C:\Users\<username>\AppData\Local\vidify\vidify\config.ini`
 
 You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments, but keeps your settings for future usage. [Here's an example of one](https://github.com/vidify/vidify/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section.
 
