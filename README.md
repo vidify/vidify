@@ -31,8 +31,8 @@
 * Other dependencies dependending on what [API](#the-apis) and [player](#the-players) you're going to use.
 
 ## Installation
-* The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1,extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
-* You can download the latest stable [release](https://github.com/vidify/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
+* With pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages with `pip install --user vidify[extra1,extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
+* You can download the latest stable [release](https://github.com/vidify/vidify/releases). You will find binaries for Windows and Linux for the stable releases.
 * Linux:
     * Any distro: you can use snap to install it: `snap install vidify-qt`
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
