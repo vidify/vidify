@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Vidify
+GenericName=Music Video Player
+Comment=Watch live videos for the songs playing on your device
+Keywords=vidify;music;video;player;live;song;spotify;youtube;
+Exec=vidify
+Icon=vidify
+Terminal=true
+Type=Application
+Categories=Video;
+StartupNotify=false

@@ -39,16 +39,12 @@ else:
 setup(
     name='vidify',
     version=__version__,
-    packages=find_packages(exclude=('tests*', 'dev*')),
+    packages=find_packages(exclude=('tests*')),
     description='Watch music videos for the songs playing on your device',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
     url='https://github.com/vidify/vidify',
     license='LGPL',
-
-    package_data={'vidify': ['gui/res/*',
-                             'gui/res/*/*',
-                             'gui/res/*/*/*']},
 
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
