@@ -1,0 +1,50 @@
+name: vidify-qt
+type: app
+version: '2.0'
+summary: Vidify
+description: |
+    Watch music videos for the songs playing on your device
+icon: 'vidify/gui/res/icon.svg'
+# license: LGPL-3.0-or-later
+confinement: strict
+base: core18
+
+apps:
+  vidify:
+    command: vidify
+
+parts:
+  vidify:
+    plugin: python
+    python-version: python3
+    source: .
+    prepare:
+      # Setting up the config file to use Mpv by default.
+      - mkdir -p ~/.config/vidify
+      - echo '[Defaults]' > ~/.config/vidify/config.ini
+      - echo 'player = mpv' >> ~/.config/vidify/config.ini
+    stage-packages:
+      # Main dependencies
+      - python3-pyqt5
+      - python3-appdirs
+      - python3-pydbus
+      - youtube-dl
+      # Mpv is used by default because it's lighter and works better
+      # with the future audiosync feature.
+      - libmpv-dev
+      # GLib
+      - libglib2.0-dev
+      # PyGobject
+      - python3-gi
+      - python3-gi-cairo
+      - gir1.2-gtk-3.0
+      # Audiosync support
+      - libfftw3-dev
+      - ffmpeg
+    python-packages:
+      - qdarkstyle
+      - vidify-audiosync
+      - python-mpv
+      - qtpy
+      - PyQtWebEngine
+      - lyricwikia
