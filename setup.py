@@ -46,6 +46,10 @@ setup(
     url='https://github.com/vidify/vidify',
     license='LGPL',
 
+    package_data={'vidify': ['gui/res/*',
+                             'gui/res/*/*',
+                             'gui/res/*/*/*']},
+
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
     maintainer='Mario O.M.',
