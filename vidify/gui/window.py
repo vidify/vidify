@@ -94,6 +94,7 @@ class MainWindow(QWidget):
 
         # Removing the widget used to obtain the API string
         self.layout.removeWidget(self.API_selection)
+        self.API_selection.setParent(None)
         self.API_selection.hide()
         del self.API_selection
 
@@ -101,8 +102,7 @@ class MainWindow(QWidget):
         self.config.api = api_str
 
         # Starting the API initialization
-        api_data = APIData[api_str]
-        self.initialize_api(api_data)
+        self.initialize_api(APIData[api_str])
 
     def initialize_api(self, api_data: APIData, do_start: bool = True) -> None:
         """
@@ -119,6 +119,7 @@ class MainWindow(QWidget):
         mod = importlib.import_module(api_data.module)
         cls = getattr(mod, api_data.class_name)
         self.api = cls()
+
         # Some custom API initializations may not want to start the API
         # inside this function.
         if do_start:

@@ -17,6 +17,7 @@ Scripts/
 
 # Vim
 *.*~
+*.swp
 
 # Custom
 # Audiosync debug output
