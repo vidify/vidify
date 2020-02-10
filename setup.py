@@ -1,49 +1,85 @@
-from setuptools import setup
-import platform
+from setuptools import setup, find_packages
+from pkg_resources import DistributionNotFound, get_distribution
 
 
-dependencies = [
+def is_installed(pkgname: str) -> bool:
+    try:
+        get_distribution(pkgname)
+        return True
+    except DistributionNotFound:
+        return False
+
+
+# Get version inside vidify/version.py without importing the package
+exec(compile(open('vidify/version.py').read(),
+             'vidify/version.py', 'exec'))
+
+install_deps = [
+    'QtPy',
+    'qdarkstyle',
     'youtube-dl',
     'python-vlc',
+    'appdirs',
     'lyricwikia',
-    'requests>=2.3.0',  # spotipy
-    'six>=1.10.0'  # spotipy
+    'tekore',
+    'pydbus; platform_system=="Linux"',
+    'SwSpotify>=1.1.1; platform_system=="Windows"'
+    ' or platform_system=="Darwin"'
 ]
 
-# DBus is only needed on Linux
-if platform.system() == 'Linux':
-    dependencies.append('pydbus')
-
-
-# Get version inside spotify_videos/version.py without importing the package
-exec(compile(open('spotify_videos/version.py').read(),
-             'spotify_videos/version.py', 'exec'))
+# If PySide2 is installed and PyQt5 is not, append PySide2 to dependencies
+if is_installed('PySide2') and not is_installed('PyQt5'):
+    install_deps.append('PySide2')
+# If PySide2 is not installed, or if both PyQt5 and PySide2 are installed
+# Use QtPy's default: PyQt5
+else:
+    install_deps.append('PyQt5')
+    install_deps.append('PyQtWebEngine')
 
 setup(
-    name='spotify-videos',
+    name='vidify',
     version=__version__,
-    packages=['spotify_videos'],
-    description='Simple tool to show Youtube music videos and lyrics'
-                ' for the playing Spotify songs',
-    url='https://github.com/marioortizmanero/spotify-music-videos',
-    license='MIT',
+    packages=find_packages(exclude=('tests*', 'dev*')),
+    description='Watch music videos for the songs playing on your device',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
+    url='https://github.com/vidify/vidify',
+    license='LGPL',
+
+    package_data={'vidify': ['gui/res/*',
+                             'gui/res/*/*',
+                             'gui/res/*/*/*']},
+
     author='Mario O.M.',
     author_email='marioortizmanero@gmail.com',
+    maintainer='Mario O.M.',
+    maintainer_email='marioortizmanero@gmail.com',
+
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users/Desktop',
         'Topic :: Multimedia :: Sound/Audio :: Players',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: GNU Lesser General Public License v3'
+        ' (LGPLv3)',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
-    keywords='spotify music video videos lyrics',
+    keywords='spotify music video player videos lyrics linux windows macos',
     python_requires='>=3.6',
-    install_requires=dependencies,
+    install_requires=install_deps,
+    extras_require={
+        'dev': [
+            'flake8'
+        ],
+        'audiosync': [
+            'vidify-audiosync'
+        ],
+        'mpv': [
+            'python-mpv'
+        ]
+    },
     entry_points={
-        'console_scripts': ['spotify-videos = spotify_videos.__main__:main']
+        'console_scripts': ['vidify = vidify.__main__:main']
     }
 )

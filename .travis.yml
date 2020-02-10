@@ -4,22 +4,42 @@ language: python
 python:
     - '3.6'
     - '3.7'
+    - '3.8'
 
-# Install PEP8 linter and dependencies
-before_install:
-    - sudo apt-get update
-    - sudo apt-get -y install python3-pip
-    - sudo pip3 install --upgrade pip
-    - pip3 install flake8
-    - sudo apt-get -y install libdbus-glib-1-dev libcairo2-dev libglib2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 vlc libvlc-dev
-    - pip3 install pygobject
+services:
+    - xvfb
+
+addons:
+    apt:
+        sources:
+            - sourceline: 'ppa:mc3man/mpv-tests'
+        packages:
+            - libdbus-glib-1-dev
+            - libcairo2-dev
+            - libglib2.0-dev
+            - libgirepository1.0-dev
+            - gir1.2-gtk-3.0
+            - libmpv-dev
+            - libvlc-dev
+            - vlc
+            - mpv
+
 install:
-    - python setup.py install
+    - pip3 install -U pip
+    - pip3 install .[mpv,dev]
+      # Pygobject is needed for virtual environments and Travis CI. See the
+      # FAQ section in the README.
+    - pip3 install pygobject
+      # Both Qt bindings are installed to test them.
+    - pip3 install pyqt5 pyqtwebengine pyside2
 
-# Lint with PEP8 (skipping spotipy) and do tests
+# Lint with PEP8 and run tests
 script: 
-    - flake8 . --exclude 'spotipy' --ignore='F821,W503'
-    - python -m unittest
+      # Running the linter
+    - flake8 . --ignore='F821,W503,E731'
+      # Testing with both Python bindings
+    - QT_API=PyQt5 python -m unittest
+    - QT_API=PySide2 python -m unittest
 
 notifications:
     email: false
