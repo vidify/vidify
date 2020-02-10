@@ -43,7 +43,7 @@ setup(
     description='Watch music videos for the songs playing on your device',
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/marioortizmanero/vidify',
+    url='https://github.com/vidify/vidify',
     license='LGPL',
 
     package_data={'vidify': ['gui/res/*',

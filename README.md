@@ -4,7 +4,7 @@
 <h1>Vidify</h1>
 <span>Watch <b>music videos</b> and <b>lyrics</b> for the songs playing on your device</span>
 
-<img alt="Travis" src="https://travis-ci.com/marioortizmanero/vidify.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/vidify"> <img alt="AUR version" src="https://img.shields.io/aur/version/vidify">
+<img alt="Travis" src="https://travis-ci.com/vidify/vidify.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/vidify"> <img alt="AUR version" src="https://img.shields.io/aur/version/vidify">
 
 <hr>
 
@@ -32,7 +32,7 @@
 
 ## Installation
 * The regular installation with pip: `pip install --user vidify`. Other APIs and Players can be used by installing the extra required packages, like `pip install --user vidify[extra1,extra2]`. Read the [APIs section](#the-apis) and the [Players section](#the-players) for more. By default, Vidify includes the Spotify APIs and VLC as the player.
-* You can download the latest stable [release](https://github.com/marioortizmanero/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
+* You can download the latest stable [release](https://github.com/vidify/vidify/releases). There should be binaries avaliable for Mac OS, Linux and Windows. These already include mpv support and most of the supported APIs.
 * Linux:
     * Any distro: you can use snap to install it: `snap install vidify`
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
@@ -45,9 +45,9 @@ An API is simply a source of information about the music playing on a device. Fo
 
 | Name                                         | Wiki link                                                                           | Extra requirements | Description |
 |----------------------------------------------|:-----------------------------------------------------------------------------------:|--------------------|-------------|
-| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/marioortizmanero/vidify/wiki/Linux-Media-Players)           | None (see wiki)    | Any MPRIS compatible media player for Linux or BSD (99% of the media players, like Spotify, Clementine, VLC...). |
-| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-for-Windows-and-MacOS) | None               | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/marioortizmanero/vidify/wiki/Spotify-Web-API)               | None               | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to use it. |
+| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/vidify/vidify/wiki/Linux-Media-Players)           | None (see wiki)    | Any MPRIS compatible media player for Linux or BSD (99% of the media players, like Spotify, Clementine, VLC...). |
+| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/vidify/vidify/wiki/Spotify-for-Windows-and-MacOS) | None               | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/vidify/vidify/wiki/Spotify-Web-API)               | None               | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to use it. |
 | Unknown (any other string)                   | -                                                                                   | -                  | If you use any other string with `--api`, the initial screen to choose an API will appear. This is temporary until the GUI menu is implemented. |
 
 The internal name inside parenthesis is used for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would enable the Linux Media Players API, for instance.
@@ -68,7 +68,7 @@ player = mpv
 ```
 
 ### Audio synchronization
-Vidify has an audio synchronization feature currently under testing. The full repository is in [marioortizmanero/vidify-audiosync](https://github.com/marioortizmanero/vidify-audiosync), being a separate repo so that it can be installed optionally, and to keep Vidify modular.
+Vidify has an audio synchronization feature currently under testing. The full repository is in [vidify/audiosync](https://github.com/vidify/audiosync), being a separate repo so that it can be installed optionally, and to keep Vidify modular.
 
 This feature is only available on Linux for now. And this feature is much more precise on a lightweight video player like Mpv. You can install it with `pip install vidify[audiosync]`, along with the following dependencies:
 
@@ -123,7 +123,7 @@ The configuration file is created by default at your usual config directory:
 * Mac OS X: `~/Library/Preferences/vidify/config.ini`
 * Windows: `C:\Users\<username>\AppData\Local\vidify\config.ini`
 
-You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments, but keeps your settings for future usage. [Here's an example of one](https://github.com/marioortizmanero/vidify/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section.
+You can use a custom one by passing `--config-file <PATH>` as an argument. The config file is overriden by the configuration passed as arguments, but keeps your settings for future usage. [Here's an example of one](https://github.com/vidify/vidify/blob/master/example.ini). It uses the [INI config file formatting](https://en.wikipedia.org/wiki/INI_file). Most options are inside the `[Defaults]` section.
 
 All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
@@ -151,9 +151,9 @@ Helpful documentation links for contributing:
 * [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position), [Qt for Python](https://wiki.qt.io/Qt_for_Python).
 * [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv).
 
-The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/marioortizmanero/vidify/issues/26).
+The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/vidify/vidify/issues/26).
 
-The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/marioortizmanero/vidify/releases).
+The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/vidify/vidify/releases).
 
 ### Tests
 You can run the module locally with `python -m vidify`.

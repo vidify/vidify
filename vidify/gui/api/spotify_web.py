@@ -211,7 +211,7 @@ class SpotifyWebForm(QWidget):
         It can also show error messages.
         """
 
-        url = 'https://github.com/marioortizmanero/vidify/wiki/Spotify-Web-API'
+        url = 'https://github.com/vidify/vidify/wiki/Spotify-Web-API'
         text = QLabel(
             "<h2><i>Please introduce your Spotify keys</i></h2>"
             "If you don't know how to obtain them, please read this"

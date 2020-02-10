@@ -4,7 +4,7 @@ the GUI on the background. It's optional, so this is only used when the user
 passes --audiosync as a parameter, or indicates it in the config file.
 
 Check out the README.md and see the official repo for more information:
-https://github.com/marioortizmanero/vidify-audiosync
+https://github.com/vidify/audiosync
 """
 
 import logging

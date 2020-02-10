@@ -362,7 +362,7 @@ class MainWindow(QWidget):
         returned lag in milliseconds on the player.
 
         This assumes that the song wasn't paused until this issue is fixed:
-        https://github.com/marioortizmanero/vidify-audiosync/issues/12
+        https://github.com/vidify/audiosync/issues/12
         """
 
         logging.info("Audiosync module returned %d ms", lag)

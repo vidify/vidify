@@ -20,7 +20,7 @@ from vidify.version import __version__
 
 
 # Default config path in the system
-APP_DIRS = AppDirs("vidify", "marioom")
+APP_DIRS = AppDirs("vidify", "vidify")
 DEFAULT_PATH = os.path.join(APP_DIRS.user_config_dir, "config.ini")
 
 
@@ -251,7 +251,7 @@ class Config:
         self._argparser = argparse.ArgumentParser(
             prog="vidify",
             description="Read more about the options in the README and the"
-            " wiki at https://github.com/marioortizmanero/vidify")
+            " wiki at https://github.com/vidify/vidify")
         self.add_arguments()
 
         self._file = configparser.ConfigParser()
