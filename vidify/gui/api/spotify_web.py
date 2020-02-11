@@ -77,6 +77,7 @@ class SpotifyWebPrompt(QWidget):
     def client_secret(self) -> str:
         return self.web_form.client_secret
 
+    @Slot()
     def on_submit_creds(self) -> None:
         """
         Checking if the submitted credentials were correct, and starting the
@@ -117,6 +118,7 @@ class SpotifyWebPrompt(QWidget):
         url = self.creds.user_authorisation_url(self.scope)
         self.browser.url = url
 
+    @Slot()
     def on_login(self) -> None:
         """
         This function is called once the user has logged into Spotify to

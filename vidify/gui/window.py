@@ -85,6 +85,7 @@ class MainWindow(QWidget):
             logging.info("Using %s as the API", config.api)
             self.initialize_api(api_data)
 
+    @Slot()
     def on_api_selection(self, api_str: str) -> None:
         """
         Method called when the API is selected with APISelection.
@@ -170,6 +171,7 @@ class MainWindow(QWidget):
         self.conn_timer.timeout.connect(self.wait_for_connection)
         self.conn_timer.start(1000)
 
+    @Slot()
     def wait_for_connection(self) -> None:
         """
         Function called by start() to check every second if the connection
