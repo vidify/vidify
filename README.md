@@ -2,7 +2,7 @@
 
 <img src="images/logo.png" height=100 alt="logo" align="center"/>
 <h1>Vidify</h1>
-<span>Watch <b>live music videos</b> for the songs playing on your device</span>
+<span>Watch <b>music videos in real-time</b> for the songs playing on your device</span>
 
 <img alt="Travis" src="https://travis-ci.com/vidify/vidify.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/vidify"> <img alt="AUR version" src="https://img.shields.io/aur/version/vidify">
 
