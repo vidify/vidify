@@ -300,11 +300,12 @@ class MainWindow(QWidget):
             # First trying to stop the previous audiosync thread, as only
             # one audiosync thread can be running at once. If it wasn't
             # initialized, the worker is created.
-            logging.info("Stopping the previous audiosync thread")
             try:
+                logging.info("Stopping the previous audiosync thread")
                 self.audiosync.abort()
                 self.audiosync.wait()
             except AttributeError:
+                logging.info("Creating a new audiosync thread")
                 from vidify.audiosync import AudiosyncWorker
                 self.audiosync = AudiosyncWorker()
 

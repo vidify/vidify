@@ -6,7 +6,7 @@ import logging
 
 from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
                             QVBoxLayout)
-from qtpy.QtCore import Qt, QSize, Signal
+from qtpy.QtCore import Qt, QSize, Signal, Slot
 from tekore.scope import scopes
 from tekore.auth.refreshing import RefreshingCredentials, RefreshingToken
 from tekore.util import parse_code_from_url

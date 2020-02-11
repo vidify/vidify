@@ -3,6 +3,12 @@ Wraps the vidify_audiosync module in a QThread so that it can be used from
 the GUI on the background. It's optional, so this is only used when the user
 passes --audiosync as a parameter, or indicates it in the config file.
 
+Qt multithreading usually recommends to have the worker as a QObject to
+avoid inheriting from QThread. In this case though, the thread doesn't act
+as an event loop, since it's controlled inside the audiosync module. The
+thread just consists on calling the main run() function, and then being
+able to control and monitor its progress.
+
 Check out the README.md and see the official repo for more information:
 https://github.com/vidify/audiosync
 """

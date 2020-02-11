@@ -57,7 +57,6 @@ class YouTubeDLWorker(QThread):
 
         try:
             self.exit()
-            self.wait()
         except RuntimeError:
             pass
 
