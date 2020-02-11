@@ -6,15 +6,6 @@ __pycache__/
 # C extensions
 *.so
 
-# venv
-pyvenv.cfg
-bin/
-etc/
-include/
-share/
-lib64
-Scripts/
-
 # Vim
 *.*~
 *.swp
