@@ -33,9 +33,7 @@ def start_gui(config: Config) -> None:
     app.setWindowIcon(QIcon(Res.icon))
     window = MainWindow(config)
     window.show()
-    rc = app.exec_()
-    del window
-    sys.exit(rc)
+    sys.exit(app.exec_())
 
 
 def main() -> None:
