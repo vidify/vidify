@@ -26,13 +26,13 @@ class YouTubeDLWorker(QObject):
     fail = Signal()
     finish = Signal()
 
-    def __init__(self, debug: bool = False, width: Optional[int] = None,
-                 height: Optional[int] = None) -> None:
+    def __init__(self, query: str, debug: bool = False,
+                 width: Optional[int] = None, height: Optional[int] = None
+                 ) -> None:
         super().__init__()
 
         # The query attribute contains the full search to be done on YouTube.
-        # It will have to be modified before get_url is called.
-        self.query = None
+        self.query = query
 
         self.options = {
             'format': 'bestvideo',

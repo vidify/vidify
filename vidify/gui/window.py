@@ -69,14 +69,6 @@ class MainWindow(QWidget):
         else:
             self.audiosync = None
 
-        # The YoutubeDL object to obtain the video URLs is also saved inside
-        # the window object, so that new threads can be created to run it.
-        # Thus, the debug mode, width and height cannot be currently changed
-        # dynamically. This isn't necessary until the GUI is fully finished
-        # to support dynamic config modifications inside it.
-        self.youtubedl = YouTubeDLWorker(self.config.debug, self.config.width,
-                                         self.config.height)
-
         # The API initialization is more complex. For more details, please
         # check the flow diagram in vidify.api. First we have to check if
         # the API is saved in the config:
@@ -331,10 +323,11 @@ class MainWindow(QWidget):
         # Launching the thread with YouTube-DL to obtain the video URL
         # without blocking the GUI.
         logging.info("Starting the youtube-dl thread")
-        self.youtubedl.query = query
+        self.youtubedl = YouTubeDLWorker(
+            query, self.config.debug, self.config.width, self.config.height)
         self.yt_thread = QThread()
-        self.yt_thread.started.connect(self.youtubedl.get_url)
         self.youtubedl.moveToThread(self.yt_thread)
+        self.yt_thread.started.connect(self.youtubedl.get_url)
         self.youtubedl.success.connect(self.on_yt_success)
         self.youtubedl.fail.connect(self.on_youtubedl_fail)
         self.youtubedl.finish.connect(self.yt_thread.exit)
