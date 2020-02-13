@@ -29,7 +29,7 @@
 By default, Vidify includes the Spotify APIs and `python-vlc` for the player (you'll need [VLC](https://www.videolan.org/vlc/index.html) installed, too).
 
 * With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs or Players can be installed with `pip install --user vidify[extra1,extra2]`. See the [APIs section](#the-apis) and the [Players section](#the-players) for all the extra dependencies available.
-* Otherwise, the [latest stable releases](https://github.com/vidify/vidify/releases) have pre-compiled binaries for Windows.
+* Otherwise, the [latest stable releases](https://github.com/vidify/vidify/releases) have pre-compiled binaries for Windows and Linux.
 * Other installation methods for Linux:
     * Any distro: you can use snap to install it: `snap install vidify-qt`.
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).

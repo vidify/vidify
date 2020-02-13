@@ -14,8 +14,7 @@ from vidify import Platform, CURRENT_PLATFORM
 
 # The vidify installation path's resources folder, having in account that this
 # module is vidify.gui and that the resources folder is vidify.gui.res.
-RESOURCES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                              'res')
+RES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'res')
 
 
 class ColorsBase:
@@ -38,7 +37,7 @@ def res_path(rel_path: str) -> str:
     from directories other than the main one.
     """
 
-    return os.path.join(RESOURCES_PATH, rel_path)
+    return os.path.join(RES_DIR, rel_path)
 
 
 def res_font(name: str) -> str:

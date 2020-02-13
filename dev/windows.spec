@@ -4,7 +4,7 @@
 block_cipher = None
 
 a = Analysis(['..\\vidify\\__main__.py'],
-             pathex=['C:\\Users\\quini\\Downloads\\vidify'],
+             pathex=[''],
              binaries=[],
              datas=[('C:/Program Files/VideoLAN/VLC/libvlc.dll', '.'),
                     ('C:/Program Files/VideoLAN/VLC/axvlc.dll', '.'),
