@@ -10,8 +10,6 @@ from typing import Optional
 from youtube_dl import YoutubeDL
 from qtpy.QtCore import QObject, Signal
 
-from vidify import format_name
-
 
 class YouTubeDLWorker(QObject):
     """
