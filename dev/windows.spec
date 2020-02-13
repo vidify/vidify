@@ -3,16 +3,21 @@
 
 block_cipher = None
 
-a = Analysis(['..\\vidify\\__main__.py'],
+a = Analysis(['vidify\\__main__.py', 'vidify\\player\\vlc.py',
+			  'vidify\\api\\spotify\\swspotify.py',
+			  'vidify\\api\\spotify\\web.py'],
              pathex=[''],
              binaries=[],
              datas=[('C:/Program Files/VideoLAN/VLC/libvlc.dll', '.'),
                     ('C:/Program Files/VideoLAN/VLC/axvlc.dll', '.'),
                     ('C:/Program Files/VideoLAN/VLC/libvlccore.dll', '.'),
                     ('C:/Program Files/VideoLAN/VLC/npvlc.dll', '.'),
-                    ('C:/Program Files/VideoLAN/VLC/plugins', 'plugins')
+                    ('C:/Program Files/VideoLAN/VLC/plugins', 'plugins'),
+					('vidify\\gui\\res', '.')
              ],
-             hiddenimports=['six', 'vidify.player.vlc', 'tekore'],
+             hiddenimports=['qtpy', 'pyqt5', 'pyqtwebengine', 'six', 'tekore',
+                            'vidify.player.vlc', 'vidify.api.spotify.web',
+							'vidify.api.spotify.swspotify'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
