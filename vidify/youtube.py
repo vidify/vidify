@@ -2,35 +2,39 @@
 This module uses youtube-dl to obtain the actual URL of a YouTube link.
 That way, the video can be played directly with a video player like VLC
 or mpv.
-
-It also works with Qt asynchronously, sending a signal once it's done
-calling youtube-dl.
 """
 
 import logging
 from typing import Optional
 
-from youtube_dl import YoutubeDL, DownloadError
-from qtpy.QtCore import QThread, Signal
+from youtube_dl import YoutubeDL
+from qtpy.QtCore import QObject, Signal
 
 from vidify import format_name
 
 
-class YouTubeDLWorker(QThread):
+class YouTubeDLWorker(QObject):
+    """
+    YouTube class with config and function to get the direct url to the video.
+    It's intended to be used with QThreads, so it contains signals to
+    communicate asynchronously.
+
+    It will send a success signal with the obtained URL, or in case of error,
+    a fail signal with no data will be emitted instead. The finish signal
+    will also always be emitted at the end.
+    """
+
     success = Signal(str)
     fail = Signal()
+    finish = Signal()
 
-    def __init__(self, artist: str, title: str, debug: bool = False,
-                 width: Optional[int] = None, height: Optional[int] = None
-                 ) -> None:
-        """
-        YouTube class with config and function to get the direct url to
-        the video.
-        """
-
+    def __init__(self, debug: bool = False, width: Optional[int] = None,
+                 height: Optional[int] = None) -> None:
         super().__init__()
 
-        self.query = f"ytsearch:{format_name(artist, title)} Official Video"
+        # The query attribute contains the full search to be done on YouTube.
+        # It will have to be modified before get_url is called.
+        self.query = None
 
         self.options = {
             'format': 'bestvideo',
@@ -41,36 +45,24 @@ class YouTubeDLWorker(QThread):
         if height is not None:
             self.options['format'] += f'[height<={height}]'
 
-    def __del__(self) -> None:
+    def get_url(self) -> None:
         """
-        Avoids a segmentation fault when the app is closed while this thread
-        is in execution. It simply waits for this to finish and closes itself
-        afterwards.
-
-        The problem is that Python doesn't guarantee that __del__ is called
-        when the interpreter exits:
-        https://docs.python.org/3.8/reference/datamodel.html#object.__del__
-        so sometimes this message still may appear:
-            QThread: Destroyed while thread is still running
-            zsh: abort (core dumped)  python -m vidify --debug
-        """
-
-        try:
-            self.exit()
-        except RuntimeError:
-            pass
-
-    def run(self) -> None:
-        """
-        Getting the youtube direct link with youtube-dl asynchronously.
+        Getting the youtube direct link with youtube-dl, intended to be used
+        with a QThread. It's guaranteed that either a success signal or a
+        fail signal will be emitted.
         """
 
         with YoutubeDL(self.options) as ytdl:
             try:
                 info = ytdl.extract_info(self.query, download=False)
-            except DownloadError as e:
+            except Exception as e:
+                # Any kind of error has to be caught, so that it doesn't only
+                # send the error signal when the download wasn't successful
+                # (a DownloadError from youtube_dl).
                 logging.info("YouTube-dl wasn't able to obtain the video: %s",
                              str(e))
                 self.fail.emit()
             else:
                 self.success.emit(info['entries'][0]['url'])
+            finally:
+                self.finish.emit()

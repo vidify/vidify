@@ -17,7 +17,7 @@ from typing import Callable, Optional
 
 from qtpy.QtWidgets import QWidget, QLabel, QHBoxLayout
 from qtpy.QtGui import QFontDatabase
-from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot
+from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot, QThread
 
 from vidify import format_name
 from vidify.api import APIData, get_api_data, ConnectionNotReady
@@ -69,6 +69,14 @@ class MainWindow(QWidget):
         else:
             self.audiosync = None
 
+        # The YoutubeDL object to obtain the video URLs is also saved inside
+        # the window object, so that new threads can be created to run it.
+        # Thus, the debug mode, width and height cannot be currently changed
+        # dynamically. This isn't necessary until the GUI is fully finished
+        # to support dynamic config modifications inside it.
+        self.youtubedl = YouTubeDLWorker(self.config.debug, self.config.width,
+                                         self.config.height)
+
         # The API initialization is more complex. For more details, please
         # check the flow diagram in vidify.api. First we have to check if
         # the API is saved in the config:
@@ -85,7 +93,7 @@ class MainWindow(QWidget):
             logging.info("Using %s as the API", config.api)
             self.initialize_api(api_data)
 
-    @Slot()
+    @Slot(str)
     def on_api_selection(self, api_str: str) -> None:
         """
         Method called when the API is selected with APISelection.
@@ -296,11 +304,16 @@ class MainWindow(QWidget):
         self.timestamp = start_time
 
         # Loading the audio synchronization feature before anything else
+        query = f"ytsearch:{format_name(artist, title)} Official Video"
         if self.config.audiosync:
             # First trying to stop the previous audiosync thread, as only
             # one audiosync thread can be running at once. If it wasn't
             # initialized, the worker is created.
             try:
+                # Although inheriting from QThread and reusing the same object
+                # may not be the standard, QThread.start() is guaranteed to
+                # work once QThread.run() has returned. Thus, this will wait
+                # until it's done and launch the new one.
                 logging.info("Stopping the previous audiosync thread")
                 self.audiosync.abort()
                 self.audiosync.wait()
@@ -310,8 +323,7 @@ class MainWindow(QWidget):
                 self.audiosync = AudiosyncWorker()
 
             logging.info("Starting the audiosync thread")
-            self.audiosync.youtube_title = f"{format_name(artist, title)}" \
-                " Official Video"
+            self.audiosync.youtube_title = query
             self.audiosync.success.connect(self.on_audiosync_success)
             self.audiosync.failed.connect(self.on_audiosync_fail)
             self.audiosync.start()
@@ -319,12 +331,14 @@ class MainWindow(QWidget):
         # Launching the thread with YouTube-DL to obtain the video URL
         # without blocking the GUI.
         logging.info("Starting the youtube-dl thread")
-        self.youtubedl = YouTubeDLWorker(
-            self.api.artist, self.api.title, self.config.debug,
-            self.config.width, self.config.height)
+        self.youtubedl.query = query
+        self.yt_thread = QThread()
+        self.yt_thread.started.connect(self.youtubedl.get_url)
+        self.youtubedl.moveToThread(self.yt_thread)
         self.youtubedl.success.connect(self.on_yt_success)
         self.youtubedl.fail.connect(self.on_youtubedl_fail)
-        self.youtubedl.start()
+        self.youtubedl.finish.connect(self.yt_thread.exit)
+        self.yt_thread.start()
 
     @Slot()
     def on_youtubedl_fail(self) -> None:
