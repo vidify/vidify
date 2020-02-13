@@ -321,11 +321,11 @@ class MainWindow(QWidget):
                 logging.info("Creating a new audiosync thread")
                 from vidify.audiosync import AudiosyncWorker
                 self.audiosync = AudiosyncWorker()
+                self.audiosync.success.connect(self.on_audiosync_success)
+                self.audiosync.failed.connect(self.on_audiosync_fail)
 
             logging.info("Starting the audiosync thread")
             self.audiosync.youtube_title = query
-            self.audiosync.success.connect(self.on_audiosync_success)
-            self.audiosync.failed.connect(self.on_audiosync_fail)
             self.audiosync.start()
 
         # Launching the thread with YouTube-DL to obtain the video URL
