@@ -390,11 +390,9 @@ class MainWindow(QWidget):
         lag += self.config.audiosync_calibration
 
         logging.info("Total delay is %d ms", lag)
-        if lag == 0:
-            return
-        elif lag > 0:
+        if lag > 0:
             self.player.position += lag
-        else:
+        elif lag < 0:
             # If a negative delay is larger than the current player position,
             # the player position is set to zero after the lag has passed
             # with a timer.
