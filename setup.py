@@ -35,7 +35,7 @@ if is_installed('PySide2') and not is_installed('PyQt5'):
 # Use QtPy's default: PyQt5
 else:
     install_deps.append('PyQt5')
-    install_deps.append('PyQtWebEngine')
+    install_deps.append('PyQtWebEngine>=5.14.0')
 
 if platform.startswith('linux'):
     datafiles = [('share/applications', ['dev/vidify.desktop']),
