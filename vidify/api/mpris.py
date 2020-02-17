@@ -55,8 +55,6 @@ class MPRISAPI(APIBase):
         rest of the APIs.
         """
 
-        if self._no_position:
-            raise NotImplementedError
         return self._player_interface.Position // 1000
 
     def connect_api(self) -> None:
@@ -68,11 +66,6 @@ class MPRISAPI(APIBase):
         self._bus = pydbus.SessionBus()
         self._bus_name, self._obj = self._get_player()
 
-        # Some MPRIS players don't support the position feature, so this
-        # checks if it's in the blacklist to act accordingly when the
-        # position is requested.
-        position_blacklist = ('org.mpris.MediaPlayer2.spotify',)
-        self._no_position = self._bus_name in position_blacklist
         self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
         try:
