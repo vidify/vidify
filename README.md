@@ -4,9 +4,7 @@
 <h1>Vidify</h1>
 <span>Watch <b>music videos in real-time</b> for the songs playing on your device</span>
 
-<img alt="Travis" src="https://travis-ci.com/vidify/vidify.svg?branch=master"> <img alt="PyPi version" src="https://img.shields.io/pypi/v/vidify"> <img alt="AUR version" src="https://img.shields.io/aur/version/vidify">
-
-<hr>
+<a href="https://travis-ci.com/vidify/vidify"><img alt="Build Status" src="https://travis-ci.com/vidify/vidify.svg?branch=master"></a> <a href="https://pypi.org/project/vidify/"><img alt="PyPi version" src="https://img.shields.io/pypi/v/vidify"></a> <a href="https://aur.archlinux.org/packages/vidify/"><img alt="AUR version" src="https://img.shields.io/aur/version/vidify"></a>
 
 <img src="images/screenshot.png" alt="Example" align="center">
 
