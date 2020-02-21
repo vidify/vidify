@@ -62,13 +62,6 @@ class MainWindow(QWidget):
         logging.info("Using %s as the player", config.player)
         self.config = config
 
-        # The audiosync feature is optional until it's more stable.
-        if self.config.audiosync:
-            from vidify.audiosync import AudiosyncWorker
-            self.audiosync = AudiosyncWorker()
-        else:
-            self.audiosync = None
-
         # The API initialization is more complex. For more details, please
         # check the flow diagram in vidify.api. First we have to check if
         # the API is saved in the config:
@@ -198,6 +191,15 @@ class MainWindow(QWidget):
         else:
             logging.info("Succesfully connected to the API")
 
+            # Initializing the optional audio synchronization extension, now
+            # that there's access to the API's data. Note that this feature
+            # is only available on Linux.
+            if self.config.audiosync:
+                from vidify.audiosync import AudiosyncWorker
+                self.audiosync = AudiosyncWorker(self.api.player_name)
+                self.audiosync.success.connect(self.on_audiosync_success)
+                self.audiosync.failed.connect(self.on_audiosync_fail)
+
             # Stopping the timer and changing the label to the loading one.
             self.conn_timer.stop()
             self.layout.removeWidget(self.conn_label)
@@ -260,10 +262,8 @@ class MainWindow(QWidget):
         self.player.pause = not is_playing
         # If there is an audiosync thread running, this will pause the sound
         # recording and youtube downloading.
-        try:
+        if self.config.audiosync:
             self.audiosync.is_running = is_playing
-        except AttributeError:
-            pass
 
     @Slot(int)
     def change_video_position(self, ms: int) -> None:
@@ -297,28 +297,19 @@ class MainWindow(QWidget):
 
         # Loading the audio synchronization feature before anything else
         query = f"ytsearch:{format_name(artist, title)} Official Video"
+
         if self.config.audiosync:
             # First trying to stop the previous audiosync thread, as only
-            # one audiosync thread can be running at once. If it wasn't
-            # initialized, the worker is created.
-            try:
-                # Although inheriting from QThread and reusing the same object
-                # may not be the standard, QThread.start() is guaranteed to
-                # work once QThread.run() has returned. Thus, this will wait
-                # until it's done and launch the new one.
-                logging.info("Stopping the previous audiosync thread")
-                self.audiosync.abort()
-                self.audiosync.wait()
-            except AttributeError:
-                logging.info("Creating a new audiosync thread")
-                from vidify.audiosync import AudiosyncWorker
-                self.audiosync = AudiosyncWorker()
-                self.audiosync.success.connect(self.on_audiosync_success)
-                self.audiosync.failed.connect(self.on_audiosync_fail)
-
-            logging.info("Starting the audiosync thread")
+            # one audiosync thread can be running at once.
+            #
+            # Note: QThread.start() is guaranteed to work once QThread.run()
+            # has returned. Thus, this will wait until it's done and launch
+            # the new one.
+            self.audiosync.abort()
+            self.audiosync.wait()
             self.audiosync.youtube_title = query
             self.audiosync.start()
+            logging.info("Started a new audiosync job")
 
         # Launching the thread with YouTube-DL to obtain the video URL
         # without blocking the GUI.

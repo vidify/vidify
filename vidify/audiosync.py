@@ -1,5 +1,5 @@
 """
-Wraps the vidify_audiosync module in a QThread so that it can be used from
+Wraps the audiosync module in a QThread so that it can be used from
 the GUI on the background. It's optional, so this is only used when the user
 passes --audiosync as a parameter, or indicates it in the config file.
 
@@ -14,14 +14,13 @@ https://github.com/vidify/audiosync
 """
 
 import logging
-from typing import Optional
 
 try:
-    import vidify_audiosync as audiosync
+    import audiosync
 except ImportError:
     raise ImportError(
-        "No module named 'vidify_audiosync'.\n"
-        "To use audio synchronization, please install vidify_audiosync and"
+        "No module named 'audiosync'.\n"
+        "To use audio synchronization, please install vidify-audiosync and"
         " its dependencies. Read more about it in the installation guide.")
 from qtpy.QtCore import QThread, Signal
 
@@ -30,15 +29,17 @@ class AudiosyncWorker(QThread):
     success = Signal(int)
     failed = Signal()
 
-    def __init__(self, title: Optional[str] = None) -> None:
-        """
-        The vidify-audiosync call automatically obtains the YouTube audio
-        track.
-        """
-
+    def __init__(self, stream_name: str = None) -> None:
         super().__init__()
-        self.youtube_title = title
+
+        # The YouTube title name will have to be updated before running
+        # audiosync.
+        self.youtube_title = None
         self._is_running = False
+
+        # Tries to initialize the dedicated PulseAudio sink at the beginning.
+        if stream_name is not None:
+            audiosync.setup(stream_name)
 
     def __del__(self) -> None:
         """
