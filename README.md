@@ -112,7 +112,7 @@ usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--dark-
 | `-a`, `--api`                    | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
 | `-p`, `--player`                 | specify the player to use. See the [Players section](#the-players) for more info about the supported players. |
 | `--audiosync`                    | enables the [Audio Synchronization](#audio-synchronization) feature (disabled by default). |
-| `--audiosync-calibration`        | You can calibrate the delay in milliseconds audiosync returns with this. It can be positive or negative. The default is -800. |
+| `--audiosync-calibration`        | You can calibrate the delay in milliseconds audiosync returns with this. It can be positive or negative. The default is 0ms. |
 | `--config-file <PATH>`           | indicate the path of your [config file](#the-config-file).  |
 
 ### The config file
