@@ -262,7 +262,7 @@ class MainWindow(QWidget):
         self.player.pause = not is_playing
         # If there is an audiosync thread running, this will pause the sound
         # recording and youtube downloading.
-        if self.config.audiosync:
+        if self.config.audiosync and self.audiosync.status != 'idle':
             self.audiosync.is_running = is_playing
 
     @Slot(int)

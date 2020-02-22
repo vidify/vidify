@@ -77,6 +77,10 @@ class AudiosyncWorker(QThread):
             audiosync.pause()
         self._is_running = do_run
 
+    @property
+    def status(self) -> str:
+        return audiosync.status()
+
     def run(self) -> None:
         """
         The run function simply executes the C extension and emits the signal
