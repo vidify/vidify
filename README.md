@@ -84,7 +84,9 @@ audiosync = true
 
 You can calibrate the audiosync results with the option `--audiosync-calibration` or `audiosync_calibration`. By default it's -800 milliseconds, but it may depend on your hardware.
 
-*Note: if the audiosync module is seemingly doing nothing, or returning zero as the lag always, make sure that the sink being recorded is the one where the music is playing too. Here's an example on Pavucontrol (it's usually called 'Monitor of ...'):*
+*Note: if when using audiosync there's no sound, you might need to disable stream target device restore by editing the corresponing line in `/etc/pulse/default.pa` to `load-module module-stream-restore restore_device=false`.*
+
+*Note 2: you should make sure that the sink being recorded is either `audiosync`, or the one where the music is playing. Here's an example on Pavucontrol (it's usually called 'Monitor of ...'):*
 
 ![pavucontrol](images/pavucontrol-audiosync.png)
 
