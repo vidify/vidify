@@ -140,7 +140,10 @@ ln -s "/usr/lib/python3.8/site-packages/gi" "$venv_dir/lib/python3.8/site-packag
 or install it with pip following [this guide](https://pygobject.readthedocs.io/en/latest/getting_started.html).
 
 ### Vidify doesn't recognize some downloaded songs
-If the song doesn't have a metadata field with the title and the artist (the latter is optional), Vidify is unable to know what song is playing. Try to modify the metadata of your downloaded songs with VLC or any other tool.
+If the song doesn't have a metadata field with its title and artist (the latter is optional), Vidify is unable to know what song is playing. Try to modify the metadata of your downloaded songs with VLC or any other tool.
+
+### `FileNotFoundError: Could not find module 'libvlc.dll'. Try using the full path with constructor syntax.`
+Make sure that both Python and VLC are either 32 bits, or 64 bits, but not different. You should have a directory called `C:\Program Files (x86)\VideoLAN\VLC` (32b), or `C:\Program Files\VideoLAN\VLC` (64b).
 
 ---
 
