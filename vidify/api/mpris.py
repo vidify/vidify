@@ -22,12 +22,14 @@ from vidify.api.generic import APIBase
 
 
 class MPRISAPI(APIBase):
+    player_name: str = None
     artist: str = None
     title: str = None
     is_playing: bool = None
 
     def __init__(self) -> None:
         super().__init__()
+        self.player_name = ""
         self.artist = ""
         self.title = ""
         self.is_playing = False
@@ -66,12 +68,13 @@ class MPRISAPI(APIBase):
         self._bus = pydbus.SessionBus()
         self._bus_name, self._obj = self._get_player()
 
+        self.player_name = self._obj['org.mpris.MediaPlayer2'].Identity
         self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
 
         try:
             self._refresh_metadata()
         except IndexError:
-            raise ConnectionNotReady("No song is currently playing")
+            raise ConnectionNotReady("Metadata unavailable")
 
         self._start_event_loop()
 
@@ -87,25 +90,27 @@ class MPRISAPI(APIBase):
         # Iterating through every bus name and checking that it's valid.
         for bus_name in self._bus.get(".DBus", "DBus").ListNames():
             # It must be from MediaPlayer2
-            if bus_name.startswith('org.mpris.MediaPlayer2'):
-                # Trying to obtain the bus object
-                try:
-                    obj = self._bus.get(bus_name, '/org/mpris/MediaPlayer2')
-                except GLib.Error as e:
-                    logging.info("Skipping %s because of error: %s",
-                                 bus_name, str(e))
-                    continue
+            if not bus_name.startswith('org.mpris.MediaPlayer2'):
+                continue
 
-                # And making sure that it's playing at the moment (otherwise
-                # only the first player found would be returned, but it could
-                # not be the one actually being used).
-                if not self._bool_status(obj.PlaybackStatus):
-                    logging.info("Skipping %s because it's not playing at"
-                                 " the moment", bus_name)
-                    continue
+            # Trying to obtain the bus object
+            try:
+                obj = self._bus.get(bus_name, '/org/mpris/MediaPlayer2')
+            except GLib.Error as e:
+                logging.info("Skipping %s because of error: %s",
+                             bus_name, str(e))
+                continue
 
-                logging.info("Using %s", bus_name)
-                return bus_name, obj
+            # And making sure that it's playing at the moment (otherwise
+            # only the first player found would be returned, but it could
+            # not be the one actually being used).
+            if not self._bool_status(obj.PlaybackStatus):
+                logging.info("Skipping %s because it's not playing at"
+                             " the moment", bus_name)
+                continue
+
+            logging.info("Using %s", bus_name)
+            return bus_name, obj
 
         # ConnectionNotReady is raised at the end, in case that no valid
         # players were found.

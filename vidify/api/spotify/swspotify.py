@@ -23,6 +23,7 @@ from vidify.api.generic import APIBase
 
 
 class SwSpotifyAPI(APIBase):
+    player_name: str = "Spotify"
     artist: str = None
     title: str = None
     is_playing: bool = None

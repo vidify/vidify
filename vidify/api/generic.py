@@ -30,6 +30,18 @@ class APIBase(QObject):
 
     @property
     @abstractmethod
+    def player_name(self) -> str:
+        """
+        Returns the API's identification name for the player that's being
+        used. For example, the Spotify Web API will always have 'Spotify',
+        but other APIs like MPRIS can have multiple names, like 'VLC',
+        'Clementine'...
+
+        It has to be available after the API has been successfully connected.
+        """
+
+    @property
+    @abstractmethod
     def artist(self) -> str:
         """
         Returns the artist of the currently playing song.

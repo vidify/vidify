@@ -83,7 +83,7 @@ setup(
             'flake8'
         ],
         'audiosync': [
-            'vidify-audiosync'
+            'vidify-audiosync==0.2.*'
         ],
         'mpv': [
             'python-mpv'
