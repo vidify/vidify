@@ -29,7 +29,7 @@ vidify.gui.window module and this one:
                 |                               | No
                 v                               v
    +------------------------+     +--------------------------+
-   | Call custom function   |     | gui.start                |
+   | Call custom function   |     | gui.wait_for_connection  |
    | from APIData which     |     |--------------------------|
    | handles initialization +---->| Wait for the API connect |
    | inside the GUI window  |     | Run the init function    |

@@ -28,6 +28,9 @@ from vidify.lyrics import get_lyrics
 from vidify.gui import Fonts, Res, Colors
 from vidify.gui.components import APISelection
 
+# Some global variables used inside the module
+MAX_CONN_ATTEMPTS = 120  # 2 minutes, at 1 connection attempt/second
+
 
 class MainWindow(QWidget):
     def __init__(self, config: Config) -> None:
@@ -48,16 +51,15 @@ class MainWindow(QWidget):
         else:
             self.resize(config.width or 800, config.height or 600)
 
-        self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(0)
-
         # Loading the used fonts (Inter)
         font_db = QFontDatabase()
         for font in Res.fonts:
             font_db.addApplicationFont(font)
 
         # Initializing the player and saving the config object in the window.
+        self.layout = QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setSpacing(0)
         self.player = initialize_player(config.player, config)
         logging.info("Using %s as the player", config.player)
         self.config = config
@@ -98,7 +100,7 @@ class MainWindow(QWidget):
         # Starting the API initialization
         self.initialize_api(APIData[api_str])
 
-    def initialize_api(self, api_data: APIData, do_start: bool = True) -> None:
+    def initialize_api(self, api_data: APIData) -> None:
         """
         Initializes an API with the information from APIData.
         """
@@ -110,25 +112,27 @@ class MainWindow(QWidget):
             fn = getattr(self, api_data.gui_init_fn)
             fn()
             return
+
+        # Initializing the API with dependency injection.
         mod = importlib.import_module(api_data.module)
         cls = getattr(mod, api_data.class_name)
         self.api = cls()
 
-        # Some custom API initializations may not want to start the API
-        # inside this function.
-        if do_start:
-            self.start(self.api.connect_api, message=api_data.connect_msg,
-                       event_loop_interval=api_data.event_loop_interval)
+        self.wait_for_connection(
+            self.api.connect_api, message=api_data.connect_msg,
+            event_loop_interval=api_data.event_loop_interval)
 
-    def start(self, connect: Callable[[], None], message: Optional[str] = None,
-              event_loop_interval: int = 1000) -> None:
+    def wait_for_connection(self, connect_fn: Callable[[], None],
+            message: Optional[str] = None,
+            event_loop_interval: int = 1000) -> None:
         """
         Waits for a Spotify session to be opened or for a song to play.
         Times out after 30 seconds to avoid infinite loops or too many
         API/process requests. A custom message will be shown meanwhile.
 
-        If a `connect` call was succesful, the `init` function will be called
-        with `init_args` as arguments. Otherwise, the program is closed.
+        If a `connect_fn` call was succesful, the `init` function will be
+        called with `init_args` as arguments. Otherwise, the program is
+        closed.
 
         An event loop can also be initialized by passing `event_loop` and
         `event_interval`. If the former is None, nothing will be done.
@@ -136,39 +140,30 @@ class MainWindow(QWidget):
 
         # Initializing values as attributes so that they can be accessed
         # from the function called with QTimer.
-        self.conn_counter = 0
-        self.conn_fn = connect
-        self.conn_attempts = 120  # 2 minutes, at 1 connection attempt/second
+        self.conn_fn = connect_fn
+        self.conn_msg = message or "Waiting for connection"
+        self.conn_attempts = MAX_CONN_ATTEMPTS
         self.event_loop_interval = event_loop_interval
 
         # Creating a label with a loading message that will be shown when the
         # connection attempt is successful.
         self.loading_label = QLabel("Loading...")
+        self.loading_label.setWordWrap(True)
         self.loading_label.setFont(Fonts.title)
         self.loading_label.setMargin(50)
         self.loading_label.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(self.loading_label)
 
-        # Creating the label to wait for connection. It starts hidden, since
-        # it's only shown if the first attempt to connect fails.
-        self.conn_label = QLabel(message or "Waiting for connection")
-        self.conn_label.hide()
-        self.conn_label.setWordWrap(True)
-        self.conn_label.setFont(Fonts.header)
-        self.conn_label.setMargin(50)
-        self.conn_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.conn_label)
-
         # Creating the QTimer to check for connection every second.
         self.conn_timer = QTimer(self)
-        self.conn_timer.timeout.connect(self.wait_for_connection)
+        self.conn_timer.timeout.connect(self.try_connection)
         self.conn_timer.start(1000)
 
     @Slot()
-    def wait_for_connection(self) -> None:
+    def try_connection(self) -> None:
         """
-        Function called by start() to check every second if the connection
-        has been established.
+        Function called by wait_for_connection() to check every second if the
+        connection has been established, so that the program can start.
         """
 
         # Saving the starting timestamp for the audiosync feature
@@ -176,63 +171,66 @@ class MainWindow(QWidget):
 
         # Changing the loading message for the connection one if the first
         # connection attempt was unsuccessful.
-        if self.conn_counter == 1:
-            self.layout.removeWidget(self.loading_label)
-            self.loading_label.hide()
-            self.conn_label.show()
+        if self.conn_attempts == MAX_CONN_ATTEMPTS - 1:
+            self.loading_label.setText(self.conn_msg)
+            self.loading_label.setFont(Fonts.header)
 
-        # The APIs should raise `ConnectionNotReady` if the first attempt
-        # to get metadata from Spotify was unsuccessful.
-        logging.info("Connection attempt %d", self.conn_counter + 1)
+        # The APIs will raise `ConnectionNotReady` if the connection attempt
+        # was unsuccessful.
         try:
             self.conn_fn()
         except ConnectionNotReady:
             pass
         else:
-            logging.info("Succesfully connected to the API")
+            self.on_connection(start_time)
+            return
 
-            # Initializing the optional audio synchronization extension, now
-            # that there's access to the API's data. Note that this feature
-            # is only available on Linux.
-            if self.config.audiosync:
-                from vidify.audiosync import AudiosyncWorker
-                self.audiosync = AudiosyncWorker(self.api.player_name)
-                self.audiosync.success.connect(self.on_audiosync_success)
-                self.audiosync.failed.connect(self.on_audiosync_fail)
-
-            # Stopping the timer and changing the label to the loading one.
-            self.conn_timer.stop()
-            self.layout.removeWidget(self.conn_label)
-            del self.conn_timer
-            self.layout.removeWidget(self.conn_label)
-            self.conn_label.hide()
-            del self.conn_label
-            self.layout.removeWidget(self.loading_label)
-            del self.loading_label
-
-            # Loading the player and more
-            self.setStyleSheet(f"background-color:{Colors.black};")
-            self.layout.addWidget(self.player)
-            self.play_video(self.api.artist, self.api.title, start_time)
-
-            # Connecting to the signals generated by the API
-            self.api.new_song_signal.connect(self.play_video)
-            self.api.position_signal.connect(self.change_video_position)
-            self.api.status_signal.connect(self.change_video_status)
-
-            # Starting the event loop if it was initially passed as
-            # a parameter.
-            if self.event_loop_interval is not None:
-                self.start_event_loop(self.api.event_loop,
-                                      self.event_loop_interval)
-
-        self.conn_counter += 1
+        self.conn_attempts -= 1
+        logging.info("Connection attempts left: %d", self.conn_attempts)
 
         # If the maximum amount of attempts is reached, the app is closed.
-        if self.conn_counter >= self.conn_attempts:
+        if self.conn_attempts == 0:
             print("Timed out waiting for the connection")
-            self.conn_timer.stop()
             QCoreApplication.exit(1)
+
+    def on_connection(self, start_time: float) -> None:
+        """
+        Once the connection has been established correctly, the API can
+        be started properly.
+        """
+
+        logging.info("Succesfully connected to the API")
+
+        # Initializing the optional audio synchronization extension, now
+        # that there's access to the API's data. Note that this feature
+        # is only available on Linux.
+        if self.config.audiosync:
+            from vidify.audiosync import AudiosyncWorker
+            self.audiosync = AudiosyncWorker(self.api.player_name)
+            self.audiosync.success.connect(self.on_audiosync_success)
+            self.audiosync.failed.connect(self.on_audiosync_fail)
+
+        # Stopping the timer and changing the label to the loading one.
+        self.conn_timer.stop()
+        del self.conn_timer
+        self.layout.removeWidget(self.loading_label)
+        del self.loading_label
+
+        # Loading the player
+        self.setStyleSheet(f"background-color:{Colors.black};")
+        self.layout.addWidget(self.player)
+        self.play_video(self.api.artist, self.api.title, start_time)
+
+        # Connecting to the signals generated by the API
+        self.api.new_song_signal.connect(self.play_video)
+        self.api.position_signal.connect(self.change_video_position)
+        self.api.status_signal.connect(self.change_video_status)
+
+        # Starting the event loop if it was initially passed as
+        # a parameter.
+        if self.event_loop_interval is not None:
+            self.start_event_loop(self.api.event_loop,
+                                  self.event_loop_interval)
 
     def start_event_loop(self, event_loop: Callable[[], None],
                          ms: int) -> None:
@@ -260,6 +258,7 @@ class MainWindow(QWidget):
         """
 
         self.player.pause = not is_playing
+
         # If there is an audiosync thread running, this will pause the sound
         # recording and youtube downloading.
         if self.config.audiosync and self.audiosync.status != 'idle':
@@ -274,6 +273,11 @@ class MainWindow(QWidget):
         if not self.config.audiosync:
             self.player.position = ms
 
+        # Audiosync is aborted if the position of the video changed, since
+        # the audio being recorded won't make sense.
+        if self.config.audiosync and self.audiosync.status != 'idle':
+            self.audiosync.abort()
+
     @Slot(str, str, float)
     def play_video(self, artist: str, title: str, start_time: float) -> None:
         """
@@ -283,36 +287,55 @@ class MainWindow(QWidget):
 
         If an error was detected when downloading the video, the default one
         is shown instead.
+
+        Both audiosync and youtubedl work in separate threads to avoid
+        blocking the GUI. This method will start both of them.
         """
 
         # Checking that the artist and title are valid first of all
         if self.api.artist in (None, '') and self.api.title in (None, ''):
             logging.info("The provided artist and title are empty.")
             self.on_youtubedl_fail()
+            if self.config.audiosync:
+                self.on_audiosync_fail()
             return
 
         # This delay is used to know the elapsed time until the video
         # actually starts playing, used in the audiosync feature.
         self.timestamp = start_time
-
-        # Loading the audio synchronization feature before anything else
         query = f"ytsearch:{format_name(artist, title)} Official Video"
 
         if self.config.audiosync:
-            # First trying to stop the previous audiosync thread, as only
-            # one audiosync thread can be running at once.
-            #
-            # Note: QThread.start() is guaranteed to work once QThread.run()
-            # has returned. Thus, this will wait until it's done and launch
-            # the new one.
-            self.audiosync.abort()
-            self.audiosync.wait()
-            self.audiosync.youtube_title = query
-            self.audiosync.start()
-            logging.info("Started a new audiosync job")
+            self.launch_audiosync(query)
 
-        # Launching the thread with YouTube-DL to obtain the video URL
-        # without blocking the GUI.
+        self.launch_youtubedl(query)
+
+    def launch_audiosync(self, query: str) -> None:
+        """
+        Starts the audiosync thread, that will call either
+        self.on_audiosync_success, or self.on_audiosync_fail once it's
+        finished.
+
+        First trying to stop the previous audiosync thread, as only
+        one audiosync thread can be running at once.
+
+        Note: QThread.start() is guaranteed to work once QThread.run()
+        has returned. Thus, this will wait until it's done and launch
+        the new one.
+        """
+
+        self.audiosync.abort()
+        self.audiosync.wait()
+        self.audiosync.youtube_title = query
+        self.audiosync.start()
+        logging.info("Started a new audiosync job")
+
+    def launch_youtubedl(self, query: str) -> None:
+        """
+        Starts a YoutubeDL thread that will call either
+        self.on_youtubedl_success or self.on_youtubedl_fail once it's done.
+        """
+
         logging.info("Starting the youtube-dl thread")
         self.youtubedl = YouTubeDLWorker(
             query, self.config.debug, self.config.width, self.config.height)
@@ -446,8 +469,9 @@ class MainWindow(QWidget):
         # Initializing the web API
         self.api = SpotifyWebAPI(token)
         api_data = APIData['SPOTIFY_WEB']
-        self.start(self.api.connect_api, message=api_data.connect_msg,
-                   event_loop_interval=api_data.event_loop_interval)
+        self.wait_for_connection(
+                self.api.connect_api, message=api_data.connect_msg,
+                event_loop_interval=api_data.event_loop_interval)
 
         # The obtained credentials are saved for the future
         if save_config:
