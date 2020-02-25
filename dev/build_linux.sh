@@ -6,7 +6,7 @@ echo "Copying module..."
 rm -rf vidify
 cp -r  ../vidify .
 
-echo "Applying patches..."
+echo "Applying pre-build patches..."
 
 # The issue with Linux building is that there can't be a directory and a file
 # with the same name at once. But both the generated binary and the directory
@@ -26,3 +26,9 @@ echo 'import os; os.environ["VLC_PLUGIN_PATH"] = "/usr/lib64/vlc/plugins"' >> vi
 # Finally running pyinstaller
 echo "Running pyinstaller..."
 pyinstaller linux.spec --noconfirm
+
+echo "Applying post-build patches"
+
+# Required file not installed by default with Tekore.
+mkdir -p dist/vidify/tekore
+wget "https://raw.githubusercontent.com/felix-hilden/tekore/master/tekore/VERSION" -O "dist/vidify/tekore/VERSION"
