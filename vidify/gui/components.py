@@ -3,17 +3,18 @@ This module contains commonly used components so that their usage and
 initialization is easier. (specially the Web API authentication widgets).
 """
 
+import time
 import logging
-from typing import Optional
+from typing import Callable, Optional
 
 from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
                             QVBoxLayout, QGridLayout, QGroupBox)
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtCore import Qt, QSize, QUrl, Signal, Slot
+from qtpy.QtCore import Qt, QSize, QUrl, Signal, Slot, QTimer
 from qtpy.QtWebEngineWidgets import QWebEngineView
 
 from vidify import CURRENT_PLATFORM
-from vidify.api import APIData
+from vidify.api import APIData, ConnectionNotReady
 from vidify.gui import Fonts, Colors, Res
 
 
@@ -187,3 +188,72 @@ class WebBrowser(QWidget):
         """
 
         self.web_view.setUrl(QUrl(url))
+
+
+class APIConnecter(QLabel):
+    """
+    Wrapper to wait for the API session to be start or for a song to play.
+    Times out after MAX_ATTEMPTS attempts to avoid infinite loops or
+    too many requests. A custom message will be shown meanwhile.
+
+    The widget itself is a QLabel, because it will display its current
+    status.
+    """
+
+    INTERVAL = 1000  # 1 second in ms
+    MAX_ATTEMPTS = 300  # 5 minutes, at 1 connection attempt/second
+    success = Signal(float)
+    fail = Signal()
+
+    def __init__(self, connect_api: Callable[[], None], wait_msg: str) -> None:
+        super().__init__("Loading...")
+        self.wait_msg = wait_msg
+        self.connect_api = connect_api
+
+        self.setWordWrap(True)
+        self.setFont(Fonts.title)
+        self.setMargin(50)
+        self.setAlignment(Qt.AlignCenter)
+
+    def start(self) -> None:
+        """
+        Creating the QTimer to check for connection every second, and
+        starting it.
+        """
+
+        self.attempts = self.MAX_ATTEMPTS
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.try_connection)
+        self.timer.start(self.INTERVAL)
+
+    @Slot()
+    def try_connection(self) -> None:
+        """
+        Function called every second to check if the connection can be
+        established, so that the program can start.
+        """
+
+        # Saving the starting timestamp for the audiosync feature
+        start_time = time.time()
+
+        # Changing the loading message for the connection one if the first
+        # connection attempt was unsuccessful.
+        if self.attempts == self.MAX_ATTEMPTS - 1:
+            self.setText(self.wait_msg)
+            self.setFont(Fonts.header)
+
+        # The APIs will raise `ConnectionNotReady` if the connection attempt
+        # was unsuccessful.
+        try:
+            self.connect_api()
+        except ConnectionNotReady:
+            self.attempts -= 1
+            logging.info("Connection attempts left: %d", self.attempts)
+
+            # If the maximum amount of attempts is reached, the app is closed.
+            if self.attempts == 0:
+                self.timer.stop()
+                self.fail.emit()
+        else:
+            self.timer.stop()
+            self.success.emit(start_time)

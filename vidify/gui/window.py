@@ -26,10 +26,7 @@ from vidify.config import Config
 from vidify.youtube import YouTubeDLWorker
 from vidify.lyrics import get_lyrics
 from vidify.gui import Fonts, Res, Colors
-from vidify.gui.components import APISelection
-
-# Some global variables used inside the module
-MAX_CONN_ATTEMPTS = 120  # 2 minutes, at 1 connection attempt/second
+from vidify.gui.components import APISelection, APIConnecter
 
 
 class MainWindow(QWidget):
@@ -122,84 +119,42 @@ class MainWindow(QWidget):
             self.api.connect_api, message=api_data.connect_msg,
             event_loop_interval=api_data.event_loop_interval)
 
-    def wait_for_connection(self, connect_fn: Callable[[], None],
+    def wait_for_connection(self, conn_fn: Callable[[], None],
             message: Optional[str] = None,
             event_loop_interval: int = 1000) -> None:
+
         """
-        Waits for a Spotify session to be opened or for a song to play.
-        Times out after 30 seconds to avoid infinite loops or too many
-        API/process requests. A custom message will be shown meanwhile.
-
-        If a `connect_fn` call was succesful, the `init` function will be
-        called with `init_args` as arguments. Otherwise, the program is
-        closed.
-
-        An event loop can also be initialized by passing `event_loop` and
-        `event_interval`. If the former is None, nothing will be done.
+        Creates an APIConnecter instance and waits for the API to be
+        available, or times out otherwise.
         """
 
-        # Initializing values as attributes so that they can be accessed
-        # from the function called with QTimer.
-        self.conn_fn = connect_fn
-        self.conn_msg = message or "Waiting for connection"
-        self.conn_attempts = MAX_CONN_ATTEMPTS
         self.event_loop_interval = event_loop_interval
-
-        # Creating a label with a loading message that will be shown when the
-        # connection attempt is successful.
-        self.loading_label = QLabel("Loading...")
-        self.loading_label.setWordWrap(True)
-        self.loading_label.setFont(Fonts.title)
-        self.loading_label.setMargin(50)
-        self.loading_label.setAlignment(Qt.AlignCenter)
-        self.layout.addWidget(self.loading_label)
-
-        # Creating the QTimer to check for connection every second.
-        self.conn_timer = QTimer(self)
-        self.conn_timer.timeout.connect(self.try_connection)
-        self.conn_timer.start(1000)
+        self.api_connecter = APIConnecter(
+            conn_fn, message or "Waiting for connection")
+        self.api_connecter.success.connect(self.on_conn_success)
+        self.api_connecter.fail.connect(self.on_conn_fail)
+        self.layout.addWidget(self.api_connecter)
+        self.api_connecter.start()
 
     @Slot()
-    def try_connection(self) -> None:
+    def on_conn_fail(self) -> None:
         """
-        Function called by wait_for_connection() to check every second if the
-        connection has been established, so that the program can start.
+        If the API failed to connect, the app will be closed.
         """
 
-        # Saving the starting timestamp for the audiosync feature
-        start_time = time.time()
+        print("Timed out waiting for the connection")
+        QCoreApplication.exit(1)
 
-        # Changing the loading message for the connection one if the first
-        # connection attempt was unsuccessful.
-        if self.conn_attempts == MAX_CONN_ATTEMPTS - 1:
-            self.loading_label.setText(self.conn_msg)
-            self.loading_label.setFont(Fonts.header)
-
-        # The APIs will raise `ConnectionNotReady` if the connection attempt
-        # was unsuccessful.
-        try:
-            self.conn_fn()
-        except ConnectionNotReady:
-            pass
-        else:
-            self.on_connection(start_time)
-            return
-
-        self.conn_attempts -= 1
-        logging.info("Connection attempts left: %d", self.conn_attempts)
-
-        # If the maximum amount of attempts is reached, the app is closed.
-        if self.conn_attempts == 0:
-            print("Timed out waiting for the connection")
-            QCoreApplication.exit(1)
-
-    def on_connection(self, start_time: float) -> None:
+    @Slot(float)
+    def on_conn_success(self, start_time: float) -> None:
         """
         Once the connection has been established correctly, the API can
         be started properly.
         """
 
         logging.info("Succesfully connected to the API")
+        self.layout.removeWidget(self.api_connecter)
+        del self.api_connecter
 
         # Initializing the optional audio synchronization extension, now
         # that there's access to the API's data. Note that this feature
@@ -209,12 +164,6 @@ class MainWindow(QWidget):
             self.audiosync = AudiosyncWorker(self.api.player_name)
             self.audiosync.success.connect(self.on_audiosync_success)
             self.audiosync.failed.connect(self.on_audiosync_fail)
-
-        # Stopping the timer and changing the label to the loading one.
-        self.conn_timer.stop()
-        del self.conn_timer
-        self.layout.removeWidget(self.loading_label)
-        del self.loading_label
 
         # Loading the player
         self.setStyleSheet(f"background-color:{Colors.black};")
