@@ -50,7 +50,7 @@ class DataStructuresTest(unittest.TestCase):
         # Both are tested this way.
         for api in APIData:
             if CURRENT_PLATFORM in api.platforms:
-                win.initialize_api(get_api_data(api.name), do_start=False)
+                win.initialize_api(get_api_data(api.name))
 
         for player in PlayerData:
             initialize_player(player.name, config)

@@ -15,17 +15,17 @@ import logging
 import importlib
 from typing import Callable, Optional
 
-from qtpy.QtWidgets import QWidget, QLabel, QHBoxLayout
+from qtpy.QtWidgets import QWidget, QHBoxLayout
 from qtpy.QtGui import QFontDatabase
 from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot, QThread
 
 from vidify import format_name
-from vidify.api import APIData, get_api_data, ConnectionNotReady
+from vidify.api import APIData, get_api_data
 from vidify.player import initialize_player
 from vidify.config import Config
 from vidify.youtube import YouTubeDLWorker
 from vidify.lyrics import get_lyrics
-from vidify.gui import Fonts, Res, Colors
+from vidify.gui import Res, Colors
 from vidify.gui.components import APISelection, APIConnecter
 
 
@@ -120,8 +120,8 @@ class MainWindow(QWidget):
             event_loop_interval=api_data.event_loop_interval)
 
     def wait_for_connection(self, conn_fn: Callable[[], None],
-            message: Optional[str] = None,
-            event_loop_interval: int = 1000) -> None:
+                            message: Optional[str] = None,
+                            event_loop_interval: int = 1000) -> None:
 
         """
         Creates an APIConnecter instance and waits for the API to be
@@ -419,8 +419,8 @@ class MainWindow(QWidget):
         self.api = SpotifyWebAPI(token)
         api_data = APIData['SPOTIFY_WEB']
         self.wait_for_connection(
-                self.api.connect_api, message=api_data.connect_msg,
-                event_loop_interval=api_data.event_loop_interval)
+            self.api.connect_api, message=api_data.connect_msg,
+            event_loop_interval=api_data.event_loop_interval)
 
         # The obtained credentials are saved for the future
         if save_config:
