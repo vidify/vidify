@@ -319,15 +319,25 @@ class MainWindow(QWidget):
         """
 
         self.player.start_video(url, self.api.is_playing)
+
         if not self.config.audiosync:
             try:
                 self.player.position = self.api.position
             except NotImplementedError:
                 self.player.position = 0
+
         # Finally, the lyrics are displayed. If the video wasn't found, an
         # error message is shown.
         if self.config.lyrics:
             print(get_lyrics(self.api.artist, self.api.title))
+
+    @Slot()
+    def on_audiosync_fail(self) -> None:
+        """
+        Currently, when audiosync fails, nothing happens.
+        """
+
+        logging.info("Audiosync module failed to return the lag")
 
     @Slot(int)
     def on_audiosync_success(self, lag: int) -> None:
@@ -365,10 +375,6 @@ class MainWindow(QWidget):
                     -lag, lambda: self.change_video_position(0))
             else:
                 self.player.position += lag
-
-    @Slot()
-    def on_audiosync_fail(self) -> None:
-        logging.info("Audiosync module failed to return the lag")
 
     def init_spotify_web_api(self) -> None:
         """
