@@ -22,12 +22,12 @@ class ExternalPlayer(PlayerBase):
     # The name should be something like Vidify + system specs.
     # This part should also check that there aren't services with the same
     # name already.
-    SERVICE_NAME = "Vidify"
+    SERVICE_NAME = "vidify"
 
     # The service type includes the protocols used, like this:
     # "_<protocol>._<transportlayer>".
     # For now, the data is transmitted with TCP, so this is enough.
-    SERVICE_TYPE = "_http._tcp.local."
+    SERVICE_TYPE = "_vidify._tcp.local."
 
     # Trying to use both IPv4 and IPv6
     IP_VERSION = IPVersion.All
@@ -52,8 +52,11 @@ class ExternalPlayer(PlayerBase):
         self.start()
 
     def __del__(self) -> None:
-        self._server.close()
-        self.unregister_service()
+        try:
+            self._server.close()
+            self.unregister_service()
+        except:
+            pass
 
     def start(self) -> None:
         """
@@ -93,13 +96,13 @@ class ExternalPlayer(PlayerBase):
 
         # Other useful attributes for the connection.
         desc = {
-            'api': self._api_name,
-            'system': platform.platform()
+            'api': self._api_name
         }
 
+        # TODO: Make sure patform.system() doesn't return any '.'
         self.info = ServiceInfo(
             self.SERVICE_TYPE,
-            f"{self.SERVICE_NAME}.{self.SERVICE_TYPE}",
+            f"{self.SERVICE_NAME} - {platform.system()}.{self.SERVICE_TYPE}",
             addresses=[socket.inet_aton(self.address)],
             port=self.port,
             properties=desc
@@ -126,8 +129,10 @@ class ExternalPlayer(PlayerBase):
         if is_playing is not None:
             data['is_playing'] = is_playing
         dump = json.dumps(data).encode('utf-8')
+        logging.info("Sending message: %s", dump)
 
         for client in self._clients:
+            logging.info("Sent to %s", client.address)
             client.socket.write(dump)
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
