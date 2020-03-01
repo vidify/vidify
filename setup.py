@@ -87,6 +87,9 @@ setup(
         ],
         'mpv': [
             'python-mpv'
+        ],
+        'server': [
+            'zeroconf'
         ]
     },
     entry_points={

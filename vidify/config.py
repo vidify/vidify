@@ -183,6 +183,16 @@ class Options(Enum):
         int,
         0)
 
+    # Turning on the server mode: rather than showing the videos inside the
+    # application, they will be sent to the available devices.
+    server = (
+        "run Vidify as a server for a client such as Vidify TV",
+        ('-s', '--server'),
+        'store_true',
+        'Defaults',
+        bool,
+        False)
+
     # Arguments and options provided for the players.
     vlc_args = (
         "custom arguments used when opening VLC.",

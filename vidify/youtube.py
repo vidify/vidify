@@ -11,6 +11,23 @@ from youtube_dl import YoutubeDL
 from qtpy.QtCore import QObject, Signal
 
 
+def get_direct_url(data: dict) -> str:
+    """
+    Returns the direct video URL from the returned data by YoutubeDL, like
+    https://r1---sn-vg5obxn25po-cjod.googlevideo.com/videoplayback?...
+    """
+
+    return data['entries'][0]['url']
+
+
+def get_youtube_url(data: dict) -> str:
+    """
+    Returns the YouTube's URL from the returned data by YoutubeDL, like
+    https://www.youtube.com/watch?v=dQw4w9WgXcQ
+    """
+
+    return data['entries'][0]['webpage_url']
+
 class YouTubeDLWorker(QObject):
     """
     YouTube class with config and function to get the direct url to the video.
@@ -52,7 +69,7 @@ class YouTubeDLWorker(QObject):
 
         with YoutubeDL(self.options) as ytdl:
             try:
-                info = ytdl.extract_info(self.query, download=False)
+                data = ytdl.extract_info(self.query, download=False)
             except Exception as e:
                 # Any kind of error has to be caught, so that it doesn't only
                 # send the error signal when the download wasn't successful
@@ -61,6 +78,6 @@ class YouTubeDLWorker(QObject):
                              str(e))
                 self.fail.emit()
             else:
-                self.success.emit(info['entries'][0]['url'])
+                self.success.emit(data)
             finally:
                 self.finish.emit()
