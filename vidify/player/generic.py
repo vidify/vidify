@@ -8,7 +8,6 @@ from qtpy.QtWidgets import QFrame
 
 
 class PlayerBase(QFrame):
-    __metaclass__ = ABCMeta
     """
     The abstract base class used for any player in this app.
 
@@ -24,6 +23,11 @@ class PlayerBase(QFrame):
         introduction to the player, and a reminder to check this file for more
         information about the player modules.
     """
+
+    __metaclass__ = ABCMeta
+    # This boolean indicates if the player needs the direct link to the
+    # YouTube video, or just the YouTube URL. By default it's true.
+    DIRECT_URL = True
 
     @property
     @abstractmethod
@@ -51,17 +55,23 @@ class PlayerBase(QFrame):
     def position(self) -> int:
         """
         Returns the position of the player in milliseconds.
+
+        It may raise NotImplementedError if it's not possible to perform this
+        action.
         """
 
-    @position.setter
     @abstractmethod
-    def position(self, ms: int) -> None:
+    def set_position(self, ms: int, relative: bool = False) -> None:
         """
         Sets the player's position in milliseconds.
 
         If the player can end up in an undefined behavior due to modifying
         the position when the video hasn't loaded yet, this function should
         block until it's possible to do so.
+
+        Since some players only have write access to the position (like the
+        external), or have specific methods for relative, this method
+        can't be a @property. It also allows to use the relative flag.
         """
 
     @abstractmethod

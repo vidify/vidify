@@ -5,6 +5,7 @@ them.
 
 import importlib
 from enum import Enum
+from typing import Optional
 
 from vidify.config import Config
 from vidify.player.generic import PlayerBase
@@ -19,7 +20,7 @@ class PlayerData(Enum):
     Note: all player entries must have their name in uppercase.
     """
 
-    def __new__(cls, module: str, class_name: str, config_flags_name: str
+    def __new__(cls, module: str, class_name: str, flags_name: Optional[str]
                 ) -> object:
         obj = object.__new__(cls)
         # The module location to import (for dependency injection).
@@ -29,11 +30,12 @@ class PlayerData(Enum):
         # The name of the player's option in the Config module used to provide
         # flags or additional information. The flags argument is always
         # optional.
-        obj.config_flags_name = config_flags_name
+        obj.flags_name = flags_name
         return obj
 
     VLC = ('vidify.player.vlc', 'VLCPlayer', 'vlc_args')
     MPV = ('vidify.player.mpv', 'MpvPlayer', 'mpv_flags')
+    EXTERNAL = ('vidify.player.external', 'ExternalPlayer', 'api')
 
 
 def initialize_player(key: str, config: Config) -> PlayerBase:
@@ -55,10 +57,10 @@ def initialize_player(key: str, config: Config) -> PlayerBase:
     cls = getattr(mod, player.class_name)
     # No other arguments are needed for now, so all this does is initialize
     # the player with the config flags (if present).
-    try:
-        flags = getattr(config, player.flags_name)
-    except AttributeError:
+    if player.flags_name is None:
         obj = cls()
     else:
+        flags = getattr(config, player.flags_name)
         obj = cls(flags)
+
     return obj
