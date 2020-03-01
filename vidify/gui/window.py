@@ -202,12 +202,6 @@ class MainWindow(QWidget):
             self.start_event_loop(self.api.event_loop,
                                   self.event_loop_interval)
 
-        # Launching as a server if enabled
-        if self.config.server:
-            from vidify.server import Server
-            self.server = Server(self.api.player_name)
-            self.server.start()
-
     def start_event_loop(self, event_loop: Callable[[], None],
                          ms: int) -> None:
         """
@@ -238,11 +232,7 @@ class MainWindow(QWidget):
         if self.config.audiosync and self.audiosync.status != 'idle':
             self.audiosync.is_running = is_playing
 
-        if self.config.server:
-            self.server.send(get_youtube_url(self.video_data),
-                             is_playing=is_playing)
-        else:
-            self.player.pause = not is_playing
+        self.player.pause = not is_playing
 
     @Slot(int)
     def change_video_position(self, ms: int) -> None:
@@ -255,12 +245,8 @@ class MainWindow(QWidget):
         if self.config.audiosync and self.audiosync.status != 'idle':
             self.audiosync.abort()
 
-        if self.config.server:
-            self.server.send(get_youtube_url(self.video_data),
-                             absolute_pos=ms)
-        else:
-            if not self.config.audiosync:
-                self.player.position = ms
+        if not self.config.audiosync:
+            self.player.set_position(ms)
 
     @Slot(str, str, float)
     def play_video(self, artist: str, title: str, start_time: float) -> None:
@@ -337,11 +323,6 @@ class MainWindow(QWidget):
               " internet connection or because the provided data was invalid."
               " For more information, enable the debug mode.")
 
-        # Communicating the error to the client
-        if self.config.server:
-            self.server.send(None)
-            return
-
         # Or playing the default video in the GUI
         self.player.start_video(Res.default_video, self.api.is_playing)
 
@@ -356,18 +337,14 @@ class MainWindow(QWidget):
         except NotImplementedError:
             position = 0
 
-        # Sending it to the clients if needed
-        if self.config.server:
-            self.server.send(get_youtube_url(data), absolute_pos=position,
-                             is_playing=is_playing)
-            return
-
         # Otherwise, playing the video inside the GUI. If audiosync is
         # enabled, the position is ignored. That way, it can stay
         # synchronized.
-        self.player.start_video(get_direct_url(data), is_playing)
+        url = get_direct_url(data) if self.player.DIRECT_URL \
+            else get_youtube_url(data)
+        self.player.start_video(url, is_playing)
         if not self.config.audiosync:
-            self.player.position = position
+            self.player.set_position(position)
 
         # Finally, the lyrics are displayed.
         if self.config.lyrics:
@@ -403,11 +380,6 @@ class MainWindow(QWidget):
         # hardware and other things). Thus, it will almost always be a
         # negative value.
         lag += self.config.audiosync_calibration
-
-        if self.config.server:
-            self.server.send(get_youtube_url(self.video_data),
-                             relative_pos=lag)
-            return
 
         logging.info("Total delay is %d ms", lag)
         if lag > 0:

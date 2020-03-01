@@ -39,7 +39,7 @@ class YouTubeDLWorker(QObject):
     will also always be emitted at the end.
     """
 
-    success = Signal(str)
+    success = Signal(dict)
     fail = Signal()
     finish = Signal()
 
