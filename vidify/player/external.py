@@ -50,6 +50,9 @@ class Client(QObject):
         self.socket.readyRead.connect(self.on_recv)
         logging.info("[client:%s] connected", self.address)
 
+    def __repr__(self) -> None:
+        return f"<Client with IP {self.address}>"
+
     @Slot()
     def on_connected(self):
         logging.info("[client:%s] event", self.address)
@@ -134,7 +137,7 @@ class ExternalPlayer(PlayerBase):
         # programatically, and will be updated later.
         self.labels = {}
         for key, prefix in self._LABEL_PREFIXES.items():
-            self.labels[key] = QLabel(prefix + '?')
+            self.labels[key] = QLabel(prefix + '-')
             self.labels[key].setStyleSheet("padding: 20px; color: white")
             self.labels[key].setWordWrap(True)
             self.labels[key].setFont(Fonts.bigtext)
@@ -160,15 +163,16 @@ class ExternalPlayer(PlayerBase):
         the service so that clients can find Vidify.
         """
 
-        if self._server.listen(QHostAddress.Any, self.port):
-            # Updating the port to the one that's actually being used.
-            self.port = self._server.serverPort()
-            logging.info("Server is listening on port %d", self.port)
-            # Now that the port is known, the Vidify service can be
-            # registered.
-            self.register_service()
-        else:
+        if not self._server.listen(QHostAddress.Any, self.port):
             logging.info("Server couldn't wake up")
+            return
+
+        # Updating the port to the one that's actually being used.
+        self.port = self._server.serverPort()
+        logging.info("Server is listening on port %d", self.port)
+        # Now that the port is known, the Vidify service can be
+        # registered.
+        self.register_service()
 
     @Slot()
     def on_new_connection(self) -> None:
@@ -249,11 +253,12 @@ class ExternalPlayer(PlayerBase):
         if is_playing is not None:
             data['is_playing'] = is_playing
         dump = json.dumps(data).encode('utf-8')
-        logging.info("Sending message: %s", dump)
 
         for client in self._clients:
-            logging.info("Sent to %s", client.address)
             client.socket.write(dump)
+            client.socket.flush()
+
+        logging.info("Sent message '%s' to %s", dump, str(self._clients))
 
         # The label refresh is done in a separate method at the end to send
         # the TCP packet as soon as possible. This part isn't important.
