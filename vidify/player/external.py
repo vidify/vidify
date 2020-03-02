@@ -33,9 +33,52 @@ from vidify.player import PlayerBase
 from vidify.gui import Res, Fonts
 
 
+class Client(QObject):
+    """
+    The client object is used by the external player to hold information
+    about a connection.
+    """
+
+    finish = Signal(object)
+
+    def __init__(self, sock: QTcpSocket) -> None:
+        super().__init__()
+        self.socket = sock
+        self.address = self.socket.peerAddress().toString()
+        self.socket.connected.connect(self.on_connected)
+        self.socket.disconnected.connect(self.on_disconnected)
+        self.socket.readyRead.connect(self.on_recv)
+        logging.info("[client:%s] connected", self.address)
+
+    @Slot()
+    def on_connected(self):
+        logging.info("[client:%s] event", self.address)
+
+    @Slot()
+    def on_disconnected(self):
+        logging.info("[client:%s] disconnected", self.address)
+        self.finish.emit(self)
+
+    @Slot()
+    def on_recv(self):
+        """
+        Assuming the client sent a message encoded with JSON
+        """
+
+        msg = self.socket.readAll().data().decode('utf-8')
+        try:
+            data = json.loads(msg)
+        except json.decoder.JSONDecodeError as e:
+            logging.info("[client:%s] sent invalid message (%s). Original: %s",
+                         self.address, str(e), msg)
+        else:
+            logging.info("[client:%s] sent: %s", self.address, data)
+
+
 class ExternalPlayer(PlayerBase):
     """
-    The server object handles asynchronously the connection with a client.
+    The external player acts as a server that sends information about the
+    videos to other sources.
     """
 
     # External players require a YouTube URL rather than the direct URL,
@@ -60,12 +103,13 @@ class ExternalPlayer(PlayerBase):
         'url': '<b>URL:</b> ',
         'relative_pos': '<b>Last relative position change:</b> ',
         'absolute_pos': '<b>Last absolute position change:</b> ',
-        'is_playing': '<b>Is it playing?:</b> '
+        'is_playing': '<b>Is it playing?:</b> ',
+        'clients': '<b>Connected clients:</b> '
     }
 
     def __init__(self, api_name: str) -> None:
         """
-        This also initializes the TCP server.
+        This initializes both the player widget and the TCP server.
         """
 
         super().__init__()
@@ -84,7 +128,7 @@ class ExternalPlayer(PlayerBase):
         self.title.setStyleSheet("padding: 30px; color: white")
         self.title.setFont(Fonts.title)
         self.layout.addWidget(self.title)
-        self.log_layout = QVBoxLayout(self)
+        self.log_layout = QVBoxLayout()
         self.layout.addLayout(self.log_layout)
         # There's a label for each attribute, so they are initialized
         # programatically, and will be updated later.
@@ -136,7 +180,17 @@ class ExternalPlayer(PlayerBase):
             logging.info("Accepting connection number %d", len(self._clients))
             client = Client(self._server.nextPendingConnection())
             self._clients.append(client)
-            client.finish.connect(lambda: self._clients.remove(client))
+            client.finish.connect(self.drop_connection)
+            self.update_label('clients', len(self._clients))
+
+    @Slot(object)
+    def drop_connection(self, client: Client) -> None:
+        """
+        Callback for whenever a client disconnects.
+        """
+
+        self._clients.remove(client)
+        self.update_label('clients', len(self._clients))
 
     def register_service(self) -> None:
         """
@@ -237,40 +291,3 @@ class ExternalPlayer(PlayerBase):
     @pause.setter
     def pause(self, do_pause: bool) -> bool:
         self.send_message(self._media, is_playing=not do_pause)
-
-
-class Client(QObject):
-    finish = Signal(object)
-
-    def __init__(self, sock: QTcpSocket) -> None:
-        super().__init__()
-        self.socket = sock
-        self.address = self.socket.peerAddress().toString()
-        self.socket.connected.connect(self.on_connected)
-        self.socket.disconnected.connect(self.on_disconnected)
-        self.socket.readyRead.connect(self.on_recv)
-        logging.info("[client:%s] connected", self.address)
-
-    @Slot()
-    def on_connected(self):
-        logging.info("[client:%s] event", self.address)
-
-    @Slot()
-    def on_disconnected(self):
-        logging.info("[client:%s] disconnected", self.address)
-        self.finish.emit(self)
-
-    @Slot()
-    def on_recv(self):
-        """
-        Assuming the client sent a message encoded with JSON
-        """
-
-        msg = self.socket.readAll().data().decode('utf-8')
-        try:
-            data = json.loads(msg)
-        except json.decoder.JSONDecodeError as e:
-            logging.info("[client:%s] sent invalid message (%s). Original: %s",
-                         self.address, str(e), msg)
-        else:
-            logging.info("[client:%s] sent: %s", self.address, data)
