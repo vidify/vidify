@@ -77,6 +77,24 @@ class MainWindow(QWidget):
             logging.info("Using %s as the API", config.api)
             self.initialize_api(api_data)
 
+    def closeEvent(self, event) -> None:
+        """
+        When the user closes the app, this makes sure that the most important
+        attributes are correctly deleted.
+        """
+
+        logging.info("Closing event deteted")
+        try:
+            if self.config.audiosync:
+                self.audiosync.abort()
+                self.audiosync.wait()
+            self.yt_thread.stop()
+            self.yt_thread.wait()
+            del self.player, self.api
+        except:
+            pass
+        super().closeEvent(event)
+
     @Slot(str)
     def on_api_selection(self, api_str: str) -> None:
         """

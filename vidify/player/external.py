@@ -147,9 +147,10 @@ class ExternalPlayer(PlayerBase):
         self.start_server()
 
     def __del__(self) -> None:
+        logging.info("Closing the server and unregistering the service")
         try:
-            self._server.close()
             self.unregister_service()
+            self._server.close()
         except:
             pass
 
