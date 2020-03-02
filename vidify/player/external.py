@@ -1,3 +1,23 @@
+"""
+The defined object model for the external API is:
+
+{
+    url: 'https://youtube.com/...',
+    relative_pos: -1200,
+    absolute_pos: 4000,
+    is_playing: true
+}
+
+`url` is a mandatory field that indicates in respect to what video the update
+is being sent. The client will compare it to the currently playing video.
+If it's the same, it will just update it. Otherwise, a new video will start
+playing with the indicated properties.
+
+The position field can be indicated as relative or absolute to the current
+status to the video. If both are provided, the absolute position has
+priority over the relative.
+"""
+
 import time
 import json
 import socket
