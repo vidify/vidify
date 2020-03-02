@@ -24,12 +24,13 @@ import socket
 import logging
 import platform
 
-from qtpy.QtCore import QObject, Slot, Signal
+from qtpy.QtCore import QObject, Slot, Signal, Qt
 from qtpy.QtNetwork import QTcpServer, QHostAddress, QTcpSocket
+from qtpy.QtWidgets import QVBoxLayout, QLabel
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 from vidify.player import PlayerBase
-from vidify.gui import Res
+from vidify.gui import Res, Fonts
 
 
 class ExternalPlayer(PlayerBase):
@@ -37,6 +38,8 @@ class ExternalPlayer(PlayerBase):
     The server object handles asynchronously the connection with a client.
     """
 
+    # External players require a YouTube URL rather than the direct URL,
+    # so that they comply with YouTube's Terms Of Service.
     DIRECT_URL = False
 
     # The name should be something like Vidify + system specs.
@@ -52,6 +55,14 @@ class ExternalPlayer(PlayerBase):
     # Trying to use both IPv4 and IPv6
     IP_VERSION = IPVersion.All
 
+    # Prefixes for the labels shown in the layout
+    _LABEL_PREFIXES = {
+        'url': '<b>URL:</b> ',
+        'relative_pos': '<b>Last relative position change:</b> ',
+        'absolute_pos': '<b>Last absolute position change:</b> ',
+        'is_playing': '<b>Is it playing?:</b> '
+    }
+
     def __init__(self, api_name: str) -> None:
         """
         This also initializes the TCP server.
@@ -66,10 +77,30 @@ class ExternalPlayer(PlayerBase):
         self._media = None
         self._clients = []
 
+        # The player itself contains a label to show messages.
+        self.layout = QVBoxLayout(self)
+        self.layout.setAlignment(Qt.AlignTop)
+        self.title = QLabel("External player")
+        self.title.setStyleSheet("padding: 30px; color: white")
+        self.title.setFont(Fonts.title)
+        self.layout.addWidget(self.title)
+        self.log_layout = QVBoxLayout(self)
+        self.layout.addLayout(self.log_layout)
+        # There's a label for each attribute, so they are initialized
+        # programatically, and will be updated later.
+        self.labels = {}
+        for key, prefix in self._LABEL_PREFIXES.items():
+            self.labels[key] = QLabel(prefix + '?')
+            self.labels[key].setStyleSheet("padding: 20px; color: white")
+            self.labels[key].setWordWrap(True)
+            self.labels[key].setFont(Fonts.bigtext)
+            self.labels[key].setAlignment(Qt.AlignHCenter)
+            self.log_layout.addWidget(self.labels[key])
+
         # Initializing the TCP server
         self._server = QTcpServer()
         self._server.newConnection.connect(self.on_new_connection)
-        self.start()
+        self.start_server()
 
     def __del__(self) -> None:
         try:
@@ -78,16 +109,17 @@ class ExternalPlayer(PlayerBase):
         except:
             pass
 
-    def start(self) -> None:
+    def start_server(self) -> None:
         """
-        Starts to wait for new connections asynchronously.
+        Starts to wait for new connections asynchronously, and registers
+        the service so that clients can find Vidify.
         """
 
         if self._server.listen(QHostAddress.Any, self.port):
             # Updating the port to the one that's actually being used.
             self.port = self._server.serverPort()
             logging.info("Server is listening on port %d", self.port)
-                # Now that the port is known, the Vidify service can be
+            # Now that the port is known, the Vidify service can be
             # registered.
             self.register_service()
         else:
@@ -95,6 +127,11 @@ class ExternalPlayer(PlayerBase):
 
     @Slot()
     def on_new_connection(self) -> None:
+        """
+        When a new client connects to this server, it's added to the current
+        clients list until it disconnects.
+        """
+
         while self._server.hasPendingConnections():
             logging.info("Accepting connection number %d", len(self._clients))
             client = Client(self._server.nextPendingConnection())
@@ -118,33 +155,41 @@ class ExternalPlayer(PlayerBase):
         desc = {
             'api': self._api_name
         }
+        # The name can't have '.', because it's a special character used as
+        # a separator, and some NSD clients can't handle names with it.
+        system = f"{platform.system()}, {platform.node()}".replace('.', '_')
 
-        # TODO: Make sure patform.system() doesn't return any '.'
         self.info = ServiceInfo(
             self.SERVICE_TYPE,
-            f"{self.SERVICE_NAME} - {platform.system()}.{self.SERVICE_TYPE}",
+            f"{self.SERVICE_NAME} - {system}.{self.SERVICE_TYPE}",
             addresses=[socket.inet_aton(self.address)],
             port=self.port,
-            properties=desc
-        )
+            properties=desc)
 
-        self.zeroconf = Zeroconf(ip_version=self.IP_VERSION)
         logging.info("Registering Vidify service")
+        self.zeroconf = Zeroconf(ip_version=self.IP_VERSION)
         self.zeroconf.register_service(self.info)
 
     def unregister_service(self) -> None:
         self.zeroconf.unregister_service(self.info)
         self.zeroconf.close()
 
-    def send_message(self, url: str = None, relative_pos: int = None,
-                     absolute_pos: int = None, is_playing: bool = None
+    def send_message(self, url: str, absolute_pos: int = None,
+                     relative_pos: int = None, is_playing: bool = None
                      ) -> None:
+        """
+        Sends a message with the structure defined at the top of this module.
+        """
+
         data = {}
+        # The URL shall only be null when the video couldn't be found.
+        # Otherwise, it won't be included in the message.
         if url is not None:
             data['url'] = None if url == Res.default_video else url
+        # The absolute position has priority over the relative.
         if absolute_pos is not None:
             data['absolute_pos'] = absolute_pos
-        if relative_pos is not None:
+        elif relative_pos is not None:
             data['relative_pos'] = relative_pos
         if is_playing is not None:
             data['is_playing'] = is_playing
@@ -154,6 +199,18 @@ class ExternalPlayer(PlayerBase):
         for client in self._clients:
             logging.info("Sent to %s", client.address)
             client.socket.write(dump)
+
+        # The label refresh is done in a separate method at the end to send
+        # the TCP packet as soon as possible. This part isn't important.
+        for key, val in data.items():
+            self.update_label(key, val)
+
+    def update_label(self, key: str, val: any) -> None:
+        """
+        Updating the labels in the widget, using a consistent syntax.
+        """
+
+        self.labels[key].setText(f"{self._LABEL_PREFIXES[key]}{val}")
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
         self._timestamp = time.time()
@@ -191,7 +248,7 @@ class Client(QObject):
         self.address = self.socket.peerAddress().toString()
         self.socket.connected.connect(self.on_connected)
         self.socket.disconnected.connect(self.on_disconnected)
-        self.socket.readyRead.connect(self.on_readyRead)
+        self.socket.readyRead.connect(self.on_recv)
         logging.info("[client:%s] connected", self.address)
 
     @Slot()
@@ -204,7 +261,7 @@ class Client(QObject):
         self.finish.emit(self)
 
     @Slot()
-    def on_readyRead(self):
+    def on_recv(self):
         """
         Assuming the client sent a message encoded with JSON
         """

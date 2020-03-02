@@ -94,7 +94,7 @@ class DataStructuresTest(unittest.TestCase):
         """
 
         for player in PlayerData:
-            if player.config_flags_name is not None:
+            for flag in player.flags:
                 getattr(Options, player.config_flags_name)
 
     def test_gui_init_exists(self):

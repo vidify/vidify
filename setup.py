@@ -88,7 +88,7 @@ setup(
         'mpv': [
             'python-mpv'
         ],
-        'server': [
+        'external': [
             'zeroconf'
         ]
     },
