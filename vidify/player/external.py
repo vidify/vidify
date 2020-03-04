@@ -47,47 +47,49 @@ class Client(QObject):
         super().__init__()
         self.socket = sock
         self.address = self.socket.peerAddress().toString()
-        self.socket.connected.connect(self.on_connected)
         self.socket.disconnected.connect(self.on_disconnected)
         self.socket.readyRead.connect(self.on_recv)
-        logging.info("[client:%s] connected", self.address)
 
     def __repr__(self) -> None:
         return f"<Client with IP {self.address}>"
 
     @Slot()
-    def on_connected(self):
-        logging.info("[client:%s] event", self.address)
-
-    @Slot()
     def on_disconnected(self):
-        logging.info("[client:%s] disconnected", self.address)
+        logging.info("%s disconnected", self)
         self.finish.emit(self)
 
     @Slot()
     def on_recv(self):
         """
-        Assuming the client sent a message encoded with JSON
+        Assuming the client sent a message encoded with JSON.
+
+        Currently unused, as the client doesn't send messages to the server.
         """
 
         msg = self.socket.readAll().data().decode('utf-8')
         try:
             data = json.loads(msg)
         except json.decoder.JSONDecodeError as e:
-            logging.info("[client:%s] sent invalid message (%s). Original: %s",
-                         self.address, str(e), msg)
+            logging.info("%s sent invalid message: %s. Original: %s",
+                         self, str(e), msg)
         else:
-            logging.info("[client:%s] sent: %s", self.address, data)
+            logging.info("%s sent: %s", self, data)
 
 
 class ExternalPlayer(PlayerBase):
     """
     The external player acts as a server that sends information about the
     videos to other sources.
+
+    It's used the same way as any other player, but it internally handles the
+    connection to clients and sends them the data.
+
+    It uses the Network Service Discovery (NSD) protocol to be visible by
+    any other device, and so that they can connect to it.
     """
 
-    # External players require a YouTube URL rather than the direct URL,
-    # so that they comply with YouTube's Terms Of Service.
+    # The external player requires a YouTube URL rather than the direct URL,
+    # so that it complies with YouTube's Terms Of Service.
     DIRECT_URL = False
 
     # The name should be something like Vidify + system specs.
@@ -123,8 +125,11 @@ class ExternalPlayer(PlayerBase):
         self.port = 0
         self._timestamp = 0
         self._api_name = api_name
-        self._media = None
         self._clients = []
+        # The external player saves the previous values so that they can be
+        # sent to new connections.
+        self._url = None
+        self._is_playing = None
 
         # The player itself contains a label to show messages.
         self.layout = QVBoxLayout(self)
@@ -192,7 +197,7 @@ class ExternalPlayer(PlayerBase):
             # Updating the GUI
             self.update_label('clients', len(self._clients))
             # Sending it the available data
-            send_message(self._clients, self._media)
+            self.send_message([client], self._url, is_playing=self._is_playing)
 
     @Slot(object)
     def drop_connection(self, client: Client) -> None:
@@ -223,7 +228,7 @@ class ExternalPlayer(PlayerBase):
         }
         # The name can't have '.', because it's a special character used as
         # a separator, and some NSD clients can't handle names with it.
-        system = f"{platform.system()}, {platform.node()}".replace('.', '_')
+        system = f"{platform.system()} ({platform.node()})".replace('.', '_')
 
         self.info = ServiceInfo(
             self.SERVICE_TYPE,
@@ -279,23 +284,21 @@ class ExternalPlayer(PlayerBase):
 
         self.labels[key].setText(f"{self._LABEL_PREFIXES[key]}{val}")
 
-    def start_video(self, media: str, is_playing: bool = True) -> None:
+    def start_video(self, url: str, is_playing: bool = True) -> None:
         self._timestamp = time.time()
-        self._media = media
-        self.send_message(self._clients, media, is_playing=is_playing)
+        self._url = url
+        self._is_playing = is_playing
+        self.send_message(self._clients, url, is_playing=is_playing)
 
     @property
     def position(self) -> bool:
         return time.time() - self._timestamp if self._timestamp != 0 else 0
 
     def set_position(self, ms: int, relative: bool = False) -> None:
-        if self._media is None:
-            return
-
         if relative:
-            self.send_message(self._clients, self._media, relative_pos=ms)
+            self.send_message(self._clients, self._url, relative_pos=ms)
         else:
-            self.send_message(self._clients, self._media, absolute_pos=ms)
+            self.send_message(self._clients, self._url, absolute_pos=ms)
 
     @property
     def pause(self) -> bool:
@@ -303,4 +306,5 @@ class ExternalPlayer(PlayerBase):
 
     @pause.setter
     def pause(self, do_pause: bool) -> bool:
-        self.send_message(self._clients, self._media, is_playing=not do_pause)
+        self.send_message(self._clients, self._url, is_playing=not do_pause)
+        self._is_playing = not do_pause
