@@ -23,12 +23,14 @@ import json
 import socket
 import logging
 import platform
+from typing import Tuple
 
 from qtpy.QtCore import QObject, Slot, Signal, Qt
 from qtpy.QtNetwork import QTcpServer, QHostAddress, QTcpSocket
 from qtpy.QtWidgets import QVBoxLayout, QLabel
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
+from vidify import CURRENT_PLATFORM
 from vidify.player import PlayerBase
 from vidify.gui import Res, Fonts
 
@@ -183,10 +185,14 @@ class ExternalPlayer(PlayerBase):
 
         while self._server.hasPendingConnections():
             logging.info("Accepting connection number %d", len(self._clients))
+            # Saving the client in the internal list
             client = Client(self._server.nextPendingConnection())
-            self._clients.append(client)
             client.finish.connect(self.drop_connection)
+            self._clients.append(client)
+            # Updating the GUI
             self.update_label('clients', len(self._clients))
+            # Sending it the available data
+            send_message(self._clients, self._media)
 
     @Slot(object)
     def drop_connection(self, client: Client) -> None:
@@ -212,6 +218,7 @@ class ExternalPlayer(PlayerBase):
 
         # Other useful attributes for the connection.
         desc = {
+            'os': CURRENT_PLATFORM.name,
             'api': self._api_name
         }
         # The name can't have '.', because it's a special character used as
@@ -233,9 +240,9 @@ class ExternalPlayer(PlayerBase):
         self.zeroconf.unregister_service(self.info)
         self.zeroconf.close()
 
-    def send_message(self, url: str, absolute_pos: int = None,
-                     relative_pos: int = None, is_playing: bool = None
-                     ) -> None:
+    def send_message(self, clients: Tuple[Client], url: str,
+                     absolute_pos: int = None, relative_pos: int = None,
+                     is_playing: bool = None) -> None:
         """
         Sends a message with the structure defined at the top of this module.
         """
@@ -254,9 +261,9 @@ class ExternalPlayer(PlayerBase):
             data['is_playing'] = is_playing
         dump = json.dumps(data).encode('utf-8')
 
-        for client in self._clients:
-            client.socket.write(dump)
-            client.socket.flush()
+        for c in clients:
+            c.socket.write(dump)
+            c.socket.flush()
 
         logging.info("Sent message '%s' to %s", dump, str(self._clients))
 
@@ -275,7 +282,7 @@ class ExternalPlayer(PlayerBase):
     def start_video(self, media: str, is_playing: bool = True) -> None:
         self._timestamp = time.time()
         self._media = media
-        self.send_message(media, is_playing=is_playing)
+        self.send_message(self._clients, media, is_playing=is_playing)
 
     @property
     def position(self) -> bool:
@@ -286,9 +293,9 @@ class ExternalPlayer(PlayerBase):
             return
 
         if relative:
-            self.send_message(self._media, relative_pos=ms)
+            self.send_message(self._clients, self._media, relative_pos=ms)
         else:
-            self.send_message(self._media, absolute_pos=ms)
+            self.send_message(self._clients, self._media, absolute_pos=ms)
 
     @property
     def pause(self) -> bool:
@@ -296,4 +303,4 @@ class ExternalPlayer(PlayerBase):
 
     @pause.setter
     def pause(self, do_pause: bool) -> bool:
-        self.send_message(self._media, is_playing=not do_pause)
+        self.send_message(self._clients, self._media, is_playing=not do_pause)
