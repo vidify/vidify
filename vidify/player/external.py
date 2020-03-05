@@ -328,7 +328,7 @@ class ExternalPlayer(PlayerBase):
         else:
             return int((self._pause_time - pos) * 1000)
 
-    def set_position(self, ms: int, relative: bool = False) -> None:
+    def seek(self, ms: int, relative: bool = False) -> None:
         """
         After sending the update to the clients, the internal position
         tracker has to be updated, too. The relative position will use the

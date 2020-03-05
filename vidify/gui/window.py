@@ -243,7 +243,7 @@ class MainWindow(QWidget):
             self.audiosync.abort()
 
         if not self.config.audiosync:
-            self.player.set_position(ms)
+            self.player.seek(ms)
 
     @Slot(str, str, float)
     def play_video(self, artist: str, title: str, start_time: float) -> None:
@@ -345,7 +345,7 @@ class MainWindow(QWidget):
             else get_youtube_url(data)
         self.player.start_video(url, is_playing)
         if not self.config.audiosync:
-            self.player.set_position(position)
+            self.player.seek(position)
 
         # Finally, the lyrics are displayed.
         if self.config.lyrics:

@@ -70,7 +70,7 @@ class MpvPlayer(PlayerBase):
         time = self._mpv.playback_time
         return round(time * 1000) if time is not None else 0
 
-    def set_position(self, ms: int, relative: bool = False) -> None:
+    def seek(self, ms: int, relative: bool = False) -> None:
         """
         Mpv will throw an error if the position is changed before the video
         starts, so this waits for 'seekable' to be set to True.

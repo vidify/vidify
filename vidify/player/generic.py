@@ -70,7 +70,7 @@ class PlayerBase(QFrame):
         """
 
     @abstractmethod
-    def set_position(self, ms: int, relative: bool = False) -> None:
+    def seek(self, ms: int, relative: bool = False) -> None:
         """
         Sets the player's position in milliseconds.
 

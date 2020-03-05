@@ -64,7 +64,7 @@ class VLCPlayer(PlayerBase):
     def position(self) -> int:
         return self._player.get_time()
 
-    def set_position(self, ms: int, relative: bool = False) -> None:
+    def seek(self, ms: int, relative: bool = False) -> None:
         if relative:
             ms += self._player.get_time()
         logging.info("Position set to %d milliseconds", ms)
