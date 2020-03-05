@@ -15,6 +15,7 @@
 * [Installation](#installation)
     * [The APIs](#the-apis)
     * [The Players](#the-players)
+        * [The External Player (Vidify TV)](#the-external-player)
     * [Audio Synchronization](#audio-synchronization)
 * [Usage and configuration](#usage)
 * [FAQ](#faq)
@@ -51,10 +52,11 @@ The internal name inside parenthesis is used for the [arguments](#usage) and the
 ### The players
 The embedded video players inside the app. Vidify uses external players because they already come with codecs installed. The default one is VLC because it's more popular, but you can use others if you have the player installed, and the Python extra dependencies. For example, to install Vidify with Mpv support, you'd run `pip install --user vidify[mpv]`, which installs `python-mpv`.
 
-| Name           | Extra requirements   | Description                                           | Arguments/config options                      |
-|----------------|----------------------|-------------------------------------------------------|-----------------------------------------------|
-| VLC (`vlc`)    | Installed by default | The default video player. Widely used and very solid. |`--vlc-args <VLC_ARGS>`                        |
-| Mpv (`mpv`)    | `python-mpv`         | A simple and portable video player.                   | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
+| Name                  | Extra requirements   | Description                                                                                             | Arguments/config options                      |
+|-----------------------|----------------------|---------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| VLC (`vlc`)           | Installed by default | The default video player. Widely used and very solid.                                                   |`--vlc-args <VLC_ARGS>`                        |
+| Mpv (`mpv`)           | `python-mpv`         | A simple and portable video player.                                                                     | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
+| External (`external`) | `zeroconf`           | Plays the videos on external devices. Check the [external players section](#the-external-player) for more. | None                                          |
 
 For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name. You can use `--player mpv` or save it in your config file for future usage:
 
@@ -62,6 +64,11 @@ For now, the only way to specify what player to use is with [arguments](#usage) 
 [Defaults]
 player = mpv
 ```
+
+#### The external player
+Vidify can play videos on any platform. If you use the `external` player, the connected device will receive the necessary information to play the music videos. You'll need `zeroconf`, which can be pre-installed with `pip install vidify[external]`.
+
+This is a WIP feature, and it's currently available on any Android system. Please check out the [Play Store page](https://play.google.com/store/apps/details?id=com.glowapps.vidify). It's also available for Chromecast and Amazon Fire TV Stick.
 
 ### Audio synchronization
 Vidify has an audio synchronization feature currently under testing. The full repository is in [vidify/audiosync](https://github.com/vidify/audiosync), being a separate repo so that it can be installed optionally.
