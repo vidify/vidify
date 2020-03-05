@@ -1,13 +1,14 @@
-import os
 import time
 import unittest
 
+import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
 from vidify.player.external import ExternalPlayer
 
 
-app = QApplication(['vidify'])
+if QApplication.instance() is None:
+    _ = QApplication(["vidify"])
 p = ExternalPlayer("test")
 POS_MARGIN = 10  # In milliseconds
 
@@ -19,6 +20,7 @@ def pos_equal(p1: float, p2: float) -> bool:
 class ExternalPlayerTest(unittest.TestCase):
     def setUp(self):
         super().setUp()
+        global p
         p = ExternalPlayer("test")
 
     def test_is_playing(self):
@@ -85,27 +87,27 @@ class ExternalPlayerTest(unittest.TestCase):
         p.start_video("test")
         # Time passing should modify the position
         p.set_position(0, relative=False)
-        time.sleep(0.75)
-        self.assertTrue(pos_equal(750, p.position))
+        time.sleep(0.25)
+        self.assertTrue(pos_equal(250, p.position))
         # Only if it's not paused
         p.pause = True
-        time.sleep(0.5)
-        self.assertTrue(pos_equal(750, p.position))
+        time.sleep(0.2)
+        self.assertTrue(pos_equal(250, p.position))
 
     def test_position_new_videos(self):
         # Playing new videos
         # If it starts paused, it shouldn't be modified
         p.start_video("test", is_playing=False)
-        time.sleep(0.5)
+        time.sleep(0.1)
         self.assertTrue(pos_equal(0, p.position))
         # If it starts playing, it should act as usual
         p.start_video("test", is_playing=True)
-        time.sleep(0.5)
-        self.assertTrue(pos_equal(500, p.position))
+        time.sleep(0.3)
+        self.assertTrue(pos_equal(300, p.position))
         # Same if it was paused before starting
         p.pause = True
         p.start_video("test", is_playing=False)
-        time.sleep(0.5)
+        time.sleep(0.1)
         self.assertTrue(pos_equal(0, p.position))
 
 

@@ -161,7 +161,7 @@ class ExternalPlayer(PlayerBase):
         try:
             self.unregister_service()
             self._server.close()
-        except:
+        except Exception:
             pass
 
     def start_server(self) -> None:
@@ -229,11 +229,15 @@ class ExternalPlayer(PlayerBase):
         }
         # The name can't have '.', because it's a special character used as
         # a separator, and some NSD clients can't handle names with it.
-        system = f"{platform.system()} ({platform.node()})".replace('.', '_')
+        system = f"{platform.system()} {platform.node()}".replace('.', '_')
+        full_name = f"{self.SERVICE_NAME} - {system}"
+        # The name's maximum length is 64 bytes
+        if len(full_name) >= 64:
+            full_name = full_name[:60] + "..."
 
         self.info = ServiceInfo(
             self.SERVICE_TYPE,
-            f"{self.SERVICE_NAME} - {system}.{self.SERVICE_TYPE}",
+            f"{full_name}.{self.SERVICE_TYPE}",
             addresses=[socket.inet_aton(self.address)],
             port=self.port,
             properties=desc)
@@ -332,7 +336,7 @@ class ExternalPlayer(PlayerBase):
         timestamp from when the previous video started playing.
         """
 
-        # Checking for out-of-bounds access with negative values. In that 
+        # Checking for out-of-bounds access with negative values. In that
         # case, the position should be set to zero instead.
         if (relative and self.position + ms < 0) or (not relative and ms < 0):
             self.send_message(self._clients, self._url, absolute_pos=0)

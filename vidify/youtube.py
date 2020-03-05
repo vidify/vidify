@@ -28,6 +28,7 @@ def get_youtube_url(data: dict) -> str:
 
     return data['entries'][0]['webpage_url']
 
+
 class YouTubeDLWorker(QObject):
     """
     YouTube class with config and function to get the direct url to the video.

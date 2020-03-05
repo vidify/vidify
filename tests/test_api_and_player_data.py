@@ -6,6 +6,7 @@ throughout the entire module.
 
 import unittest
 
+import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
 from vidify import CURRENT_PLATFORM, Platform
@@ -15,9 +16,10 @@ from vidify.player import PlayerData, initialize_player
 from vidify.config import Config, Options
 
 
+if QApplication.instance() is None:
+    _ = QApplication(["vidify"])
 config = Config()
 config.parse()
-app = QApplication(['vidify'])
 win = MainWindow(config)
 
 

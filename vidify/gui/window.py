@@ -89,7 +89,7 @@ class MainWindow(QWidget):
             self.yt_thread.stop()
             self.yt_thread.wait()
             del self.player, self.api
-        except:
+        except Exception:
             pass
         super().closeEvent(event)
 
