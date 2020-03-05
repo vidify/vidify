@@ -35,6 +35,9 @@ class PlayerBase(QFrame):
         """
         Returns the current status of the player as a boolean. True means the
         player is paused, and False means it's currently playing.
+
+        Its behaviour is undefined if it's called before a video starts
+        playing.
         """
 
     @pause.setter
@@ -48,6 +51,9 @@ class PlayerBase(QFrame):
         It's used this way because it's more versatile: a boolean can be
         provided instead of using play() or pause(), making sure the player
         does what it's told.
+
+        Its behaviour is undefined if it's called before a video starts
+        playing.
         """
 
     @property
@@ -58,6 +64,9 @@ class PlayerBase(QFrame):
 
         It may raise NotImplementedError if it's not possible to perform this
         action.
+
+        Its behaviour is undefined if it's called before a video starts
+        playing.
         """
 
     @abstractmethod
@@ -72,6 +81,11 @@ class PlayerBase(QFrame):
         Since some players only have write access to the position (like the
         external), or have specific methods for relative, this method
         can't be a @property. It also allows to use the relative flag.
+
+        If the absolute position has a negative value, it should use zero.
+
+        Its behaviour is undefined if it's called before a video starts
+        playing.
         """
 
     @abstractmethod

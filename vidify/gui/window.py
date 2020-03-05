@@ -57,8 +57,6 @@ class MainWindow(QWidget):
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
-        self.player = initialize_player(config.player, config)
-        logging.info("Using %s as the player", config.player)
         self.config = config
 
         # The API initialization is more complex. For more details, please
@@ -183,8 +181,10 @@ class MainWindow(QWidget):
             self.audiosync.success.connect(self.on_audiosync_success)
             self.audiosync.failed.connect(self.on_audiosync_fail)
 
-        # Loading the player
+        # Initializing the player and starting the first video
         self.setStyleSheet(f"background-color:{Colors.black};")
+        self.player = initialize_player(self.config.player, self.config)
+        logging.info("Using %s as the player", self.config.player)
         self.layout.addWidget(self.player)
         self.play_video(self.api.artist, self.api.title, start_time)
 

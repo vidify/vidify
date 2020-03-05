@@ -123,7 +123,7 @@ class ExternalPlayer(PlayerBase):
         # If the port is set to zero, it's chosen automatically. This avoids
         # conflicts when the port is already being used.
         self.port = 0
-        self._timestamp = 0
+        self._time_delay = 0
         self._api_name = api_name
         self._clients = []
         # The external player saves the previous values so that they can be
@@ -219,6 +219,7 @@ class ExternalPlayer(PlayerBase):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(('8.8.8.8', 1))
         self.address = s.getsockname()[0]
+        s.close()
         logging.info("Using address %s", self.address)
 
         # Other useful attributes for the connection.
@@ -285,26 +286,83 @@ class ExternalPlayer(PlayerBase):
         self.labels[key].setText(f"{self._LABEL_PREFIXES[key]}{val}")
 
     def start_video(self, url: str, is_playing: bool = True) -> None:
-        self._timestamp = time.time()
+        """
+        """
+
+        self._position = 0
+        self._start_time = time.time()
+        if not is_playing:
+            self._pause_time = self._start_time
+
         self._url = url
         self._is_playing = is_playing
         self.send_message(self._clients, url, is_playing=is_playing)
 
     @property
-    def position(self) -> bool:
-        return time.time() - self._timestamp if self._timestamp != 0 else 0
+    def position(self) -> int:
+        """
+        This will return the theoretical position of the external player in
+        milliseconds.
+
+        The player doesn't know the position of the clients, so it's
+        simulated inside this class. It's a bit complicated, since there are
+        four factors that can modify the position:
+            * Changing the position manually (absolute)
+            * Changing the position manually (relative)
+            * Pausing a video: a timestamp of when the video was paused has to
+            be saved in order to return the correct position when the player
+            is still paused. After playing the video again, the position
+            tracker (self._position) has to be updated.
+            * The start of a new video: the position tracker starts at zero.
+            If the video doesn't start playing
+        """
+
+        pos = self._start_time - self._position
+
+        if self._is_playing:
+            return int((time.time() - pos) * 1000)
+        else:
+            return int((self._pause_time - pos) * 1000)
 
     def set_position(self, ms: int, relative: bool = False) -> None:
+        """
+        After sending the update to the clients, the internal position
+        tracker has to be updated, too. The relative position will use the
+        previous position value, and the absolute position will use the
+        timestamp from when the previous video started playing.
+        """
+
+        # Checking for out-of-bounds access with negative values. In that 
+        # case, the position should be set to zero instead.
+        if (relative and self.position + ms < 0) or (not relative and ms < 0):
+            self.send_message(self._clients, self._url, absolute_pos=0)
+            self._position = 0
+            return
+
         if relative:
             self.send_message(self._clients, self._url, relative_pos=ms)
+            self._position += ms / 1000
         else:
             self.send_message(self._clients, self._url, absolute_pos=ms)
+            self._position = ms / 1000
 
     @property
     def pause(self) -> bool:
-        raise NotImplementedError
+        return not self._is_playing
 
     @pause.setter
     def pause(self, do_pause: bool) -> bool:
+        """
+        Pausing the video also alters the player position. This means that
+        when the video is paused, the timestamp is saved. That way, when the
+        video starts playing again, it can be calculated, and while it's
+        paused, the correct position will be returned.
+        """
+
+        if do_pause:
+            self._pause_time = time.time()
+        else:
+            self._start_time += time.time() - self._pause_time
+
         self.send_message(self._clients, self._url, is_playing=not do_pause)
         self._is_playing = not do_pause

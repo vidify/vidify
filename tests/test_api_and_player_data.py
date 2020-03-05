@@ -95,7 +95,7 @@ class DataStructuresTest(unittest.TestCase):
 
         for player in PlayerData:
             for flag in player.flags:
-                getattr(Options, player.config_flags_name)
+                getattr(Options, flag)
 
     def test_gui_init_exists(self):
         """
