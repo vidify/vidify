@@ -9,7 +9,7 @@ from vidify.player.external import ExternalPlayer
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
-p = ExternalPlayer("test")
+p: ExternalPlayer = None
 POS_MARGIN = 10  # In milliseconds
 
 
@@ -22,6 +22,11 @@ class ExternalPlayerTest(unittest.TestCase):
         super().setUp()
         global p
         p = ExternalPlayer("test")
+
+    def tearDown(self):
+        global p
+        del p
+        super().tearDown()
 
     def test_is_playing(self):
         # Starting a new video and pausing it
