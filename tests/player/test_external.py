@@ -67,17 +67,17 @@ class ExternalPlayerTest(unittest.TestCase):
             # this function, so the results should be the same when the video
             # starts paused or playing.
             p.start_video("test")
-            p.set_position(0, relative=False)
+            p.seek(0, relative=False)
             self.assertTrue(pos_equal(0, p.position))
-            p.set_position(-1000, relative=False)
+            p.seek(-1000, relative=False)
             self.assertTrue(pos_equal(0, p.position))
-            p.set_position(1000, relative=False)
+            p.seek(1000, relative=False)
             self.assertTrue(pos_equal(1000, p.position))
-            p.set_position(1000, relative=True)
+            p.seek(1000, relative=True)
             self.assertTrue(pos_equal(2000, p.position))
-            p.set_position(-500, relative=True)
+            p.seek(-500, relative=True)
             self.assertTrue(pos_equal(1500, p.position))
-            p.set_position(-5000, relative=True)
+            p.seek(-5000, relative=True)
             self.assertTrue(pos_equal(0, p.position))
 
         test_manual_change(False)
@@ -86,7 +86,7 @@ class ExternalPlayerTest(unittest.TestCase):
     def test_position_with_sleep(self):
         p.start_video("test")
         # Time passing should modify the position
-        p.set_position(0, relative=False)
+        p.seek(0, relative=False)
         time.sleep(0.25)
         self.assertTrue(pos_equal(250, p.position))
         # Only if it's not paused
