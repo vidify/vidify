@@ -31,7 +31,7 @@ By default, Vidify includes the Spotify APIs and `python-vlc` for the player (yo
 * Other installation methods for Linux:
     * Any distro: you can use snap to install it: `snap install vidify-qt`.
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
-    * Gentoo: there's an e-build maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) at [media-video/vidify](https://packages.gentoo.org/packages/media-video/vidify).
+    * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) at [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
     * *Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.*
 
 *Note: Vidify requires Python >= 3.6.*
