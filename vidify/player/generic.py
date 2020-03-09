@@ -1,5 +1,6 @@
 """
 Generic implementation of a player that can be used in this app.
+This describes the exact behaviour the players should have.
 """
 
 
@@ -14,17 +15,13 @@ class PlayerBase(QFrame):
     Other notes:
         * The player's module should have an entry in the list of supported
         players in vidify.player (the __init__.py file).
-        * The player itself must inherit from `QFrame`.
-        * The player should have a defined __init__ method to initialize the
-        player when an instance is created.
-        * The player should have a defined __del__ method to terminate
-        itself when the app is closed safely, if necessary.
         * The player module should have a docstring at the top with a brief
         introduction to the player, and a reminder to check this file for more
         information about the player modules.
     """
 
     __metaclass__ = ABCMeta
+
     # This boolean indicates if the player needs the direct link to the
     # YouTube video, or just the YouTube URL. By default it's true.
     DIRECT_URL = True
@@ -91,9 +88,7 @@ class PlayerBase(QFrame):
     @abstractmethod
     def start_video(self, media: str, is_playing: bool = True) -> None:
         """
-        Starts a new video in the player. This doesn't mean the player it's
-        initialized, since that's done in `__init__`. When this function is
-        called, the player should be ready to start a new video.
+        Starts playing a new video.
 
         `media` can be either an URL or a location in the user's filesystem.
         There shouldn't be a difference when providing these 2 types of media.

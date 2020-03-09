@@ -291,6 +291,9 @@ class ExternalPlayer(PlayerBase):
 
     def start_video(self, url: str, is_playing: bool = True) -> None:
         """
+        When a new video starts, every internal attribute about the song is
+        resetted, including the position. The obtained information will be
+        sent to the clients.
         """
 
         self._position = 0
