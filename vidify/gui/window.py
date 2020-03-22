@@ -21,7 +21,7 @@ from qtpy.QtGui import QFontDatabase
 from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot, QThread
 
 from vidify import format_name
-from vidify.api import APIData, get_api_data
+from vidify.api import APIData
 from vidify.player import initialize_player
 from vidify.config import Config
 from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
@@ -47,7 +47,8 @@ class MainWindow(QWidget):
         if config.fullscreen:
             self.showFullScreen()
         else:
-            self.resize(config.width or 1000, config.height or 850)
+            self.setMinimumSize(800, 800)
+            self.resize(config.width or 800, config.height or 800)
 
         # Loading the used fonts (Inter)
         font_db = QFontDatabase()

@@ -91,7 +91,7 @@ class APIData(Enum):
         None)
     SWSPOTIFY = (
         "Spotify for Windows and MacOS",
-        "The desktop Spotify client using SwSpotify.",
+        "The desktop Spotify client",
         Res.swspotify_icon,
         (Platform.WINDOWS, Platform.MACOS),
         "vidify.api.spotify.swspotify",
@@ -101,8 +101,8 @@ class APIData(Enum):
         500)
     SPOTIFY_WEB = (
         "Spotify Web",
-        "The official Spotify Web API using Tekore. Read the wiki to learn"
-        " how to set it up.",
+        "The official Spotify Web API, read the wiki to learn how to set it"
+        " up",
         Res.spotify_web_icon,
         tuple(Platform),  # Supports all platforms
         "vidify.api.spotify.web",

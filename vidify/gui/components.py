@@ -8,10 +8,10 @@ import logging
 from typing import Callable, Optional
 
 from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
-                            QVBoxLayout, QGridLayout, QGroupBox, QRadioButton,
-                            QHBoxLayout, QButtonGroup, QScrollArea)
+                            QVBoxLayout, QGroupBox, QRadioButton, QHBoxLayout,
+                            QButtonGroup, QScrollArea)
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtCore import Qt, QSize, QUrl, Signal, Slot, QTimer
+from qtpy.QtCore import Qt, QUrl, Signal, Slot, QTimer
 from qtpy.QtWebEngineWidgets import QWebEngineView
 
 from vidify import CURRENT_PLATFORM
@@ -41,10 +41,10 @@ class Card(QGroupBox):
 
         self.name = name
         self.setFont(Fonts.smalltext)
-        self.setMinimumHeight(340)
-        self.setMaximumHeight(450)
-        self.setMinimumWidth(300)
-        self.setMaximumWidth(350)
+        self.setMinimumHeight(270)
+        self.setMaximumHeight(400)
+        self.setMinimumWidth(220)
+        self.setMaximumWidth(300)
         self.layout = QVBoxLayout(self)
         self.setup_icon(icon)
         self.setup_text(description)
@@ -54,13 +54,13 @@ class Card(QGroupBox):
         self.icon = QPixmap(icon or Res.default_api_icon)
         self.icon_label = QLabel()
         self.icon_label.setPixmap(self.icon.scaled(
-            200, 200, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            175, 175, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         self.icon_label.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(self.icon_label)
 
     def setup_text(self, description: str) -> None:
         self.text = QLabel(description)
-        self.text.setStyleSheet("padding: 10px")
+        self.text.setStyleSheet("padding: 10px 3px")
         self.text.setWordWrap(True)
         self.text.setFont(Fonts.smalltext)
         self.text.setAlignment(Qt.AlignHCenter)
@@ -122,7 +122,7 @@ class SetupWidget(QWidget):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setMinimumHeight(380)
+        scroll.setMinimumHeight(340)
         scroll.setMaximumHeight(500)
         wrapper = QWidget()
         layout = QHBoxLayout()
