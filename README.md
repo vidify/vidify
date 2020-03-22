@@ -25,13 +25,13 @@
 
 
 ## Installation
-Vidify is intended to be modular. By default, it includes support for the most popular music players (aka APIs), and the videos will be played with VLC. Thus, you'll need [VLC](https://www.videolan.org/vlc/index.html) installed. But it can be extended with support for other [APIs](#the-apis) or [Players](#the-players) by installing their required dependencies.
+Vidify is intended to be modular. By default, it includes support for the most popular music players (a.k.a. [APIs](#the-apis)). Same goes for the [video players](#the-players) (currently, [VLC](https://www.videolan.org/vlc/index.html) by default). This can be extended by installing the required dependencies listed in their sections.
 
-Here are the different ways to install Vidify:
+Here are the different ways to install Vidify, depending on your Operating System:
 
-* With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs or Players can be installed with `pip install --user vidify[extra1,extra2]`, which is equivalent to installing the list of dependencies needed for `extra1` and `extra2`.
-* Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases) for Windows and Linux.
-* Other installation methods for Linux:
+* **Cross-platform:** With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs and Players can be installed with `pip install --user vidify[extra1,extra2]`, which is equivalent to installing the list of dependencies needed for `extra1` and `extra2`.
+* **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs and Players.
+* **Linux:**
     * Any distro: you can use snap to install it: `snap install vidify-qt`.
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
     * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) at [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
@@ -45,20 +45,21 @@ An API is simply a source of information about the music playing on a device. Fo
 | Name                                         | Wiki link                                                                 | Extra requirements              | Description |
 |----------------------------------------------|:-------------------------------------------------------------------------:|---------------------------------------|-------------|
 | Linux Media Players (`mpris_linux`\*)        | [🔗](https://github.com/vidify/vidify/wiki/Linux-Media-Players)           | *Installed by default* (see the wiki) | Any MPRIS compatible media player for Linux or BSD (99% of them, like Spotify, Clementine, VLC...). |
-| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/vidify/vidify/wiki/Spotify-for-Windows-and-MacOS) | *Installed by default*                | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/vidify/vidify/wiki/Spotify-Web-API)               | *Installed by default*                | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to use it. |
-| Unknown (any other string)                   | -                                                                         | -                                     | If you use any other string with `--api`, the initial screen to choose an API will appear again. This is temporary until the GUI menu is implemented. |
+| Spotify for Windows & MacOS (`swspotify`\*)  | [🔗](https://github.com/vidify/vidify/wiki/Spotify-for-Windows-and-MacOS) | *Installed by default*                | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`\*)                | [🔗](https://github.com/vidify/vidify/wiki/Spotify-Web-API)               | *Installed by default*                | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to set it up. |
 
 \* The name inside parenthesis is used as a key for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would force using the Linux Media Players API, for instance. It's also used for the extra dependencies installation with pip: `pip install vidify[extra1]` would install all the extra requirements for `extra1` with pip.
 
-### The players
-The embedded video players inside the app. The default one is VLC because it's more popular, but you can use others if you have the player installed, and the Python extra dependencies.
+If you use any other string with `--api`, the initial screen to choose an API will appear again. This is temporary until the GUI menu is implemented.
 
-| Name                  | Extra requirements   | Description                                                                                                | Arguments/config options                      |
-|-----------------------|----------------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| VLC (`vlc`)           | Installed by default | The default video player. Widely used and very solid.                                                      |`--vlc-args <VLC_ARGS>`                        |
-| Mpv (`mpv`)           | `python-mpv`         | A simple and portable video player.                                                                        | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
-| External (`external`) | `zeroconf`           | Plays the videos on external devices. Check the [external players section](#the-external-player) for more. | None                                          |
+### The players
+The embedded video players inside the app. The default one is VLC because it's more popular, but you can use others if you have the player itself installed, and the Python extra dependencies.
+
+| Name                  | Extra requirements                                | Description                                                                                                | Arguments/config options                      |
+|-----------------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| VLC (`vlc`)           | [VLC](https://www.videolan.org/vlc/#download)     | The default video player. Widely used and very solid.                                                      |`--vlc-args <VLC_ARGS>`                        |
+| Mpv (`mpv`)           | [Mpv](https://mpv.io/installation/), `python-mpv` | A command-line portable video player. More lightweight and precise than VLC.                               | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
+| External (`external`) | `zeroconf`                                        | Play the videos on external devices. Check the [external players section](#the-external-player) for more.  | None                                          |
 
 For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name. You can use `--player mpv` or save it in your config file for future usage:
 
@@ -136,6 +137,9 @@ You can use a custom one by passing `--config-file <PATH>` as an argument. The c
 All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
 ## FAQ
+### Vidify closes without printing anything
+Use the `--debug` flag to know what exactly went wrong.
+
 ### Vidify doesn't work correctly with Python 3.8 and PySide2
 PySide2 started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 
