@@ -21,8 +21,6 @@ class ConfigTest(unittest.TestCase):
             os.remove(TEST_PATH)
         except FileNotFoundError:
             pass
-        else:
-            print("Removed dummy config file")
 
         with unittest.mock.patch('sys.argv', ['']):
             self.config.parse(config_file=TEST_PATH)
@@ -32,8 +30,6 @@ class ConfigTest(unittest.TestCase):
             os.remove(TEST_PATH)
         except FileNotFoundError:
             pass
-        else:
-            print("Removed dummy config file")
 
     def test_order(self):
         """

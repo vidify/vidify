@@ -2,7 +2,12 @@ import os
 import unittest
 import unittest.mock
 
+import qtpy.QtWebEngineWidgets  # noqa: F401
+from qtpy.QtWidgets import QApplication
 
+
+if QApplication.instance() is None:
+    _ = QApplication(["vidify"])
 TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
 SKIP_MSG = "Skipping this test as it won't work on the current system."
 

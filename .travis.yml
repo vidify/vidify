@@ -26,7 +26,7 @@ addons:
 
 install:
     - pip3 install -U pip
-    - pip3 install .[mpv,dev]
+    - pip3 install .[mpv,dev,external]
       # Pygobject is needed for virtual environments and Travis CI. See the
       # FAQ section in the README.
     - pip3 install pygobject

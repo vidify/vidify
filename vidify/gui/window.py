@@ -23,7 +23,7 @@ from vidify import format_name
 from vidify.api import APIData, get_api_data
 from vidify.player import initialize_player
 from vidify.config import Config
-from vidify.youtube import YouTubeDLWorker
+from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
 from vidify.lyrics import get_lyrics
 from vidify.gui import Res, Colors
 from vidify.gui.components import APISelection, APIConnecter
@@ -57,8 +57,6 @@ class MainWindow(QWidget):
         self.layout = QHBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
-        self.player = initialize_player(config.player, config)
-        logging.info("Using %s as the player", config.player)
         self.config = config
 
         # The API initialization is more complex. For more details, please
@@ -76,6 +74,24 @@ class MainWindow(QWidget):
         else:
             logging.info("Using %s as the API", config.api)
             self.initialize_api(api_data)
+
+    def closeEvent(self, event) -> None:
+        """
+        When the user closes the app, this makes sure that the most important
+        attributes are correctly deleted.
+        """
+
+        logging.info("Closing event deteted")
+        try:
+            if self.config.audiosync:
+                self.audiosync.abort()
+                self.audiosync.wait()
+            self.yt_thread.stop()
+            self.yt_thread.wait()
+            del self.player, self.api
+        except Exception:
+            pass
+        super().closeEvent(event)
 
     @Slot(str)
     def on_api_selection(self, api_str: str) -> None:
@@ -165,8 +181,10 @@ class MainWindow(QWidget):
             self.audiosync.success.connect(self.on_audiosync_success)
             self.audiosync.failed.connect(self.on_audiosync_fail)
 
-        # Loading the player
+        # Initializing the player and starting the first video
         self.setStyleSheet(f"background-color:{Colors.black};")
+        self.player = initialize_player(self.config.player, self.config)
+        logging.info("Using %s as the player", self.config.player)
         self.layout.addWidget(self.player)
         self.play_video(self.api.artist, self.api.title, start_time)
 
@@ -206,12 +224,12 @@ class MainWindow(QWidget):
         Slot used for API updates of the video status.
         """
 
-        self.player.pause = not is_playing
-
         # If there is an audiosync thread running, this will pause the sound
         # recording and youtube downloading.
         if self.config.audiosync and self.audiosync.status != 'idle':
             self.audiosync.is_running = is_playing
+
+        self.player.pause = not is_playing
 
     @Slot(int)
     def change_video_position(self, ms: int) -> None:
@@ -219,13 +237,13 @@ class MainWindow(QWidget):
         Slot used for API updates of the video position.
         """
 
-        if not self.config.audiosync:
-            self.player.position = ms
-
         # Audiosync is aborted if the position of the video changed, since
         # the audio being recorded won't make sense.
         if self.config.audiosync and self.audiosync.status != 'idle':
             self.audiosync.abort()
+
+        if not self.config.audiosync:
+            self.player.seek(ms)
 
     @Slot(str, str, float)
     def play_video(self, artist: str, title: str, start_time: float) -> None:
@@ -291,7 +309,7 @@ class MainWindow(QWidget):
         self.yt_thread = QThread()
         self.youtubedl.moveToThread(self.yt_thread)
         self.yt_thread.started.connect(self.youtubedl.get_url)
-        self.youtubedl.success.connect(self.on_yt_success)
+        self.youtubedl.success.connect(self.on_youtubedl_success)
         self.youtubedl.fail.connect(self.on_youtubedl_fail)
         self.youtubedl.finish.connect(self.yt_thread.exit)
         self.yt_thread.start()
@@ -304,30 +322,32 @@ class MainWindow(QWidget):
         happened.
         """
 
-        self.player.start_video(Res.default_video, self.api.is_playing)
         print("The video wasn't found, either because of an issue with your"
               " internet connection or because the provided data was invalid."
               " For more information, enable the debug mode.")
 
-    @Slot(str)
-    def on_yt_success(self, url: str) -> None:
-        """
-        Obtains the video URL from the Youtube-dl thread and starts playing
-        the video. Also shows the lyrics if enabled. The position of the video
-        isn't set if it's using audiosync, because this is done by the
-        AudiosyncWorker thread.
-        """
+        # Or playing the default video in the GUI
+        self.player.start_video(Res.default_video, self.api.is_playing)
 
-        self.player.start_video(url, self.api.is_playing)
+    @Slot(dict)
+    def on_youtubedl_success(self, data: dict) -> None:
+        # Obtaining the rest of the data from the API
+        is_playing = self.api.is_playing
+        try:
+            position = self.api.position
+        except NotImplementedError:
+            position = 0
 
+        # Otherwise, playing the video inside the GUI. If audiosync is
+        # enabled, the position is ignored. That way, it can stay
+        # synchronized.
+        url = get_direct_url(data) if self.player.DIRECT_URL \
+            else get_youtube_url(data)
+        self.player.start_video(url, is_playing)
         if not self.config.audiosync:
-            try:
-                self.player.position = self.api.position
-            except NotImplementedError:
-                self.player.position = 0
+            self.player.seek(position)
 
-        # Finally, the lyrics are displayed. If the video wasn't found, an
-        # error message is shown.
+        # Finally, the lyrics are displayed.
         if self.config.lyrics:
             print(get_lyrics(self.api.artist, self.api.title))
 
