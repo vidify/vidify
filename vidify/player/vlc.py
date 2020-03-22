@@ -44,8 +44,7 @@ class VLCPlayer(PlayerBase):
         if self._vlc is None:
             raise AttributeError(
                 "VLC couldn't load. This may have been caused by an incorrect"
-                " installation or because an nonexistent parameter was passed"
-                " with --vlc-args")
+                " installation or an invalid parameter in --vlc-args.")
 
         self._player = self._vlc.media_player_new()
 

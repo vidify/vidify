@@ -137,9 +137,6 @@ You can use a custom one by passing `--config-file <PATH>` as an argument. The c
 All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
 ## FAQ
-### Vidify closes without printing anything
-Use the `--debug` flag to know what exactly went wrong.
-
 ### Vidify doesn't work correctly with Python 3.8 and PySide2
 PySide2 started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 

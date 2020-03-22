@@ -3,7 +3,6 @@ This module chooses the player and platform and starts them. The Qt GUI is
 also initialized here.
 """
 
-import os
 import sys
 import logging
 
@@ -44,14 +43,6 @@ def main() -> None:
     logging.basicConfig(level=logging.DEBUG if config.debug else logging.ERROR,
                         format="[%(asctime)s.%(msecs)03d] %(levelname)s:"
                         " %(message)s", datefmt="%H:%M:%S")
-
-    # Redirecting stderr to /dev/null if debug is turned off, since sometimes
-    # VLC will print non-fatal errors even when configured to be quiet.
-    # This could be redirected to a log file in the future, along with any
-    # other output from the logging module.
-    if not config.debug:
-        null_fd = os.open(os.devnull, os.O_WRONLY)
-        os.dup2(null_fd, sys.stderr.fileno())
 
     start_gui(config)
 
