@@ -1,10 +1,14 @@
 import os
 import unittest
 
-from vidify import CURRENT_PLATFORM, Platform
-from vidify.api.mpris import MPRISAPI
+import qtpy.QtWebEngineWidgets  # noqa: F401
+from qtpy.QtWidgets import QApplication
 
-api = MPRISAPI()
+from vidify import CURRENT_PLATFORM, Platform
+
+
+if QApplication.instance() is None:
+    _ = QApplication(["vidify"])
 TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
 SKIP_MSG = "Skipping this test as it won't work on the current system."
 
@@ -21,6 +25,7 @@ class MPRISTest(unittest.TestCase):
     @unittest.skipIf(CURRENT_PLATFORM not in (Platform.BSD, Platform.LINUX),
                      SKIP_MSG)
     def test_bool_status(self):
+        from vidify.api.mpris import MPRISAPI
         self.assertFalse(MPRISAPI._bool_status("stopped"))
         self.assertFalse(MPRISAPI._bool_status("sToPPeD"))
         self.assertFalse(MPRISAPI._bool_status("paused"))

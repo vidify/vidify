@@ -67,7 +67,7 @@ class SpotifyWebAPI(APIBase):
         """
 
         metadata = self._spotify.playback_currently_playing()
-        if metadata is None:
+        if metadata is None or metadata.item is None:
             raise ConnectionNotReady("No song currently playing")
         self.artist = metadata.item.artists[0].name
         self.title = metadata.item.name

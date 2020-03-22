@@ -15,6 +15,7 @@
 * [Installation](#installation)
     * [The APIs](#the-apis)
     * [The Players](#the-players)
+        * [The External Player](#the-external-player)
     * [Audio Synchronization](#audio-synchronization)
 * [Usage and configuration](#usage)
 * [FAQ](#faq)
@@ -24,11 +25,13 @@
 
 
 ## Installation
-By default, Vidify includes the Spotify APIs and `python-vlc` for the player (you'll need [VLC](https://www.videolan.org/vlc/index.html) installed, too).
+Vidify is intended to be modular. By default, it includes support for the most popular music players (a.k.a. [APIs](#the-apis)). Same goes for the [video players](#the-players) (currently, [VLC](https://www.videolan.org/vlc/index.html) by default). This can be extended by installing the required dependencies listed in their sections.
 
-* With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs or Players can be installed with `pip install --user vidify[extra1,extra2]`. See the [APIs section](#the-apis) and the [Players section](#the-players) for all the extra dependencies available.
-* Otherwise, the [latest stable releases](https://github.com/vidify/vidify/releases) have pre-compiled binaries for Windows and Linux.
-* Other installation methods for Linux:
+Here are the different ways to install Vidify, depending on your Operating System:
+
+* **Cross-platform:** With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs and Players can be installed with `pip install --user vidify[extra1,extra2]`, which is equivalent to installing the list of dependencies needed for `extra1` and `extra2`.
+* **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs and Players.
+* **Linux:**
     * Any distro: you can use snap to install it: `snap install vidify-qt`.
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
     * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) at [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
@@ -37,24 +40,26 @@ By default, Vidify includes the Spotify APIs and `python-vlc` for the player (yo
 *Note: Vidify requires Python >= 3.6.*
 
 ### The APIs
-An API is simply a source of information about the music playing on a device. For example, the Spotify desktop client, or iTunes. This app is built to support any API as easily as possible, because there are many different ways to play music. Here are the currently supported ones:
+An API is simply a source of information about the music playing on a device. For example, the Spotify desktop client, or iTunes. Here are the currently supported ones:
 
 | Name                                         | Wiki link                                                                 | Extra requirements              | Description |
-|----------------------------------------------|:-------------------------------------------------------------------------:|---------------------------------|-------------|
-| Linux Media Players (`mpris_linux`)          | [🔗](https://github.com/vidify/vidify/wiki/Linux-Media-Players)           | Installed by default (see wiki) | Any MPRIS compatible media player for Linux or BSD (99% of them, like Spotify, Clementine, VLC...). |
-| Spotify for Windows & MacOS (`swspotify`)    | [🔗](https://github.com/vidify/vidify/wiki/Spotify-for-Windows-and-MacOS) | Installed by default            | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`)                  | [🔗](https://github.com/vidify/vidify/wiki/Spotify-Web-API)               | Installed by default            | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to use it. |
-| Unknown (any other string)                   | -                                                                         | -                               | If you use any other string with `--api`, the initial screen to choose an API will appear again. This is temporary until the GUI menu is implemented. |
+|----------------------------------------------|:-------------------------------------------------------------------------:|---------------------------------------|-------------|
+| Linux Media Players (`mpris_linux`\*)        | [🔗](https://github.com/vidify/vidify/wiki/Linux-Media-Players)           | *Installed by default* (see the wiki) | Any MPRIS compatible media player for Linux or BSD (99% of them, like Spotify, Clementine, VLC...). |
+| Spotify for Windows & MacOS (`swspotify`\*)  | [🔗](https://github.com/vidify/vidify/wiki/Spotify-for-Windows-and-MacOS) | *Installed by default*                | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`\*)                | [🔗](https://github.com/vidify/vidify/wiki/Spotify-Web-API)               | *Installed by default*                | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to set it up. |
 
-The internal name inside parenthesis is used for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would force using the Linux Media Players API, for instance.
+\* The name inside parenthesis is used as a key for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would force using the Linux Media Players API, for instance. It's also used for the extra dependencies installation with pip: `pip install vidify[extra1]` would install all the extra requirements for `extra1` with pip.
+
+If you use any other string with `--api`, the initial screen to choose an API will appear again. This is temporary until the GUI menu is implemented.
 
 ### The players
-The embedded video players inside the app. Vidify uses external players because they already come with codecs installed. The default one is VLC because it's more popular, but you can use others if you have the player installed, and the Python extra dependencies. For example, to install Vidify with Mpv support, you'd run `pip install --user vidify[mpv]`, which installs `python-mpv`.
+The embedded video players inside the app. The default one is VLC because it's more popular, but you can use others if you have the player itself installed, and the Python extra dependencies.
 
-| Name           | Extra requirements   | Description                                           | Arguments/config options                      |
-|----------------|----------------------|-------------------------------------------------------|-----------------------------------------------|
-| VLC (`vlc`)    | Installed by default | The default video player. Widely used and very solid. |`--vlc-args <VLC_ARGS>`                        |
-| Mpv (`mpv`)    | `python-mpv`         | A simple and portable video player.                   | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
+| Name                  | Extra requirements                                | Description                                                                                                | Arguments/config options                      |
+|-----------------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| VLC (`vlc`)           | [VLC](https://www.videolan.org/vlc/#download)     | The default video player. Widely used and very solid.                                                      |`--vlc-args <VLC_ARGS>`                        |
+| Mpv (`mpv`)           | [Mpv](https://mpv.io/installation/), `python-mpv` | A command-line portable video player. More lightweight and precise than VLC.                               | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
+| External (`external`) | `zeroconf`                                        | Play the videos on external devices. Check the [external players section](#the-external-player) for more.  | None                                          |
 
 For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name. You can use `--player mpv` or save it in your config file for future usage:
 
@@ -63,10 +68,15 @@ For now, the only way to specify what player to use is with [arguments](#usage) 
 player = mpv
 ```
 
-### Audio synchronization
-Vidify has an audio synchronization feature currently under testing. The full repository is in [vidify/audiosync](https://github.com/vidify/audiosync), being a separate repo so that it can be installed optionally.
+#### The external player
+The external player is a Work-In-Progress feature. It will send all the music video information to an external application. Here are the current implementations:
 
-This feature is only available on Linux for now. It's much more precise on a lightweight video player like Mpv. You can install it with `pip install vidify[audiosync]`, along with the following dependencies:
+* **Vidify TV**: available on Android, Android TV and Amazon Fire Stick TV. [Play Store page](https://play.google.com/store/apps/details?id=com.glowapps.vidify).
+
+### Audio synchronization
+Vidify has an audio synchronization feature. The full repository is in [vidify/audiosync](https://github.com/vidify/audiosync). It's still Work-In-Progress.
+
+Audiosync is only available on Linux for now. It's strongly recommended to use Mpv as the video player. You can install it with `pip install vidify[audiosync]`, along with the following dependencies:
 
 * FFTW: `libfftw3` on Debian-based distros.
 * ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
@@ -75,14 +85,14 @@ This feature is only available on Linux for now. It's much more precise on a lig
 
 It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR, and it comes pre-installed in the vidify snap.
 
-Finally, you can activate the feature with `--audiosync` or inside your [config file](#the-config-file):
+It can be activated with `--audiosync`, or inside your [config file](#the-config-file):
 
 ```ini
 [Defaults]
 audiosync = true
 ```
 
-You can calibrate the audiosync results with the option `--audiosync-calibration` or `audiosync_calibration`. By default it's -800 milliseconds, but it may depend on your hardware.
+You can calibrate the audiosync results with the option `--audiosync-calibration` or `audiosync_calibration`. By default it's 0 milliseconds, but it may depend on your hardware.
 
 *Note: if when using audiosync there's no sound, you might need to disable stream target device restore by editing the corresponing line in `/etc/pulse/default.pa` to `load-module module-stream-restore restore_device=false`.*
 
@@ -127,6 +137,9 @@ You can use a custom one by passing `--config-file <PATH>` as an argument. The c
 All the available options for the config file are the same as the arguments listed in the [Usage section](#usage), except for `--config-file <PATH>`, which is only an argument. Their names are the same but with underscores instead of dashes. For example, `--use-mpv` would be equivalent to `use_mpv = true`.
 
 ## FAQ
+### Vidify closes without printing anything
+Use the `--debug` flag to know what exactly went wrong.
+
 ### Vidify doesn't work correctly with Python 3.8 and PySide2
 PySide2 started supporting Python 3.8 with the 5.14 release. Make sure you're using an updated version and try again. `TypeError: 'Shiboken.ObjectType' object is not iterable` will be raised otherwise.
 
@@ -142,7 +155,7 @@ or install it with pip following [this guide](https://pygobject.readthedocs.io/e
 ### Vidify doesn't recognize some downloaded songs
 If the song doesn't have a metadata field with its title and artist (the latter is optional), Vidify is unable to know what song is playing. Try to modify the metadata of your downloaded songs with VLC or any other tool.
 
-### `FileNotFoundError: Could not find module 'libvlc.dll'. Try using the full path with constructor syntax.`
+### `FileNotFoundError: Could not find module 'libvlc.dll'.`
 Make sure that both Python and VLC are either 32 bits, or 64 bits, but not different. You should have a directory called `C:\Program Files (x86)\VideoLAN\VLC` (32b), or `C:\Program Files\VideoLAN\VLC` (64b).
 
 ---
@@ -159,4 +172,4 @@ The changelog and more information about this program's versions can be found in
 ### Tests
 You can run the module locally with `python -m vidify`.
 
-This project uses `unittest` for testing. Run them with `python -m unittest`.
+This project uses `unittest` for testing. Run them with `python -m unittest`. You'll need all the extra dependencies installed for this to work.
