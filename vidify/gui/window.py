@@ -81,16 +81,25 @@ class MainWindow(QWidget):
         attributes are correctly deleted.
         """
 
-        logging.info("Closing event deteted")
+        logging.info("Closing event detected")
         try:
+            # Stopping the audiosync thread (always initialized)
             if self.config.audiosync:
                 self.audiosync.abort()
                 self.audiosync.wait()
-            self.yt_thread.stop()
-            self.yt_thread.wait()
+
+            # Stopping the youtube downloader thread (can be uninitialized)
+            try:
+                if self.yt_thread.isRunning():
+                    self.yt_thread.exit()
+                    self.yt_thread.wait()
+            except AttributeError:
+                pass
+
+            # Safely deleting the player and the API objects
             del self.player, self.api
-        except Exception:
-            pass
+        except Exception as e:
+            logging.error("Error when closing: %s", str(e))
         super().closeEvent(event)
 
     @Slot(str)

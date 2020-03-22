@@ -4,14 +4,17 @@ codecs needed to easily play videos and can play a video from an URL,
 in comparison to the Qt player.
 
 For more information about the player modules, please check out
-vidify.player.generic, which contains the abstract base class of which any
+vidify.player.generic. It contains the abstract base class of which any
 player implementation inherits, and an explanation in detail of the methods.
 """
 
 import logging
 from typing import Optional
 
-import vlc
+try:
+    import vlc
+except OSError:
+    raise ImportError("VLC is not installed")
 
 from vidify import Platform, CURRENT_PLATFORM
 from vidify.player.generic import PlayerBase
@@ -36,13 +39,13 @@ class VLCPlayer(PlayerBase):
         try:
             self._vlc = vlc.Instance(vlc_args)
         except NameError:
-            raise ImportError("VLC is not installed") from None
+            raise ImportError("VLC is not installed")
 
         if self._vlc is None:
             raise AttributeError(
                 "VLC couldn't load. This may have been caused by an incorrect"
                 " installation or because an nonexistent parameter was passed"
-                " with --vlc-args") from None
+                " with --vlc-args")
 
         self._player = self._vlc.media_player_new()
 
