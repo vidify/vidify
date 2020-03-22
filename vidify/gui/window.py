@@ -14,6 +14,7 @@ import types
 import logging
 import importlib
 from typing import Callable, Optional
+from contextlib import suppress
 
 from qtpy.QtWidgets import QWidget, QHBoxLayout
 from qtpy.QtGui import QFontDatabase
@@ -26,7 +27,7 @@ from vidify.config import Config
 from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
 from vidify.lyrics import get_lyrics
 from vidify.gui import Res, Colors
-from vidify.gui.components import APISelection, APIConnecter
+from vidify.gui.components import SetupWidget, APIConnecter
 
 
 class MainWindow(QWidget):
@@ -46,7 +47,7 @@ class MainWindow(QWidget):
         if config.fullscreen:
             self.showFullScreen()
         else:
-            self.resize(config.width or 800, config.height or 600)
+            self.resize(config.width or 1000, config.height or 850)
 
         # Loading the used fonts (Inter)
         font_db = QFontDatabase()
@@ -59,21 +60,12 @@ class MainWindow(QWidget):
         self.layout.setSpacing(0)
         self.config = config
 
-        # The API initialization is more complex. For more details, please
-        # check the flow diagram in vidify.api. First we have to check if
-        # the API is saved in the config:
-        try:
-            api_data = get_api_data(config.api)
-        except KeyError:
-            # Otherwise, the user is prompted for an API. After choosing one,
-            # it will be initialized from outside this function.
-            logging.info("API not found: prompting the user")
-            self.API_selection = APISelection()
-            self.layout.addWidget(self.API_selection)
-            self.API_selection.api_chosen.connect(self.on_api_selection)
-        else:
-            logging.info("Using %s as the API", config.api)
-            self.initialize_api(api_data)
+        # Otherwise, the user is prompted for an API. After choosing one,
+        # it will be initialized from outside this function.
+        logging.info("Loading setup screen")
+        self.setup_widget = SetupWidget(config.api, config.player)
+        self.layout.addWidget(self.setup_widget)
+        self.setup_widget.done.connect(self.on_setup_done)
 
     def closeEvent(self, event) -> None:
         """
@@ -89,38 +81,45 @@ class MainWindow(QWidget):
                 self.audiosync.wait()
 
             # Stopping the youtube downloader thread (can be uninitialized)
-            try:
+            with suppress(AttributeError):
                 if self.yt_thread.isRunning():
                     self.yt_thread.exit()
                     self.yt_thread.wait()
-            except AttributeError:
-                pass
 
             # Safely deleting the player and the API objects
-            del self.player, self.api
+            with suppress(AttributeError):
+                del self.player
+            with suppress(AttributeError):
+                del self.api
         except Exception as e:
-            logging.error("Error when closing: %s", str(e))
+            logging.info("Error when closing: %s", str(e))
+
         super().closeEvent(event)
 
-    @Slot(str)
-    def on_api_selection(self, api_str: str) -> None:
+    @Slot(str, str)
+    def on_setup_done(self, api_key: str, player_key: str) -> None:
         """
-        Method called when the API is selected with APISelection.
-        The provided api string must be an existent entry
-        inside the APIData enumeration.
+        Method called when the API and Player are selected with APISelection.
+        Returns two keys, from APIData and PlayerData, respectively.
         """
 
-        # Removing the widget used to obtain the API string
-        self.layout.removeWidget(self.API_selection)
-        self.API_selection.setParent(None)
-        self.API_selection.hide()
-        del self.API_selection
+        # Completely removing the widget used to obtain the API string
+        self.layout.removeWidget(self.setup_widget)
+        self.setup_widget.setParent(None)
+        self.setup_widget.hide()
+        del self.setup_widget
 
-        # Saving the API in the config
-        self.config.api = api_str
+        # Saving the API and Player in the config
+        self.config.api = api_key
+        self.config.player = player_key
 
-        # Starting the API initialization
-        self.initialize_api(APIData[api_str])
+        # Starting the asynchronous API initialization
+        self.initialize_api(APIData[api_key])
+        logging.info("Using %s as the API", self.config.api)
+
+        # Initializing the player
+        self.player = initialize_player(self.config.player, self.config)
+        logging.info("Using %s as the player", self.config.player)
 
     def initialize_api(self, api_data: APIData) -> None:
         """
@@ -192,8 +191,6 @@ class MainWindow(QWidget):
 
         # Initializing the player and starting the first video
         self.setStyleSheet(f"background-color:{Colors.black};")
-        self.player = initialize_player(self.config.player, self.config)
-        logging.info("Using %s as the player", self.config.player)
         self.layout.addWidget(self.player)
         self.play_video(self.api.artist, self.api.title, start_time)
 
@@ -467,9 +464,7 @@ class MainWindow(QWidget):
         # The credentials prompt widget is removed after saving the data. It
         # may not exist because start_spotify_web_api was called directly,
         # so errors are taken into account.
-        try:
+        with supress(AttributeError):
             self.layout.removeWidget(self._spotify_web_prompt)
             self._spotify_web_prompt.hide()
             del self._spotify_web_prompt
-        except AttributeError:
-            pass

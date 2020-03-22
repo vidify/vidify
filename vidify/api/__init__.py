@@ -81,8 +81,7 @@ class APIData(Enum):
 
     MPRIS_LINUX = (
         "Linux Media Players",
-        "Any MPRIS compatible media player: Spotify, Rhythmbox... for "
-        "<b>Linux</b> and <b>BSD</b>. Recommended.",
+        "Any MPRIS compatible media player: Spotify, Rhythmbox...",
         Res.mpris_linux_icon,
         (Platform.LINUX, Platform.BSD),
         "vidify.api.mpris",
@@ -92,8 +91,7 @@ class APIData(Enum):
         None)
     SWSPOTIFY = (
         "Spotify for Windows and MacOS",
-        "The desktop Spotify client for <b>Windows</b> and <b>Mac OS</b> using"
-        " SwSpotify. Recommended.",
+        "The desktop Spotify client using SwSpotify.",
         Res.swspotify_icon,
         (Platform.WINDOWS, Platform.MACOS),
         "vidify.api.spotify.swspotify",
@@ -103,8 +101,8 @@ class APIData(Enum):
         500)
     SPOTIFY_WEB = (
         "Spotify Web",
-        "The official Spotify <b>Web</b> API. Read the installation guide for"
-        " more details on how to set it up.",
+        "The official Spotify Web API using Tekore. Read the wiki to learn"
+        " how to set it up.",
         Res.spotify_web_icon,
         tuple(Platform),  # Supports all platforms
         "vidify.api.spotify.web",
