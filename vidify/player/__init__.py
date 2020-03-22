@@ -44,7 +44,7 @@ class PlayerData(Enum):
         ('api',))
 
 
-def initialize_player(key: str, config: Config = None) -> PlayerBase:
+def initialize_player(key: str, config: Config) -> PlayerBase:
     """
     Choosing a player from the list and initializing an abstract player
     instance with the information inside the `player` enumeration object.
@@ -57,6 +57,7 @@ def initialize_player(key: str, config: Config = None) -> PlayerBase:
         raise AttributeError(
             "The selected player isn't available. Please check your config or"
             " specify one by using a valid `--player` argument.") from None
+
     # Importing the module first
     mod = importlib.import_module(player.module)
     # Then obtaining the player class
