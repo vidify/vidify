@@ -21,7 +21,7 @@ class PlayerData(Enum):
     Note: all player entries must have their name in uppercase.
     """
 
-    def __new__(cls, short_name: str, description: str, icon: Optional[str],
+    def __new__(cls, short_name: str, description: str, icon: str,
                 module: str, class_name: str, flags: list) -> object:
         obj = object.__new__(cls)
         obj.short_name = short_name

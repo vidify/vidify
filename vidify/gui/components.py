@@ -50,11 +50,10 @@ class Card(QGroupBox):
         self.setup_text(description)
         self.setup_button(enabled, selected)
 
-    def setup_icon(self, icon: Optional[str]) -> None:
-        self.icon = QPixmap(icon or Res.default_api_icon)
+    def setup_icon(self, icon: str) -> None:
+        self.icon = QPixmap(icon)
         self.icon_label = QLabel()
-        self.icon_label.setPixmap(self.icon.scaled(
-            175, 175, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        self.icon_label.setPixmap(self.icon)
         self.icon_label.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(self.icon_label)
 

@@ -57,7 +57,7 @@ class APIData(Enum):
     Note: all API entries must have their name in uppercase.
     """
 
-    def __new__(cls, short_name: str, description: str, icon: Optional[str],
+    def __new__(cls, short_name: str, description: str, icon: str,
                 platforms: Tuple[Platform], module: str, class_name: str,
                 connect_msg: Optional[str], gui_init_fn: Optional[str],
                 event_loop_interval: Optional[int]) -> object:
@@ -91,7 +91,7 @@ class APIData(Enum):
         None)
     SWSPOTIFY = (
         "Spotify for Windows and MacOS",
-        "The desktop Spotify client",
+        "The desktop Spotify client for Windows and MacOS.",
         Res.swspotify_icon,
         (Platform.WINDOWS, Platform.MACOS),
         "vidify.api.spotify.swspotify",
@@ -101,8 +101,8 @@ class APIData(Enum):
         500)
     SPOTIFY_WEB = (
         "Spotify Web",
-        "The official Spotify Web API, read the wiki to learn how to set it"
-        " up",
+        "The official Spotify Web API. Read the wiki to learn how to set it"
+        " up.",
         Res.spotify_web_icon,
         tuple(Platform),  # Supports all platforms
         "vidify.api.spotify.web",
