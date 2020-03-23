@@ -1,42 +1,8 @@
 """
 This init module contains functions used throughout the different APIs.
 
-It's also used to list, choose and control the APIs in a generic way, so that
-they can be used the same throughout the entire module.
-
-Here's a flow diagram with how the API initialization is done inside the
-vidify.gui.window module and this one:
-
-                +------------------ Is the API in the config?
-                |       No
-                |                               |
-                |                               | Yes
-                v                               v
-  +-------------------------+     +--------------------------+
-  | initialize APISelection |     | api.initialize_api       |
-  |-------------------------|     |--------------------------|
-  | Prompt the user for the +---->| Initialize the API       |
-  | API to be used          |     | object using the APIData |
-  +-------------------------+     | entry information        |
-                                  +-------------+------------+
-                                                |
-                                                v
-
-                +---------------- Does it need GUI interaction?
-                |      Yes            (APIData.gui_init_fn)
-                |
-                |                               |
-                |                               | No
-                v                               v
-   +------------------------+     +--------------------------+
-   | Call custom function   |     | gui.wait_for_connection  |
-   | from APIData which     |     |--------------------------|
-   | handles initialization +---->| Wait for the API connect |
-   | inside the GUI window  |     | Run the init function    |
-   | (APIData.gui_init_fn)  |     | Start event loop         |
-   +------------------------+     +--------------------------+
-
-Made with http://stable.ascii-flow.appspot.com
+It's also used to list information about the APIs so that they can be
+initialized the same programatically.
 """
 
 import re
@@ -57,7 +23,7 @@ class APIData(Enum):
     Note: all API entries must have their name in uppercase.
     """
 
-    def __new__(cls, short_name: str, description: str, icon: Optional[str],
+    def __new__(cls, short_name: str, description: str, icon: str,
                 platforms: Tuple[Platform], module: str, class_name: str,
                 connect_msg: Optional[str], gui_init_fn: Optional[str],
                 event_loop_interval: Optional[int]) -> object:
@@ -81,8 +47,7 @@ class APIData(Enum):
 
     MPRIS_LINUX = (
         "Linux Media Players",
-        "Any MPRIS compatible media player: Spotify, Rhythmbox... for "
-        "<b>Linux</b> and <b>BSD</b>. Recommended.",
+        "Any MPRIS compatible media player: Spotify, Rhythmbox...",
         Res.mpris_linux_icon,
         (Platform.LINUX, Platform.BSD),
         "vidify.api.mpris",
@@ -92,8 +57,7 @@ class APIData(Enum):
         None)
     SWSPOTIFY = (
         "Spotify for Windows and MacOS",
-        "The desktop Spotify client for <b>Windows</b> and <b>Mac OS</b> using"
-        " SwSpotify. Recommended.",
+        "The desktop Spotify client for Windows and MacOS.",
         Res.swspotify_icon,
         (Platform.WINDOWS, Platform.MACOS),
         "vidify.api.spotify.swspotify",
@@ -103,8 +67,8 @@ class APIData(Enum):
         500)
     SPOTIFY_WEB = (
         "Spotify Web",
-        "The official Spotify <b>Web</b> API. Read the installation guide for"
-        " more details on how to set it up.",
+        "The official Spotify Web API. Read the wiki to learn how to set it"
+        " up.",
         Res.spotify_web_icon,
         tuple(Platform),  # Supports all platforms
         "vidify.api.spotify.web",

@@ -147,7 +147,9 @@ class ExternalPlayer(PlayerBase):
             self.labels[key] = QLabel(prefix + '-')
             self.labels[key].setStyleSheet("padding: 20px; color: white")
             self.labels[key].setWordWrap(True)
-            self.labels[key].setFont(Fonts.bigtext)
+            font = Fonts.bigtext
+            font.setBold(False)
+            self.labels[key].setFont(font)
             self.labels[key].setAlignment(Qt.AlignHCenter)
             self.log_layout.addWidget(self.labels[key])
 

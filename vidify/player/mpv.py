@@ -51,10 +51,7 @@ class MpvPlayer(PlayerBase):
         self._mpv = MPV(*flags, **args)
 
     def __del__(self) -> None:
-        try:
-            self._mpv.terminate()
-        except AttributeError:
-            pass
+        self._mpv.terminate()
 
     @property
     def pause(self) -> bool:

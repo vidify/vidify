@@ -6,6 +6,7 @@ them.
 import importlib
 from enum import Enum
 
+from vidify.gui import Res
 from vidify.config import Config
 from vidify.player.generic import PlayerBase
 
@@ -19,8 +20,12 @@ class PlayerData(Enum):
     Note: all player entries must have their name in uppercase.
     """
 
-    def __new__(cls, module: str, class_name: str, flags: list) -> object:
+    def __new__(cls, short_name: str, description: str, icon: str,
+                module: str, class_name: str, flags: list) -> object:
         obj = object.__new__(cls)
+        obj.short_name = short_name
+        obj.description = description
+        obj.icon = icon
         # The module location to import, for dependency injection.
         obj.module = module
         # The player's class name inside its module.
@@ -31,14 +36,23 @@ class PlayerData(Enum):
         return obj
 
     VLC = (
+        'VLC',
+        'Widely used and very solid player.',
+        Res.vlc_icon,
         'vidify.player.vlc',
         'VLCPlayer',
         ('vlc_args',))
     MPV = (
+        'Mpv',
+        'More lightweight and precise player than VLC.',
+        Res.mpv_icon,
         'vidify.player.mpv',
         'MpvPlayer',
         ('mpv_flags',))
     EXTERNAL = (
+        'External',
+        'Play the videos on external devices.',
+        Res.external_icon,
         'vidify.player.external',
         'ExternalPlayer',
         ('api',))

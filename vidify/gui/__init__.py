@@ -72,10 +72,13 @@ class ResBase:
         else res_path("icon.svg")
     cross = res_path("cross.svg")
 
-    default_api_icon = res_path("api_icons/default.svg")
     mpris_linux_icon = res_path("api_icons/mpris.svg")
     swspotify_icon = res_path("api_icons/spotify/swspotify.svg")
     spotify_web_icon = res_path("api_icons/spotify/web.svg")
+
+    vlc_icon = res_path("player_icons/vlc.svg")
+    mpv_icon = res_path("player_icons/mpv.svg")
+    external_icon = res_path("player_icons/external.svg")
 
     def set_dark_mode(self) -> None:
         """
