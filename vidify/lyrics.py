@@ -18,7 +18,7 @@ from vidify import format_name, Platform, CURRENT_PLATFORM
 ERROR_MESSAGES = (
     "Unfortunately, we are not licensed to display the full lyrics for this"
     " song at the moment. Hopefully we will be able to in the future. Until"
-    " then... how about a random page?\n",)
+    " then... how about a random page?",)
 
 
 def get_lyrics(artist: str, title: str) -> str:
@@ -29,18 +29,18 @@ def get_lyrics(artist: str, title: str) -> str:
     name = format_name(artist, title)
 
     # Colors are not displayed on Windows because it doesn't support ANSI
-    # escape codes and importing colorama isn't worth it currently.
+    # escape codes and importing colorama isn't worth it.
     if CURRENT_PLATFORM == Platform.WINDOWS:
-        name = f">> {name}\n"
+        name = f">> {name}"
     else:
-        name = f"\033[4m{name}\033[0m\n"
+        name = f"\033[4m{name}\033[0m"
 
     try:
-        lyrics = lyricwikia.get_lyrics(artist, title) + "\n"
+        lyrics = lyricwikia.get_lyrics(artist, title)
     except (lyricwikia.LyricsNotFound, AttributeError):
-        lyrics = "No lyrics found\n"
+        lyrics = "No lyrics found"
     else:
         if lyrics in ERROR_MESSAGES:
-            lyrics = "No lyrics found\n"
+            lyrics = "No lyrics found"
 
-    return name + lyrics
+    return f"{name}\n{lyrics}\n"
