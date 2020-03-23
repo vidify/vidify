@@ -50,8 +50,6 @@ An API is simply a source of information about the music playing on a device. Fo
 
 \* The name inside parenthesis is used as a key for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would force using the Linux Media Players API, for instance. It's also used for the extra dependencies installation with pip: `pip install vidify[extra1]` would install all the extra requirements for `extra1` with pip.
 
-If you use any other string with `--api`, the initial screen to choose an API will appear again. This is temporary until the GUI menu is implemented.
-
 ### The players
 The embedded video players inside the app. The default one is VLC because it's more popular, but you can use others if you have the player itself installed, and the Python extra dependencies.
 
@@ -101,7 +99,12 @@ You can calibrate the audiosync results with the option `--audiosync-calibration
 ![pavucontrol](images/pavucontrol-audiosync.png)
 
 ## Usage
-The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished).
+The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished):
+
+<div align="center">
+<img src="images/screenshot_setup.png" alt="setup">
+</div>
+
 
 ```
 usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--dark-mode] [--stay-on-top]
