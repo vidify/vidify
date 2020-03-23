@@ -128,7 +128,7 @@ class ExternalPlayer(PlayerBase):
         self._clients = []
         # The external player saves the previous values so that they can be
         # sent to new connections.
-        self._url = None
+        self._media = None
         self._is_playing = None
 
         # The player itself contains a label to show messages.
@@ -199,7 +199,8 @@ class ExternalPlayer(PlayerBase):
             # Updating the GUI
             self.update_label('clients', len(self._clients))
             # Sending it the available data
-            self.send_message([client], self._url, is_playing=self._is_playing)
+            self.send_message([client], self._media,
+                              is_playing=self._is_playing)
 
     @Slot(object)
     def drop_connection(self, client: Client) -> None:
@@ -291,7 +292,7 @@ class ExternalPlayer(PlayerBase):
 
         self.labels[key].setText(f"{self._LABEL_PREFIXES[key]}{val}")
 
-    def start_video(self, url: str, is_playing: bool = True) -> None:
+    def start_video(self, media: str, is_playing: bool = True) -> None:
         """
         When a new video starts, every internal attribute about the song is
         resetted, including the position. The obtained information will be
@@ -303,9 +304,9 @@ class ExternalPlayer(PlayerBase):
         if not is_playing:
             self._pause_time = self._start_time
 
-        self._url = url
+        self._media = media
         self._is_playing = is_playing
-        self.send_message(self._clients, url, is_playing=is_playing)
+        self.send_message(self._clients, media, is_playing=is_playing)
 
     @property
     def position(self) -> int:
@@ -344,15 +345,15 @@ class ExternalPlayer(PlayerBase):
         # Checking for out-of-bounds access with negative values. In that
         # case, the position should be set to zero instead.
         if (relative and self.position + ms < 0) or (not relative and ms < 0):
-            self.send_message(self._clients, self._url, absolute_pos=0)
+            self.send_message(self._clients, self._media, absolute_pos=0)
             self._position = 0
             return
 
         if relative:
-            self.send_message(self._clients, self._url, relative_pos=ms)
+            self.send_message(self._clients, self._media, relative_pos=ms)
             self._position += ms / 1000
         else:
-            self.send_message(self._clients, self._url, absolute_pos=ms)
+            self.send_message(self._clients, self._media, absolute_pos=ms)
             self._position = ms / 1000
 
     @property
@@ -373,5 +374,5 @@ class ExternalPlayer(PlayerBase):
         else:
             self._start_time += time.time() - self._pause_time
 
-        self.send_message(self._clients, self._url, is_playing=not do_pause)
+        self.send_message(self._clients, self._media, is_playing=not do_pause)
         self._is_playing = not do_pause

@@ -82,16 +82,13 @@ class SpotifyWebAPI(APIBase):
 
     def event_loop(self) -> None:
         """
-        A callable event loop that checks if changes happen. This is called
-        every 0.5 seconds from the Qt window.
+        The event loop callback that checks if changes happen. This is called
+        periodically within the Qt window.
 
         It checks for changes in:
             * The playback status (playing/paused) to change the player's too
             * The currently playing song: if a new song started, it's played
-            * The position. Changes will be ignored unless the difference is
-              larger than the real elapsed time or if it was backwards.
-              This is done because some systems may lag more than others and
-              a fixed time difference would cause errors
+            * The position
         """
 
         # Previous properties are saved to compare them with the new ones
@@ -102,8 +99,8 @@ class SpotifyWebAPI(APIBase):
         is_playing = self.is_playing
         self._refresh_metadata()
 
-        # The first check should be if the song has ended to not touch
-        # anything else that may not actually be true.
+        # First checking if a new song started, so that position or status
+        # changes are related to the new song.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
             self.new_song_signal.emit(self.artist, self.title, 0)
@@ -112,6 +109,11 @@ class SpotifyWebAPI(APIBase):
             logging.info("Status change detected")
             self.status_signal.emit(self.is_playing)
 
+        # The position difference between calls is compared to the elapsed
+        # time to know whether the position has been modified.
+        # Changes will be ignored unless the position difference is
+        # greater than the elapsed time (plus a margin) or if it's negative
+        # (backwards).
         playback_diff = self._position - position
         calls_diff = int((time.time() - self._event_timestamp) * 1000)
         if playback_diff >= (calls_diff + 100) or playback_diff < 0:

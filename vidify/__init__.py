@@ -45,9 +45,11 @@ def format_name(artist: Optional[str], title: Optional[str]) -> str:
 
     if is_empty(artist) and is_empty(title):
         return ''
-    elif is_empty(artist):
+
+    if is_empty(artist):
         return title
-    elif is_empty(title):
+
+    if is_empty(title):
         return artist
-    else:
-        return f"{artist} - {title}"
+
+    return f"{artist} - {title}"

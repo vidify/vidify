@@ -77,8 +77,8 @@ class SwSpotifyAPI(APIBase):
 
     def event_loop(self) -> None:
         """
-        A callable event loop that checks if changes happen. This is called
-        every 0.5 seconds from the QT window.
+        The event loop callback that checks if changes happen. This is called
+        periodically within the Qt window.
 
         It checks for changes in:
             * The playback status (playing/paused) to change the player's too
@@ -90,8 +90,8 @@ class SwSpotifyAPI(APIBase):
         is_playing = self.is_playing
         self._refresh_metadata()
 
-        # The first check should be if the song has ended to not touch
-        # anything else that may not actually be true.
+        # First checking if a new song started, so that status changes are
+        # related to the new song.
         if self.artist != artist or self.title != title:
             logging.info("New video detected")
             self.new_song_signal.emit(self.artist, self.title, 0)

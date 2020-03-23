@@ -80,14 +80,9 @@ class APIData(Enum):
 
 class ConnectionNotReady(Exception):
     """
-    This exception is raised when no Spotify session is open or when
-    no songs are currently playing, since it is better to catch them
-    outside of the init function.
+    Exception used to notify the GUI from the API that the connection
+    attempt was unsuccessful.
     """
-
-    def __init__(self, msg: str = "Spotify is closed or there isn't a"
-                 "  currently playing track."):
-        super().__init__(msg)
 
 
 def get_api_data(key: Optional[str]) -> APIData:
