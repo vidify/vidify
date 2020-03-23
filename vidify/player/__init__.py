@@ -5,7 +5,6 @@ them.
 
 import importlib
 from enum import Enum
-from typing import Optional
 
 from vidify.gui import Res
 from vidify.config import Config

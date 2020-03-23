@@ -146,7 +146,7 @@ class SetupWidget(QWidget):
 
         return text
 
-    def load_apis(self, saved_api: str) -> None:
+    def load_apis(self, saved_api: Optional[str]) -> None:
         self.api_instructions = self.init_title("Select an API:")
         self.api_layout = self.init_scroll_layout()
 
@@ -157,7 +157,8 @@ class SetupWidget(QWidget):
         disabled = []
         for api in APIData:
             enabled = CURRENT_PLATFORM in api.platforms
-            selected = api.name == saved_api.upper()
+            selected = False if saved_api is None \
+                else api.name == saved_api.upper()
             card = Card(api.name, api.short_name, api.description, api.icon,
                         enabled, selected)
             if enabled:
@@ -171,14 +172,15 @@ class SetupWidget(QWidget):
         for card in disabled:
             self.api_layout.addWidget(card)
 
-    def load_players(self, saved_player: str) -> None:
+    def load_players(self, saved_player: Optional[str]) -> None:
         self.player_instructions = self.init_title("Select a Player:")
         self.player_layout = self.init_scroll_layout()
 
         # The cards are inside a group so that their selection is exclusive.
         self.player_group = QButtonGroup()
         for player in PlayerData:
-            selected = player.name == saved_player.upper()
+            selected = False if saved_player is None \
+                else player.name == saved_player.upper()
             card = Card(player.name, player.short_name, player.description,
                         player.icon, selected=selected)
             self.player_layout.addWidget(card)

@@ -506,7 +506,7 @@ class MainWindow(QWidget):
         # The credentials prompt widget is removed after saving the data. It
         # may not exist because start_spotify_web_api was called directly,
         # so errors are taken into account.
-        with supress(AttributeError):
+        with suppress(AttributeError):
             self.layout.removeWidget(self._spotify_web_prompt)
             self._spotify_web_prompt.hide()
             del self._spotify_web_prompt
