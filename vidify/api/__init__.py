@@ -1,42 +1,8 @@
 """
 This init module contains functions used throughout the different APIs.
 
-It's also used to list, choose and control the APIs in a generic way, so that
-they can be used the same throughout the entire module.
-
-Here's a flow diagram with how the API initialization is done inside the
-vidify.gui.window module and this one:
-
-                +------------------ Is the API in the config?
-                |       No
-                |                               |
-                |                               | Yes
-                v                               v
-  +-------------------------+     +--------------------------+
-  | initialize APISelection |     | api.initialize_api       |
-  |-------------------------|     |--------------------------|
-  | Prompt the user for the +---->| Initialize the API       |
-  | API to be used          |     | object using the APIData |
-  +-------------------------+     | entry information        |
-                                  +-------------+------------+
-                                                |
-                                                v
-
-                +---------------- Does it need GUI interaction?
-                |      Yes            (APIData.gui_init_fn)
-                |
-                |                               |
-                |                               | No
-                v                               v
-   +------------------------+     +--------------------------+
-   | Call custom function   |     | gui.wait_for_connection  |
-   | from APIData which     |     |--------------------------|
-   | handles initialization +---->| Wait for the API connect |
-   | inside the GUI window  |     | Run the init function    |
-   | (APIData.gui_init_fn)  |     | Start event loop         |
-   +------------------------+     +--------------------------+
-
-Made with http://stable.ascii-flow.appspot.com
+It's also used to list information about the APIs so that they can be
+initialized the same programatically.
 """
 
 import re

@@ -2,11 +2,52 @@
 This module implements the Qt interface and is where every other module is
 put together.
 
+Here's a flow diagram with how the API and Player initialization is done
+inside this module.
+
+                     +-------------------------+
+                     | Prompt with SetupWidget |
+                     |-------------------------|
+                     | Ask the user for what   |
+                     | API & Player to use     |
+                     +------------+------------+
+                                  |
+                 +----------------+---------------+
+                 |                                |
+                 v                                v
+      +-------------+------------+  +-------------+------------+
+      | player.initialize_player |  | api.initialize_api       |
+      |--------------------------|  |--------------------------|
+      | Initialize the Player    |  | Initialize the API       |
+      | using the PlayerData     |  | using the APIData entry  |
+      | entry information        |  | information              |
+      +-------------+------------+  +-------------+------------+
+                                                  |
+                                                  v
+
+                  +---------------- Does it need GUI interaction?
+                  |      Yes            (APIData.gui_init_fn)
+                  |
+                  |                               |
+                  |                               | No
+                  v                               v
+     +------------------------+     +--------------------------+
+     | Call custom function   |     | gui.wait_for_connection  |
+     | from APIData which     |     |--------------------------|
+     | handles initialization +---->| Wait for the API connect |
+     | inside the GUI window  |     +--------------------------+
+     | (APIData.gui_init_fn)  |                   |
+     +------------------------+                   |
+                                                  |
+                                                  v
+                                                START
+
 The API and player modules are mixed using Qt events:
     * Position changes -> MainWindow.change_video_position(ms)
     * Status changes -> MainWindow.change_video_status(status)
-    * Song changes -> MainWindow.play_video()
-These events are generated inside the APIs.
+    * Song changes -> MainWindow.play_video(artist, title, start)
+
+These events are emitted inside the APIs.
 """
 
 import time
