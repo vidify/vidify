@@ -96,7 +96,7 @@ class MPRISAPI(APIBase):
             # Trying to obtain the bus object
             try:
                 obj = self._bus.get(bus_name, '/org/mpris/MediaPlayer2')
-            except GLib.Error as e:
+            except (GLib.Error, KeyError) as e:
                 logging.info("Skipping %s because of error: %s",
                              bus_name, str(e))
                 continue
