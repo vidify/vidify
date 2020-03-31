@@ -57,7 +57,7 @@ The embedded video players inside the app. The default one is VLC because it's m
 |-----------------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
 | VLC (`vlc`)           | [VLC](https://www.videolan.org/vlc/#download)     | The default video player. Widely used and very solid.                                                      |`--vlc-args <VLC_ARGS>`                        |
 | Mpv (`mpv`)           | [Mpv](https://mpv.io/installation/), `python-mpv` | A command-line portable video player. More lightweight and precise than VLC.                               | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
-| External (`external`) | `zeroconf`                                        | Play the videos on external devices. Check the [external players section](#the-external-player) for more.  | None                                          |
+| External (`external`) | Installed by default                              | Play the videos on external devices. Check the [external players section](#the-external-player) for more.  | None                                          |
 
 For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name. You can use `--player mpv` or save it in your config file for future usage:
 
@@ -67,7 +67,7 @@ player = mpv
 ```
 
 #### The external player
-The external player is a Work-In-Progress feature. It will send all the music video information to an external application. Here are the current implementations:
+The external player lets you play Vidify's music videos essentially anywhere. It will send all the music video information to an external application. Here are the current implementations:
 
 * **Vidify TV**: available on Android, Android TV and Amazon Fire Stick TV. [Play Store page](https://play.google.com/store/apps/details?id=com.glowapps.vidify).
 

@@ -23,6 +23,7 @@ install_deps = [
     'appdirs',
     'lyricwikia',
     'tekore',
+    'zeroconf',
     'pydbus; platform_system=="Linux"',
     'SwSpotify>=1.1.1; platform_system=="Windows"'
     ' or platform_system=="Darwin"'
@@ -87,9 +88,6 @@ setup(
         ],
         'mpv': [
             'python-mpv'
-        ],
-        'external': [
-            'zeroconf'
         ]
     },
     entry_points={
