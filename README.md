@@ -169,6 +169,9 @@ The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](
 
 The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/vidify/vidify/releases).
 
+### External player implementations
+The Vidify external player has an open protocol for anyone to implement their own app or program to play the videos. You can read more about how it works in this [wiki article](https://github.com/vidify/vidify/wiki/%5BDEV%5D-External-Player-Protocol).
+
 ### Tests
 You can run the module locally with `python -m vidify`.
 

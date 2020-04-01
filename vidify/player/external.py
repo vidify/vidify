@@ -1,21 +1,6 @@
 """
-The defined object model for the external API is:
-
-{
-    url: 'https://youtube.com/...',
-    relative_pos: -1200,
-    absolute_pos: 4000,
-    is_playing: true
-}
-
-`url` is a mandatory field that indicates in respect to what video the update
-is being sent. The client will compare it to the currently playing video.
-If it's the same, it will just update it. Otherwise, a new video will start
-playing with the indicated properties.
-
-The position field can be indicated as relative or absolute to the current
-status to the video. If both are provided, the absolute position has
-priority over the relative.
+To read more details about the external player API, please check out:
+https://github.com/vidify/vidify/wiki/%5BDEV%5D-The-External-Player-Protocol
 """
 
 import time
@@ -24,6 +9,7 @@ import socket
 import logging
 import platform
 from typing import Tuple
+from contextlib import suppress
 
 from qtpy.QtCore import QObject, Slot, Signal, Qt
 from qtpy.QtNetwork import QTcpServer, QHostAddress, QTcpSocket
@@ -33,6 +19,7 @@ from zeroconf import IPVersion, ServiceInfo, Zeroconf
 from vidify import CURRENT_PLATFORM
 from vidify.player import PlayerBase
 from vidify.gui import Res, Fonts
+from vidify.version import __version__
 
 
 class Client(QObject):
@@ -41,39 +28,64 @@ class Client(QObject):
     about a connection.
     """
 
-    finish = Signal(object)
+    # Emitted once the client has identified itself successfully
+    confirmed = Signal(object)
+    # Otherwise, this signal is emitted. It also contains the error message.
+    confirm_fail = Signal(object, str)
+    # Emitted when the connection with the client is dropped.
+    done = Signal(object)
 
     def __init__(self, sock: QTcpSocket) -> None:
         super().__init__()
-        self.socket = sock
-        self.address = self.socket.peerAddress().toString()
-        self.socket.disconnected.connect(self.on_disconnected)
-        self.socket.readyRead.connect(self.on_recv)
+        self.id = None
+        self._socket = sock
+        self.address = self._socket.peerAddress().toString()
+        self._socket.disconnected.connect(self.on_disconnected)
+        self._socket.readyRead.connect(self.on_recv)
 
     def __repr__(self) -> None:
-        return f"<Client with IP {self.address}>"
+        return f"<Client at {self.address}>"
+
+    def send(self, msg: str) -> None:
+        self._socket.write(msg)
+
+    def disconnect(self) -> None:
+        """
+        Manually disconnecting implies that the done signal won't be
+        emitted.
+        """
+
+        self._socket.disconnected.disconnect(self.on_disconnected)
+        self._socket.disconnectFromHost()
 
     @Slot()
-    def on_disconnected(self):
+    def on_disconnected(self) -> None:
         logging.info("%s disconnected", self)
-        self.finish.emit(self)
+        self.done.emit(self)
 
     @Slot()
-    def on_recv(self):
+    def on_recv(self) -> None:
         """
-        Assuming the client sent a message encoded with JSON.
-
-        Currently unused, as the client doesn't send messages to the server.
+        The client will only send messages to identify itself.
         """
 
-        msg = self.socket.readAll().data().decode('utf-8')
+        msg = self._socket.readAll().data().decode('utf-8')
         try:
             data = json.loads(msg)
         except json.decoder.JSONDecodeError as e:
             logging.info("%s sent invalid message: %s. Original: %s",
                          self, str(e), msg)
         else:
-            logging.info("%s sent: %s", self, data)
+            self.identify(data)
+
+    def identify(self, data: dict) -> None:
+        try:
+            self.id = data['id']
+        except KeyError:
+            self.confirm_fail.emit(self, f"missing 'id' field")
+            return
+        else:
+            self.confirmed.emit(self)
 
 
 class ExternalPlayer(PlayerBase):
@@ -114,6 +126,8 @@ class ExternalPlayer(PlayerBase):
         'clients': '<b>Connected clients:</b> '
     }
 
+    _CONFIRM_MSG = json.dumps({'success': True}).encode('utf-8')
+
     def __init__(self, api_name: str) -> None:
         """
         This initializes both the player widget and the TCP server.
@@ -126,6 +140,7 @@ class ExternalPlayer(PlayerBase):
         self._time_delay = 0
         self._api_name = api_name
         self._clients = []
+        self._pending = []
         # The external player saves the previous values so that they can be
         # sent to new connections.
         self._media = None
@@ -183,34 +198,6 @@ class ExternalPlayer(PlayerBase):
         # registered.
         self.register_service()
 
-    @Slot()
-    def on_new_connection(self) -> None:
-        """
-        When a new client connects to this server, it's added to the current
-        clients list until it disconnects.
-        """
-
-        while self._server.hasPendingConnections():
-            logging.info("Accepting connection number %d", len(self._clients))
-            # Saving the client in the internal list
-            client = Client(self._server.nextPendingConnection())
-            client.finish.connect(self.drop_connection)
-            self._clients.append(client)
-            # Updating the GUI
-            self.update_label('clients', len(self._clients))
-            # Sending it the available data
-            self.send_message([client], self._media,
-                              is_playing=self._is_playing)
-
-    @Slot(object)
-    def drop_connection(self, client: Client) -> None:
-        """
-        Callback for whenever a client disconnects.
-        """
-
-        self._clients.remove(client)
-        self.update_label('clients', len(self._clients))
-
     def register_service(self) -> None:
         """
         Registers a service so that it can be detected with the Network
@@ -227,6 +214,8 @@ class ExternalPlayer(PlayerBase):
 
         # Other useful attributes for the connection.
         desc = {
+            'id': self.SERVICE_NAME,
+            'version': __version__,
             'os': CURRENT_PLATFORM.name,
             'api': self._api_name
         }
@@ -253,6 +242,79 @@ class ExternalPlayer(PlayerBase):
         self.zeroconf.unregister_service(self.info)
         self.zeroconf.close()
 
+    @Slot()
+    def on_new_connection(self) -> None:
+        """
+        When a new client connects to this server, it's added to the current
+        clients list until it disconnects.
+        """
+
+        while self._server.hasPendingConnections():
+            logging.info("Accepting connection number %d", len(self._clients))
+            # The initial client state is pending, until the first message
+            # is received.
+            client = Client(self._server.nextPendingConnection())
+            self._pending.append(client)
+            client.confirmed.connect(self.on_confirmation)
+            client.confirm_fail.connect(self.on_confirm_fail)
+            client.done.connect(self.on_disconnect)
+
+    @Slot(object)
+    def on_confirmation(self, client: Client) -> None:
+        """
+        Method invoked once the client has identified itself, and the
+        connection is assured to be compatible.
+        """
+
+        logging.info("Client %s confirmation successful", str(client))
+        self._pending.remove(client)
+        self._clients.append(client)
+        # Sending it the reply and the available data
+        client.send(self._CONFIRM_MSG)
+        self.send_message([client], self._media, is_playing=self._is_playing)
+        # The client won't confirm again
+        client.confirmed.disconnect(self.on_confirmation)
+        client.confirm_fail.disconnect(self.on_confirm_fail)
+        # Updating the GUI
+        self.update_label('clients', len(self._clients))
+
+    @Slot(object, str)
+    def on_confirm_fail(self, client: Client, msg: str) -> None:
+        """
+        If a client fails to identify itself, its connection is closed.
+        """
+
+        logging.info("Client %s confirmation failed: %s", str(client), msg)
+
+        # Answering back
+        reply = json.dumps({
+            'success': False,
+            'error_msg': msg
+        }).encode('utf-8')
+        client.send(reply)
+        client.disconnect()
+
+        # Cleaning up the client
+        self._pending.remove(client)
+        del client
+
+    @Slot(object)
+    def on_disconnect(self, client: Client) -> None:
+        """
+        Callback for whenever a client disconnects. It might not have been
+        confirmed, so this attempts to remove the client from the pending
+        and connected lists.
+        """
+
+        with suppress(ValueError):
+            self._pending.remove(client)
+
+        with suppress(ValueError):
+            self._clients.remove(client)
+            self.update_label('clients', len(self._clients))
+
+        del client
+
     def send_message(self, clients: Tuple[Client], url: str,
                      absolute_pos: int = None, relative_pos: int = None,
                      is_playing: bool = None) -> None:
@@ -275,8 +337,7 @@ class ExternalPlayer(PlayerBase):
         dump = json.dumps(data).encode('utf-8')
 
         for c in clients:
-            c.socket.write(dump)
-            c.socket.flush()
+            c.send(dump)
 
         logging.info("Sent message '%s' to %s", dump, str(self._clients))
 
