@@ -1,9 +1,7 @@
 # Temporary Vidify folder to apply patches
 echo "Copying module..."
 $DIR = "vidify"
-if(!(Test-Path -Path $DIR )){
-	New-Item -ItemType directory -Path $DIR
-} else {
+if ( Test-Path -Path $DIR ) {
 	rm -r $DIR
 }
 cp -r ../vidify .

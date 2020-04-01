@@ -14,7 +14,7 @@ a = Analysis(['vidify\\__main__.py', 'vidify\\player\\vlc.py',
                     ('C:/Program Files/VideoLAN/VLC/libvlccore.dll', '.'),
                     ('C:/Program Files/VideoLAN/VLC/npvlc.dll', '.'),
                     ('C:/Program Files/VideoLAN/VLC/plugins', 'plugins'),
-					('vidify\\gui\\res', '.')
+					('vidify/gui/res', 'vidify/gui/res')
              ],
              hiddenimports=['appdirs', 'qtpy', 'pyqt5', 'pyqtwebengine', 'six',
 							'tekore', 'vlc',  'zeroconf',
