@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
-# Example spec file used to build Vidify for Windows. See BUILDING.md for more.
+# Don't use this file directly. Please run build_windows.ps1 to apply the
+# necessary patches before building.
 
 block_cipher = None
 
@@ -15,8 +16,10 @@ a = Analysis(['vidify\\__main__.py', 'vidify\\player\\vlc.py',
                     ('C:/Program Files/VideoLAN/VLC/plugins', 'plugins'),
 					('vidify\\gui\\res', '.')
              ],
-             hiddenimports=['qtpy', 'pyqt5', 'pyqtwebengine', 'six', 'tekore',
-                            'vidify.player.vlc', 'vidify.api.spotify.web',
+             hiddenimports=['appdirs', 'qtpy', 'pyqt5', 'pyqtwebengine', 'six',
+							'tekore', 'vlc',  'zeroconf',
+							'vidify.player.external', 'vidify.player.vlc',
+							'vidify.api.spotify.web',
 							'vidify.api.spotify.swspotify'],
              hookspath=[],
              runtime_hooks=[],

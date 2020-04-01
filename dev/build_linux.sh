@@ -26,7 +26,7 @@ sed -i '/RES_DIR = .*/c\import vidify; RES_DIR = os.path.join(os.path.dirname(os
 echo 'import os; os.environ["VLC_PLUGIN_PATH"] = "/usr/lib64/vlc/plugins"' >> vidify/__init__.py
 
 # Finally running pyinstaller
-echo "Running pyinstaller..."
+echo "Running PyInstaller..."
 pyinstaller linux.spec --noconfirm || exit 1
 
 echo "Applying post-build patches..."
