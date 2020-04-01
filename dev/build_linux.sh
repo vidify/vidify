@@ -6,6 +6,8 @@ echo "Copying module..."
 rm -rf vidify
 cp -r  ../vidify .
 
+version=$(awk '{print $3}' vidify/version.py | tr -d '"')
+
 echo "Applying pre-build patches..."
 
 # The issue with Linux building is that there can't be a directory and a file
@@ -25,10 +27,14 @@ echo 'import os; os.environ["VLC_PLUGIN_PATH"] = "/usr/lib64/vlc/plugins"' >> vi
 
 # Finally running pyinstaller
 echo "Running pyinstaller..."
-pyinstaller linux.spec --noconfirm
+pyinstaller linux.spec --noconfirm || exit 1
 
-echo "Applying post-build patches"
+echo "Applying post-build patches..."
 
 # Required file not installed by default with Tekore.
 mkdir -p dist/vidify/tekore
 wget "https://raw.githubusercontent.com/felix-hilden/tekore/master/tekore/VERSION" -O "dist/vidify/tekore/VERSION"
+
+# Saving everything into a zip
+echo "Compressing..."
+zip -r "vidify-${version}_linux_x86_64.zip" dist/vidify 
