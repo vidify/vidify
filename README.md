@@ -31,7 +31,7 @@ Vidify is intended to be modular. By default, it includes support for the most p
 Here are the different ways to install Vidify, depending on your Operating System:
 
 * **Cross-platform:** With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs and Players can be installed with `pip install --user vidify[extra1,extra2]`, which is equivalent to installing the list of dependencies needed for `extra1` and `extra2`.
-* **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs and Players.
+* **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs, and use mpv as the player.
 * **Linux:**
     * Any distro: you can use [snap](https://snapcraft.io/vidify-qt) to install it: `snap install vidify-qt`.
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
