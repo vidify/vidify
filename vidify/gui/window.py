@@ -435,17 +435,17 @@ class MainWindow(QWidget):
 
         logging.info("Total delay is %d ms", lag)
         if lag > 0:
-            self.player.position += lag
+            self.player.seek(lag, relative=True)
         elif lag < 0:
             # If a negative delay is larger than the current player position,
             # the player position is set to zero after the lag has passed
             # with a timer.
             if self.player.position < -lag:
                 self.sync_timer = QTimer(self)
-                self.sync_timer.singleShot(
-                    -lag, lambda: self.change_video_position(0))
+                self.sync_timer.singleShot(-self.player.position - lag,
+                                           lambda: self.player.seek(0))
             else:
-                self.player.position += lag
+                self.player.seek(lag, relative=True)
 
     def init_spotify_web_api(self) -> None:
         """
