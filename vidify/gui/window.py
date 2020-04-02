@@ -108,6 +108,9 @@ class MainWindow(QWidget):
         self.setup_widget = SetupWidget(config.api, config.player)
         self.layout.addWidget(self.setup_widget)
         self.setup_widget.done.connect(self.on_setup_done)
+        # Setting focus on the continue button after the first time.
+        if None not in (config.api, config.player):
+            self.setup_widget.continue_btn.setFocus()
 
     def closeEvent(self, event) -> None:
         """
