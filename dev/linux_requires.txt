@@ -1,0 +1,16 @@
+QtPy
+qdarkstyle
+youtube-dl
+appdirs
+lyricwikia
+tekore
+zeroconf
+PyQt5
+PyQtWebEngine>=5.14.0
+pydbus
+pyside2
+vidify-audiosync==0.2.*
+pyinstaller
+python-mpv
+pycairo
+pygobject
