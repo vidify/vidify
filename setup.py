@@ -81,7 +81,8 @@ setup(
     install_requires=install_deps,
     extras_require={
         'dev': [
-            'flake8'
+            'flake8',
+            'pyinstaller'
         ],
         'audiosync': [
             'vidify-audiosync==0.2.*'

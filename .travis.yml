@@ -23,10 +23,15 @@ addons:
             - libvlc-dev
             - vlc
             - mpv
+            # Audiosync
+            - pulseaudio
+            - libfftw3-dev
+            - libpulse-dev
+            - ffmpeg
 
 install:
     - pip3 install -U pip
-    - pip3 install .[mpv,dev,external]
+    - pip3 install .[mpv,dev,audiosync]
       # Pygobject is needed for virtual environments and Travis CI. See the
       # FAQ section in the README.
     - pip3 install pygobject
