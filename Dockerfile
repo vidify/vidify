@@ -8,7 +8,7 @@ WORKDIR /vidify/
 # Needed to install programs without interaction
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Apt build dependencies: TODO mpv and pulseaudio unnecessary ??
+# Apt build dependencies
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     gir1.2-gtk-3.0 \
