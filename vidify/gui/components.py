@@ -72,7 +72,7 @@ class Card(QGroupBox):
         platforms.
         """
 
-        self.button = QRadioButton("USE" if enabled else "Unavailable")
+        self.button = QRadioButton("USE" if enabled else "Not Installed")
         self.button.setEnabled(enabled)
         self.button.setChecked(selected)
         font = Fonts.text
@@ -156,15 +156,17 @@ class SetupWidget(QWidget):
         # they're saved in a list to add them later.
         disabled = []
         for api in APIData:
-            enabled = CURRENT_PLATFORM in api.platforms
+            available = CURRENT_PLATFORM in api.platforms
+            enabled = api.installed
             selected = False if saved_api is None \
                 else api.name == saved_api.upper()
             card = Card(api.name, api.short_name, api.description, api.icon,
                         enabled, selected)
-            if enabled:
-                self.api_layout.addWidget(card)
-            else:
-                disabled.append(card)
+            if available:
+                if enabled:
+                    self.api_layout.addWidget(card)
+                else:
+                    disabled.append(card)
             self.api_group.addButton(card.button)
             logging.info("Created API card: %s (enabled=%s, selected=%s)",
                          api.name, enabled, selected)
@@ -178,15 +180,27 @@ class SetupWidget(QWidget):
 
         # The cards are inside a group so that their selection is exclusive.
         self.player_group = QButtonGroup()
+        # The disabled players will always be at the end of the layout, so
+        # they're saved in a list to add them later.
+        disabled = []
         for player in PlayerData:
+            available = CURRENT_PLATFORM in player.platforms
+            enabled = player.installed
             selected = False if saved_player is None \
                 else player.name == saved_player.upper()
             card = Card(player.name, player.short_name, player.description,
-                        player.icon, selected=selected)
-            self.player_layout.addWidget(card)
+                        player.icon, enabled, selected)
+            if available:
+                if enabled:
+                    self.player_layout.addWidget(card)
+                else:
+                    disabled.append(card)
             self.player_group.addButton(card.button)
-            logging.info("Added Player card: %s (selected=%s)", player.name,
-                         selected)
+            logging.info("Added Player card: %s (enabled=%s, selected=%s)",
+                         player.name, enabled, selected)
+
+        for card in disabled:
+            self.player_layout.addWidget(card)
 
     @Slot()
     def on_click(self) -> None:
