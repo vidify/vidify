@@ -20,13 +20,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           with:
             tag_name: ${{ github.ref }}
-            release_name: ${{ github.ref }} - ???
-            body: |  # This will be edited afterwards
-              ### Added
-              * ???
-
-              ### Fixed
-              * ???
+            release_name: ${{ github.ref }}
             draft: false
             prerelease: false
 
@@ -38,7 +32,7 @@ jobs:
           run: |
             sudo apt-get install docker
             sudo docker build -t vidify .
-            sudo docker run --rm -v $PWD/dev:/vidify/dev/dist vidify:latest /bin/sh -c 'cd dev; bash build_linux.sh'
+            sudo docker run -v $PWD/dev:/vidify/dev/dist vidify:latest /bin/sh -c 'cd dev; bash build_linux.sh'
 
         - name: Upload Linux Release Assets
           id: upload-release-asset 
@@ -50,3 +44,14 @@ jobs:
             asset_path: dev/vidify-${{ steps.get_version.outputs.VERSION }}_linux_x86_64.zip
             asset_name: vidify-${{ steps.get_version.outputs.VERSION }}_linux_x86_64.zip
             asset_content_type: application/zip
+
+        - name: Upload to PyPi
+          env:
+            TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+            TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          run: |
+            sudo docker run vidify:latest /bin/sh -c \
+              "pip install twine; \
+              python setup.py sdist bdist_wheel; \
+              export TWINE_USERNAME=$TWINE_USERNAME; export TWINE_PASSWORD=$TWINE_PASSWORD;\
+              twine upload dist/*"
