@@ -12,5 +12,6 @@ pyside2
 vidify-audiosync==0.2.*
 pyinstaller
 python-mpv
+python-vlc
 pycairo
 pygobject

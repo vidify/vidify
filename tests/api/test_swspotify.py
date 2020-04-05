@@ -9,12 +9,12 @@ from vidify import Platform, CURRENT_PLATFORM
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
-TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
+CI = "CI" in os.environ and os.environ["CI"] == "true"
 SKIP_MSG = "Skipping this test as it won't work on the current system."
 
 
 class SwSpotifyTest(unittest.TestCase):
-    @unittest.skipIf(TRAVIS or CURRENT_PLATFORM not in (Platform.MACOS,
+    @unittest.skipIf(CI or CURRENT_PLATFORM not in (Platform.MACOS,
                      Platform.WINDOWS), SKIP_MSG)
     def test_simple(self):
         from vidify.api.spotify.swspotify import SwSpotifyAPI

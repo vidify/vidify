@@ -8,12 +8,12 @@ from qtpy.QtWidgets import QApplication
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
-TRAVIS = "TRAVIS" in os.environ and os.environ["TRAVIS"] == "true"
+CI = "CI" in os.environ and os.environ["CI"] == "true"
 SKIP_MSG = "Skipping this test as it won't work on the current system."
 
 
 class SpotifyWebTest(unittest.TestCase):
-    @unittest.skipIf(TRAVIS, SKIP_MSG)
+    @unittest.skipIf(CI, SKIP_MSG)
     def test_simple(self):
         """
         The web credentials have to be already in the config file, including

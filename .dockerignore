@@ -9,3 +9,5 @@ env
 /dist
 /.venv
 /*.egg-info
+Dockerfile
+.dockerignore
