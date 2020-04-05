@@ -1,0 +1,42 @@
+name: Continuous Integration
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+        matrix:
+            python: [3.6, 3.7, 3.8]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        env:
+            PYTHON_VERSION: ${{ matrix.python }}
+        run: |
+          sudo apt-get update --yes
+          sudo apt-get install docker --yes
+          sudo docker build -t vidify . --build-arg python_version=$PYTHON_VERSION
+
+      - name: Run Tests
+        run: sudo docker run vidify
+
+  linter:
+      runs-on: ubuntu-latest
+
+      steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.x'
+
+      - name: Install Linter
+        run: python3 -m pip install flake8
+
+      - name: Run Linter
+        run: python3 -m flake8 . --ignore='F821,W503,E731'

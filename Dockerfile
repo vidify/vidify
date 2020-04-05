@@ -2,7 +2,8 @@
 # Vidify dependency, even the optionals.
 # It uses xvfb to run the Qt tests without an actual X server running.
 
-FROM python:3.6
+ARG python_version=3.8
+FROM python:$python_version
 WORKDIR /vidify/
 # Needed to install programs without interaction
 ENV DEBIAN_FRONTEND=noninteractive
@@ -38,5 +39,4 @@ RUN pip install -r linux_requires.txt
 COPY . .
 RUN pip install . --no-deps
 
-RUN chmod a+x dev/run-tests-docker.sh
-CMD dev/run-tests-docker.sh
+CMD sh dev/run-tests-docker.sh

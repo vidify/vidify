@@ -5,7 +5,6 @@ import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
 from vidify import CURRENT_PLATFORM, Platform
-from vidify.api import ConnectionNotReady
 
 
 if QApplication.instance() is None:
