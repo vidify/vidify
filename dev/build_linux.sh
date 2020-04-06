@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set -e
 log() { echo -e "\e[36m$*\e[0m"; }
 LIBRARIES=("libmpv.so")
 log "Building Vidify for Linux"

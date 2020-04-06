@@ -3,7 +3,7 @@
 # It uses xvfb to run the Qt tests without an actual X server running.
 
 ARG python_version=3.8
-FROM python:$python_version
+FROM python:${python_version}-buster
 WORKDIR /vidify/
 # Needed to install programs without interaction
 ENV DEBIAN_FRONTEND=noninteractive
@@ -14,18 +14,13 @@ ENV CI=true
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     gir1.2-gtk-3.0 \
-    libcairo2-dev \
-    libdbus-glib-1-dev \
     libfftw3-dev \
     libgirepository1.0-dev \
-    libglib2.0-dev \
     libmpv-dev \
     libnss3 \
     libpulse-dev \
     libvlc-dev \
-    mpv \
     pulseaudio \
-    python-gobject \
     vlc \
     xvfb \
     zip \
