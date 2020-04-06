@@ -6,6 +6,7 @@ logger, cross-platform variables...
 import sys
 from enum import Enum
 from typing import Optional
+from pkg_resources import DistributionNotFound, get_distribution
 
 
 class Platform(Enum):
@@ -31,6 +32,15 @@ elif sys.platform.find('bsd') != -1:
     CURRENT_PLATFORM = Platform.BSD
 else:
     CURRENT_PLATFORM = Platform.UNKNOWN
+
+
+def is_installed(*args: str) -> bool:
+    for pkgname in args:
+        try:
+            get_distribution(pkgname)
+        except DistributionNotFound:
+            return False
+    return True
 
 
 def format_name(artist: Optional[str], title: Optional[str]) -> str:

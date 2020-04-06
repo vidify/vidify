@@ -10,7 +10,7 @@ import logging
 from enum import Enum
 from typing import Tuple, Optional
 
-from vidify import Platform
+from vidify import Platform, is_installed
 from vidify.gui import Res
 
 
@@ -24,8 +24,9 @@ class APIData(Enum):
     """
 
     def __new__(cls, short_name: str, description: str, icon: str,
-                platforms: Tuple[Platform], module: str, class_name: str,
-                connect_msg: Optional[str], gui_init_fn: Optional[str],
+                platforms: Tuple[Platform], installed: bool, module: str,
+                class_name: str, connect_msg: Optional[str],
+                gui_init_fn: Optional[str],
                 event_loop_interval: Optional[int]) -> object:
         obj = object.__new__(cls)
         # The short name displayed in the GUI, its description and the icon,
@@ -36,6 +37,7 @@ class APIData(Enum):
         # A tuple containing the supported platforms for this API. That way,
         # it's only shown in these.
         obj.platforms = platforms
+        obj.installed = installed
         # The module location and class name to import (for dependency
         # injection).
         obj.module = module
@@ -50,6 +52,7 @@ class APIData(Enum):
         "Any MPRIS compatible media player: Spotify, Rhythmbox...",
         Res.mpris_linux_icon,
         (Platform.LINUX, Platform.BSD),
+        is_installed('pydbus'),
         "vidify.api.mpris",
         "MPRISAPI",
         "Waiting for a song to play on any MPRIS player...",
@@ -60,6 +63,7 @@ class APIData(Enum):
         "The desktop Spotify client for Windows and MacOS.",
         Res.swspotify_icon,
         (Platform.WINDOWS, Platform.MACOS),
+        is_installed('swspotify'),
         "vidify.api.spotify.swspotify",
         "SwSpotifyAPI",
         "Waiting for a Spotify song to play...",
@@ -71,6 +75,7 @@ class APIData(Enum):
         " up.",
         Res.spotify_web_icon,
         tuple(Platform),  # Supports all platforms
+        is_installed('tekore'),
         "vidify.api.spotify.web",
         "SpotifyWebAPI",
         "Waiting for a Spotify song to play...",
