@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from typing import Tuple, Optional
 
-from vidify import Platform, is_installed, BaseModuleData
+from vidify import Platform, CURRENT_PLATFORM, is_installed, BaseModuleData
 from vidify.gui import Res
 
 
@@ -31,7 +31,7 @@ APIS = (
         short_name="Linux Media Players",
         description="Any MPRIS compatible media player: Spotify, Rhythmbox...",
         icon=Res.mpris_linux_icon,
-        platforms=(Platform.LINUX, Platform.BSD),
+        compatible=CURRENT_PLATFORM in (Platform.LINUX, Platform.BSD),
         installed=is_installed('pydbus'),
         module="vidify.api.mpris",
         class_name="MPRISAPI",
@@ -42,7 +42,7 @@ APIS = (
         short_name="Spotify for Windows and MacOS",
         description="The desktop Spotify client for Windows and MacOS.",
         icon=Res.swspotify_icon,
-        platforms=(Platform.WINDOWS, Platform.MACOS),
+        compatible=CURRENT_PLATFORM in (Platform.WINDOWS, Platform.MACOS),
         installed=is_installed('swspotify'),
         module="vidify.api.spotify.swspotify",
         class_name="SwSpotifyAPI",
@@ -55,7 +55,7 @@ APIS = (
         description="The official Spotify Web API. Read the wiki to learn how"
         " to set it up.",
         icon=Res.spotify_web_icon,
-        platforms=tuple(Platform),  # Supports all platforms
+        compatible=True,
         installed=is_installed('tekore'),
         module="vidify.api.spotify.web",
         class_name="SpotifyWebAPI",

@@ -5,7 +5,7 @@ logger, cross-platform variables...
 
 import sys
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Optional
 from dataclasses import dataclass
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -79,7 +79,7 @@ class BaseModuleData:
     short_name: str
     description: str
     icon: str
-    platforms: Tuple[Platform]
+    compatible: bool
     installed: bool
     module: str
     class_name: str

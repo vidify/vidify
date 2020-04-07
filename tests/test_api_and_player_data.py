@@ -9,7 +9,6 @@ import unittest
 import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
-from vidify import CURRENT_PLATFORM, Platform
 from vidify.gui.window import MainWindow
 from vidify.api import APIS
 from vidify.player import PLAYERS, initialize_player
@@ -49,15 +48,16 @@ class DataStructuresTest(unittest.TestCase):
 
         This is only done with the APIs supported by the current operating
         system though, so for a full coverage this test should be done on
-        all supported platforms.
+        all supported platforms and with all the optional dependencies
+        installed.
         """
 
         for api in APIS:
-            if CURRENT_PLATFORM in api.platforms:
+            if api.compatible and api.installed:
                 win.initialize_api(api)
 
         for player in PLAYERS:
-            if CURRENT_PLATFORM in player.platforms:
+            if player.compatible and player.installed:
                 initialize_player(player, config)
 
     def test_event_loop_interval(self):

@@ -14,7 +14,7 @@ from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtCore import Qt, QUrl, Signal, Slot, QTimer
 from qtpy.QtWebEngineWidgets import QWebEngineView
 
-from vidify import CURRENT_PLATFORM, BaseModuleData
+from vidify import BaseModuleData
 from vidify.api import APIS, ConnectionNotReady
 from vidify.player import PLAYERS
 from vidify.gui import Fonts, Colors, Res
@@ -62,8 +62,6 @@ class ModuleCard(QGroupBox):
     def setup_button(self, enabled: bool, selected: bool) -> None:
         """
         The button will be disabled but still shown if `enabled` is false.
-        This is used when the current platform isn't in the API's supported
-        platforms.
         """
 
         self.button = QRadioButton("USE" if enabled else "Not Installed")
@@ -158,7 +156,7 @@ class SetupWidget(QWidget):
         # they're saved in a list to add them later.
         disabled = []
         for module in data:
-            if CURRENT_PLATFORM not in module.platforms:
+            if not module.compatible:
                 continue
 
             selected = saved_item is not None \

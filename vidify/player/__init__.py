@@ -7,7 +7,7 @@ import importlib
 from typing import Tuple
 from dataclasses import dataclass
 
-from vidify import Platform, is_installed, BaseModuleData
+from vidify import is_installed, BaseModuleData
 from vidify.gui import Res
 from vidify.config import Config
 from vidify.player.generic import PlayerBase
@@ -29,7 +29,7 @@ PLAYERS = (
         short_name='VLC',
         description='Widely used and very solid player.',
         icon=Res.vlc_icon,
-        platforms=tuple(Platform),  # Supports all platforms
+        compatible=True,
         installed=is_installed('python-vlc'),
         module='vidify.player.vlc',
         class_name='VLCPlayer',
@@ -40,7 +40,7 @@ PLAYERS = (
         short_name='Mpv',
         description='More lightweight and precise player than VLC.',
         icon=Res.mpv_icon,
-        platforms=tuple(Platform),  # Supports all platforms
+        compatible=True,
         installed=is_installed('python-mpv'),
         module='vidify.player.mpv',
         class_name='MpvPlayer',
@@ -51,7 +51,7 @@ PLAYERS = (
         short_name='External',
         description='Play the videos on external devices.',
         icon=Res.external_icon,
-        platforms=tuple(Platform),  # Supports all platforms
+        compatible=True,
         installed=is_installed('zeroconf'),
         module='vidify.player.external',
         class_name='ExternalPlayer',
