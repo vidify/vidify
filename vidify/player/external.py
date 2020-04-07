@@ -1,6 +1,6 @@
 """
 To read more details about the external player API, please check out:
-https://github.com/vidify/vidify/wiki/%5BDEV%5D-The-External-Player-Protocol
+https://vidify.org/wiki/the-external-player-protocol/
 """
 
 import time

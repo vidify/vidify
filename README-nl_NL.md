@@ -33,7 +33,6 @@ Hier zijn de verschillende manier om Vidify te installeren, afhankelijk van jouw
 * **Cross-platform:** Met [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optionele APIs en Videospelers kunnen worden geïnstalleerd met `pip install --user vidify[extra1,extra2]`, dit is equivalent aan het installeren van de lijst van benodigdheden voor `extra1` en `extra2`.
 * **Windows of Linux:** Met gebruik van de binaire [recentste stabiele versie](https://github.com/vidify/vidify/releases). Deze bevatten ondersteuning voor alle optionele APIs en Videospelers.
 * **Linux:**
-    * Elke distro: je kunt gebruik maken van [snap](https://snapcraft.io/vidify-qt), installeer met: `snap install vidify-qt`.
     * Arch Linux: je kunt dit vinden in de AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Onderhouden door mijzelf ([marioortizmanero](https://github.com/marioortizmanero)).
     * Gentoo Linux: er is een ebuild onderhouden door [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in de [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) genaamd [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
     * *Voel je vrij om dit te uploaden naar de repositories van jouw distro! Laat me dit weten in een issue zodat ik dit aan deze lijst kan toevoegen.*
@@ -45,9 +44,9 @@ Een API is een bron van informatie over welke muziek er op het moment op jouw ap
 
 | Naam                                         | Wiki link                                                                 | Extra vereisten                         | Beschrijving |
 |----------------------------------------------|:-------------------------------------------------------------------------:|-----------------------------------------|--------------|
-| Linux Media Players (`mpris_linux`\*)        | [🔗](https://github.com/vidify/vidify/wiki/Linux-Media-Players)            | *Standaard geïnstalleerd* (zie de wiki) | Elke MPRIS compatibele mediaspeler voor Linux of BSD (99% zou zeker moeten werken, zoals Spotify, Clementine, VLC...). |
-| Spotify voor Windows & MacOS (`swspotify`\*) | [🔗](https://github.com/vidify/vidify/wiki/Spotify-for-Windows-and-MacOS)  | *Standaard geïnstalleerd*               | De Spotify desktop app voor Windows & MacOS, maakt gebruik van de [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`\*)                | [🔗](https://github.com/vidify/vidify/wiki/Spotify-Web-API)                | *Standaard geïnstalleerd*               | De officiële Spotify Web API, maakt gebruik van [Tekore](https://github.com/felix-hilden/tekore). Zie de wiki voor instructies over hoe je dit instelt. |
+| Linux Media Players (`mpris_linux`\*)        | [🔗](https://vidify.org/nl/wiki/linux-media-players/)            | *Standaard geïnstalleerd* (zie de wiki) | Elke MPRIS compatibele mediaspeler voor Linux of BSD (99% zou zeker moeten werken, zoals Spotify, Clementine, VLC...). |
+| Spotify voor Windows & MacOS (`swspotify`\*) | [🔗](https://vidify.org/nl/wiki/spotify-for-windows-and-macos/)  | *Standaard geïnstalleerd*               | De Spotify desktop app voor Windows & MacOS, maakt gebruik van de [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`\*)                | [🔗](https://vidify.org/nl/wiki/spotify-web-api/)                | *Standaard geïnstalleerd*               | De officiële Spotify Web API, maakt gebruik van [Tekore](https://github.com/felix-hilden/tekore). Zie de wiki voor instructies over hoe je dit instelt. |
 
 \* De naam tussen haakjes wordt gebruikt als identificatie sleutel in [argumenten](#usage) en het [config bestand](#the-config-file). `--api mpris_linux` zou bijvoorbeeld het gebruik van de Linux Media Players API forceren. Dit wordt ook gebruikt om extra vereisten te installeren met pip: `pip install vidify[extra1]` zou de extra software installeren die benodigd is voor `extra1` met pip.
 
@@ -171,7 +170,7 @@ Het app logo is gemaakt door [xypnox](https://github.com/xypnox) in deze [issue]
 De changelog en andere informatie over de versies van dit programma vind je op de [Releases pagina](https://github.com/vidify/vidify/releases).
 
 ### Externe spelers implementatie
-Het Vidify externe speler protocol is open voor iedereen om te implementeren in hun eigen applicaties om videos af te spelen. Je kunt er in dit [wiki artikel](https://github.com/vidify/vidify/wiki/%5BDEV%5D-External-Player-Protocol) meer over lezen.
+Het Vidify externe speler protocol is open voor iedereen om te implementeren in hun eigen applicaties om videos af te spelen. Je kunt er in dit [wiki artikel](https://vidify.org/nl/wiki/the-external-player-protocol/) meer over lezen.
 
 ### Tests
 Je kunt deze applicatie lokaal uitvoeren met `python -m vidify`.

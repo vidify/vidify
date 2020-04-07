@@ -12,6 +12,8 @@
 
 READMEs: [🇬🇧](README.md) [🇳🇱](README-nl_NL.md)
 
+*A lighter and less dev-oriented version of this README can be found at [vidify.org](https://vidify.org).*
+
 ## Table of contents
 * [Installation](#installation)
     * [The APIs](#the-apis)
@@ -33,7 +35,6 @@ Here are the different ways to install Vidify, depending on your Operating Syste
 * **Cross-platform:** With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs and Players can be installed with `pip install --user vidify[extra1,extra2]`, which is equivalent to installing the list of dependencies needed for `extra1` and `extra2`.
 * **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs, and use mpv as the player.
 * **Linux:**
-    * Any distro: you can use [snap](https://snapcraft.io/vidify-qt) to install it: `snap install vidify-qt`.
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
     * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) at [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
     * *Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.*
@@ -45,9 +46,9 @@ An API is simply a source of information about the music playing on a device. Fo
 
 | Name                                         | Wiki link                                                                 | Extra requirements              | Description |
 |----------------------------------------------|:-------------------------------------------------------------------------:|---------------------------------------|-------------|
-| Linux Media Players (`mpris_linux`\*)        | [🔗](https://github.com/vidify/vidify/wiki/Linux-Media-Players)           | *Installed by default* (see the wiki) | Any MPRIS compatible media player for Linux or BSD (99% of them, like Spotify, Clementine, VLC...). |
-| Spotify for Windows & MacOS (`swspotify`\*)  | [🔗](https://github.com/vidify/vidify/wiki/Spotify-for-Windows-and-MacOS) | *Installed by default*                | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`\*)                | [🔗](https://github.com/vidify/vidify/wiki/Spotify-Web-API)               | *Installed by default*                | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to set it up. |
+| Linux Media Players (`mpris_linux`\*)        | [🔗](https://vidify.org/wiki/linux-media-players/)           | *Installed by default* (see the wiki) | Any MPRIS compatible media player for Linux or BSD (99% of them, like Spotify, Clementine, VLC...). |
+| Spotify for Windows & MacOS (`swspotify`\*)  | [🔗](https://vidify.org/wiki/spotify-for-windows-and-macos/) | *Installed by default*                | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`\*)                | [🔗](https://vidify.org/wiki/spotify-web-api/)               | *Installed by default*                | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to set it up. |
 
 \* The name inside parenthesis is used as a key for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would force using the Linux Media Players API, for instance. It's also used for the extra dependencies installation with pip: `pip install vidify[extra1]` would install all the extra requirements for `extra1` with pip.
 
@@ -82,7 +83,7 @@ Audiosync is only available on Linux for now. It's strongly recommended to use M
 * pulseaudio: `pulseaudio`, pre-installed on most repos.
 * youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
 
-It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR, and it comes pre-installed in the vidify snap.
+It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR, and it comes pre-installed in the binaries.
 
 It can be activated with `--audiosync`, or inside your [config file](#the-config-file):
 
@@ -171,7 +172,7 @@ The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](
 The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/vidify/vidify/releases).
 
 ### External player implementations
-The Vidify external player has an open protocol for anyone to implement their own app or program to play the videos. You can read more about how it works in this [wiki article](https://github.com/vidify/vidify/wiki/%5BDEV%5D-External-Player-Protocol).
+The Vidify external player has an open protocol for anyone to implement their own app or program to play the videos. You can read more about how it works in this [wiki article](https://vidify.org/wiki/the-external-player-protocol/).
 
 ### Tests
 You can run the module locally with `python -m vidify`.
