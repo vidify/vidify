@@ -16,6 +16,7 @@ from typing import Optional, Union, Tuple, Any
 
 from appdirs import AppDirs
 
+from vidify import Platform, CURRENT_PLATFORM
 from vidify.version import __version__
 
 
@@ -63,7 +64,7 @@ OPTIONS = {
     # Note: for the argument options with a single identifier, a comma has to
     # be used at the end to specify that it's a tuple.
     'debug': FullOption(
-        description="display debug messages",
+        description="display debug messages.",
         type=bool,
         default=False,
         args=('--debug',),
@@ -72,9 +73,9 @@ OPTIONS = {
 
     # Custom config file, only available for the argument parser.
     'config_file': Argument(
-        description=f"the config file path. Default is {DEFAULT_PATH}",
+        description=f"the config file path.",
         type=str,
-        default=None,
+        default=DEFAULT_PATH,
         args=('--config-file',),
         arg_action='store'),
 
@@ -82,7 +83,7 @@ OPTIONS = {
     # meaning that it has to be set to False in the config file to be
     # equivalent.
     'lyrics': FullOption(
-        description="do not print lyrics",
+        description="do not print lyrics.",
         type=bool,
         default=True,
         args=('-n', '--no-lyrics'),
@@ -91,7 +92,7 @@ OPTIONS = {
 
     # Starting the app fullscreen.
     'fullscreen': FullOption(
-        description="open the app in fullscreen mode",
+        description="open the app in fullscreen mode.",
         type=bool,
         default=False,
         args=('-f', '--fullscreen'),
@@ -100,7 +101,7 @@ OPTIONS = {
 
     # The dark mode
     'dark_mode': FullOption(
-        description="activate the dark mode",
+        description="activate the dark mode.",
         type=bool,
         default=False,
         args=('--dark-mode',),
@@ -128,7 +129,7 @@ OPTIONS = {
 
     # Initial window's height.
     'height': FullOption(
-        description="set the maximum height for the player",
+        description="set the maximum height for the player.",
         type=int,
         default=None,
         args=('--height',),
@@ -152,9 +153,9 @@ OPTIONS = {
     # of the names listed in `vidify.player`'s PlayerData enumeration.
     'player': FullOption(
         description="select the player to be used. Plase read the installation"
-        " guide for a list with the available players. By default, it's VLC.",
+        " guide for a list with the available players.",
         type=str,
-        default="vlc",
+        default="VLC",
         args=('-p', '--player'),
         arg_action='store',
         section='Defaults'),
@@ -165,7 +166,7 @@ OPTIONS = {
     'audiosync': FullOption(
         description="enable automatic audio synchronization. You may need to"
         " install additional dependencies. Read the installation guide for"
-        " more information. Note: this feature is still in the alpha stage."
+        " more information. Note: this feature is still in development."
         " It's recommended to use Mpv for precision.",
         type=bool,
         default=False,
@@ -180,7 +181,7 @@ OPTIONS = {
     'audiosync_calibration': FullOption(
         description="the audio synchronization's precision may depend on your"
         " hardware. You can calibrate the delay in milliseconds returned with"
-        " this. It can be positive or negative. The default value is 0ms.",
+        " this. It can be positive or negative.",
         type=int,
         default=0,
         args=('--audiosync-calibration',),
@@ -209,7 +210,7 @@ OPTIONS = {
     'client_id': FullOption(
         description="your client ID key for the Spotify Web API. Check the"
         " README to learn how to obtain yours. Example:"
-        " --client-id='5fe01282e44241328a84e7c5cc169165'",
+        " --client-id='5fe01282e44241328a84e7c5cc169165'.",
         type=str,
         default=None,
         args=('--client-id',),
@@ -219,7 +220,7 @@ OPTIONS = {
     'client_secret': FullOption(
         description="your client secret key for the Spotify Web API. Check the"
         " wiki to learn how to obtain yours. Example:"
-        " --client-secret='2665f6d143be47c1bc9ff284e9dfb350'",
+        " --client-secret='2665f6d143be47c1bc9ff284e9dfb350'.",
         type=str,
         default=None,
         args=('--client-secret',),
@@ -228,7 +229,7 @@ OPTIONS = {
 
     'redirect_uri': FullOption(
         description="optional redirect uri for the Spotify Web API to get the"
-        " authorization token. The default is http://localhost:8888/callback/",
+        " authorization token.",
         type=str,
         default='http://localhost:8888/callback/',
         args=('--redirect-uri',),
@@ -285,8 +286,23 @@ class Config:
             if not isinstance(data, Argument):
                 continue
 
-            kwargs = {'action': data.arg_action, 'dest': name,
-                      'default': None, 'help': data.description}
+            # A text with the default value is also shown in the description.
+            if data.arg_action == "store_false":
+                default = not data.default
+            else:
+                default = data.default
+            default_str = f"Default is '{default}'"
+            if CURRENT_PLATFORM == Platform.WINDOWS:
+                default_str = "[" + default_str + "]"
+            else:
+                default_str = "\033[34m" + default_str + "\033[0m"
+
+            kwargs = {
+                'action': data.arg_action,
+                'dest': name,
+                'default': None,
+                'help': data.description + " " + default_str
+            }
             # Only store arguments must specify their type.
             if data.arg_action == 'store':
                 kwargs['type'] = data.type
@@ -354,7 +370,7 @@ class Config:
         """
 
         self._args = self._argparser.parse_args()
-        self._path = config_file or self._args.config_file or DEFAULT_PATH
+        self._path = config_file or self.config_file
 
         # Checking if the directory exists and creating it
         dirname = os.path.dirname(self._path)
