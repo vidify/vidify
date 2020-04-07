@@ -1,0 +1,18 @@
+appdirs
+dataclasses; python_version < '3.7'
+lyricwikia
+pydbus; platform_system == "Linux"
+pygobject
+pyinstaller
+PyQt5
+PyQtWebEngine >= 5.14.0
+PySide2
+python-mpv
+python-vlc
+qdarkstyle
+QtPy
+SwSpotify>=1.1.1; platform_system == "Windows" or platform_system == "Darwin"
+tekore < 2.0
+vidify-audiosync == 0.2.*
+youtube-dl
+zeroconf

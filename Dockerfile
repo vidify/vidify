@@ -27,8 +27,8 @@ RUN apt-get update && apt-get install -y \
  && rm -rf /var/lib/apt/lists/*
 
 # Python dependencies
-COPY dev/linux_requires.txt .
-RUN pip install -r linux_requires.txt
+COPY dev/build_requires.txt dev/
+RUN pip install -r dev/build_requires.txt
 
 # The app is ready to be installed
 COPY . .

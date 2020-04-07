@@ -139,7 +139,7 @@ class SetupWidget(QWidget):
         self.layout.addWidget(text)
 
     def load_data(self, data: Tuple[BaseModuleData], msg: str,
-                  saved_item: Optional[str] = None,) -> QButtonGroup:
+                  saved_item: Optional[str] = None) -> QButtonGroup:
         """
         The provided data is converted into cards in the GUI. If the
         module isn't supported on the current OS, it's not added to avoid
