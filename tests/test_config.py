@@ -4,7 +4,7 @@ import unittest
 import unittest.mock
 import configparser
 
-from vidify.config import Options, Config
+from vidify.config import OPTIONS, Argument, Config
 
 
 # Using a dummy config file
@@ -39,12 +39,12 @@ class ConfigTest(unittest.TestCase):
 
         attr = 'vlc_args'
         arg = '--vlc-args'
-        section = getattr(Options, attr).section
+        section = OPTIONS[attr].section
 
         # Default
         with unittest.mock.patch('sys.argv', ['']):
             self.config.parse(TEST_PATH)
-        true_value = getattr(Options, attr).default
+        true_value = OPTIONS[attr].default
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
@@ -93,9 +93,9 @@ class ConfigTest(unittest.TestCase):
         file to simplify it, but it should be checked.
         """
 
-        for option in Options:
+        for option in OPTIONS:
             # Not all options are arguments
-            if option.args is None:
+            if not isinstance(option, Argument):
                 continue
 
             # Checking the number of arguments
@@ -119,7 +119,7 @@ class ConfigTest(unittest.TestCase):
             self.assertEqual(opt, option.name)
 
             # If it's an argument, the description and arg_action shouldn't be
-            # empty
+            # empty.
             self.assertNotIsInstance(option.description, type(None))
             self.assertNotEqual(option.description, '')
             self.assertNotIsInstance(option.arg_action, type(None))
@@ -130,9 +130,9 @@ class ConfigTest(unittest.TestCase):
         Makes sure that the argument actions make sense.
         """
 
-        for option in Options:
+        for option in OPTIONS:
             # Not all options are arguments
-            if option.args is None:
+            if not isinstance(option, Argument):
                 continue
 
             # store_true and store_false should be of type boolean
@@ -145,9 +145,9 @@ class ConfigTest(unittest.TestCase):
         or None.
         """
 
-        for option in Options:
+        for option in OPTIONS:
             # Some options don't have a default
-            if option.default is None:
+            if not isinstance(option, Argument):
                 continue
 
             self.assertIsInstance(option.default, option.type)
@@ -194,10 +194,10 @@ class ConfigTest(unittest.TestCase):
         One test is done for each type of variable: bool, int and str.
         """
 
-        for opt in Options:
+        for name, opt in OPTIONS.items():
             with open(self.config._path, 'w') as configfile:
-                configfile.write(f"[Defaults]\n{opt.name} =\n")
-            value = getattr(self.config, opt.name)
+                configfile.write(f"[Defaults]\n{name} =\n")
+            value = getattr(self.config, name)
             true_value = opt.default
             self.assertEqual(value, true_value)
 

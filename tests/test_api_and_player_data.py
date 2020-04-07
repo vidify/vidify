@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QApplication
 from vidify.gui.window import MainWindow
 from vidify.api import APIS
 from vidify.player import PLAYERS, initialize_player
-from vidify.config import Config, Options
+from vidify.config import Config, OPTIONS
 
 
 if QApplication.instance() is None:
@@ -79,9 +79,9 @@ class DataStructuresTest(unittest.TestCase):
         """
 
         for player in PLAYERS:
-            for flag in player.flags:
+            for attr in player.flags:
                 # Will raise AtributeError if it isn't found
-                getattr(Options, flag)
+                OPTIONS[attr]
 
     def test_gui_init_exists(self):
         """
