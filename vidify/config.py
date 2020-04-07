@@ -11,7 +11,6 @@ import os
 import errno
 import argparse
 import configparser
-from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, Union, Tuple, Any
 

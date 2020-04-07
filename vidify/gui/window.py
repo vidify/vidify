@@ -61,8 +61,8 @@ from qtpy.QtWidgets import QWidget, QHBoxLayout
 from qtpy.QtGui import QFontDatabase
 from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot, QThread
 
-from vidify import format_name
-from vidify.api import APIS
+from vidify import format_name, find_module
+from vidify.api import APIS, APIData
 from vidify.player import initialize_player, PlayerData
 from vidify.config import Config
 from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
@@ -493,7 +493,7 @@ class MainWindow(QWidget):
 
         # Initializing the web API
         self.api = SpotifyWebAPI(token)
-        api_data = APIS['SPOTIFY_WEB']
+        api_data = find_module(APIS, 'SPOTIFY_WEB')
         self.wait_for_connection(
             self.api.connect_api, message=api_data.connect_msg,
             event_loop_interval=api_data.event_loop_interval)
