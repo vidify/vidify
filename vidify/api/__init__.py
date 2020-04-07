@@ -6,81 +6,63 @@ initialized the same programatically.
 """
 
 import re
-import logging
-from enum import Enum
+from dataclasses import dataclass
 from typing import Tuple, Optional
 
-from vidify import Platform, is_installed
+from vidify import Platform, CURRENT_PLATFORM, is_installed, BaseModuleData
 from vidify.gui import Res
 
 
-class APIData(Enum):
+@dataclass(frozen=True)
+class APIData(BaseModuleData):
     """
-    Information structure about the different APIs supported in this module.
-    It contains information about the API and how to initialize it, following
-    the top of this module's flow diagram with dependency injection.
-
-    Note: all API entries must have their name in uppercase.
+    Information structure about the different APIs supported in this module,
+    with a description for the user and how to initialize the API.
     """
 
-    def __new__(cls, short_name: str, description: str, icon: str,
-                platforms: Tuple[Platform], installed: bool, module: str,
-                class_name: str, connect_msg: Optional[str],
-                gui_init_fn: Optional[str],
-                event_loop_interval: Optional[int]) -> object:
-        obj = object.__new__(cls)
-        # The short name displayed in the GUI, its description and the icon,
-        # if existent. The description can use HTML tags like <b>.
-        obj.short_name = short_name
-        obj.description = description
-        obj.icon = icon
-        # A tuple containing the supported platforms for this API. That way,
-        # it's only shown in these.
-        obj.platforms = platforms
-        obj.installed = installed
-        # The module location and class name to import (for dependency
-        # injection).
-        obj.module = module
-        obj.class_name = class_name
-        obj.connect_msg = connect_msg
-        obj.gui_init_fn = gui_init_fn
-        obj.event_loop_interval = event_loop_interval
-        return obj
+    connect_msg: Optional[str] = None
+    gui_init_fn: Optional[str] = None
+    event_loop_interval: Optional[int] = None
 
-    MPRIS_LINUX = (
-        "Linux Media Players",
-        "Any MPRIS compatible media player: Spotify, Rhythmbox...",
-        Res.mpris_linux_icon,
-        (Platform.LINUX, Platform.BSD),
-        is_installed('pydbus'),
-        "vidify.api.mpris",
-        "MPRISAPI",
-        "Waiting for a song to play on any MPRIS player...",
-        None,
-        None)
-    SWSPOTIFY = (
-        "Spotify for Windows and MacOS",
-        "The desktop Spotify client for Windows and MacOS.",
-        Res.swspotify_icon,
-        (Platform.WINDOWS, Platform.MACOS),
-        is_installed('swspotify'),
-        "vidify.api.spotify.swspotify",
-        "SwSpotifyAPI",
-        "Waiting for a Spotify song to play...",
-        None,
-        500)
-    SPOTIFY_WEB = (
-        "Spotify Web",
-        "The official Spotify Web API. Read the wiki to learn how to set it"
-        " up.",
-        Res.spotify_web_icon,
-        tuple(Platform),  # Supports all platforms
-        is_installed('tekore'),
-        "vidify.api.spotify.web",
-        "SpotifyWebAPI",
-        "Waiting for a Spotify song to play...",
-        "init_spotify_web_api",
-        1000)
+
+APIS = (
+    APIData(
+        id="MPRIS_LINUX",
+        short_name="Linux Media Players",
+        description="Any MPRIS compatible media player: Spotify, Rhythmbox...",
+        icon=Res.mpris_linux_icon,
+        compatible=CURRENT_PLATFORM in (Platform.LINUX, Platform.BSD),
+        installed=is_installed('pydbus'),
+        module="vidify.api.mpris",
+        class_name="MPRISAPI",
+        connect_msg="Waiting for a song to play on any MPRIS player..."),
+
+    APIData(
+        id='SWSPOTIFY',
+        short_name="Spotify for Windows and MacOS",
+        description="The desktop Spotify client for Windows and MacOS.",
+        icon=Res.swspotify_icon,
+        compatible=CURRENT_PLATFORM in (Platform.WINDOWS, Platform.MACOS),
+        installed=is_installed('swspotify'),
+        module="vidify.api.spotify.swspotify",
+        class_name="SwSpotifyAPI",
+        connect_msg="Waiting for a Spotify song to play...",
+        event_loop_interval=500),
+
+    APIData(
+        id='SPOTIFY_WEB',
+        short_name="Spotify Web",
+        description="The official Spotify Web API. Read the wiki to learn how"
+        " to set it up.",
+        icon=Res.spotify_web_icon,
+        compatible=True,
+        installed=is_installed('tekore'),
+        module="vidify.api.spotify.web",
+        class_name="SpotifyWebAPI",
+        connect_msg="Waiting for a Spotify song to play...",
+        gui_init_fn="init_spotify_web_api",
+        event_loop_interval=1000)
+)
 
 
 class ConnectionNotReady(Exception):
@@ -88,24 +70,6 @@ class ConnectionNotReady(Exception):
     Exception used to notify the GUI from the API that the connection
     attempt was unsuccessful.
     """
-
-
-def get_api_data(key: Optional[str]) -> APIData:
-    """
-    Returns an entry from the APIs from `key`. KeyError is raised if it
-    isn't found.
-    """
-
-    if key is None:
-        logging.info("Rejecting API initialization because it was None")
-        raise KeyError
-
-    try:
-        return APIData[key.upper()]
-    except KeyError:
-        logging.info("Rejecting API initialization because it wasn't found"
-                     " in the APIs enumeration.")
-        raise
 
 
 def split_title(title: str) -> Tuple[str, str]:

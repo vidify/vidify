@@ -4,86 +4,66 @@ them.
 """
 
 import importlib
-from enum import Enum
 from typing import Tuple
+from dataclasses import dataclass
 
-from vidify import Platform, is_installed
+from vidify import is_installed, BaseModuleData
 from vidify.gui import Res
 from vidify.config import Config
 from vidify.player.generic import PlayerBase
 
 
-class PlayerData(Enum):
+@dataclass(frozen=True)
+class PlayerData(BaseModuleData):
     """
-    The available players enumeration. It contains information about how to
-    initialize them: the module, the class name and the possible parameters
-    needed (flags from the config).
-
-    Note: all player entries must have their name in uppercase.
+    Information structure about the different Players supported, with a
+    description for the user and how to initialize it.
     """
 
-    def __new__(cls, short_name: str, description: str, icon: str,
-                platforms: Tuple[Platform], installed: bool,
-                module: str, class_name: str, flags: list) -> object:
-        obj = object.__new__(cls)
-        obj.short_name = short_name
-        obj.description = description
-        obj.icon = icon
-        # A tuple containing the supported platforms for this Player. That way,
-        # it's only shown in these.
-        obj.platforms = platforms
-        obj.installed = installed
-        # The module location to import, for dependency injection.
-        obj.module = module
-        # The player's class name inside its module.
-        obj.class_name = class_name
-        # The player can also take options from a config file to be
-        # initialized. The parameters must be in order.
-        obj.flags = flags
-        return obj
-
-    VLC = (
-        'VLC',
-        'Widely used and very solid player.',
-        Res.vlc_icon,
-        tuple(Platform),  # Supports all platforms
-        is_installed('python-vlc'),
-        'vidify.player.vlc',
-        'VLCPlayer',
-        ('vlc_args',))
-    MPV = (
-        'Mpv',
-        'More lightweight and precise player than VLC.',
-        Res.mpv_icon,
-        tuple(Platform),  # Supports all platforms
-        is_installed('python-mpv'),
-        'vidify.player.mpv',
-        'MpvPlayer',
-        ('mpv_flags',))
-    EXTERNAL = (
-        'External',
-        'Play the videos on external devices.',
-        Res.external_icon,
-        tuple(Platform),  # Supports all platforms
-        is_installed('zeroconf'),
-        'vidify.player.external',
-        'ExternalPlayer',
-        ('api',))
+    flags: Tuple[str]
 
 
-def initialize_player(key: str, config: Config) -> PlayerBase:
+PLAYERS = (
+    PlayerData(
+        id='VLC',
+        short_name='VLC',
+        description='Widely used and very solid player.',
+        icon=Res.vlc_icon,
+        compatible=True,
+        installed=is_installed('python-vlc'),
+        module='vidify.player.vlc',
+        class_name='VLCPlayer',
+        flags=('vlc_args',)),
+
+    PlayerData(
+        id='MPV',
+        short_name='Mpv',
+        description='More lightweight and precise player than VLC.',
+        icon=Res.mpv_icon,
+        compatible=True,
+        installed=is_installed('python-mpv'),
+        module='vidify.player.mpv',
+        class_name='MpvPlayer',
+        flags=('mpv_flags',)),
+
+    PlayerData(
+        id='EXTERNAL',
+        short_name='External',
+        description='Play the videos on external devices.',
+        icon=Res.external_icon,
+        compatible=True,
+        installed=is_installed('zeroconf'),
+        module='vidify.player.external',
+        class_name='ExternalPlayer',
+        flags=('api',))
+)
+
+
+def initialize_player(player: PlayerData, config: Config) -> PlayerBase:
     """
     Choosing a player from the list and initializing an abstract player
     instance with the information inside the `player` enumeration object.
     """
-
-    # Finding the config player and initializing it.
-    try:
-        player = PlayerData[key.upper()]
-    except KeyError:
-        raise AttributeError(
-            "The selected player isn't available. Please check your config or"
-            " specify one by using a valid `--player` argument.") from None
 
     # Importing the module first
     mod = importlib.import_module(player.module)

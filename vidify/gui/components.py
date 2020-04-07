@@ -5,7 +5,7 @@ initialization is easier.
 
 import time
 import logging
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
                             QVBoxLayout, QGroupBox, QRadioButton, QHBoxLayout,
@@ -14,41 +14,35 @@ from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtCore import Qt, QUrl, Signal, Slot, QTimer
 from qtpy.QtWebEngineWidgets import QWebEngineView
 
-from vidify import CURRENT_PLATFORM
-from vidify.api import APIData, ConnectionNotReady
-from vidify.player import PlayerData
+from vidify import BaseModuleData
+from vidify.api import APIS, ConnectionNotReady
+from vidify.player import PLAYERS
 from vidify.gui import Fonts, Colors, Res
 
 
-class Card(QGroupBox):
+class ModuleCard(QGroupBox):
     """
     Widget used inside Selection to display information about an API or Player
     as a selectable card.
     """
 
-    def __init__(self, name: str, title: str, description: str,
-                 icon: Optional[str], enabled: bool = True,
-                 selected: bool = False) -> None:
+    def __init__(self, module: BaseModuleData, selected: bool = False) -> None:
         """
-        A card with the cards's basic info. `name` is its identifying
-        inside either APIData or PlayerData.
-
-        The card can be greyed out with `enabled`, and its button can be
-        enabled initially with `selected`.
+        A card with the cards's basic info.
         """
 
-        super().__init__(title)
+        super().__init__(module.short_name)
 
-        self.name = name
+        self.module = module
         self.setFont(Fonts.smalltext)
         self.setMinimumHeight(270)
         self.setMaximumHeight(400)
         self.setMinimumWidth(220)
         self.setMaximumWidth(300)
         self.layout = QVBoxLayout(self)
-        self.setup_icon(icon)
-        self.setup_text(description)
-        self.setup_button(enabled, selected)
+        self.setup_icon(module.icon)
+        self.setup_text(module.description)
+        self.setup_button(module.installed, selected)
 
     def setup_icon(self, icon: str) -> None:
         self.icon = QPixmap(icon)
@@ -68,8 +62,6 @@ class Card(QGroupBox):
     def setup_button(self, enabled: bool, selected: bool) -> None:
         """
         The button will be disabled but still shown if `enabled` is false.
-        This is used when the current platform isn't in the API's supported
-        platforms.
         """
 
         self.button = QRadioButton("USE" if enabled else "Not Installed")
@@ -86,10 +78,12 @@ class SetupWidget(QWidget):
     Widget used to prompt the user for what API and Player to use.
     """
 
-    done = Signal(str, str)
+    # This signal returns references of the obtained API and Player,
+    # respectively.
+    done = Signal(object, object)
 
-    def __init__(self, saved_api: Optional[str], saved_player: Optional[str],
-                 *args) -> None:
+    def __init__(self, saved_api: Optional[str] = None,
+                 saved_player: Optional[str] = None, *args) -> None:
         """
         The setup widget can be initialized with the previously selected API
         and Player so that all the user has to do is press "Next".
@@ -99,8 +93,9 @@ class SetupWidget(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.load_apis(saved_api)
-        self.load_players(saved_player)
+        self.api_group = self.load_data(APIS, "Select an API:", saved_api)
+        self.player_group = self.load_data(PLAYERS, "Select a Player:",
+                                           saved_player)
         self.init_button()
 
     def init_button(self) -> None:
@@ -131,7 +126,7 @@ class SetupWidget(QWidget):
 
         return layout
 
-    def init_title(self, title: str) -> QLabel:
+    def init_title(self, title: str) -> None:
         """
         The instruction title for the screen. Also adds the new widget to the
         main layout.
@@ -141,66 +136,45 @@ class SetupWidget(QWidget):
         font = Fonts.bigtext
         font.setBold(True)
         text.setFont(font)
-        #  text.setAlignment(Qt.AlignCenter)
         self.layout.addWidget(text)
 
-        return text
+    def load_data(self, data: Tuple[BaseModuleData], msg: str,
+                  saved_item: Optional[str] = None) -> QButtonGroup:
+        """
+        The provided data is converted into cards in the GUI. If the
+        module isn't supported on the current OS, it's not added to avoid
+        confusion. If it's not installed, it's disabled but it's still
+        appended to the layout.
+        """
 
-    def load_apis(self, saved_api: Optional[str]) -> None:
-        self.api_instructions = self.init_title("Select an API:")
-        self.api_layout = self.init_scroll_layout()
+        self.init_title(msg)
+        layout = self.init_scroll_layout()
 
         # The cards are inside a group so that their selection is exclusive.
-        self.api_group = QButtonGroup()
+        group = QButtonGroup()
         # The disabled APIs will always be at the end of the layout, so
         # they're saved in a list to add them later.
         disabled = []
-        for api in APIData:
-            available = CURRENT_PLATFORM in api.platforms
-            enabled = api.installed
-            selected = False if saved_api is None \
-                else api.name == saved_api.upper()
-            card = Card(api.name, api.short_name, api.description, api.icon,
-                        enabled, selected)
-            if available:
-                if enabled:
-                    self.api_layout.addWidget(card)
-                else:
-                    disabled.append(card)
-            self.api_group.addButton(card.button)
+        for module in data:
+            if not module.compatible:
+                continue
+
+            selected = saved_item is not None \
+                and module.id == saved_item.upper()
+            card = ModuleCard(module, selected)
+
+            if module.installed:
+                layout.addWidget(card)
+            else:
+                disabled.append(card)
+            group.addButton(card.button)
             logging.info("Created API card: %s (enabled=%s, selected=%s)",
-                         api.name, enabled, selected)
+                         module.id, module.installed, selected)
 
         for card in disabled:
-            self.api_layout.addWidget(card)
+            layout.addWidget(card)
 
-    def load_players(self, saved_player: Optional[str]) -> None:
-        self.player_instructions = self.init_title("Select a Player:")
-        self.player_layout = self.init_scroll_layout()
-
-        # The cards are inside a group so that their selection is exclusive.
-        self.player_group = QButtonGroup()
-        # The disabled players will always be at the end of the layout, so
-        # they're saved in a list to add them later.
-        disabled = []
-        for player in PlayerData:
-            available = CURRENT_PLATFORM in player.platforms
-            enabled = player.installed
-            selected = False if saved_player is None \
-                else player.name == saved_player.upper()
-            card = Card(player.name, player.short_name, player.description,
-                        player.icon, enabled, selected)
-            if available:
-                if enabled:
-                    self.player_layout.addWidget(card)
-                else:
-                    disabled.append(card)
-            self.player_group.addButton(card.button)
-            logging.info("Added Player card: %s (enabled=%s, selected=%s)",
-                         player.name, enabled, selected)
-
-        for card in disabled:
-            self.player_layout.addWidget(card)
+        return group
 
     @Slot()
     def on_click(self) -> None:
@@ -209,13 +183,16 @@ class SetupWidget(QWidget):
         caught from outside this widget.
         """
 
+        checked_api = self.api_group.checkedButton()
+        checked_player = self.player_group.checkedButton()
+
         try:
-            api = self.api_group.checkedButton().parentWidget().name
-            player = self.player_group.checkedButton().parentWidget().name
+            api = checked_api.parentWidget().module
+            player = checked_player.parentWidget().module
         except AttributeError:
             return
 
-        logging.info("Selected: api=%s, player=%s", api, player)
+        logging.info("Selected: api=%s, player=%s", api.id, player.id)
         self.done.emit(api, player)
 
 

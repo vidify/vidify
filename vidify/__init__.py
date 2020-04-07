@@ -5,7 +5,8 @@ logger, cross-platform variables...
 
 import sys
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple
+from dataclasses import dataclass
 from pkg_resources import DistributionNotFound, get_distribution
 
 
@@ -63,3 +64,30 @@ def format_name(artist: Optional[str], title: Optional[str]) -> str:
         return artist
 
     return f"{artist} - {title}"
+
+
+@dataclass(frozen=True)
+class BaseModuleData:
+    """
+    This dataclass describes the base attributes of an API or Player inside
+    vidify.api or vidify.player, respectively. These attributes are used
+    to display information to the user about the modules, and to
+    initialize them programatically.
+    """
+
+    id: str
+    short_name: str
+    description: str
+    icon: str
+    compatible: bool
+    installed: bool
+    module: str
+    class_name: str
+
+
+def find_module(data: Tuple[BaseModuleData], id: str) -> None:
+    for element in data:
+        if element.id == id:
+            return element
+
+    return None
