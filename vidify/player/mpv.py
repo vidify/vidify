@@ -49,9 +49,10 @@ class MpvPlayer(PlayerBase):
         args['config'] = False
 
         self._mpv = MPV(*flags, **args)
+        self._mpv.register_key_binding("CLOSE_WIN", quit)
 
     def __del__(self) -> None:
-        self._mpv.terminate()
+        del self._mpv
 
     @property
     def pause(self) -> bool:
