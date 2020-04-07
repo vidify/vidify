@@ -16,12 +16,15 @@ exec(compile(open('vidify/version.py').read(),
              'vidify/version.py', 'exec'))
 
 install_deps = [
+    # Base package
     'QtPy',
-    'qdarkstyle',
-    'youtube-dl',
-    'python-vlc',
-    'appdirs',
     'lyricwikia',
+    'youtube-dl',
+    'appdirs',
+    'qdarkstyle',
+    'dataclasses;python_version<"3.7"',
+    # APIs and players
+    'python-vlc',
     'tekore<2.0',
     'zeroconf',
     'pydbus; platform_system=="Linux"',

@@ -11,8 +11,8 @@ from qtpy.QtWidgets import QApplication
 
 from vidify import CURRENT_PLATFORM, Platform
 from vidify.gui.window import MainWindow
-from vidify.api import APIData, get_api_data
-from vidify.player import PlayerData, initialize_player
+from vidify.api import APIS
+from vidify.player import PLAYERS, initialize_player
 from vidify.config import Config, Options
 
 
@@ -24,18 +24,23 @@ win = MainWindow(config)
 
 
 class DataStructuresTest(unittest.TestCase):
-    def test_uppercase_names(self):
+    def test_unique_uppercase_names(self):
         """
         Checking that the names in the API and Player enumerations are all
-        uppercase. This way, they are unique and can be searched easily with
-        str.upper().
+        unique and uppercase.
         """
 
-        for api in APIData:
-            self.assertEqual(api.name, api.name.upper())
+        existing_apis = []
+        for api in APIS:
+            self.assertEqual(api.id, api.id.upper())
+            self.assertTrue(api.id not in existing_apis)
+            existing_apis.append(api.id)
 
-        for player in PlayerData:
-            self.assertEqual(player.name, player.name.upper())
+        existing_players = []
+        for player in PLAYERS:
+            self.assertEqual(player.id, player.id.upper())
+            self.assertTrue(player.id not in existing_players)
+            existing_players.append(player.id)
 
     def test_imports_and_class_names_in_modules(self):
         """
@@ -47,24 +52,13 @@ class DataStructuresTest(unittest.TestCase):
         all supported platforms.
         """
 
-        # The API has 2 different functions, one to obtain the APIData entry
-        # (get_api_data), and another to initialize the API (initialize_api).
-        # Both are tested this way.
-        for api in APIData:
+        for api in APIS:
             if CURRENT_PLATFORM in api.platforms:
-                win.initialize_api(get_api_data(api.name))
+                win.initialize_api(api)
 
-        for player in PlayerData:
-            initialize_player(player.name, config)
-
-        # Also checking that AttributeError is raised when an unexisting
-        # player is provided.
-        with self.assertRaises(AttributeError):
-            initialize_player('player-does-not-exist', config)
-
-        # If the API isn't found, KeyError should be raised.
-        with self.assertRaises(KeyError):
-            get_api_data('api-does-not-exist')
+        for player in PLAYERS:
+            if CURRENT_PLATFORM in player.platforms:
+                initialize_player(player, config)
 
     def test_event_loop_interval(self):
         """
@@ -74,20 +68,9 @@ class DataStructuresTest(unittest.TestCase):
         also cause lag in some systems.
         """
 
-        for api in APIData:
+        for api in APIS:
             if api.event_loop_interval is not None:
                 self.assertTrue(api.event_loop_interval > 100)
-
-    def test_platforms(self):
-        """
-        Checking that all APIs have at least one available platform.
-        """
-
-        for api in APIData:
-            self.assertTrue(len(api.platforms) > 0)
-            # Also checking that the type is valid
-            for p in api.platforms:
-                self.assertIsInstance(p, Platform)
 
     def test_player_flags_name_exists(self):
         """
@@ -95,8 +78,9 @@ class DataStructuresTest(unittest.TestCase):
         holds real entries in Config.
         """
 
-        for player in PlayerData:
+        for player in PLAYERS:
             for flag in player.flags:
+                # Will raise AtributeError if it isn't found
                 getattr(Options, flag)
 
     def test_gui_init_exists(self):
@@ -105,9 +89,8 @@ class DataStructuresTest(unittest.TestCase):
         exist inside the GUI module.
         """
 
-        for api in APIData:
+        for api in APIS:
             if api.gui_init_fn is not None:
-                # Will raise AtributeError if it isn't found
                 getattr(win, api.gui_init_fn)
 
 

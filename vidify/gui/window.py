@@ -63,7 +63,7 @@ from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot, QThread
 
 from vidify import format_name
 from vidify.api import APIData
-from vidify.player import initialize_player
+from vidify.player import initialize_player, PlayerData
 from vidify.config import Config
 from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
 from vidify.lyrics import get_lyrics
@@ -141,11 +141,10 @@ class MainWindow(QWidget):
 
         super().closeEvent(event)
 
-    @Slot(str, str)
-    def on_setup_done(self, api_key: str, player_key: str) -> None:
+    @Slot(object, object)
+    def on_setup_done(self, api: APIData, player: PlayerData) -> None:
         """
         Method called when the API and Player are selected with APISelection.
-        Returns two keys, from APIData and PlayerData, respectively.
         """
 
         # Completely removing the widget used to obtain the API string
@@ -155,16 +154,16 @@ class MainWindow(QWidget):
         del self.setup_widget
 
         # Saving the API and Player in the config
-        self.config.api = api_key
-        self.config.player = player_key
+        self.config.api = api.id
+        self.config.player = player.id
 
         # Starting the asynchronous API initialization
-        self.initialize_api(APIData[api_key])
-        logging.info("Using %s as the API", self.config.api)
+        self.initialize_api(api)
+        logging.info("Using %s as the API", api.id)
 
         # Initializing the player
-        self.player = initialize_player(self.config.player, self.config)
-        logging.info("Using %s as the player", self.config.player)
+        self.player = initialize_player(player, self.config)
+        logging.info("Using %s as the player", player.id)
 
     def initialize_api(self, api_data: APIData) -> None:
         """
