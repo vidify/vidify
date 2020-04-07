@@ -66,7 +66,7 @@ def format_name(artist: Optional[str], title: Optional[str]) -> str:
     return f"{artist} - {title}"
 
 
-@dataclass
+@dataclass(frozen=True)
 class BaseModuleData:
     """
     This dataclass describes the base attributes of an API or Player inside

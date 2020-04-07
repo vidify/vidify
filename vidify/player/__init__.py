@@ -13,7 +13,7 @@ from vidify.config import Config
 from vidify.player.generic import PlayerBase
 
 
-@dataclass
+@dataclass(frozen=True)
 class PlayerData(BaseModuleData):
     """
     Information structure about the different Players supported, with a

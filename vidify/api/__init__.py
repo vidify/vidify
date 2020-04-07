@@ -13,7 +13,7 @@ from vidify import Platform, CURRENT_PLATFORM, is_installed, BaseModuleData
 from vidify.gui import Res
 
 
-@dataclass
+@dataclass(frozen=True)
 class APIData(BaseModuleData):
     """
     Information structure about the different APIs supported in this module,
