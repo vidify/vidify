@@ -79,6 +79,10 @@ class YouTubeDLWorker(QObject):
                              str(e))
                 self.fail.emit()
             else:
-                self.success.emit(data)
+                if len(data['entries']) == 0:
+                    logging.info("YouTube-dl returned no entries")
+                    self.fail.emit()
+                else:
+                    self.success.emit(data)
             finally:
                 self.finish.emit()

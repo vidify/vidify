@@ -45,14 +45,9 @@ class MpvPlayer(PlayerBase):
             args['loglevel'] = 'info'
         args['wid'] = str(int(self.winId()))
         args['vo'] = 'gpu,libmpv,x11'
-        args['input_default_bindings'] = False
         args['config'] = False
 
         self._mpv = MPV(*flags, **args)
-        self._mpv.register_key_binding("CLOSE_WIN", quit)
-
-    def __del__(self) -> None:
-        del self._mpv
 
     @property
     def pause(self) -> bool:
