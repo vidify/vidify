@@ -1,12 +1,22 @@
 # Temporary Vidify folder to apply patches
 echo "Copying module..."
-$DIR = "vidify"
-if ( Test-Path -Path $DIR ) {
-	rm -r $DIR
+if ( Test-Path -Path vidify ) {
+	rm -r vidify
 }
 cp -r ../vidify .
 
 $version = ( ( Get-Content vidify/version.py ) -split '"' | Select -Index 1 )
+
+# Calling get_distribution at runtime to check if modules are installed
+# doesn't work with PyInstaller, so the is_installed function is overridden:
+# https://github.com/pyinstaller/pyinstaller/issues/4795
+echo -e \
+'def is_installed(*args):
+    for s in args:
+        if s not in ("python-mpv", "zeroconf", "swspotify", "tekore"):
+            return False
+    return True' >> vidify/__init__.py
+
 
 echo "Running PyInstaller..."
 pyinstaller windows.spec --noconfirm

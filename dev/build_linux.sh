@@ -28,6 +28,16 @@ sed -i '/RES_DIR = .*/c\import vidify; RES_DIR = os.path.join(os.path.dirname(os
 # correctly.
 echo 'import os; os.environ["VLC_PLUGIN_PATH"] = "/usr/lib64/vlc/plugins"' >> vidify/__init__.py
 
+# Calling get_distribution at runtime to check if modules are installed
+# doesn't work with PyInstaller, so the is_installed function is overridden:
+# https://github.com/pyinstaller/pyinstaller/issues/4795
+echo -e \
+'def is_installed(*args):
+    for s in args:
+        if s not in ("python-mpv", "zeroconf", "pydbus", "tekore"):
+            return False
+    return True' >> vidify/__init__.py
+
 
 log "Running PyInstaller"
 
