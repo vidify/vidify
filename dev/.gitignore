@@ -1,3 +1,11 @@
 # Building data
 vidify/
+include/
+build/
+dist/
 vidify-v*.zip
+*.h
+*.dll
+*.a
+*.7z
+mpv.def
