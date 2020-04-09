@@ -1,9 +1,3 @@
 # Building.md
 
-## Windows
-
-Please run `build_windows.bat` to apply the necessary patches and generate a binary with PyInstaller.
-
-## Linux
-
-`build_linux.sh` will apply all the needed patches and run PyInstaller to generate the binary.
+Building is fully automated with GitHub Actions. You can follow the exact steps needed at `.github/workflows/release.yaml`. It basically installs the required dependencies and then runs `build_linux.sh` and `build_windows.ps1`.

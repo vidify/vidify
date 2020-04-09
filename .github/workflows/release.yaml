@@ -7,51 +7,71 @@ on:
 
 jobs:
   release:
-      name: New Release
-      runs-on: ubuntu-latest
+      name: Upload Assets
+      runs-on: ${{ matrix.os }}
+      strategy:
+        matrix:
+          os: [ubuntu-latest, windows-latest]
+          python: [3.6]
+          include:
+            - os: ubuntu-latest
+              artifact_prefix: linux_x86_64
+            - os: windows-latest
+              artifact_prefix: win10_x86_64
       steps:
         - name: Checkout code
           uses: actions/checkout@v2
 
-        - name: Create Release
-          id: create_release
-          uses: actions/create-release@latest
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            tag_name: ${{ github.ref }}
-            release_name: ${{ github.ref }}
-            draft: false
-            prerelease: false
+        - name: Get the tag name
+          id: tag-name
+          uses: olegtarasov/get-tag@v2
 
-        - name: Get the version
-          id: get_version
-          run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
+        - name: Build on Windows
+          if: matrix.os == 'windows-latest'
+          shell: pwsh
+          run: |
+            choco install wget 7zip.install
+            pip install .[mpv,dev] pyinstaller
+            cd dev
+            ./build_windows.ps1
 
         - name: Build on Linux
+          if: matrix.os == 'ubuntu-latest'
           run: |
             sudo apt-get install docker
             sudo docker build -t vidify .
             sudo docker run -v $PWD/dev:/vidify/dev/dist vidify:latest /bin/sh -c 'cd dev; bash build_linux.sh'
 
-        - name: Upload Linux Release Assets
-          id: upload-release-asset 
-          uses: actions/upload-release-asset@v1.0.1
+        - name: Uploading Release Assets
+          uses: softprops/action-gh-release@v1
+          with:
+            body: ""
+            files: dev/vidify-${{ steps.tag-name.outputs.tag }}_${{ matrix.artifact_prefix }}.zip
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            upload_url: ${{ steps.create_release.outputs.upload_url }}
-            asset_path: dev/vidify-${{ steps.get_version.outputs.VERSION }}_linux_x86_64.zip
-            asset_name: vidify-${{ steps.get_version.outputs.VERSION }}_linux_x86_64.zip
-            asset_content_type: application/zip
 
-        - name: Upload to PyPi
+  pypi:
+      name: Upload to PyPi
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@master
+
+        - name: Setup python
+          uses: actions/setup-python@v1
+          with:
+            python-version: 3.6
+            architecture: x64
+
+        - name: Building
+          run: |
+            python3 -m pip install wheel
+            python3 setup.py sdist bdist_wheel
+
+        - name: Uploading
           env:
             TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
             TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
           run: |
-            sudo docker run vidify:latest /bin/sh -c \
-              "pip install twine; \
-              python setup.py sdist bdist_wheel; \
-              export TWINE_USERNAME=$TWINE_USERNAME; export TWINE_PASSWORD=$TWINE_PASSWORD;\
-              twine upload dist/*"
+            python3 -m pip install twine
+            python3 -m twine upload dist/*
