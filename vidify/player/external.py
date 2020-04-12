@@ -8,7 +8,7 @@ import json
 import socket
 import logging
 import platform
-from typing import Tuple
+from typing import List
 from contextlib import suppress
 
 from qtpy.QtCore import QObject, Slot, Signal, Qt
@@ -43,10 +43,10 @@ class Client(QObject):
         self._socket.disconnected.connect(self.on_disconnected)
         self._socket.readyRead.connect(self.on_recv)
 
-    def __repr__(self) -> None:
+    def __repr__(self) -> str:
         return f"<Client at {self.address}>"
 
-    def send(self, msg: str) -> None:
+    def send(self, msg: bytes) -> None:
         self._socket.write(msg)
 
     def disconnect(self) -> None:
@@ -315,7 +315,7 @@ class ExternalPlayer(PlayerBase):
 
         del client
 
-    def send_message(self, clients: Tuple[Client], url: str,
+    def send_message(self, clients: List[Client], url: str,
                      absolute_pos: int = None, relative_pos: int = None,
                      is_playing: bool = None) -> None:
         """
@@ -422,7 +422,7 @@ class ExternalPlayer(PlayerBase):
         return not self._is_playing
 
     @pause.setter
-    def pause(self, do_pause: bool) -> bool:
+    def pause(self, do_pause: bool) -> None:
         """
         Pausing the video also alters the player position. This means that
         when the video is paused, the timestamp is saved. That way, when the

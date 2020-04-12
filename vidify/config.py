@@ -43,7 +43,7 @@ class Argument(Option):
     arg_action: str
     # Arguments that the option can take, like ("-p", "--player"), if it's
     # available for the argument parser. Otherwise, it's None.
-    args: Tuple[str]
+    args: Tuple[str, ...]
 
 
 @dataclass
