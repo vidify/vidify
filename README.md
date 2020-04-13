@@ -10,9 +10,7 @@
 
 </div>
 
-READMEs: [🇬🇧](README.md) [🇳🇱](README-nl_NL.md)
-
-*A lighter and less dev-oriented version of this README can be found at [vidify.org](https://vidify.org).*
+*A lighter and less dev-oriented version of this README can be found at [vidify.org](https://vidify.org). The official site also has translations available.*
 
 ## Table of contents
 * [Installation](#installation)
