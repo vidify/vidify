@@ -88,7 +88,7 @@ setup(
             'pyinstaller'
         ],
         'audiosync': [
-            'vidify-audiosync==0.2.*'
+            'vidify-audiosync==0.3.*'
         ],
         'mpv': [
             'python-mpv'

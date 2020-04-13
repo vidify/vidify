@@ -230,6 +230,8 @@ class MainWindow(QWidget):
         if self.config.audiosync:
             from vidify.audiosync import AudiosyncWorker
             self.audiosync = AudiosyncWorker(self.api.player_name)
+            if self.config.debug:
+                self.audiosync.debug = True
             self.audiosync.success.connect(self.on_audiosync_success)
             self.audiosync.failed.connect(self.on_audiosync_fail)
 
