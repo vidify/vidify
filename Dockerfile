@@ -2,7 +2,7 @@
 # Vidify dependency, even the optionals.
 # It uses xvfb to run the Qt tests without an actual X server running.
 
-ARG python_version=3.8
+ARG python_version=3.6
 FROM python:${python_version}-buster
 WORKDIR /vidify/
 # Needed to install programs without interaction

@@ -38,7 +38,8 @@ jobs:
         - name: Build on Linux
           if: matrix.os == 'ubuntu-latest'
           run: |
-            sudo apt-get install docker
+            sudo apt-get update --yes
+            sudo apt-get install docker --yes
             sudo docker build -t vidify .
             sudo docker run -v $PWD/dev:/vidify/dev/dist vidify:latest /bin/sh -c 'cd dev; bash build_linux.sh'
 
@@ -57,21 +58,20 @@ jobs:
         - name: Checkout code
           uses: actions/checkout@master
 
-        - name: Setup python
-          uses: actions/setup-python@v1
-          with:
-            python-version: 3.6
-            architecture: x64
-
-        - name: Building
+        - name: Preparing Docker Image
           run: |
-            python3 -m pip install wheel
-            python3 setup.py sdist bdist_wheel
+            sudo apt-get update --yes
+            sudo apt-get install docker --yes
+            sudo docker build -t vidify .
 
         - name: Uploading
           env:
             TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
             TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
           run: |
-            python3 -m pip install twine
-            python3 -m twine upload dist/*
+            sudo --preserve-env docker run \
+                --env TWINE_USERNAME --env TWINE_PASSWORD \
+                vidify /bin/sh -c \
+                    'pip install twine; \
+                    python setup.py sdist bdist_wheel; \
+                    twine upload dist/*'
