@@ -158,6 +158,9 @@ If the song doesn't have a metadata field with its title and artist (the latter 
 ### `FileNotFoundError: Could not find module 'libvlc.dll'.`
 Make sure that both Python and VLC are either 32 bits, or 64 bits, but not different. You should have a directory called `C:\Program Files (x86)\VideoLAN\VLC` (32b), or `C:\Program Files\VideoLAN\VLC` (64b).
 
+### Not playing any videos (`HTTP Error 403: Forbidden`)
+If Vidify is not playing any videos, and is throwing 403 Forbidden errors (with the `--debug` argument). The YouTube-DL cache has likely become corrupt or needs to be regenerated because of other reasons, please try deleting `~/.cache/youtube-dl`.
+
 ---
 
 ## Development
