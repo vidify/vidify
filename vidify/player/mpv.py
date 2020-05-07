@@ -29,23 +29,29 @@ locale.setlocale(locale.LC_NUMERIC, 'C')
 
 
 class MpvPlayer(PlayerBase):
+    # The audio is always muted, which is needed because not all the
+    # youtube-dl videos are silent. The keep-open flag stops mpv from closing
+    # after the video is over.
+    DEFAULT_FLAGS = ['mute']
+    DEFAULT_ARGS = {
+        'vo': 'gpu,libmpv,x11',
+        'config': False,
+        'keep-open': 'always'
+    }
+
     def __init__(self, flags: Optional[str] = None) -> None:
         super().__init__()
 
         # Converting the flags passed by parameter (str) to a tuple
         flags = flags.split() if flags not in (None, '') else []
-        # The audio is always muted, which is needed because not all the
-        # youtube-dl videos are silent. The keep-open flag stops mpv from
-        # closing after the video is over.
-        flags.extend(['mute', 'keep-open'])
+        flags.extend(self.DEFAULT_FLAGS)
 
         args = {}
         if logging.root.level <= logging.INFO:
             args['log_handler'] = print
             args['loglevel'] = 'info'
-        args['wid'] = str(int(self.winId()))
-        args['vo'] = 'gpu,libmpv,x11'
-        args['config'] = False
+        args['wid'] = str(int(self.winId()))  # sip.voidptr -> int -> str
+        args.update(self.DEFAULT_ARGS)
 
         self._mpv = MPV(*flags, **args)
 
