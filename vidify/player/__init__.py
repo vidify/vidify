@@ -27,7 +27,7 @@ PLAYERS = (
     PlayerData(
         id='VLC',
         short_name='VLC',
-        description='Widely used and very solid player.',
+        description='Play the music videos locally with the VLC player.',
         icon=Res.vlc_icon,
         compatible=True,
         installed=is_installed('python-vlc'),
@@ -38,7 +38,7 @@ PLAYERS = (
     PlayerData(
         id='MPV',
         short_name='Mpv',
-        description='More lightweight and precise player than VLC.',
+        description='Play the music videos locally with the mpv player.',
         icon=Res.mpv_icon,
         compatible=True,
         installed=is_installed('python-mpv'),
@@ -49,7 +49,7 @@ PLAYERS = (
     PlayerData(
         id='EXTERNAL',
         short_name='External',
-        description='Play the videos on external devices.',
+        description='Play the music videos on external devices.',
         icon=Res.external_icon,
         compatible=True,
         installed=is_installed('zeroconf'),

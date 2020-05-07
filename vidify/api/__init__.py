@@ -29,7 +29,8 @@ APIS = (
     APIData(
         id="MPRIS_LINUX",
         short_name="Linux Media Players",
-        description="Any MPRIS compatible media player: Spotify, Rhythmbox...",
+        description="Any MPRIS compatible media player: Spotify, Rhythmbox,"
+                    " Clementine, VLC...",
         icon=Res.mpris_linux_icon,
         compatible=CURRENT_PLATFORM in (Platform.LINUX, Platform.BSD),
         installed=is_installed('pydbus'),
@@ -52,8 +53,9 @@ APIS = (
     APIData(
         id='SPOTIFY_WEB',
         short_name="Spotify Web",
-        description="The official Spotify Web API. Read the wiki to learn how"
-        " to set it up.",
+        description="The official Spotify Web API. Read"
+        " <a href=\"https://vidify.org/wiki/spotify-web-api/\">the wiki</a>"
+        " to learn how it works.",
         icon=Res.spotify_web_icon,
         compatible=True,
         installed=is_installed('tekore'),

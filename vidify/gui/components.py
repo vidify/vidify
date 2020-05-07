@@ -57,6 +57,9 @@ class ModuleCard(QGroupBox):
         self.text.setWordWrap(True)
         self.text.setFont(Fonts.smalltext)
         self.text.setAlignment(Qt.AlignHCenter)
+        self.text.setTextFormat(Qt.RichText)
+        self.text.setTextInteractionFlags(Qt.TextBrowserInteraction)
+        self.text.setOpenExternalLinks(True)
         self.layout.addWidget(self.text)
 
     def setup_button(self, enabled: bool, selected: bool) -> None:
@@ -93,9 +96,10 @@ class SetupWidget(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.api_group = self.load_data(APIS, "Select an API:", saved_api)
-        self.player_group = self.load_data(PLAYERS, "Select a Player:",
-                                           saved_player)
+        self.api_group = self.load_data(
+            APIS, "Select your music player:", saved_api)
+        self.player_group = self.load_data(
+            PLAYERS, "Select where to play the videos:", saved_player)
         self.init_button()
 
     def init_button(self) -> None:
