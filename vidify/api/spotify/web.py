@@ -18,14 +18,12 @@ import logging
 from typing import Optional
 
 try:
-    from tekore import Spotify
+    from tekore import Spotify, RefreshingToken, refresh_user_token
 except ModuleNotFoundError:
     raise ModuleNotFoundError(
         "No module named 'tekore'.\n"
         "To use the Spotify Web API, please install tekore. Read more about"
         " this in the Installation Guide.")
-from tekore.auth.refreshing import RefreshingToken
-from tekore.util import refresh_user_token
 
 from vidify.api import split_title, ConnectionNotReady
 from vidify.api.generic import APIBase

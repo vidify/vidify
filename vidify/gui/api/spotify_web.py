@@ -7,10 +7,8 @@ import logging
 from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
                             QVBoxLayout)
 from qtpy.QtCore import Qt, QSize, Signal, Slot
-from tekore.scope import scopes
-from tekore.auth.refreshing import RefreshingCredentials, RefreshingToken
-from tekore.util import parse_code_from_url
-from tekore.auth.expiring import OAuthError
+from tekore import (scope, RefreshingCredentials, RefreshingToken,
+                    parse_code_from_url, HTTPError)
 
 from vidify.gui import Fonts, Colors
 from vidify.gui.components import InputField, WebBrowser
@@ -114,7 +112,7 @@ class SpotifyWebPrompt(QWidget):
         # Creating the request URL to obtain the authorization token
         self.creds = RefreshingCredentials(
             form_client_id, form_client_secret, self.redirect_uri)
-        self.scope = scopes.user_read_currently_playing
+        self.scope = scope.user_read_currently_playing
         url = self.creds.user_authorisation_url(self.scope)
         self.browser.url = url
 
@@ -155,7 +153,7 @@ class SpotifyWebPrompt(QWidget):
             # of type `RefreshingCredentials`, so it returns always a
             # RefreshingToken.
             token = self.creds.request_user_token(code)
-        except OAuthError as e:
+        except HTTPError as e:
             self.browser.hide()
             self.web_form.show()
             self.web_form.show_error(str(e))
