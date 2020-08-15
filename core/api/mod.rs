@@ -11,7 +11,7 @@ use std::time;
 use pyo3::prelude::*;
 use strum_macros::{Display, EnumString};
 
-pub type Sender = relm::Sender<APIEvent>;
+pub type Sender = std::sync::mpsc::Sender<APIEvent>;
 
 // #[pyenum]
 #[derive(Clone, Debug, Display, EnumString)]

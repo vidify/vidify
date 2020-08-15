@@ -14,10 +14,12 @@ ENV CI=true
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     gir1.2-gtk-3.0 \
+    libdbus-1-dev \
     libfftw3-dev \
     libgirepository1.0-dev \
     libmpv-dev \
     libnss3 \
+    libpango1.0-dev \
     libpulse-dev \
     libvlc-dev \
     pulseaudio \
@@ -26,7 +28,13 @@ RUN apt-get update && apt-get install -y \
     zip \
  && rm -rf /var/lib/apt/lists/*
 
+# Installing stable Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="${HOME:-/root}/.cargo/bin:$PATH"
+RUN rustup default stable
+
 # Python dependencies
+RUN pip install -U pip
 COPY dev/build_requires.txt dev/
 RUN pip install -r dev/build_requires.txt
 

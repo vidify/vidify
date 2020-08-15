@@ -20,7 +20,6 @@ structconf = "0.3.2"
 clap = "2.33.1"
 rust-ini = "0.15.3"
 dirs = "3.0.0"
-relm = "0.20.0"
 # Players
 libmpv = "2.0.0"
 # APIs

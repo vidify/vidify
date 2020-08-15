@@ -11,6 +11,7 @@ python-mpv
 python-vlc
 qdarkstyle
 QtPy
+setuptools_rust
 SwSpotify>=1.1.1; platform_system == "Windows" or platform_system == "Darwin"
 tekore < 2.0
 vidify-audiosync == 0.2.*
