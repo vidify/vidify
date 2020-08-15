@@ -1,3 +1,5 @@
+include Cargo.toml
+recursive-include src *
 include vidify/gui/res/*
 include vidify/gui/res/*/*
 include vidify/gui/res/*/*/*

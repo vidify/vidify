@@ -1,0 +1,33 @@
+[package]
+name = "vidify_core"
+version = "3.0.0-alpha"
+authors = ["Mario Ortiz Manero <marioortizmanero@gmail.com>"]
+license = "GPL-3.0+"
+edition = "2018"
+
+[lib]
+name = "vidify_core"
+path = "core/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+# Base dependencies
+log = "0.4.11"
+simplelog = "0.8.0"
+strum = "0.19.1"
+strum_macros = "0.19.1"
+structconf = "0.3.2"
+clap = "2.33.1"
+rust-ini = "0.15.3"
+dirs = "3.0.0"
+relm = "0.20.0"
+# Players
+libmpv = "2.0.0"
+# APIs
+rspotify = { version = "0.10.0", features = ["blocking"] }
+webbrowser = "0.5.4"
+# Python interoperability
+pyo3 = { version = "0.11.1", features = ["extension-module"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+mpris = "1.1.2"

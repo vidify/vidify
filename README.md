@@ -172,6 +172,9 @@ The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](
 
 The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/vidify/vidify/releases).
 
+### Project organization
+Vidify combines both Rust and Python, the former for core parts, and the latter for mainly the GUI.
+
 ### External player implementations
 The Vidify external player has an open protocol for anyone to implement their own app or program to play the videos. You can read more about how it works in this [wiki article](https://vidify.org/wiki/the-external-player-protocol/).
 

@@ -10,7 +10,7 @@ from qtpy.QtWidgets import QApplication
 from qtpy.QtGui import QIcon
 import qdarkstyle
 
-from vidify.config import Config
+from vidify.config import Config, init_config, init_logging
 from vidify.gui import set_dark_mode, Res
 from vidify.gui.window import MainWindow
 
@@ -35,15 +35,8 @@ def start_gui(config: Config) -> None:
 
 
 def main() -> None:
-    # Initialization and parsing of the config from arguments and config file
-    config = Config()
-    config.parse()
-
-    # Logger initialzation with precise milliseconds handler.
-    logging.basicConfig(level=logging.DEBUG if config.debug else logging.ERROR,
-                        format="[%(asctime)s.%(msecs)03d] %(levelname)s:"
-                        " %(message)s", datefmt="%H:%M:%S")
-
+    config = init_config(sys.argv)
+    init_logging(config)
     start_gui(config)
 
 
