@@ -3,6 +3,9 @@ TODO: this wrapper may be unnecessary. A better idea would be to have a QFrame
 in the GUI be the player window, whose WID is passed to the player instance
 from Rust. They are kept as two separate things, one for GUI-related things,
 and the other to interact with the player itself.
+
+In that case, the locale will have to be set always when the program begins,
+instead of only when the Mpv player is used.
 """
 
 import locale

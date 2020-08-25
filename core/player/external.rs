@@ -17,11 +17,13 @@ impl PlayerBase for External {
         true
     }
 
-    fn position(&self) -> u32 {
-        0
+    fn position(&self) -> Result<u32> {
+        Ok(0)
     }
 
-    fn seek(&mut self, ms: i64, relative: bool) {}
+    fn seek_relative(&mut self, ms: i64) {}
+
+    fn seek_absolute(&mut self, ms: u32) {}
 
     fn start_video(&mut self, media: &str, start_playing: bool) {}
 }

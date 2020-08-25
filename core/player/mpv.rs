@@ -49,9 +49,6 @@ impl PlayerBase for Mpv {
     fn set_pause(&mut self, do_pause: bool) {
         info!("Setting pause to {}", do_pause);
 
-        // TODO: maybe the trait should return `Result`? This would avoid
-        // the unwraps.
-        //
         // This doesn't check if it's already paused because mpv already
         // should take care of that.
         // TODO: check that this is true.
@@ -63,41 +60,37 @@ impl PlayerBase for Mpv {
     }
 
     fn is_paused(&self) -> bool {
-        // TODO: maybe the trait should return `Result`? This would avoid
-        // the unwrap.
         self.mpv.get_property("pause").unwrap()
     }
 
-    fn position(&self) -> u32 {
-        // TODO: maybe the trait should return `Result`? This would avoid
-        // the unwrap.
-        // TODO: maybe the trait should return u64 or a different type?
-        self.mpv.get_property::<i64>("playback_time").unwrap() as u32
+    fn position(&self) -> Result<u32> {
+        let pos = self.mpv.get_property::<i64>("playback_time")?;
+        Ok(pos as u32)
     }
 
-    fn seek(&mut self, ms: i64, relative: bool) {
-        // TODO: maybe the trait should return `Result`? This would avoid
-        // the unwraps.
-        // TODO: should this `wait_for_property("seekable")`?
+    fn seek_relative(&mut self, ms: i64) {
+        info!("Seeking to relative {} ms", ms);
+
         let secs = (ms as f64 / 1000.0).round();
-        if relative {
-            info!("Seeking to relative {} ms", ms);
-            if secs > 0.0 {
-                self.mpv.seek_forward(secs).unwrap();
-            } else {
-                self.mpv.seek_backward(-secs).unwrap();
-            }
+        // TODO: should this `wait_for_property("seekable")`?
+        if secs > 0.0 {
+            self.mpv.seek_forward(secs).unwrap();
         } else {
-            info!("Seeking to absolute {} ms", ms);
-            self.mpv.seek_absolute(secs).unwrap();
+            self.mpv.seek_backward(-secs).unwrap();
         }
+    }
+
+    fn seek_absolute(&mut self, ms: u32) {
+        info!("Seeking to absolute {} ms", ms);
+
+        let secs = (ms as f64 / 1000.0).round();
+        // TODO: should this `wait_for_property("seekable")`?
+        self.mpv.seek_absolute(secs).unwrap();
     }
 
     fn start_video(&mut self, media: &str, start_playing: bool) {
         info!("Starting new media '{}', playing? {}", media, start_playing);
 
-        // TODO: maybe the trait should return `Result`? This would avoid
-        // the unwraps.
         self.mpv.command("loadfile", &[media]).unwrap();
 
         // Mpv starts automatically playing the video.
