@@ -1,3 +1,5 @@
+//! TODO: module-level docs
+
 use crate::api::APIBase;
 use crate::config::Config;
 use crate::error::Result;

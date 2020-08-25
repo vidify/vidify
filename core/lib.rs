@@ -1,3 +1,5 @@
+//! TODO: module-level docs
+
 pub mod api;
 pub mod config;
 pub mod data;

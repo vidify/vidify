@@ -151,7 +151,7 @@ fn get_token(oauth: &mut SpotifyOAuth) -> Result<TokenInfo> {
 /// Converting a redirect uri like `http://localhost:8888/callback/` into
 /// `localhost:8888` so that it can be used for the TCP listener.
 fn to_bind_format(bind_uri: &str) -> &str {
-    bind_uri.split("/").nth(2).expect(
+    bind_uri.split('/').nth(2).expect(
         "Invalid redirect uri, it must follow the regular expression \
                 `.*//(.+:\\d+).*`.",
     )
@@ -190,7 +190,7 @@ fn extract_code(data: &str) -> Result<String> {
         .split_whitespace() // May include a space before `HTTP/X.X`
         .next()
         .ok_or(Error::SpotifyWebAuth)?
-        .split("&") // May include `&state=4V8JSmSUqWyn9ah8`
+        .split('&') // May include `&state=4V8JSmSUqWyn9ah8`
         .next()
         .ok_or(Error::SpotifyWebAuth)?;
 

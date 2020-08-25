@@ -1,3 +1,5 @@
+//! TODO: module-level docs
+
 pub mod external;
 pub mod mpv;
 
@@ -19,11 +21,20 @@ pub trait PlayerBase {
     where
         Self: Sized;
 
-    fn pause(&mut self);
+    fn set_pause(&mut self, do_pause: bool);
+
     fn is_paused(&self) -> bool;
+
     fn position(&self) -> u32;
-    fn seek(&mut self);
-    fn start_video(&mut self);
+
+    /// TODO: In the future, the `relative` parameter could be turned into
+    /// an enum that allows different types of seeking: relative, absolute,
+    /// frames, percentage.
+    fn seek(&mut self, ms: i64, relative: bool);
+
+    /// TODO: maybe this should follow a queue-like logic instead of by
+    /// playing only one video at a time.
+    fn start_video(&mut self, media: &str, start_playing: bool);
 }
 
 /// Establishes the relation between the enumeration of the available Players

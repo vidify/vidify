@@ -1,10 +1,13 @@
+//! TODO: module-level docs
+
 use crate::api::API;
 use crate::data::{Res, ResKind};
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::lyrics::Lyrics;
 use crate::player::Player;
 
 use std::fs::File;
+use std::str::FromStr;
 
 use clap::App;
 use pyo3::prelude::*;
@@ -15,9 +18,8 @@ use structconf::StructConf;
 fn config(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<Config>()?;
 
-    // TODO: can this be done automatically with `add_wrapped` and
-    // `#[pyfunction]`.
-    // m.add_wrapped(wrap_pyfunction!(init_config))?;
+    // TODO: this can be avoided in the future after
+    // https://github.com/PyO3/pyo3/issues/1106
     #[pyfn(m, "init_config")]
     fn init_config_py(_py: Python, args: Vec<String>) -> PyResult<Config> {
         Ok(init_config(args)?)
@@ -26,6 +28,63 @@ fn config(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(init_logging))?;
 
     Ok(())
+}
+
+/// The generic properties are represented by this struct, which uses the
+/// format `key1=val1;key2=val2`. In the future with const generics, the
+/// delimiter could be made generic as well. For now, it's `;`.
+///
+/// This way, the string provided from the config can be parsed only once and
+/// at the beginning of the program into an easier to use type.
+#[pyclass]
+#[derive(Default, Debug)]
+pub struct Properties {
+    values: Vec<(String, String)>
+}
+
+impl FromStr for Properties {
+    type Err = Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        let err = || {
+            Error::ConfigParse(
+                structconf::Error::Parse(
+                    "Invalid properties format, the provided value doesn't \
+                        match the format `key1=val1;key2=val2`"
+                        .to_string()
+                )
+            )
+        };
+        let mut values = Vec::new();
+
+        for flag in s.split(';') {
+            let mut iter = flag.split('=');
+            let key = iter.next().ok_or_else(err)?;
+            let val = iter.next().ok_or_else(err)?;
+            values.push((key.to_owned(), val.to_owned()));
+        }
+
+        Ok(Properties { values })
+    }
+}
+
+impl ToString for Properties {
+    fn to_string(&self) -> String {
+        let mut ret = String::new();
+        for (key, val) in &self.values {
+            ret.push_str(&format!("{}={};", key, val));
+        }
+
+        ret
+    }
+}
+
+impl std::ops::Deref for Properties {
+    type Target = Vec<(String, String)>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.values
+    }
 }
 
 /// The config file saves the app's state and configuration in a config file,
@@ -75,6 +134,8 @@ pub struct Config {
 
     /// The API used. The API names are exactly the ones found in the
     /// `core::api::API` enum, case sensitive.
+    ///
+    /// TODO: waiting for https://github.com/PyO3/pyo3/pull/1045
     // #[pyo3(get, set)]
     #[conf(
         help = "The source music player used. Read the installation guide \
@@ -85,6 +146,8 @@ pub struct Config {
     /// The Player used. The player names are exactly the ones found in the
     /// `core::player::Player` enum, case sensitive.
     // #[pyo3(get, set)]
+    ///
+    /// TODO: waiting for https://github.com/PyO3/pyo3/pull/1045
     #[conf(
         help = "The output video player. Read the installation guide for \
            a list with the available players"
@@ -109,10 +172,11 @@ pub struct Config {
 
     #[conf(
         no_short,
-        help = "Custom boolean flags used when opening mpv, with dashes and \
-           separated by spaces"
+        help = "Custom properties used when opening mpv, like \
+            `msg-level=ao/sndio=no;brightness=50;sub-gray=true`.
+            See all of them here: https://mpv.io/manual/master/#options"
     )]
-    pub mpv_flags: String,
+    pub mpv_properties: Properties,
 
     #[pyo3(get, set)]
     #[conf(

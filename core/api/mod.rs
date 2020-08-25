@@ -1,3 +1,5 @@
+//! TODO: module-level docs
+
 pub mod macos;
 pub mod mpris;
 pub mod spotifyweb;

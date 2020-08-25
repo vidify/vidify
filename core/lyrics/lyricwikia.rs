@@ -1,3 +1,5 @@
+//! TODO: module-level docs
+
 use crate::error::Result;
 use crate::lyrics::LyricsBase;
 

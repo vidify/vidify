@@ -1,3 +1,5 @@
+//! TODO: module-level docs
+
 use crate::error::Result;
 
 use std::fs::{create_dir, File};
@@ -31,12 +33,18 @@ impl Res {
             Custom => path.to_string(),
             Config => Res::custom(
                 &mut config_dir()
-                    .ok_or(Error::new(ErrorKind::NotFound, "config dir"))?,
+                    .ok_or_else(|| {
+                        Error::new(ErrorKind::NotFound, "config dir")
+                    })?,
                 path,
             )?,
+            // TODO: the `Data` variant shouldn't create a file in case
+            // it already exists.
             Data => Res::custom(
                 &mut data_dir()
-                    .ok_or(Error::new(ErrorKind::NotFound, "data dir"))?,
+                    .ok_or_else(|| {
+                        Error::new(ErrorKind::NotFound, "data dir")
+                    })?,
                 path,
             )?,
         };
