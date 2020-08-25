@@ -1,8 +1,4 @@
-import os
-
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
-from setuptools.command.sdist import sdist as SdistCommand
 from setuptools_rust import RustExtension, Binding
 from pkg_resources import DistributionNotFound, get_distribution
 from sys import platform
@@ -86,7 +82,7 @@ else:
 setup(
     # Metadata for publishing
     name='vidify',
-    version=__version__,  # TODO: remove
+    version=__version__,
     packages=packages,
     description='Watch music videos in real-time for the songs playing on'
                 ' your device',
@@ -127,5 +123,5 @@ setup(
     },
     rust_extensions=rust_extensions,
     setup_requires=setup_requires,
-    zip_safe=False, # Rust extensions are not zip safe
+    zip_safe=False,  # Rust extensions are not zip safe
 )

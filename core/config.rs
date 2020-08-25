@@ -36,6 +36,9 @@ fn config(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 ///
 /// This way, the string provided from the config can be parsed only once and
 /// at the beginning of the program into an easier to use type.
+///
+/// It's basically a thin wrapper over a vector, so all its methods can be
+/// used after a deref.
 #[pyclass]
 #[derive(Default, Debug)]
 pub struct Properties {
@@ -45,23 +48,28 @@ pub struct Properties {
 impl FromStr for Properties {
     type Err = Error;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
+        // An empty value will result in an empty vector to reduce errors.
+        if input.len() == 0 {
+            return Ok(Self::default());
+        }
+        // The last character is ignored if it's a delimiter, also to reduce
+        // errors.
+        let input = input.trim_end_matches(';');
         let err = || {
             Error::ConfigParse(structconf::Error::Parse(
-                "Invalid properties format, the provided value doesn't \
-                        match the format `key1=val1;key2=val2`"
-                    .to_string(),
+                "Invalid properties: the provided value doesn't match the \
+                    format `key1=val1;key2=val2`".to_string(),
             ))
         };
-        let mut values = Vec::new();
 
-        for flag in s.split(';') {
+        let mut values = Vec::new();
+        for flag in input.split(';') {
             let mut iter = flag.split('=');
             let key = iter.next().ok_or_else(err)?;
             let val = iter.next().ok_or_else(err)?;
             values.push((key.to_owned(), val.to_owned()));
         }
-
         Ok(Properties { values })
     }
 }
@@ -244,4 +252,71 @@ pub fn init_logging(config: &Config) {
         ),
     ])
     .expect("Couldn't load loggers");
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    /// The default value should be equivalent to an empty vector.
+    #[test]
+    fn test_default_properties() {
+        let properties = Properties::default();
+        assert_eq!(properties.len(), 0);
+    }
+
+    /// An empty string should be equivalent to an empty vector.
+    #[test]
+    fn test_properties_from_empty_str() {
+        let properties = Properties::from_str("").unwrap();
+        assert_eq!(properties.len(), 0);
+    }
+
+    #[test]
+    fn test_properties_from_str_simple() {
+        let properties = Properties::from_str("key1=val1").unwrap();
+        assert_eq!(
+            properties.get(0),
+            Some(&("key1".to_string(), "val1".to_string()))
+        );
+        assert_eq!(properties.get(1), None);
+    }
+
+    // Testing the same as before but with a delimiter at the end to make
+    // sure it's the same result.
+    #[test]
+    fn test_properties_from_str_simple_delimiter_end() {
+        let properties = Properties::from_str("key1=val1;").unwrap();
+        assert_eq!(
+            properties.get(0),
+            Some(&("key1".to_string(), "val1".to_string()))
+        );
+        assert_eq!(properties.get(1), None);
+    }
+
+    /// Now with multiple keys and values
+    #[test]
+    fn test_properties_from_str_multiple() {
+        let properties = Properties::from_str("key1=val1;key2=val2;key3=val3;").unwrap();
+        assert_eq!(
+            properties.get(0),
+            Some(&("key1".to_string(), "val1".to_string()))
+        );
+        assert_eq!(
+            properties.get(1),
+            Some(&("key2".to_string(), "val2".to_string()))
+        );
+        assert_eq!(
+            properties.get(2),
+            Some(&("key3".to_string(), "val3".to_string()))
+        );
+        assert_eq!(properties.get(3), None);
+    }
+
+    /// Making sure that not including a '=' fails, for simplicity.
+    #[test]
+    #[should_panic]
+    fn test_properties_from_str_no_equal() {
+        Properties::from_str("key1;key2=val2").unwrap();
+    }
 }
