@@ -18,7 +18,7 @@ use structconf::StructConf;
 fn config(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<Config>()?;
 
-    // TODO: this can be avoided in the future after
+    // FIXME: this can be avoided in the future after
     // https://github.com/PyO3/pyo3/issues/1106
     #[pyfn(m, "init_config")]
     fn init_config_py(_py: Python, args: Vec<String>) -> PyResult<Config> {
@@ -141,7 +141,7 @@ pub struct Config {
     /// The API used. The API names are exactly the ones found in the
     /// `core::api::API` enum, case sensitive.
     ///
-    /// TODO: waiting for https://github.com/PyO3/pyo3/pull/1045
+    /// FIXME: waiting for https://github.com/PyO3/pyo3/pull/1045
     // #[pyo3(get, set)]
     #[conf(help = "The source music player used. Read the installation guide \
            for a list with the available APIs")]
@@ -149,9 +149,9 @@ pub struct Config {
 
     /// The Player used. The player names are exactly the ones found in the
     /// `core::player::Player` enum, case sensitive.
-    // #[pyo3(get, set)]
     ///
-    /// TODO: waiting for https://github.com/PyO3/pyo3/pull/1045
+    /// FIXME: waiting for https://github.com/PyO3/pyo3/pull/1045
+    // #[pyo3(get, set)]
     #[conf(help = "The output video player. Read the installation guide for \
            a list with the available players")]
     pub player: Option<Player>,
@@ -213,7 +213,7 @@ pub struct Config {
 /// will be at the user's default config path, or whichever is specified
 /// by `--config-file`.
 ///
-/// TODO: maybe it should be a `Mutex` or `RwLock`.
+/// NOTE: maybe it should return a `Mutex` or `RwLock`.
 pub fn init_config(args: Vec<String>) -> Result<Config> {
     // Author and version pulled at compile time from `Cargo.toml`.
     let app = App::new("vidify")

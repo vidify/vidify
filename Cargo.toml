@@ -32,7 +32,8 @@ mpris = "1.1.2"
 pyo3 = "0.11.1"
 
 [features]
-# Workaround until https://github.com/PyO3/pyo3/issues/341 is fixed. This way,
-# `cargo test --no-default-features` can be used to run tests instead.
+# FIXME: Workaround until https://github.com/PyO3/pyo3/issues/341 is fixed.
+# This way, `cargo test --no-default-features` can be used to run tests
+# instead.
 extension-module = ["pyo3/extension-module"]
 default = ["extension-module"]
