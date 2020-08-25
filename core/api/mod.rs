@@ -85,12 +85,7 @@ pub trait APIBase {
 
 /// Establishes the relation between the enumeration of the available APIs
 /// and their implementations, instantiating the selected one.
-pub fn init_api(
-        api: API,
-        config: &Config,
-        sender: Sender,
-    ) -> Result<Box<dyn APIBase>>
-{
+pub fn init_api(api: API, config: &Config, sender: Sender) -> Result<Box<dyn APIBase>> {
     let api: Box<dyn APIBase> = match api {
         #[cfg(any(target_os = "linux", target_os = "bsd"))]
         API::MPRIS => Box::new(mpris::MPRIS::new(config, sender)?),

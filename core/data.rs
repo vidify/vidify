@@ -32,27 +32,18 @@ impl Res {
         let path = match kind {
             Custom => path.to_string(),
             Config => Res::custom(
-                &mut config_dir()
-                    .ok_or_else(|| {
-                        Error::new(ErrorKind::NotFound, "config dir")
-                    })?,
+                &mut config_dir().ok_or_else(|| Error::new(ErrorKind::NotFound, "config dir"))?,
                 path,
             )?,
             // TODO: the `Data` variant shouldn't create a file in case
             // it already exists.
             Data => Res::custom(
-                &mut data_dir()
-                    .ok_or_else(|| {
-                        Error::new(ErrorKind::NotFound, "data dir")
-                    })?,
+                &mut data_dir().ok_or_else(|| Error::new(ErrorKind::NotFound, "data dir"))?,
                 path,
             )?,
         };
 
-        Ok(Res {
-            kind,
-            path,
-        })
+        Ok(Res { kind, path })
     }
 
     fn custom(path: &mut PathBuf, file: &str) -> Result<String> {

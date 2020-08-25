@@ -89,12 +89,7 @@ pub trait PlayerBase {
 
 /// Establishes the relation between the enumeration of the available Players
 /// and their implementations, instantiating the selected one.
-pub fn init_player(
-        player: Player,
-        config: &Config,
-        wid: u64,
-    ) -> Result<Box<dyn PlayerBase>>
-{
+pub fn init_player(player: Player, config: &Config, wid: u64) -> Result<Box<dyn PlayerBase>> {
     let player: Box<dyn PlayerBase> = match player {
         Player::Mpv => Box::new(mpv::Mpv::new(config, wid)?),
         Player::External => Box::new(external::External::new(config, wid)?),

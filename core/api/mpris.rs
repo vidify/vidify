@@ -2,13 +2,13 @@
 
 use crate::api::{APIBase, APIEvent};
 use crate::config::Config;
-use crate::error::{Result, Error};
+use crate::error::{Error, Result};
 
 use std::thread;
 use std::time;
 
-use mpris::{PlayerFinder, Event};
-use log::{info, error};
+use log::{error, info};
+use mpris::{Event, PlayerFinder};
 
 impl From<mpris::DBusError> for Error {
     fn from(err: mpris::DBusError) -> Self {
@@ -45,11 +45,11 @@ impl APIBase for MPRIS {
                             Playing => sender.send(APIEvent::Playing).unwrap(),
                             Stopped => sender.send(APIEvent::Stopped).unwrap(),
                             // Seeked{position_in_us: us} => {},
-                            TrackChanged(track) => {},
+                            TrackChanged(track) => {}
                             ev => info!("Unrelated event received: {:?}", ev),
                         }
                     }
-                    Err(e) => error!("DBus event error: {}", e)
+                    Err(e) => error!("DBus event error: {}", e),
                 }
             }
 

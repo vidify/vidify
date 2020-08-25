@@ -39,7 +39,7 @@ fn config(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 #[pyclass]
 #[derive(Default, Debug)]
 pub struct Properties {
-    values: Vec<(String, String)>
+    values: Vec<(String, String)>,
 }
 
 impl FromStr for Properties {
@@ -47,13 +47,11 @@ impl FromStr for Properties {
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
         let err = || {
-            Error::ConfigParse(
-                structconf::Error::Parse(
-                    "Invalid properties format, the provided value doesn't \
+            Error::ConfigParse(structconf::Error::Parse(
+                "Invalid properties format, the provided value doesn't \
                         match the format `key1=val1;key2=val2`"
-                        .to_string()
-                )
-            )
+                    .to_string(),
+            ))
         };
         let mut values = Vec::new();
 
@@ -137,10 +135,8 @@ pub struct Config {
     ///
     /// TODO: waiting for https://github.com/PyO3/pyo3/pull/1045
     // #[pyo3(get, set)]
-    #[conf(
-        help = "The source music player used. Read the installation guide \
-           for a list with the available APIs"
-    )]
+    #[conf(help = "The source music player used. Read the installation guide \
+           for a list with the available APIs")]
     pub api: Option<API>,
 
     /// The Player used. The player names are exactly the ones found in the
@@ -148,10 +144,8 @@ pub struct Config {
     // #[pyo3(get, set)]
     ///
     /// TODO: waiting for https://github.com/PyO3/pyo3/pull/1045
-    #[conf(
-        help = "The output video player. Read the installation guide for \
-           a list with the available players"
-    )]
+    #[conf(help = "The output video player. Read the installation guide for \
+           a list with the available players")]
     pub player: Option<Player>,
 
     #[pyo3(get, set)]
@@ -164,10 +158,7 @@ pub struct Config {
     pub audiosync: bool,
 
     #[pyo3(get, set)]
-    #[conf(
-        no_short,
-        help = "Manual tweaking value for audiosync in milliseconds"
-    )]
+    #[conf(no_short, help = "Manual tweaking value for audiosync in milliseconds")]
     pub audiosync_calibration: i32,
 
     #[conf(
@@ -232,13 +223,9 @@ pub fn init_config(args: Vec<String>) -> Result<Config> {
 
 #[pyfunction]
 pub fn init_logging(config: &Config) {
-    use simplelog::{
-        CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode,
-        WriteLogger,
-    };
+    use simplelog::{CombinedLogger, Config, LevelFilter, TermLogger, TerminalMode, WriteLogger};
 
-    let file = Res::new(ResKind::Data, "session.log")
-        .expect("Couldn't load log file");
+    let file = Res::new(ResKind::Data, "session.log").expect("Couldn't load log file");
     let file: &str = &file;
     CombinedLogger::init(vec![
         TermLogger::new(

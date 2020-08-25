@@ -9,7 +9,7 @@ use crate::api::APIBase;
 use crate::config::Config;
 use crate::error::{Error, Result};
 
-use std::io::{Write, BufRead, BufReader};
+use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc;
 use std::thread;
@@ -17,9 +17,7 @@ use std::time;
 
 use log::{error, info};
 use rspotify::blocking::client::Spotify;
-use rspotify::blocking::oauth2::{
-    SpotifyClientCredentials, SpotifyOAuth, TokenInfo,
-};
+use rspotify::blocking::oauth2::{SpotifyClientCredentials, SpotifyOAuth, TokenInfo};
 use rspotify::model::playing::Playing;
 
 pub struct SpotifyWeb {
@@ -31,9 +29,7 @@ impl APIBase for SpotifyWeb {
     fn new(config: &Config, sender: super::Sender) -> Result<Self> {
         let mut oauth = SpotifyOAuth::default()
             .client_id(&config.client_id.clone().ok_or(Error::SpotifyWebAuth)?)
-            .client_secret(
-                &config.client_secret.clone().ok_or(Error::SpotifyWebAuth)?,
-            )
+            .client_secret(&config.client_secret.clone().ok_or(Error::SpotifyWebAuth)?)
             .redirect_uri(&config.redirect_uri)
             .scope("user-read-currently-playing user-read-playback-state")
             .build();
@@ -52,8 +48,7 @@ impl APIBase for SpotifyWeb {
         let creds = SpotifyClientCredentials::default()
             .token_info(token)
             .build();
-        let spotify =
-            Spotify::default().client_credentials_manager(creds).build();
+        let spotify = Spotify::default().client_credentials_manager(creds).build();
 
         // A first request for the playing track will also be made in order
         // to fully initialize the internal data, and to make sure the API
@@ -95,7 +90,9 @@ impl APIBase for SpotifyWeb {
     }
 
     fn position(&self) -> Option<time::Duration> {
-        Some(time::Duration::from_millis(self.playing.progress_ms? as u64))
+        Some(time::Duration::from_millis(
+            self.playing.progress_ms? as u64,
+        ))
     }
 
     fn is_playing(&self) -> bool {
@@ -106,7 +103,6 @@ impl APIBase for SpotifyWeb {
         unimplemented!();
     }
 }
-
 
 /// A small server will be ran to obtain the access token without user
 /// interaction, besides logging in to Spotify in the browser.
@@ -128,9 +124,9 @@ fn get_token(oauth: &mut SpotifyOAuth) -> Result<TokenInfo> {
                         sx.send(code).unwrap();
                         break;
                     }
-                    Err(e) => error!("Error when obtaining the code: {}", e)
+                    Err(e) => error!("Error when obtaining the code: {}", e),
                 },
-                Err(e) => error!("Unable to connect: {}", e)
+                Err(e) => error!("Unable to connect: {}", e),
             }
         }
     });
@@ -184,7 +180,8 @@ fn get_code(mut stream: TcpStream) -> Result<String> {
 ///
 /// In the previous example, the extracted code will be "AQBM...XGN".
 fn extract_code(data: &str) -> Result<String> {
-    let code = data.split("?code=") // Starting prefix
+    let code = data
+        .split("?code=") // Starting prefix
         .nth(1)
         .ok_or(Error::SpotifyWebAuth)?
         .split_whitespace() // May include a space before `HTTP/X.X`

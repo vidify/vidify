@@ -41,9 +41,7 @@ impl PlayerBase for Mpv {
             Ok(())
         })?;
 
-        Ok(Mpv {
-            mpv
-        })
+        Ok(Mpv { mpv })
     }
 
     fn set_pause(&mut self, do_pause: bool) {
