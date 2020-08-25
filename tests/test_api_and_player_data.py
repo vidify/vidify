@@ -6,7 +6,6 @@ throughout the entire module.
 
 import unittest
 
-import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
 from vidify.gui.window import MainWindow

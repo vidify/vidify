@@ -22,13 +22,13 @@ exec(compile(open('vidify/version.py').read(),
 
 install_deps = [
     # Base package
+    'audiosync',
     'QtPy',
     'lyricwikia',
     'youtube-dl',
     'qdarkstyle',
     'dataclasses; python_version<"3.7"',
     # APIs and players
-    'python-vlc',
     'tekore<3.0',
     'zeroconf',
     'pydbus; platform_system=="Linux"',
@@ -43,18 +43,11 @@ if is_installed('PySide2') and not is_installed('PyQt5'):
 # Use QtPy's default: PyQt5
 else:
     install_deps.append('PyQt5')
-    install_deps.append('PyQtWebEngine>=5.14.0')
 
 extras_require = {
     'dev': [
         'flake8',
         'pyinstaller'
-    ],
-    'audiosync': [
-        'vidify-audiosync==0.3.*'
-    ],
-    'mpv': [
-        'python-mpv'
     ]
 }
 

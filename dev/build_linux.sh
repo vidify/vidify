@@ -21,13 +21,6 @@ log "Applying pre-build patches"
 # new path will be the 'res' folder inside the binary directory.
 sed -i '/RES_DIR = .*/c\import vidify; RES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(vidify.__file__))), "res")' "vidify/gui/__init__.py"
 
-# Another workaround needed to get libvlc working on Linux
-# https://github.com/pyinstaller/pyinstaller/issues/4506
-# `os.environ["VLC_PLUGIN_PATH"] = "/usr/lib64/vlc/plugins"` has to be added
-# at the end of __init__.py so that VLC can find the needed libraries
-# correctly.
-echo 'import os; os.environ["VLC_PLUGIN_PATH"] = "/usr/lib64/vlc/plugins"' >> vidify/__init__.py
-
 # Calling get_distribution at runtime to check if modules are installed
 # doesn't work with PyInstaller, so the is_installed function is overridden:
 # https://github.com/pyinstaller/pyinstaller/issues/4795

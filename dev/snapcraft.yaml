@@ -40,7 +40,6 @@ parts:
     python-packages:
       # Qt-related
       - qtpy
-      - PyQtWebEngine
       - qdarkstyle
       # Mandatory
       - python-mpv

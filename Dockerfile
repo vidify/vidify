@@ -21,9 +21,7 @@ RUN apt-get update && apt-get install -y \
     libnss3 \
     libpango1.0-dev \
     libpulse-dev \
-    libvlc-dev \
     pulseaudio \
-    vlc \
     xvfb \
     zip \
  && rm -rf /var/lib/apt/lists/*

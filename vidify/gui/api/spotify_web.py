@@ -11,7 +11,7 @@ from tekore import (scope, RefreshingCredentials, RefreshingToken,
                     parse_code_from_url, HTTPError)
 
 from vidify.gui import Fonts, Colors
-from vidify.gui.components import InputField, WebBrowser
+from vidify.gui.components import InputField
 
 
 class SpotifyWebPrompt(QWidget):
@@ -56,6 +56,7 @@ class SpotifyWebPrompt(QWidget):
         # The web browser for the user to login and grant access.
         # It's hidden at the beggining and will appear once the credentials
         # are input.
+        # TODO: replace with new browser-based solution
         self.browser = WebBrowser()
         self.browser.hide()
         # The initial screen with the web form will be shown if the user

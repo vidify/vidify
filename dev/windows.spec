@@ -4,17 +4,17 @@
 
 block_cipher = None
 
-a = Analysis(['./vidify/__main__.py', './vidify/player/vlc.py',
+a = Analysis(['./vidify/__main__.py',
               './vidify/api/spotify/swspotify.py',
               './vidify/api/spotify/web.py'],
              pathex=[''],
              binaries=[],
              datas=[('vidify/gui/res', 'vidify/gui/res')],
-             hiddenimports=['qtpy', 'pyqt5', 'pyqtwebengine', 'six',
-                            'tekore', 'mpv',  'zeroconf',
-                            'vidify.player.external', 'vidify.player.mpv',
-                            'vidify.api.spotify.web',
-                            'vidify.api.spotify.swspotify'],
+             hiddenimports=[
+                 'qtpy', 'pyqt5', 'six', 'tekore', 'mpv',  'zeroconf',
+                 'vidify.player.external', 'vidify.player.mpv',
+                 'vidify.api.spotify.web', 'vidify.api.spotify.swspotify'
+             ],
              hookspath=[],
              runtime_hooks=[],
              excludes=['PySide2'],

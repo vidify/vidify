@@ -26,7 +26,7 @@
 
 
 ## Installation
-Vidify is intended to be modular. By default, it includes support for the most popular music players (a.k.a. [APIs](#the-apis)). Same goes for the [video players](#the-players) (currently, [VLC](https://www.videolan.org/vlc/index.html) by default). This can be extended by installing the required dependencies listed in their sections.
+Vidify ships with the most popular [music players](#the-apis) for your operating system. The music videos can be played on either [the same computer, or on a different device](#the-players).
 
 Here are the different ways to install Vidify, depending on your Operating System:
 
@@ -51,37 +51,20 @@ An API is simply a source of information about the music playing on a device. Fo
 \* The name inside parenthesis is used as a key for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would force using the Linux Media Players API, for instance. It's also used for the extra dependencies installation with pip: `pip install vidify[extra1]` would install all the extra requirements for `extra1` with pip.
 
 ### The players
-The embedded video players inside the app. The default one is VLC because it's more popular, but you can use others if you have the player itself installed, and the Python extra dependencies.
+The music videos can be played inside Vidify with [an embedded instance of Mpv](https://mpv.io/), or on a different device in your network with the external player.
 
-| Name                  | Extra requirements                                | Description                                                                                                | Arguments/config options                      |
-|-----------------------|---------------------------------------------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| VLC (`vlc`)           | [VLC](https://www.videolan.org/vlc/#download)     | The default video player. Widely used and very solid.                                                      |`--vlc-args <VLC_ARGS>`                        |
-| Mpv (`mpv`)           | [Mpv](https://mpv.io/installation/), `python-mpv` | A command-line portable video player. More lightweight and precise than VLC.                               | `--mpv-flags <MPV_ARGS>` (only boolean flags) |
-| External (`external`) | Installed by default                              | Play the videos on external devices. Check the [external players section](#the-external-player) for more.  | None                                          |
-
-For now, the only way to specify what player to use is with [arguments](#usage) or inside the [config file](#the-config-file) with the internal name. You can use `--player mpv` or save it in your config file for future usage:
-
-```ini
-[Defaults]
-player = mpv
-```
-
-#### The external player
 The external player lets you play Vidify's music videos essentially anywhere. It will send all the music video information to an external application. Here are the current implementations:
 
 * **Vidify TV**: available on Android, Android TV and Amazon Fire Stick TV. [Play Store page](https://play.google.com/store/apps/details?id=com.glowapps.vidify).
 
 ### Audio synchronization
-Vidify has an audio synchronization feature. The full repository is in [vidify/audiosync](https://github.com/vidify/audiosync). It's still Work-In-Progress.
+Vidify has an audio synchronization feature. The full repository is in [vidify/audiosync](https://github.com/vidify/audiosync-rs). It's still Work-In-Progress, so it's disabled by default. It requires the following dependencies:
 
-Audiosync is only available on Linux for now. It's strongly recommended to use Mpv as the video player. You can install it with `pip install vidify[audiosync]`, along with the following dependencies:
-
+<!-- TODO: these will change after audiosync-rs replaces the C implementation -->
 * FFTW: `libfftw3` on Debian-based distros.
 * ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
 * pulseaudio: `pulseaudio`, pre-installed on most repos.
 * youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
-
-It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR, and it comes pre-installed in the binaries.
 
 It can be activated with `--audiosync`, or inside your [config file](#the-config-file):
 
@@ -92,7 +75,7 @@ audiosync = true
 
 You can calibrate the audiosync results with the option `--audiosync-calibration` or `audiosync_calibration`. By default it's 0 milliseconds, but it may depend on your hardware.
 
-*Note: if when using audiosync there's no sound, you might need to disable stream target device restore by editing the corresponing line in `/etc/pulse/default.pa` to `load-module module-stream-restore restore_device=false`.*
+*Note: if when using audiosync there's no sound on Linux, you might need to disable stream target device restore by editing the corresponing line in `/etc/pulse/default.pa` to `load-module module-stream-restore restore_device=false`.*
 
 *Note 2: you should make sure that the sink being recorded is either `audiosync`, or the one where the music is playing. Here's an example on Pavucontrol (it's usually called 'Monitor of ...'):*
 
@@ -107,26 +90,42 @@ The app has an interface that will guide you through most of the set-up, but you
 
 
 ```
-usage: vidify [-h] [-v] [--debug] [--config-file CONFIG_FILE] [-n] [-f] [--dark-mode] [--stay-on-top]
-              [--width WIDTH] [--height HEIGHT] [-a API] [-p PLAYER] [--audiosync]
-              [--audiosync-calibration AUDIOSYNC_CALIBRATION] [--vlc-args VLC_ARGS]
-              [--mpv-flags MPV_FLAGS] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET]
-              [--redirect-uri REDIRECT_URI]
-```
+USAGE:
+    vidify [FLAGS] [OPTIONS]
 
-| Argument                         | Description         |
-|----------------------------------|---------------------|
-| `-n`, `--no-lyrics`              | do not print lyrics. |
-| `-f`, `--fullscreen`             | play videos in fullscreen mode. |
-| `--dark-mode`                    | enables dark mode for the GUI. |
-| `--stay-on-top`                  | the app window will stay on top of other apps. |
-| `--width <WIDTH>`                | set the width for the downloaded videos (this is useful to play lower quality videos if your connection isn't good). |
-| `--height <HEIGHT>`              | set the height for the downloaded videos. |
-| `-a`, `--api`                    | specify the API to use. See the [APIs section](#the-apis) for more info about the supported APIs. |
-| `-p`, `--player`                 | specify the player to use. See the [Players section](#the-players) for more info about the supported players. |
-| `--audiosync`                    | enables the [Audio Synchronization](#audio-synchronization) feature (disabled by default). |
-| `--audiosync-calibration`        | You can calibrate the delay in milliseconds audiosync returns with this. It can be positive or negative. The default is 0ms. |
-| `--config-file <PATH>`           | indicate the path of your [config file](#the-config-file).  |
+FLAGS:
+        --audiosync      Enable automatic audio synchronization. Read the installation guide for more information. Note:
+                         this feature is still in development
+        --dark-mode      Activate the dark mode
+    -d, --debug          Display debug messages
+    -f, --fullscreen     Open the app in fullscreen mode
+        --help           Prints help information
+    -h, --height         The initial window's height
+        --stay-on-top    The window will stay on top of all apps
+    -V, --version        Prints version information
+    -w, --width          The initial window's width
+
+OPTIONS:
+    -a, --api <api>
+            The source music player used. Read the installation guide for a list with the available APIs
+
+        --audiosync-calibration <audiosync_calibration>    Manual tweaking value for audiosync in milliseconds
+        --client-id <client_id>
+            The client ID for the Spotify Web API. Check the guide to learn how to obtain yours
+
+        --client-secret <client_secret>
+            The client secret for the Spotify Web API. Check the install guide to learn how to obtain yours
+
+    -c, --conf-file <conf_file>                            The config file path
+    -l, --lyrics <lyrics>                                  Choose the lyrics provider, which is "LyricWikia" by default
+        --mpv-properties <mpv_properties>
+            Custom properties used when opening mpv, like `msg-level=ao/sndio=no;brightness=50;sub-gray=true`.
+                        See all of them here: https://mpv.io/manual/master/#options
+    -p, --player <player>
+            The output video player. Read the installation guide for a list with the available players
+
+        --redirect-uri <redirect_uri>                      The redirect URI used for the Spotify Web API
+```
 
 ### The config file
 The configuration file is created by default at your usual config directory:
@@ -155,9 +154,6 @@ or install it with pip following [this guide](https://pygobject.readthedocs.io/e
 ### Vidify doesn't recognize some downloaded songs
 If the song doesn't have a metadata field with its title and artist (the latter is optional), Vidify is unable to know what song is playing. Try to modify the metadata of your downloaded songs with VLC or any other tool.
 
-### `FileNotFoundError: Could not find module 'libvlc.dll'.`
-Make sure that both Python and VLC are either 32 bits, or 64 bits, but not different. You should have a directory called `C:\Program Files (x86)\VideoLAN\VLC` (32b), or `C:\Program Files\VideoLAN\VLC` (64b).
-
 ### Not playing any videos (`HTTP Error 403: Forbidden`)
 If Vidify is not playing any videos, and is throwing 403 Forbidden errors (with the `--debug` argument). The YouTube-DL cache has likely become corrupt or needs to be regenerated because of other reasons, please try deleting `~/.cache/youtube-dl`.
 
@@ -166,7 +162,6 @@ If Vidify is not playing any videos, and is throwing 403 Forbidden errors (with 
 ## Development
 Helpful documentation links for contributing:
 * [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position), [Qt for Python](https://wiki.qt.io/Qt_for_Python).
-* [python-vlc](https://www.olivieraubert.net/vlc/python-ctypes/doc/), [python-mpv](https://github.com/jaseg/python-mpv).
 
 The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/vidify/vidify/issues/26).
 

@@ -25,17 +25,6 @@ class PlayerData(BaseModuleData):
 
 PLAYERS = (
     PlayerData(
-        id='VLC',
-        short_name='VLC',
-        description='Play the music videos locally with the VLC player.',
-        icon=Res.vlc_icon,
-        compatible=True,
-        installed=is_installed('python-vlc'),
-        module='vidify.player.vlc',
-        class_name='VLCPlayer',
-        flags=('vlc_args',)),
-
-    PlayerData(
         id='MPV',
         short_name='Mpv',
         description='Play the music videos locally with the mpv player.',
