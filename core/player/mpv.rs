@@ -1,4 +1,6 @@
-//! TODO: module-level docs
+//! Mpv is used as the embedded player, which is what it's designed for.
+//! It's lightweight, precise and fast, which makes it perfect for
+//! synchronizing audio and video with the audiosync extension.
 
 use crate::config::Config;
 use crate::error::{Error, Result};
@@ -18,7 +20,6 @@ pub struct Mpv {
     mpv: libmpv::Mpv,
 }
 
-// TODO: add logging
 impl PlayerBase for Mpv {
     fn new(config: &Config, wid: u64) -> Result<Mpv> {
         // Setting the base properties before mpv is initialized.
@@ -46,6 +47,8 @@ impl PlayerBase for Mpv {
     }
 
     fn set_pause(&mut self, do_pause: bool) {
+        info!("Setting pause to {}", do_pause);
+
         // TODO: maybe the trait should return `Result`? This would avoid
         // the unwraps.
         //
@@ -78,17 +81,21 @@ impl PlayerBase for Mpv {
         // TODO: should this `wait_for_property("seekable")`?
         let secs = (ms as f64 / 1000.0).round();
         if relative {
+            info!("Seeking to relative {} ms", ms);
             if secs > 0.0 {
                 self.mpv.seek_forward(secs).unwrap();
             } else {
                 self.mpv.seek_backward(-secs).unwrap();
             }
         } else {
+            info!("Seeking to absolute {} ms", ms);
             self.mpv.seek_absolute(secs).unwrap();
         }
     }
 
     fn start_video(&mut self, media: &str, start_playing: bool) {
+        info!("Starting new media '{}', playing? {}", media, start_playing);
+
         // TODO: maybe the trait should return `Result`? This would avoid
         // the unwraps.
         self.mpv.command("loadfile", &[media]).unwrap();
