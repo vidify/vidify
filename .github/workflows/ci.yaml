@@ -1,42 +1,49 @@
 name: Continuous Integration
 
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
+    branches: master
 
 jobs:
-  tests:
+  python-tests:
+    name: Python tests
     runs-on: ubuntu-latest
     strategy:
         matrix:
             python: [3.6, 3.7, 3.8]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Docker
-        env:
-            PYTHON_VERSION: ${{ matrix.python }}
-        run: |
-          sudo apt-get update --yes
-          sudo apt-get install docker --yes
-          sudo docker build -t vidify . --build-arg python_version=$PYTHON_VERSION
-
-      - name: Run Tests
-        run: sudo docker run vidify
-
-  linter:
-      runs-on: ubuntu-latest
-
-      steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
         with:
-          python-version: '3.x'
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+              ffmpeg \
+              gir1.2-gtk-3.0 \
+              libfftw3-dev \
+              libgirepository1.0-dev \
+              libmpv-dev \
+              libnss3 \
+              libpulse-dev \
+              pulseaudio \
+              xvfb
+          python -m pip install -r dev/build_requires.txt
+      - name: Run Tests
+        run: sh dev/run-tests-docker.sh
 
-      - name: Install Linter
-        run: python3 -m pip install flake8
-
-      - name: Run Linter
-        run: python3 -m flake8 . --ignore='F821,W503,E731'
+  python-linter:
+      name: Python linter
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set up Python
+          uses: actions/setup-python@v1
+          with:
+            python-version: '3.x'
+        - name: Install Linter
+          run: python3 -m pip install flake8
+        - name: Run Linter
+          run: python3 -m flake8 . --ignore='F821,W503,E731'

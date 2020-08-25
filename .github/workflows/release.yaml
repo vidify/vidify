@@ -38,8 +38,9 @@ jobs:
         - name: Build on Linux
           if: matrix.os == 'ubuntu-latest'
           run: |
-            sudo apt-get update --yes
-            sudo apt-get install docker --yes
+            sudo apt-get update -y
+            sudo apt-get install curl -y
+            curl -fsSL https://get.docker.com | sudo sh
             sudo docker build -t vidify .
             sudo docker run -v $PWD/dev:/vidify/dev/dist vidify:latest /bin/sh -c 'cd dev; bash build_linux.sh'
 
@@ -60,8 +61,9 @@ jobs:
 
         - name: Preparing Docker Image
           run: |
-            sudo apt-get update --yes
-            sudo apt-get install docker --yes
+            sudo apt-get update -y
+            sudo apt-get install curl -y
+            curl -fsSL https://get.docker.com | sudo sh
             sudo docker build -t vidify .
 
         - name: Uploading
