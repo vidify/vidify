@@ -26,7 +26,11 @@ impl PlayerBase for Mpv {
             init.set_property("wid", wid as i64)?;
             init.set_property("vo", "gpu,libmpv,x11")?;
             init.set_property("config", false)?;
+            // The audio is always muted, which is needed because not all the
+            // youtube-dl videos are silent.
             init.set_property("mute", true)?;
+            // The keep-open flag stops mpv from closing after the video is
+            // over.
             init.set_property("keep-open", "always")?;
 
             for (key, val) in config.mpv_properties.iter() {
