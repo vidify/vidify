@@ -14,6 +14,7 @@ ENV CI=true
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     gir1.2-gtk-3.0 \
+    libasound2-dev \
     libdbus-1-dev \
     libfftw3-dev \
     libgirepository1.0-dev \
