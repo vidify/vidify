@@ -98,7 +98,7 @@ setup(
     description='Watch music videos in real-time for the songs playing on'
                 ' your device',
     url='https://vidify.org/',
-    license='LGPL',
+    license='GPL-3.0+',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: End Users/Desktop',
