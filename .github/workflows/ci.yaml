@@ -91,7 +91,6 @@ jobs:
           command: clippy
           args: -- -D warnings
     
-
   python-tests:
     name: Python tests
     runs-on: ubuntu-20.04
@@ -120,7 +119,8 @@ jobs:
             pulseaudio \
             xvfb \
             zip
-          pip install .
+      - name: Intall python package
+        run: pip install . --verbose
       - name: Run Tests
         run: sh dev/run-python-tests.sh
 

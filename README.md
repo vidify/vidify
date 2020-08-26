@@ -173,6 +173,9 @@ Vidify combines both Rust and Python, the former for core parts, and the latter 
 ### External player implementations
 The Vidify external player has an open protocol for anyone to implement their own app or program to play the videos. You can read more about how it works in this [wiki article](https://vidify.org/wiki/the-external-player-protocol/).
 
+### Building
+The [`build.rs`](./build.rs) script will compile everything needed automatically. Install the required dependencies listed at the top comment and simply run it.
+
 ### Tests
 You can run the module locally with `python -m vidify`.
 

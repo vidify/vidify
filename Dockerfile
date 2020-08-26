@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     libnss3 \
     libpango1.0-dev \
     libpulse-dev \
+    p7zip-full \
     pulseaudio \
     xvfb \
     zip \
@@ -32,13 +33,13 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="${HOME:-/root}/.cargo/bin:$PATH"
 RUN rustup default stable
 
-# Python dependencies
+# Installing Python dependencies
 RUN pip install -U pip
 COPY dev/build_requires.txt dev/
 RUN pip install -r dev/build_requires.txt
 
-# The app is ready to be installed
+# Installing the app itself
 COPY . .
-RUN pip install . --no-deps --verbose
+RUN pip install ".[dev]" --verbose
 
 CMD sh dev/run-python-tests.sh

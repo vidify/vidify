@@ -31,7 +31,7 @@ jobs:
           shell: pwsh
           run: |
             choco install wget 7zip.install
-            pip install .[mpv,dev] pyinstaller
+            pip install .[dev] --verbose
             cd dev
             ./build_windows.ps1
 

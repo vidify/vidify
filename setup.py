@@ -19,15 +19,15 @@ def get_version():
     with open(cargo_dir, 'r') as f:
         for line in f:
             split = line.split()
-            if split[0] == 'version':
+            if len(split) > 0 and split[0] == 'version':
                 return split[2][:-1][1:]
 
-    raise "Couldn't find `Cargo.toml` version"
+    raise Exception("Couldn't find `Cargo.toml` version")
 
 
 version = get_version()
 
-install_deps = [
+install_requires = [
     # Base package
     'QtPy',
     'lyricwikia',
@@ -45,23 +45,18 @@ install_deps = [
 
 # If PySide2 is installed and PyQt5 is not, append PySide2 to dependencies
 if is_installed('PySide2') and not is_installed('PyQt5'):
-    install_deps.append('PySide2')
+    install_requires.append('PySide2')
 # If PySide2 is not installed, or if both PyQt5 and PySide2 are installed
 # Use QtPy's default: PyQt5
 else:
-    install_deps.append('PyQt5')
+    install_requires.append('PyQt5')
 
 extras_require = {
     'dev': [
         'flake8',
-        'pyinstaller'
+        'pyinstaller',
     ]
 }
-
-setup_requires = [
-    # Rust extensions will be included with `setuptools-rust`.
-    "setuptools-rust"
-]
 
 # The Rust extensions will share the same `vidify` namespace as the Python
 # module.
@@ -112,28 +107,24 @@ setup(
     keywords='spotify music video player videos lyrics linux windows macos',
 
     # Data included
-    package_dir={"": "src/vidify"},
+    package_dir={"": "src"},
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
-    package_data={'vidify': ['gui/res/*',
-                             'gui/res/*/*',
-                             'gui/res/*/*/*']},
     data_files=datafiles,
 
     # Authors
-    author='Mario O.M.',
+    author='Mario Ortiz Manero',
     author_email='marioortizmanero@gmail.com',
-    maintainer='Mario O.M.',
+    maintainer='Mario Ortiz Manero',
     maintainer_email='marioortizmanero@gmail.com',
 
     # Metadata for the installation
     python_requires='>=3.6',
-    install_requires=install_deps,
+    install_requires=install_requires,
     extras_require=extras_require,
     entry_points={
         'console_scripts': ['vidify = vidify.__main__:main']
     },
     rust_extensions=rust_extensions,
-    setup_requires=setup_requires,
     zip_safe=False,  # Rust extensions are not zip safe
 )
