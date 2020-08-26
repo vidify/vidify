@@ -1,3 +1,4 @@
+from os.path import join, dirname, abspath
 from setuptools import setup, find_packages
 from setuptools_rust import RustExtension, Binding
 from pkg_resources import DistributionNotFound, get_distribution
@@ -12,18 +13,28 @@ def is_installed(pkgname: str) -> bool:
         return False
 
 
-# Get version inside vidify/version.py without importing the package.
-exec(compile(open('vidify/version.py').read(),
-             'vidify/version.py', 'exec'))
+# The version should be the same as the one in `Cargo.toml`.
+def get_version():
+    cargo_dir = join(dirname(abspath(__file__)), 'Cargo.toml')
+    with open(cargo_dir, 'r') as f:
+        for line in f:
+            split = line.split()
+            if split[0] == 'version':
+                return split[2][:-1][1:]
+
+    raise "Couldn't find `Cargo.toml` version"
+
+
+version = get_version()
 
 install_deps = [
     # Base package
-    'audiosync',
     'QtPy',
     'lyricwikia',
     'youtube-dl',
     'qdarkstyle',
     'dataclasses; python_version<"3.7"',
+    'vidify_audiosync',
     # APIs and players
     'tekore<3.0',
     'zeroconf',
@@ -64,10 +75,10 @@ rust_extensions = [
         "vidify.config",
         **rust_ext_conf
     ),
-    RustExtension(
-        "vidify.rust",
-        **rust_ext_conf
-    )
+    # RustExtension(
+    #     "vidify.audiosync",
+    #     **rust_ext_conf
+    # )
 ]
 
 packages = find_packages(exclude=('tests*', 'dev*'))
@@ -82,7 +93,7 @@ else:
 setup(
     # Metadata for publishing
     name='vidify',
-    version=__version__,
+    version=version,
     packages=packages,
     description='Watch music videos in real-time for the songs playing on'
                 ' your device',
@@ -101,6 +112,7 @@ setup(
     keywords='spotify music video player videos lyrics linux windows macos',
 
     # Data included
+    package_dir={"": "src/vidify"},
     long_description=open('README.md', 'r').read(),
     long_description_content_type='text/markdown',
     package_data={'vidify': ['gui/res/*',

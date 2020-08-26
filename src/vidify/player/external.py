@@ -82,7 +82,7 @@ class Client(QObject):
         try:
             self.id = data['id']
         except KeyError:
-            self.confirm_fail.emit(self, f"missing 'id' field")
+            self.confirm_fail.emit(self, "missing 'id' field")
             return
         else:
             self.confirmed.emit(self)

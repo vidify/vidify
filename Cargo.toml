@@ -7,20 +7,21 @@ edition = "2018"
 
 [lib]
 name = "vidify_core"
-path = "core/lib.rs"
+path = "src/core/lib.rs"
 # For Python interoperability
 crate-type = ["cdylib"]
 
 [dependencies]
 # Base dependencies
+audiosync = { path = "src/audiosync", version = "0.4.0" }
+clap = "2.33.1"
+dirs = "3.0.0"
 log = "0.4.11"
+rust-ini = "0.15.3"
 simplelog = "0.8.0"
+structconf = "0.3.2"
 strum = "0.19.1"
 strum_macros = "0.19.1"
-structconf = "0.3.2"
-clap = "2.33.1"
-rust-ini = "0.15.3"
-dirs = "3.0.0"
 # Players
 libmpv = "2.0.0"
 # APIs

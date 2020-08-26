@@ -11,7 +11,7 @@ from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
                             QVBoxLayout, QGroupBox, QRadioButton, QHBoxLayout,
                             QButtonGroup, QScrollArea)
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtCore import Qt, QUrl, Signal, Slot, QTimer
+from qtpy.QtCore import Qt, Signal, Slot, QTimer
 
 from vidify import BaseModuleData
 from vidify.api import APIS, ConnectionNotReady

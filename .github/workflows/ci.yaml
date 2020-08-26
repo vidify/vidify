@@ -19,7 +19,7 @@ jobs:
           command: check
 
   rust-test:
-    name: Rust Test
+    name: Rust test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -33,6 +33,7 @@ jobs:
           sudo apt-get install -y \
               ffmpeg \
               gir1.2-gtk-3.0 \
+              libdconf-dbus-1-dev \
               libfftw3-dev \
               libgirepository1.0-dev \
               libmpv-dev \
@@ -42,7 +43,7 @@ jobs:
               xvfb
       - uses: actions-rs/cargo@v1
         with:
-          command: test
+          command: test --no-default-features
 
   rust-fmt:
     name: Rust fmt
@@ -92,6 +93,7 @@ jobs:
           sudo apt-get install -y \
               ffmpeg \
               gir1.2-gtk-3.0 \
+              libdconf-dbus-1-dev \
               libfftw3-dev \
               libgirepository1.0-dev \
               libmpv-dev \
@@ -99,9 +101,9 @@ jobs:
               libpulse-dev \
               pulseaudio \
               xvfb
-          python -m pip install -r dev/build_requires.txt
+          pip install .
       - name: Run Tests
-        run: sh dev/run-tests-docker.sh
+        run: sh dev/run-python-tests.sh
 
   python-linter:
       name: Python linter

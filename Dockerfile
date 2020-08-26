@@ -38,6 +38,6 @@ RUN pip install -r dev/build_requires.txt
 
 # The app is ready to be installed
 COPY . .
-RUN pip install . --no-deps
+RUN pip install . --no-deps --verbose
 
-CMD sh dev/run-tests-docker.sh
+CMD sh dev/run-python-tests.sh

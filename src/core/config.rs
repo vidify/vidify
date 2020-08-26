@@ -59,7 +59,8 @@ impl FromStr for Properties {
         let err = || {
             Error::ConfigParse(structconf::Error::Parse(
                 "Invalid properties: the provided value doesn't match the \
-                    format `key1=val1;key2=val2`".to_string(),
+                    format `key1=val1;key2=val2`"
+                    .to_string(),
             ))
         };
 
