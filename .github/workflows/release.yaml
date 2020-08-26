@@ -11,10 +11,10 @@ jobs:
       runs-on: ${{ matrix.os }}
       strategy:
         matrix:
-          os: [ubuntu-latest, windows-latest]
+          os: [ubuntu-20.04, windows-latest]
           python: [3.6]
           include:
-            - os: ubuntu-latest
+            - os: ubuntu-20.04
               artifact_prefix: linux_x86_64
             - os: windows-latest
               artifact_prefix: win10_x86_64
@@ -36,7 +36,7 @@ jobs:
             ./build_windows.ps1
 
         - name: Build on Linux
-          if: matrix.os == 'ubuntu-latest'
+          if: matrix.os == 'ubuntu-20.04'
           run: |
             sudo apt-get update -y
             sudo apt-get install curl -y
@@ -54,7 +54,7 @@ jobs:
 
   pypi:
       name: Upload to PyPi
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-20.04
       steps:
         - name: Checkout code
           uses: actions/checkout@master
