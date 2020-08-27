@@ -1,3 +1,5 @@
+# NOTE: this is a separate file until
+# https://gitlab.com/pycqa/flake8/-/issues/428 is fixed.
 [flake8]
 # Recommend matching the black line length (default 88),
 # rather than using the flake8 default of 79:
