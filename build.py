@@ -23,6 +23,33 @@ IGNORED_FILES = [".git", ".venv", "target"]
 
 ALL_OS = ["Linux", "Windows", "Darwin"]
 
+SUFFIXES = {
+    "Linux": "linux",
+    "Windows": "win32",
+    "Darwin": "macos",
+}
+
+
+# The version is inside the `Cargo.toml` file.
+def get_version():
+    cargo_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Cargo.toml")
+    with open(cargo_dir, "r") as f:
+        for line in f:
+            split = line.split()
+            if len(split) > 0 and split[0] == "version":
+                return split[2][:-1][1:]
+
+    raise Exception("Couldn't find `Cargo.toml` version")
+
+
+# Obtains the resulting name the binary will be named as.
+def format_name() -> str:
+    cur_os = platform.system()
+    machine = platform.machine()
+    version = get_version()
+
+    return f"vidify-{version}_{SUFFIXES[cur_os]}_{machine}"
+
 
 def download_file(uri: str, name: str) -> None:
     with open(name, "wb") as output_file:
@@ -98,25 +125,40 @@ logging.info("Applying pre-build patches")
 # dictionaries for simplicity.
 logging.info("Running PyInstaller")
 args_os = {
-    # The basic information
+    "src/vidify/__main__.py": ALL_OS,
+    "src/vidify/player/mpv.py": ALL_OS,
+    "src/vidify/api/spotify/web.py": ALL_OS,
+    "src/vidify/audiosync.py": ALL_OS,
+    "src/vidify/api/mpris.py": ["Linux"],
+    "src/vidify/api/spotify/swspotify.py": ["Windows", "Darwin"],
+    "--onefile": ALL_OS,
     "--name=vidify": ALL_OS,
-    # TODO: may not be necessary
-    #  '--add-data=tekore/VERSION:tekore/VERSION': ALL_OS,
-    # TODO: may not be necessary
-    "--hidden-import=pkg_resources.py2_warn": ALL_OS,
-    # External libraries
-    f'--add-data={os.path.join("src", "vidify", "config.cpython*")}:.': ALL_OS,
-    "--add-data=mpv-1.dll": ["Windows"],
     "--exclude-module=PySide2": ALL_OS,
-    os.path.join("src", "vidify", "__main__.py"): ALL_OS,
-    os.path.join("src", "vidify", "player", "mpv.py"): ALL_OS,
-    os.path.join("src", "vidify", "api", "spotify", "web.py"): ALL_OS,
-    os.path.join("src", "vidify", "audiosync.py"): ALL_OS,
-    os.path.join("src", "vidify", "api", "mpris.py"): ["Linux"],
-    os.path.join("src", "vidify", "api", "spotify", "swspotify.py"): [
-        "Windows",
-        "Darwin",
-    ],
+    "--hidden-import=gi": ALL_OS,
+    "--hidden-import=lyricwikia": ALL_OS,
+    "--hidden-import=pkg_resources.py2_warn": ALL_OS,
+    "--hidden-import=pydbus": ['Linux'],
+    "--hidden-import=pyqt5": ALL_OS,
+    "--hidden-import=qdarkstyle": ALL_OS,
+    "--hidden-import=qtpy": ALL_OS,
+    "--hidden-import=six": ALL_OS,
+    "--hidden-import=swspotify": ['Windows', 'Darwin'],
+    "--hidden-import=tekore": ALL_OS,
+    "--hidden-import=vidify.api.mpris": ['Linux'],
+    "--hidden-import=vidify.api.spotify.swspotify": ['Windows', 'Darwin'],
+    "--hidden-import=vidify.api.spotify.web": ALL_OS,
+    "--hidden-import=vidify.audiosync": ['Linux'],
+    "--hidden-import=vidify.player.external": ALL_OS,
+    "--hidden-import=vidify.player.mpv": ALL_OS,
+    "--hidden-import=vidify_audiosync": ['Linux'],
+    "--hidden-import=youtube-dl": ALL_OS,
+    "--hidden-import=zeroconf": ALL_OS,
+    "--add-data=src/vidify/config.cpython*:.": ALL_OS,
+    "--add-data=mpv-1.dll": ["Windows"],
 }
 args = filter_os_args(args_os)
 pyinstaller.run(args)
+
+logging.info("Compressing resulting binaries")
+name = format_name()
+shutil.make_archive(name, "zip", "dist/vidify")
