@@ -173,6 +173,11 @@ Vidify combines both Rust and Python, the former for core parts, and the latter 
 ### External player implementations
 The Vidify external player has an open protocol for anyone to implement their own app or program to play the videos. You can read more about how it works in this [wiki article](https://vidify.org/wiki/the-external-player-protocol/).
 
+### Style
+Vidify tries to follow a consistent style for both Python and Rust by using automatic formatting tools:
+* `cargo fmt` as the Rust formatter, and `cargo clippy` as the linter.
+* `black`, `isort` for formatting, and `flake8` for linting.
+
 ### Building
 The [`build.rs`](./build.rs) script will compile everything needed automatically. Install the required dependencies listed at the top comment and simply run it.
 

@@ -8,11 +8,12 @@ In the future, these properties could be modified if dark mode was enabled.
 import os
 
 from qtpy.QtGui import QFont
+
 from vidify import CURRENT_PLATFORM, Platform
 
 # The vidify installation path's resources folder, having in account that this
 # module is vidify.gui and that the resources folder is vidify.gui.res.
-RES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'res')
+RES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "res")
 
 
 class ColorsBase:
@@ -21,11 +22,11 @@ class ColorsBase:
     future when dark mode is implemented.
     """
 
-    light = '#eff0eb'
-    dark = '#282828'
-    black = '#000000'
-    lighterror = '#fc9086'
-    darkerror = '#e33120'
+    light = "#eff0eb"
+    dark = "#282828"
+    black = "#000000"
+    lighterror = "#fc9086"
+    darkerror = "#e33120"
 
 
 def res_path(rel_path: str) -> str:
@@ -45,8 +46,7 @@ def res_font(name: str) -> str:
     what this function selects.
     """
 
-    extension = ".ttf" if CURRENT_PLATFORM == Platform.WINDOWS \
-        else ".otf"
+    extension = ".ttf" if CURRENT_PLATFORM == Platform.WINDOWS else ".otf"
 
     return res_path(name) + extension
 
@@ -56,18 +56,22 @@ class ResBase:
     Contains the paths for all the resources used in this program.
     """
 
-    fonts = (res_font("Inter/Inter-Regular"),
-             res_font("Inter/Inter-Italic"),
-             res_font("Inter/Inter-Bold"),
-             res_font("Inter/Inter-BoldItalic"),
-             res_font("Inter/Inter-Medium"),
-             res_font("Inter/Inter-MediumItalic"))
+    fonts = (
+        res_font("Inter/Inter-Regular"),
+        res_font("Inter/Inter-Italic"),
+        res_font("Inter/Inter-Bold"),
+        res_font("Inter/Inter-BoldItalic"),
+        res_font("Inter/Inter-Medium"),
+        res_font("Inter/Inter-MediumItalic"),
+    )
 
     default_video = res_path("default_video.mp4")
 
-    icon = res_path("icon16x16.ico") \
-        if CURRENT_PLATFORM == Platform.WINDOWS \
+    icon = (
+        res_path("icon16x16.ico")
+        if CURRENT_PLATFORM == Platform.WINDOWS
         else res_path("icon.svg")
+    )
     cross = res_path("cross.svg")
 
     mpris_linux_icon = res_path("api_icons/mpris.svg")

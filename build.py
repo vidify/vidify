@@ -11,16 +11,17 @@ NOTE: as https://github.com/pyinstaller/pyinstaller/issues/4311 indicates,
 Python >=3.8 isn't supported yet.
 """
 
-from typing import Tuple
-import PyInstaller.__main__ as pyinstaller
 import logging
 import os
 import platform
 import shutil
 import subprocess
 import urllib.request
+from typing import List
 
-MPV_DOWNLOAD_WINDOWS = "https://downloads.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-x86_64-20200405-git-c5f8ec7.7z?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fmpv-player-windows%2Ffiles%2Flibmpv%2Fmpv-dev-x86_64-20200405-git-c5f8ec7.7z%2Fdownload&ts=1586353127"
+import PyInstaller.__main__ as pyinstaller
+
+MPV_DOWNLOAD_WINDOWS = "https://downloads.sourceforge.net/project/mpv-player-windows/libmpv/mpv-dev-x86_64-20200405-git-c5f8ec7.7z?r=https%3A%2F%2Fsourceforge.net%2Fprojects%2Fmpv-player-windows%2Ffiles%2Flibmpv%2Fmpv-dev-x86_64-20200405-git-c5f8ec7.7z%2Fdownload&ts=1586353127"  # noqa: E501
 
 IGNORED_FILES = [".git", ".venv", "target"]
 
@@ -61,7 +62,7 @@ def download_file(uri: str, name: str) -> None:
 
 
 # This function is used in shutil.copytree to ignore specific files
-def get_ignored(path: str, filenames: Tuple[str]) -> None:
+def get_ignored(path: str, filenames: List[str]) -> List[str]:
     ret = []
     for filename in filenames:
         if os.path.join(path, filename) in IGNORED_FILES:
@@ -71,7 +72,7 @@ def get_ignored(path: str, filenames: Tuple[str]) -> None:
 
 # Returns a tuple from a dictionary with keys depending on the supported OS.
 # See `args_os` below.
-def filter_os_args(args: Tuple[str]) -> Tuple[str]:
+def filter_os_args(args: List[str]) -> List[str]:
     args_os = []
     cur_os = platform.system()
     for val, supp_os in args.items():

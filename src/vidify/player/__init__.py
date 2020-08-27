@@ -25,26 +25,27 @@ class PlayerData(BaseModuleData):
 
 PLAYERS = (
     PlayerData(
-        id='MPV',
-        short_name='Mpv',
-        description='Play the music videos locally with the mpv player.',
+        id="MPV",
+        short_name="Mpv",
+        description="Play the music videos locally with the mpv player.",
         icon=Res.mpv_icon,
         compatible=True,
-        installed=is_installed('python-mpv'),
-        module='vidify.player.mpv',
-        class_name='MpvPlayer',
-        flags=('mpv_flags',)),
-
+        installed=is_installed("python-mpv"),
+        module="vidify.player.mpv",
+        class_name="MpvPlayer",
+        flags=("mpv_flags",),
+    ),
     PlayerData(
-        id='EXTERNAL',
-        short_name='External',
-        description='Play the music videos on external devices.',
+        id="EXTERNAL",
+        short_name="External",
+        description="Play the music videos on external devices.",
         icon=Res.external_icon,
         compatible=True,
-        installed=is_installed('zeroconf'),
-        module='vidify.player.external',
-        class_name='ExternalPlayer',
-        flags=('api',))
+        installed=is_installed("zeroconf"),
+        module="vidify.player.external",
+        class_name="ExternalPlayer",
+        flags=("api",),
+    ),
 )
 
 

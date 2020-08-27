@@ -14,11 +14,12 @@ from typing import List
 from qtpy.QtCore import QObject, Qt, Signal, Slot
 from qtpy.QtNetwork import QHostAddress, QTcpServer, QTcpSocket
 from qtpy.QtWidgets import QLabel, QVBoxLayout
+from zeroconf import IPVersion, ServiceInfo, Zeroconf
+
 from vidify import CURRENT_PLATFORM
 from vidify.gui import Fonts, Res
 from vidify.player import PlayerBase
 from vidify.version import __version__
-from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 
 class Client(QObject):
@@ -68,18 +69,17 @@ class Client(QObject):
         The client will only send messages to identify itself.
         """
 
-        msg = self._socket.readAll().data().decode('utf-8')
+        msg = self._socket.readAll().data().decode("utf-8")
         try:
             data = json.loads(msg)
         except json.decoder.JSONDecodeError as e:
-            logging.info("%s sent invalid message: %s. Original: %s",
-                         self, str(e), msg)
+            logging.info("%s sent invalid message: %s. Original: %s", self, str(e), msg)
         else:
             self.identify(data)
 
     def identify(self, data: dict) -> None:
         try:
-            self.id = data['id']
+            self.id = data["id"]
         except KeyError:
             self.confirm_fail.emit(self, "missing 'id' field")
             return
@@ -118,14 +118,14 @@ class ExternalPlayer(PlayerBase):
 
     # Prefixes for the labels shown in the layout
     _LABEL_PREFIXES = {
-        'url': '<b>URL:</b> ',
-        'relative_pos': '<b>Last relative position change:</b> ',
-        'absolute_pos': '<b>Last absolute position change:</b> ',
-        'is_playing': '<b>Is it playing?:</b> ',
-        'clients': '<b>Connected clients:</b> '
+        "url": "<b>URL:</b> ",
+        "relative_pos": "<b>Last relative position change:</b> ",
+        "absolute_pos": "<b>Last absolute position change:</b> ",
+        "is_playing": "<b>Is it playing?:</b> ",
+        "clients": "<b>Connected clients:</b> ",
     }
 
-    _CONFIRM_MSG = json.dumps({'success': True}).encode('utf-8')
+    _CONFIRM_MSG = json.dumps({"success": True}).encode("utf-8")
 
     def __init__(self, api_name: str) -> None:
         """
@@ -158,7 +158,7 @@ class ExternalPlayer(PlayerBase):
         # programatically, and will be updated later.
         self.labels = {}
         for key, prefix in self._LABEL_PREFIXES.items():
-            self.labels[key] = QLabel(prefix + '-')
+            self.labels[key] = QLabel(prefix + "-")
             self.labels[key].setStyleSheet("padding: 20px; color: white")
             self.labels[key].setWordWrap(True)
             font = Fonts.bigtext
@@ -206,21 +206,21 @@ class ExternalPlayer(PlayerBase):
         # Obtaining the local address where the server is running, so that
         # clients in the same network can connect to it.
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(('8.8.8.8', 1))
+        s.connect(("8.8.8.8", 1))
         self.address = s.getsockname()[0]
         s.close()
         logging.info("Using address %s", self.address)
 
         # Other useful attributes for the connection.
         desc = {
-            'id': self.SERVICE_NAME,
-            'version': __version__,
-            'os': CURRENT_PLATFORM.name,
-            'api': self._api_name
+            "id": self.SERVICE_NAME,
+            "version": __version__,
+            "os": CURRENT_PLATFORM.name,
+            "api": self._api_name,
         }
         # The name can't have '.', because it's a special character used as
         # a separator, and some NSD clients can't handle names with it.
-        system = f"{platform.system()} {platform.node()}".replace('.', '_')
+        system = f"{platform.system()} {platform.node()}".replace(".", "_")
         full_name = f"{self.SERVICE_NAME} - {system}"
         # The name's maximum length is 64 bytes
         if len(full_name) >= 64:
@@ -231,7 +231,8 @@ class ExternalPlayer(PlayerBase):
             f"{full_name}.{self.SERVICE_TYPE}",
             addresses=[socket.inet_aton(self.address)],
             port=self.port,
-            properties=desc)
+            properties=desc,
+        )
 
         logging.info("Registering Vidify service")
         self.zeroconf = Zeroconf(ip_version=self.IP_VERSION)
@@ -275,7 +276,7 @@ class ExternalPlayer(PlayerBase):
         client.confirmed.disconnect(self.on_confirmation)
         client.confirm_fail.disconnect(self.on_confirm_fail)
         # Updating the GUI
-        self.update_label('clients', len(self._clients))
+        self.update_label("clients", len(self._clients))
 
     @Slot(object, str)
     def on_confirm_fail(self, client: Client, msg: str) -> None:
@@ -286,10 +287,7 @@ class ExternalPlayer(PlayerBase):
         logging.info("Client %s confirmation failed: %s", str(client), msg)
 
         # Answering back
-        reply = json.dumps({
-            'success': False,
-            'error_msg': msg
-        }).encode('utf-8')
+        reply = json.dumps({"success": False, "error_msg": msg}).encode("utf-8")
         client.send(reply)
         client.disconnect()
 
@@ -310,13 +308,18 @@ class ExternalPlayer(PlayerBase):
 
         with suppress(ValueError):
             self._clients.remove(client)
-            self.update_label('clients', len(self._clients))
+            self.update_label("clients", len(self._clients))
 
         del client
 
-    def send_message(self, clients: List[Client], url: str,
-                     absolute_pos: int = None, relative_pos: int = None,
-                     is_playing: bool = None) -> None:
+    def send_message(
+        self,
+        clients: List[Client],
+        url: str,
+        absolute_pos: int = None,
+        relative_pos: int = None,
+        is_playing: bool = None,
+    ) -> None:
         """
         Sends a message with the structure defined at the top of this module.
         """
@@ -325,15 +328,15 @@ class ExternalPlayer(PlayerBase):
         # The URL shall only be null when the video couldn't be found.
         # Otherwise, it won't be included in the message.
         if url is not None:
-            data['url'] = None if url == Res.default_video else url
+            data["url"] = None if url == Res.default_video else url
         # The absolute position has priority over the relative.
         if absolute_pos is not None:
-            data['absolute_pos'] = absolute_pos
+            data["absolute_pos"] = absolute_pos
         elif relative_pos is not None:
-            data['relative_pos'] = relative_pos
+            data["relative_pos"] = relative_pos
         if is_playing is not None:
-            data['is_playing'] = is_playing
-        dump = json.dumps(data).encode('utf-8')
+            data["is_playing"] = is_playing
+        dump = json.dumps(data).encode("utf-8")
 
         for c in clients:
             c.send(dump)

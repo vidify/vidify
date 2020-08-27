@@ -9,6 +9,7 @@ import sys
 import qdarkstyle
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QApplication
+
 from vidify.config import Config, init_config, init_logging
 from vidify.gui import Res, set_dark_mode
 from vidify.gui.window import MainWindow
@@ -21,7 +22,7 @@ def start_gui(config: Config) -> None:
     is put together.
     """
 
-    app = QApplication(['vidify'])
+    app = QApplication(["vidify"])
     # Setting dark mode if enabled
     if config.dark_mode:
         logging.info("Enabling dark mode")
@@ -39,5 +40,5 @@ def main() -> None:
     start_gui(config)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

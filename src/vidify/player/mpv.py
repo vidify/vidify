@@ -21,7 +21,7 @@ class MpvPlayer(PlayerBase):
         # settings needed by libmpv. This needs to happen after importing
         # PyQT before creating the first mpv.MPV instance, so it's in global
         # context.
-        locale.setlocale(locale.LC_NUMERIC, 'C')
+        locale.setlocale(locale.LC_NUMERIC, "C")
 
         super().__init__()
         self._mpv = Mpv.new(config, self.winId())

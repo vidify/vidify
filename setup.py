@@ -1,8 +1,9 @@
-from os.path import join, dirname, abspath
-from setuptools import setup, find_packages
-from setuptools_rust import RustExtension, Binding
-from pkg_resources import DistributionNotFound, get_distribution
+from os.path import abspath, dirname, join
 from sys import platform
+
+from pkg_resources import DistributionNotFound, get_distribution
+from setuptools import find_packages, setup
+from setuptools_rust import Binding, RustExtension
 
 
 def is_installed(pkgname: str) -> bool:
@@ -50,7 +51,12 @@ if is_installed("PySide2") and not is_installed("PyQt5"):
 else:
     install_requires.append("PyQt5")
 
-extras_require = {"dev": ["flake8", "pyinstaller",]}
+extras_require = {
+    "dev": [
+        "flake8",
+        "pyinstaller",
+    ]
+}
 
 # The Rust extensions will share the same `vidify` namespace as the Python
 # module.
@@ -87,7 +93,7 @@ setup(
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: End Users/Desktop",
         "Topic :: Multimedia :: Sound/Audio :: Players",
-        "License :: OSI Approved :: GNU Lesser General Public License v3" " (LGPLv3)",
+        "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",

@@ -23,7 +23,8 @@ except ImportError:
     raise ImportError(
         "No module named 'audiosync'.\n"
         "To use audio synchronization, please install vidify-audiosync and"
-        " its dependencies. Read more about it in the installation guide.")
+        " its dependencies. Read more about it in the installation guide."
+    )
 
 
 class AudiosyncWorker(QThread):

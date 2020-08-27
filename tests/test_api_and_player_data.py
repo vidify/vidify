@@ -8,11 +8,10 @@ import unittest
 
 from qtpy.QtWidgets import QApplication
 
-from vidify.gui.window import MainWindow
 from vidify.api import APIS
+from vidify.config import OPTIONS, Config
+from vidify.gui.window import MainWindow
 from vidify.player import PLAYERS, initialize_player
-from vidify.config import Config, OPTIONS
-
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
@@ -93,5 +92,5 @@ class DataStructuresTest(unittest.TestCase):
                 getattr(win, api.gui_init_fn)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
