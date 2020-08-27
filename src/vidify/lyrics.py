@@ -9,9 +9,7 @@ free, in comparison to Genius.
 """
 
 import lyricwikia
-
-from vidify import format_name, Platform, CURRENT_PLATFORM
-
+from vidify import CURRENT_PLATFORM, Platform, format_name
 
 # The different error messages returned by LyricWikia in order to override
 # them with the default error message.

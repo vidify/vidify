@@ -11,8 +11,8 @@ instead of only when the Mpv player is used.
 import locale
 
 from vidify.config import Config
-from vidify.player.mpv import Mpv
 from vidify.player.generic import PlayerBase
+from vidify.player.mpv import Mpv
 
 
 class MpvPlayer(PlayerBase):

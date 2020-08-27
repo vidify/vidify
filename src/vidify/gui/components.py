@@ -3,20 +3,19 @@ This module contains commonly used components so that their usage and
 initialization is easier.
 """
 
-import time
 import logging
+import time
 from typing import Callable, Optional, Tuple
 
-from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
-                            QVBoxLayout, QGroupBox, QRadioButton, QHBoxLayout,
-                            QButtonGroup, QScrollArea)
+from qtpy.QtCore import Qt, QTimer, Signal, Slot
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtCore import Qt, Signal, Slot, QTimer
-
+from qtpy.QtWidgets import (QButtonGroup, QGroupBox, QHBoxLayout, QLabel,
+                            QLineEdit, QPushButton, QRadioButton, QScrollArea,
+                            QVBoxLayout, QWidget)
 from vidify import BaseModuleData
 from vidify.api import APIS, ConnectionNotReady
+from vidify.gui import Colors, Fonts, Res
 from vidify.player import PLAYERS
-from vidify.gui import Fonts, Colors, Res
 
 
 class ModuleCard(QGroupBox):

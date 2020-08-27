@@ -6,6 +6,9 @@ Requires:
     * 7zip (system, `7z` in path)
     * libmpv (system, Linux and Darwin)
     * pyinstaller
+
+NOTE: as https://github.com/pyinstaller/pyinstaller/issues/4311 indicates,
+Python >=3.8 isn't supported yet.
 """
 
 from typing import Tuple
@@ -137,20 +140,20 @@ args_os = {
     "--hidden-import=gi": ALL_OS,
     "--hidden-import=lyricwikia": ALL_OS,
     "--hidden-import=pkg_resources.py2_warn": ALL_OS,
-    "--hidden-import=pydbus": ['Linux'],
+    "--hidden-import=pydbus": ["Linux"],
     "--hidden-import=pyqt5": ALL_OS,
     "--hidden-import=qdarkstyle": ALL_OS,
     "--hidden-import=qtpy": ALL_OS,
     "--hidden-import=six": ALL_OS,
-    "--hidden-import=swspotify": ['Windows', 'Darwin'],
+    "--hidden-import=swspotify": ["Windows", "Darwin"],
     "--hidden-import=tekore": ALL_OS,
-    "--hidden-import=vidify.api.mpris": ['Linux'],
-    "--hidden-import=vidify.api.spotify.swspotify": ['Windows', 'Darwin'],
+    "--hidden-import=vidify.api.mpris": ["Linux"],
+    "--hidden-import=vidify.api.spotify.swspotify": ["Windows", "Darwin"],
     "--hidden-import=vidify.api.spotify.web": ALL_OS,
-    "--hidden-import=vidify.audiosync": ['Linux'],
+    "--hidden-import=vidify.audiosync": ["Linux"],
     "--hidden-import=vidify.player.external": ALL_OS,
     "--hidden-import=vidify.player.mpv": ALL_OS,
-    "--hidden-import=vidify_audiosync": ['Linux'],
+    "--hidden-import=vidify_audiosync": ["Linux"],
     "--hidden-import=youtube-dl": ALL_OS,
     "--hidden-import=zeroconf": ALL_OS,
     "--add-data=src/vidify/config.cpython*:.": ALL_OS,

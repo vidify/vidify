@@ -7,9 +7,9 @@ initialized the same programatically.
 
 import re
 from dataclasses import dataclass
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
-from vidify import Platform, CURRENT_PLATFORM, is_installed, BaseModuleData
+from vidify import CURRENT_PLATFORM, BaseModuleData, Platform, is_installed
 from vidify.gui import Res
 
 

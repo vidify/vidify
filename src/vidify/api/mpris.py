@@ -10,14 +10,13 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import time
 import logging
+import time
 from typing import Tuple
 
 import pydbus
 from gi.repository import GLib
-
-from vidify.api import split_title, ConnectionNotReady
+from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
 
 

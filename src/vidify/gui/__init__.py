@@ -8,9 +8,7 @@ In the future, these properties could be modified if dark mode was enabled.
 import os
 
 from qtpy.QtGui import QFont
-
-from vidify import Platform, CURRENT_PLATFORM
-
+from vidify import CURRENT_PLATFORM, Platform
 
 # The vidify installation path's resources folder, having in account that this
 # module is vidify.gui and that the resources folder is vidify.gui.res.

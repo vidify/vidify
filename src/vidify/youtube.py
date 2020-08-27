@@ -7,8 +7,8 @@ or mpv.
 import logging
 from typing import Optional
 
-from youtube_dl import YoutubeDL
 from qtpy.QtCore import QObject, Signal
+from youtube_dl import YoutubeDL
 
 
 def get_direct_url(data: dict) -> str:

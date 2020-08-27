@@ -50,25 +50,24 @@ The API and player modules are mixed using Qt events:
 These events are emitted inside the APIs.
 """
 
+import importlib
+import logging
 import time
 import types
-import logging
-import importlib
-from typing import Callable, Optional
 from contextlib import suppress
+from typing import Callable, Optional
 
-from qtpy.QtWidgets import QWidget, QHBoxLayout
+from qtpy.QtCore import QCoreApplication, Qt, QThread, QTimer, Slot
 from qtpy.QtGui import QFontDatabase
-from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot, QThread
-
-from vidify import format_name, find_module
+from qtpy.QtWidgets import QHBoxLayout, QWidget
+from vidify import find_module, format_name
 from vidify.api import APIS, APIData
-from vidify.player import initialize_player, PlayerData
 from vidify.config import Config
-from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
+from vidify.gui import Colors, Res
+from vidify.gui.components import APIConnecter, SetupWidget
 from vidify.lyrics import get_lyrics
-from vidify.gui import Res, Colors
-from vidify.gui.components import SetupWidget, APIConnecter
+from vidify.player import PlayerData, initialize_player
+from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
 
 
 class MainWindow(QWidget):

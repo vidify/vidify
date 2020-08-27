@@ -4,12 +4,12 @@ them.
 """
 
 import importlib
-from typing import Tuple
 from dataclasses import dataclass
+from typing import Tuple
 
-from vidify import is_installed, BaseModuleData
-from vidify.gui import Res
+from vidify import BaseModuleData, is_installed
 from vidify.config import Config
+from vidify.gui import Res
 from vidify.player.generic import PlayerBase
 
 

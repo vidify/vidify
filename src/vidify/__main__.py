@@ -3,15 +3,14 @@ This module chooses the player and platform and starts them. The Qt GUI is
 also initialized here.
 """
 
-import sys
 import logging
+import sys
 
-from qtpy.QtWidgets import QApplication
-from qtpy.QtGui import QIcon
 import qdarkstyle
-
+from qtpy.QtGui import QIcon
+from qtpy.QtWidgets import QApplication
 from vidify.config import Config, init_config, init_logging
-from vidify.gui import set_dark_mode, Res
+from vidify.gui import Res, set_dark_mode
 from vidify.gui.window import MainWindow
 
 

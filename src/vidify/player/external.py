@@ -3,23 +3,22 @@ To read more details about the external player API, please check out:
 https://vidify.org/wiki/the-external-player-protocol/
 """
 
-import time
 import json
-import socket
 import logging
 import platform
-from typing import List
+import socket
+import time
 from contextlib import suppress
+from typing import List
 
-from qtpy.QtCore import QObject, Slot, Signal, Qt
-from qtpy.QtNetwork import QTcpServer, QHostAddress, QTcpSocket
-from qtpy.QtWidgets import QVBoxLayout, QLabel
-from zeroconf import IPVersion, ServiceInfo, Zeroconf
-
+from qtpy.QtCore import QObject, Qt, Signal, Slot
+from qtpy.QtNetwork import QHostAddress, QTcpServer, QTcpSocket
+from qtpy.QtWidgets import QLabel, QVBoxLayout
 from vidify import CURRENT_PLATFORM
+from vidify.gui import Fonts, Res
 from vidify.player import PlayerBase
-from vidify.gui import Res, Fonts
 from vidify.version import __version__
+from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 
 class Client(QObject):
