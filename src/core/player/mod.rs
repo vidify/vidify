@@ -10,7 +10,7 @@ use crate::error::Result;
 use pyo3::prelude::*;
 use strum_macros::{Display, EnumString};
 
-// #[pyenum]
+#[pyenum]
 #[derive(Clone, Debug, Display, EnumString)]
 pub enum Player {
     Mpv,

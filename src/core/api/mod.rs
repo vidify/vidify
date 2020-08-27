@@ -15,7 +15,7 @@ use strum_macros::{Display, EnumString};
 
 pub type Sender = std::sync::mpsc::Sender<APIEvent>;
 
-// #[pyenum]
+#[pyenum]
 #[derive(Clone, Debug, Display, EnumString)]
 pub enum API {
     #[cfg(any(target_os = "linux", target_os = "bsd"))]

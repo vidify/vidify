@@ -17,14 +17,7 @@ use structconf::StructConf;
 #[pymodule]
 fn config(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<Config>()?;
-
-    // FIXME: this can be avoided in the future after
-    // https://github.com/PyO3/pyo3/issues/1106
-    #[pyfn(m, "init_config")]
-    fn init_config_py(_py: Python, args: Vec<String>) -> PyResult<Config> {
-        Ok(init_config(args)?)
-    }
-
+    m.add_wrapped(wrap_pyfunction!(init_config))?;
     m.add_wrapped(wrap_pyfunction!(init_logging))?;
 
     Ok(())
@@ -142,8 +135,7 @@ pub struct Config {
     /// The API used. The API names are exactly the ones found in the
     /// `core::api::API` enum, case sensitive.
     ///
-    /// FIXME: waiting for https://github.com/PyO3/pyo3/pull/1045
-    // #[pyo3(get, set)]
+    #[pyo3(get, set)]
     #[conf(help = "The source music player used. Read the installation guide \
            for a list with the available APIs")]
     pub api: Option<API>,
@@ -151,8 +143,7 @@ pub struct Config {
     /// The Player used. The player names are exactly the ones found in the
     /// `core::player::Player` enum, case sensitive.
     ///
-    /// FIXME: waiting for https://github.com/PyO3/pyo3/pull/1045
-    // #[pyo3(get, set)]
+    #[pyo3(get, set)]
     #[conf(help = "The output video player. Read the installation guide for \
            a list with the available players")]
     pub player: Option<Player>,
@@ -215,6 +206,7 @@ pub struct Config {
 /// by `--config-file`.
 ///
 /// NOTE: maybe it should return a `Mutex` or `RwLock`.
+#[pyfunction]
 pub fn init_config(args: Vec<String>) -> Result<Config> {
     // Author and version pulled at compile time from `Cargo.toml`.
     let app = App::new("vidify")

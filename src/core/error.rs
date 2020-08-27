@@ -7,6 +7,9 @@ pub type Result<T> = std::result::Result<T, Error>;
 /// The different errors that may happen are stored in this enum. These
 /// include errors specific to some APIs because that way they can be handled
 /// correctly.
+///
+/// TODO: implement hierarchy for player/api/etc errors to avoid having
+/// too many in the general module.
 #[derive(Debug)]
 pub enum Error {
     ConfigParse(structconf::Error),

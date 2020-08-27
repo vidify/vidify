@@ -9,7 +9,7 @@ use crate::lyrics::lyricwikia::LyricWikia;
 use pyo3::prelude::*;
 use strum_macros::{Display, EnumString};
 
-// #[pyenum]
+#[pyenum]
 #[derive(Clone, Debug, Display, EnumString)]
 pub enum Lyrics {
     None,
