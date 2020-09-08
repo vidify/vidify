@@ -73,7 +73,7 @@ OPTIONS = {
 
     # Custom config file, only available for the argument parser.
     'config_file': Argument(
-        description=f"the config file path.",
+        description="the config file path.",
         type=str,
         default=DEFAULT_PATH,
         args=('--config-file',),
