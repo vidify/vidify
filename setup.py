@@ -25,7 +25,7 @@ install_deps = [
     'dataclasses; python_version<"3.7"',
     # APIs and players
     'python-vlc',
-    'tekore<3.0',
+    'tekore==3.*',
     'zeroconf',
     'pydbus; platform_system=="Linux"',
     'SwSpotify>=1.1.1; platform_system=="Windows"'
