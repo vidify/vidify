@@ -181,7 +181,7 @@ class SpotifyWebForm(QWidget):
     process in the Web API.
     """
 
-    def __init__(self, *args, client_id: str = "", client_secret: str = "") -> None:
+    def __init__(self, *args, client_id: str = None, client_secret: str = None) -> None:
         """
         Loading the main components inside the form. The initial client ID
         and client secret can be passed as a parameter to have an initial
@@ -192,10 +192,8 @@ class SpotifyWebForm(QWidget):
 
         # Checking that the credentials aren't None and using an empty field
         # instead.
-        if client_id is None:
-            client_id = ""
-        if client_secret is None:
-            client_secret = ""
+        client_id = client_id or ""
+        client_secret = client_secret or ""
 
         # The main layout will now have a widget with a vertical layout inside
         # it. This way, the widget's size can be controlled.
@@ -216,11 +214,10 @@ class SpotifyWebForm(QWidget):
         It can also show error messages.
         """
 
-        url = "https://vidify.org/wiki/spotify-web-api/"
         text = QLabel(
-            "<h2><i>Please introduce your Spotify keys</i></h2>"
-            "If you don't know how to obtain them, please read this"
-            f" <a href='{url}'>quick tutorial.</a>"
+            """<h2><i>Please introduce your Spotify keys</i></h2>
+            If you don't know how to obtain them, please read this
+            <a href='https://vidify.org/wiki/spotify-web-api/'>quick guide.</a>"""
         )
         text.setWordWrap(True)
         text.setOpenExternalLinks(True)

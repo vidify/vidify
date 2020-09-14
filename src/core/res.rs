@@ -10,7 +10,7 @@ use dirs::*;
 use pyo3::prelude::*;
 
 #[pymodule]
-fn data(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn res(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<Res>()?;
     m.add_class::<ResKind>()?;
 

@@ -27,7 +27,7 @@ class APIData(BaseModuleData):
 
 APIS = (
     APIData(
-        id="MPRIS_LINUX",
+        name="MPRIS",
         short_name="Linux Media Players",
         description="Any MPRIS compatible media player: Spotify, Rhythmbox,"
         " Clementine, VLC...",
@@ -35,23 +35,21 @@ APIS = (
         compatible=CURRENT_PLATFORM in (Platform.LINUX, Platform.BSD),
         installed=is_installed("pydbus"),
         module="vidify.api.mpris",
-        class_name="MPRISAPI",
         connect_msg="Waiting for a song to play on any MPRIS player...",
     ),
     APIData(
-        id="SWSPOTIFY",
+        name="SwSpotify",
         short_name="Spotify for Windows and MacOS",
         description="The desktop Spotify client for Windows and MacOS.",
         icon=Res.swspotify_icon,
         compatible=CURRENT_PLATFORM in (Platform.WINDOWS, Platform.MACOS),
         installed=is_installed("swspotify"),
         module="vidify.api.spotify.swspotify",
-        class_name="SwSpotifyAPI",
         connect_msg="Waiting for a Spotify song to play...",
         event_loop_interval=500,
     ),
     APIData(
-        id="SPOTIFY_WEB",
+        name="SpotifyWeb",
         short_name="Spotify Web",
         description="The official Spotify Web API. Read"
         ' <a href="https://vidify.org/wiki/spotify-web-api/">the wiki</a>'
@@ -60,7 +58,6 @@ APIS = (
         compatible=True,
         installed=is_installed("tekore"),
         module="vidify.api.spotify.web",
-        class_name="SpotifyWebAPI",
         connect_msg="Waiting for a Spotify song to play...",
         gui_init_fn="init_spotify_web_api",
         event_loop_interval=1000,

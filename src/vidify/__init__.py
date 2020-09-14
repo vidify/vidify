@@ -77,14 +77,13 @@ class BaseModuleData:
     initialize them programatically.
     """
 
-    id: str
+    name: str
     short_name: str
     description: str
     icon: str
     compatible: bool
     installed: bool
     module: str
-    class_name: str
 
 
 def find_module(data: Tuple[BaseModuleData], module_id: str) -> BaseModuleData:

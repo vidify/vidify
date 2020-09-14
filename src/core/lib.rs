@@ -1,8 +1,3 @@
-//! TODO: module-level docs
-
-pub mod api;
 pub mod config;
-pub mod data;
+pub mod res;
 pub mod error;
-pub mod lyrics;
-pub mod player;

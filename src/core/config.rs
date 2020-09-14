@@ -1,18 +1,14 @@
 //! TODO: module-level docs
 
-use crate::api::API;
-use crate::data::{Res, ResKind};
+use crate::res::{Res, ResKind};
 use crate::error::{Error, Result};
-use crate::lyrics::Lyrics;
-use crate::player::Player;
 
 use std::fs::File;
 use std::str::FromStr;
 
-use clap::App;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
-use structconf::StructConf;
+use structconf::{clap, StructConf};
 
 #[pymodule]
 fn config(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
@@ -104,13 +100,14 @@ pub struct Config {
     #[conf(no_file, help = "The config file path")]
     pub conf_file: Option<String>,
 
-    /// Showing the lyrics. For the argument parser, it's a negated option,
-    /// meaning that it has to be set to False in the config file to be
-    /// equivalent.
-    // #[pyo3(get, set)]
-    #[conf(help = "Choose the lyrics provider, which is \"LyricWikia\" by \
-           default")]
-    pub lyrics: Lyrics,
+    #[pyo3(get, set)]
+    #[conf(
+        negated_arg,
+        long = "no_lyrics",
+        short = "n",
+        help = "Do not print lyrics"
+    )]
+    pub lyrics: bool,
 
     #[pyo3(get, set)]
     #[conf(help = "The initial window's width")]
@@ -132,21 +129,15 @@ pub struct Config {
     #[conf(no_short, help = "The window will stay on top of all apps")]
     pub stay_on_top: bool,
 
-    /// The API used. The API names are exactly the ones found in the
-    /// `core::api::API` enum, case sensitive.
-    ///
     #[pyo3(get, set)]
     #[conf(help = "The source music player used. Read the installation guide \
            for a list with the available APIs")]
-    pub api: Option<API>,
+    pub api: Option<String>,
 
-    /// The Player used. The player names are exactly the ones found in the
-    /// `core::player::Player` enum, case sensitive.
-    ///
     #[pyo3(get, set)]
     #[conf(help = "The output video player. Read the installation guide for \
            a list with the available players")]
-    pub player: Option<Player>,
+    pub player: Option<String>,
 
     #[pyo3(get, set)]
     #[conf(
@@ -209,7 +200,7 @@ pub struct Config {
 #[pyfunction]
 pub fn init_config(args: Vec<String>) -> Result<Config> {
     // Author and version pulled at compile time from `Cargo.toml`.
-    let app = App::new("vidify")
+    let app = clap::App::new("vidify")
         .version(clap::crate_version!())
         .author(clap::crate_authors!());
     let args = Config::parse_args_from(app, args);

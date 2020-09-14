@@ -22,7 +22,7 @@ from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
 
 
-class SwSpotifyAPI(APIBase):
+class SwSpotify(APIBase):
     player_name: str = "Spotify"
     artist: str = None
     title: str = None
