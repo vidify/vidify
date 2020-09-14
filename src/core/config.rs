@@ -1,7 +1,7 @@
 //! TODO: module-level docs
 
-use crate::res::{Res, ResKind};
 use crate::error::{Error, Result};
+use crate::res::{Res, ResKind};
 
 use std::fs::File;
 use std::str::FromStr;

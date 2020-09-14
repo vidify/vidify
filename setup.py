@@ -64,7 +64,7 @@ rust_ext_conf = {"path": "Cargo.toml", "binding": Binding.PyO3, "debug": False}
 rust_extensions = [
     RustExtension("vidify.vidify", **rust_ext_conf),
     RustExtension("vidify.config", **rust_ext_conf),
-    RustExtension("vidify.api.spotify.web", **rust_ext_conf)
+    RustExtension("vidify.api.spotify.web", **rust_ext_conf),
 ]
 
 packages = find_packages(exclude=("tests*", "dev*"))

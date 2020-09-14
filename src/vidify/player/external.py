@@ -235,7 +235,7 @@ class External(PlayerBase):
         full_name = f"{self.SERVICE_NAME} - {system}"
 
         if len(full_name) >= self._MAX_NSD_NAME_LENGTH:
-            full_name = full_name[:self._MAX_NSD_NAME_LENGTH - 3] + "..."
+            full_name = full_name[: self._MAX_NSD_NAME_LENGTH - 3] + "..."
 
         self.info = ServiceInfo(
             self.SERVICE_TYPE,
