@@ -382,15 +382,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "heck"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20564e78d53d2bb135c343b3f47714a56af2061f1c928fdb541dc7b9fdd94205"
-dependencies = [
- "unicode-segmentation",
-]
-
-[[package]]
 name = "hermit-abi"
 version = "0.1.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -455,12 +446,6 @@ dependencies = [
  "quote",
  "syn",
 ]
-
-[[package]]
-name = "itoa"
-version = "0.4.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc6f3ad7b9d11a0c00842ff8de1b60ee58661048eb8049ed33c73594f359d7e6"
 
 [[package]]
 name = "js-sys"
@@ -883,12 +868,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ryu"
-version = "1.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
-
-[[package]]
 name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -927,17 +906,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "serde_json"
-version = "1.0.57"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "164eacbdb13512ec2745fb09d51fd5b22b0d65ed294a1dcf7285a360c80a675c"
-dependencies = [
- "itoa",
- "ryu",
- "serde",
 ]
 
 [[package]]
@@ -992,8 +960,9 @@ checksum = "6446ced80d6c486436db5c078dde11a9f73d42b57fb273121e160b84f63d894c"
 
 [[package]]
 name = "structconf"
-version = "0.3.2"
-source = "git+https://github.com/vidify/structconf#24d8e0fe3ebff2a462cdcc1979fc8b13a5704735"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9f7d2a3cbbfafb651154a295c5992d7e02ac16507941d4a9c5e10301badb137"
 dependencies = [
  "clap",
  "rust-ini",
@@ -1003,28 +972,11 @@ dependencies = [
 
 [[package]]
 name = "structconf_derive"
-version = "0.3.2"
-source = "git+https://github.com/vidify/structconf#24d8e0fe3ebff2a462cdcc1979fc8b13a5704735"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf78be3cb222a941d1deef0700947ec0a87d2a4223622371eae09e9ea0face0c"
 dependencies = [
  "darling",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "strum"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3924a58d165da3b7b2922c667ab0673c7b5fd52b5c19ea3442747bcb3cd15abe"
-
-[[package]]
-name = "strum_macros"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2d2ab682ecdcae7f5f45ae85cd7c1e6c8e68ea42c8a612d47fedf831c037146a"
-dependencies = [
- "heck",
  "proc-macro2",
  "quote",
  "syn",
@@ -1090,12 +1042,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "unicode-segmentation"
-version = "1.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e83e153d1053cbb5a118eeff7fd5be06ed99153f00dbcd8ae310c5fb2b22edc0"
-
-[[package]]
 name = "unicode-width"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1134,11 +1080,8 @@ dependencies = [
  "log",
  "pyo3",
  "serde",
- "serde_json",
  "simplelog",
  "structconf",
- "strum",
- "strum_macros",
  "thiserror",
 ]
 
