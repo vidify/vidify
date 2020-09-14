@@ -7,20 +7,20 @@ use std::ops::Deref;
 use std::path::PathBuf;
 
 use dirs::*;
-use pyo3::prelude::*;
+// use pyo3::prelude::*;
 
-#[pymodule]
-fn res(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_class::<Res>()?;
-    m.add_class::<ResKind>()?;
+// #[pymodule]
+// fn res(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+//     m.add_class::<Res>()?;
+//     m.add_class::<ResKind>()?;
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 /// What kind of resource it is, to determine where it should be stored. The
 /// custom type holds the full path, the rest of them only contain the file
 /// name, which will be appended to a predetermined directory.
-#[pyenum]
+// #[pyenum]
 #[derive(Clone)]
 pub enum ResKind {
     /// Can be anything, no path is appended to it.
@@ -36,18 +36,18 @@ pub enum ResKind {
 
 /// The actual struct with the functionalities required to initialize the
 /// resource's path and access to them.
-#[pyclass]
+// #[pyclass]
 #[derive(Clone)]
 pub struct Res {
-    #[pyo3(get)]
+    // #[pyo3(get)]
     pub kind: ResKind,
-    #[pyo3(get)]
+    // #[pyo3(get)]
     pub path: String,
 }
 
-#[pymethods]
+// #[pymethods]
 impl Res {
-    #[new]
+    // #[new]
     pub fn new(kind: ResKind, path: &str) -> Result<Self> {
         use std::io::{Error, ErrorKind};
         use ResKind::*;
