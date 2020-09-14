@@ -88,7 +88,7 @@ class BaseModuleData:
 
 def find_module(data: Tuple[BaseModuleData], module_id: str) -> BaseModuleData:
     for element in data:
-        if element.id == module_id:
+        if element.name == module_id:
             return element
 
     raise ValueError("Module with id {module_id} not found")

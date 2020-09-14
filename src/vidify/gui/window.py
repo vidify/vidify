@@ -154,16 +154,16 @@ class MainWindow(QWidget):
         del self.setup_widget
 
         # Saving the API and Player in the config
-        self.config.api = api.id
-        self.config.player = player.id
+        self.config.api = api.name
+        self.config.player = player.name
 
         # Starting the asynchronous API initialization
         self.initialize_api(api)
-        logging.info("Using %s as the API", api.id)
+        logging.info("Using %s as the API", api.name)
 
         # Initializing the player
         self.player = initialize_player(player, self.config)
-        logging.info("Using %s as the player", player.id)
+        logging.info("Using %s as the player", player.name)
 
     def initialize_api(self, api_data: APIData) -> None:
         """

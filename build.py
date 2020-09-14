@@ -17,7 +17,7 @@ import platform
 import shutil
 import subprocess
 import urllib.request
-from typing import List
+from typing import List, Dict
 
 import PyInstaller.__main__ as pyinstaller
 
@@ -61,7 +61,8 @@ def download_file(uri: str, name: str) -> None:
             output_file.write(input_file.read())
 
 
-# This function is used in shutil.copytree to ignore specific files
+# This function is used in shutil.copytree to ignore specific files and make
+# it considerably faster in some situations.
 def get_ignored(path: str, filenames: List[str]) -> List[str]:
     ret = []
     for filename in filenames:
@@ -72,7 +73,7 @@ def get_ignored(path: str, filenames: List[str]) -> List[str]:
 
 # Returns a tuple from a dictionary with keys depending on the supported OS.
 # See `args_os` below.
-def filter_os_args(args: List[str]) -> List[str]:
+def filter_os_args(args: Dict[str]) -> List[str]:
     args_os = []
     cur_os = platform.system()
     for val, supp_os in args.items():
@@ -135,8 +136,8 @@ args_os = {
     "src/vidify/audiosync.py": ALL_OS,
     "src/vidify/api/mpris.py": ["Linux"],
     "src/vidify/api/spotify/swspotify.py": ["Windows", "Darwin"],
-    "--onefile": ALL_OS,
-    "--name=vidify": ALL_OS,
+    "-y": ALL_OS,
+    "--name=Vidify": ALL_OS,
     "--exclude-module=PySide2": ALL_OS,
     "--hidden-import=gi": ALL_OS,
     "--hidden-import=lyricwikia": ALL_OS,
@@ -148,16 +149,17 @@ args_os = {
     "--hidden-import=six": ALL_OS,
     "--hidden-import=swspotify": ["Windows", "Darwin"],
     "--hidden-import=tekore": ALL_OS,
-    "--hidden-import=vidify.api.mpris": ["Linux"],
-    "--hidden-import=vidify.api.spotify.swspotify": ["Windows", "Darwin"],
-    "--hidden-import=vidify.api.spotify.web": ALL_OS,
-    "--hidden-import=vidify.audiosync": ["Linux"],
-    "--hidden-import=vidify.player.external": ALL_OS,
-    "--hidden-import=vidify.player.mpv": ALL_OS,
-    "--hidden-import=vidify_audiosync": ["Linux"],
     "--hidden-import=youtube-dl": ALL_OS,
     "--hidden-import=zeroconf": ALL_OS,
-    "--add-data=src/vidify/config.cpython*:.": ALL_OS,
+    #  "--hidden-import=vidify.api.mpris": ["Linux"],
+    #  "--hidden-import=vidify.api.spotify.swspotify": ["Windows", "Darwin"],
+    #  "--hidden-import=vidify.api.spotify.web": ALL_OS,
+    #  "--hidden-import=vidify.audiosync": ["Linux"],
+    #  "--hidden-import=vidify.player.external": ALL_OS,
+    #  "--hidden-import=vidify.player.mpv": ALL_OS,
+    #  "--hidden-import=vidify_audiosync": ["Linux"],
+    #  "--add-data=src/vidify/config.cpython*:.": ALL_OS,
+    "--add-data=res:res": ALL_OS,
     "--add-data=mpv-1.dll": ["Windows"],
 }
 args = filter_os_args(args_os)

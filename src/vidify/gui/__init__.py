@@ -5,15 +5,16 @@ fonts.
 In the future, these properties could be modified if dark mode was enabled.
 """
 
-import os
+from os.path import join, dirname, abspath
 
 from qtpy.QtGui import QFont
 
 from vidify import CURRENT_PLATFORM, Platform
 
-# The vidify installation path's resources folder, having in account that this
-# module is vidify.gui and that the resources folder is vidify.gui.res.
-RES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "res")
+# The vidify installation path's resources folder, assuming this file is
+# always exactly at 'vidify/gui/__init__.py'.
+RES_DIR = join(dirname(dirname(dirname(abspath(__file__)))), "res")
+print(RES_DIR)
 
 
 class ColorsBase:
@@ -36,7 +37,7 @@ def res_path(rel_path: str) -> str:
     from directories other than the main one.
     """
 
-    return os.path.join(RES_DIR, rel_path)
+    return join(RES_DIR, rel_path)
 
 
 def res_font(name: str) -> str:

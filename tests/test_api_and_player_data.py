@@ -29,15 +29,15 @@ class DataStructuresTest(unittest.TestCase):
 
         existing_apis = []
         for api in APIS:
-            self.assertEqual(api.id, api.id.upper())
-            self.assertTrue(api.id not in existing_apis)
-            existing_apis.append(api.id)
+            self.assertEqual(api.name, api.name.upper())
+            self.assertTrue(api.name not in existing_apis)
+            existing_apis.append(api.name)
 
         existing_players = []
         for player in PLAYERS:
-            self.assertEqual(player.id, player.id.upper())
-            self.assertTrue(player.id not in existing_players)
-            existing_players.append(player.id)
+            self.assertEqual(player.name, player.name.upper())
+            self.assertTrue(player.name not in existing_players)
+            existing_players.append(player.name)
 
     def test_imports_and_class_names_in_modules(self):
         """

@@ -173,7 +173,7 @@ class SetupWidget(QWidget):
             if not module.compatible:
                 continue
 
-            selected = saved_item is not None and module.id == saved_item.upper()
+            selected = saved_item is not None and module.name == saved_item.upper()
             card = ModuleCard(module, selected)
 
             if module.installed:
@@ -183,7 +183,7 @@ class SetupWidget(QWidget):
             group.addButton(card.button)
             logging.info(
                 "Created API card: %s (enabled=%s, selected=%s)",
-                module.id,
+                module.name,
                 module.installed,
                 selected,
             )
@@ -209,7 +209,7 @@ class SetupWidget(QWidget):
         except AttributeError:
             return
 
-        logging.info("Selected: api=%s, player=%s", api.id, player.id)
+        logging.info("Selected: api=%s, player=%s", api.name, player.name)
         self.done.emit(api, player)
 
 

@@ -1,3 +1,4 @@
 include Cargo.toml
 recursive-include src *
+recursive-include res *
 include dev/vidify.desktop dev/vidify.svg
