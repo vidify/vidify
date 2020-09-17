@@ -13,8 +13,7 @@ from vidify import CURRENT_PLATFORM, Platform
 
 # The vidify installation path's resources folder, assuming this file is
 # always exactly at 'vidify/gui/__init__.py'.
-RES_DIR = join(dirname(dirname(dirname(abspath(__file__)))), "res")
-print(RES_DIR)
+RES_DIR = join(dirname(dirname(dirname(dirname(abspath(__file__))))), "res")
 
 
 class ColorsBase:
