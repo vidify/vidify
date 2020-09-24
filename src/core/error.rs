@@ -1,5 +1,3 @@
-//! TODO: module-level docs
-
 pub type Result<T> = std::result::Result<T, Error>;
 
 /// The different errors that may happen are stored in this enum. These

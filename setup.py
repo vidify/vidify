@@ -62,7 +62,7 @@ extras_require = {
 # module.
 rust_ext_conf = {"path": "Cargo.toml", "binding": Binding.PyO3, "debug": False}
 rust_extensions = [
-    RustExtension("vidify.config", **rust_ext_conf),
+    RustExtension("vidify.core", **rust_ext_conf),
 ]
 
 packages = find_packages(exclude=("tests*", "dev*"))

@@ -158,7 +158,6 @@ args_os = {
     #  "--hidden-import=vidify.player.external": ALL_OS,
     #  "--hidden-import=vidify.player.mpv": ALL_OS,
     #  "--hidden-import=vidify_audiosync": ["Linux"],
-    #  "--add-data=src/vidify/config.cpython*:.": ALL_OS,
     "--add-data=res:res": ALL_OS,
     "--add-data=mpv-1.dll": ["Windows"],
 }

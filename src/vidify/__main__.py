@@ -10,7 +10,7 @@ import qdarkstyle
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QApplication
 
-from vidify.config import Config, init_config, init_logging
+from vidify.core import Config, init_config, init_logging
 from vidify.gui import Res, set_dark_mode
 from vidify.gui.window import MainWindow
 
