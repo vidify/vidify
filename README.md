@@ -160,28 +160,10 @@ If Vidify is not playing any videos, and is throwing 403 Forbidden errors (with 
 ---
 
 ## Development
-Helpful documentation links for contributing:
-* [DBus](https://dbus.freedesktop.org/doc/dbus-specification.html), [pydbus](https://github.com/LEW21/pydbus), [MPRIS](https://specifications.freedesktop.org/mpris-spec/latest/Player_Interface.html#Property:Position), [Qt for Python](https://wiki.qt.io/Qt_for_Python).
+If you want to help to develop Vidify, please read the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 
 The app logo was created by [xypnox](https://github.com/xypnox) in this [issue](https://github.com/vidify/vidify/issues/26).
 
 The changelog and more information about this program's versions can be found in the [Releases page](https://github.com/vidify/vidify/releases).
 
-### Project organization
-Vidify combines both Rust and Python, the former for core parts, and the latter for mainly the GUI.
-
-### External player implementations
-The Vidify external player has an open protocol for anyone to implement their own app or program to play the videos. You can read more about how it works in this [wiki article](https://vidify.org/wiki/the-external-player-protocol/).
-
-### Style
-Vidify tries to follow a consistent style for both Python and Rust by using automatic formatting tools:
-* `cargo fmt` as the Rust formatter, and `cargo clippy` as the linter.
-* `black`, `isort` for formatting, and `flake8` for linting.
-
-### Building
-The [`build.rs`](./build.rs) script will compile everything needed automatically. Install the required dependencies listed at the top comment and simply run it.
-
-### Tests
-You can run the module locally with `python -m vidify`.
-
-This project uses `unittest` for testing. Run them with `python -m unittest`. You'll need all the extra dependencies installed for this to work.
+Vidify's license is the [GPL v3](./LICENSE).
