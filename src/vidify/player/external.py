@@ -16,8 +16,7 @@ from qtpy.QtWidgets import QLabel, QVBoxLayout
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 from vidify import CURRENT_PLATFORM
-from vidify.config import Config
-from vidify.core import log
+from vidify.core import log, Core
 from vidify.gui import FONTS, RES
 from vidify.player import PlayerBase
 from vidify.version import __version__

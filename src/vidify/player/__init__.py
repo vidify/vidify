@@ -7,7 +7,7 @@ import importlib
 from dataclasses import dataclass
 
 from vidify import BaseModuleData, is_installed
-from vidify.config import Config
+from vidify.core import Config
 from vidify.gui import RES
 from vidify.player.generic import PlayerBase
 

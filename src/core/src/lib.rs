@@ -10,7 +10,7 @@ pub mod error;
 pub mod res;
 
 use crate::error::{Error, Result};
-use crate::res::{Res, ResKind};
+use crate::res::{Res, CustomRes, ConfigRes, DataRes};
 
 use std::fs::File;
 use std::str::FromStr;
@@ -218,19 +218,19 @@ pub fn init_config(args: Vec<String>) -> Result<Config> {
         .version(clap::crate_version!())
         .author(clap::crate_authors!());
     let args = Config::parse_args_from(app, args);
-    let path = match args.value_of("config_path") {
-        Some(path) => Res::new(ResKind::Custom, path)?,
-        None => Res::new(ResKind::Config, "config.ini")?,
+    let res: Box<dyn Res> = match args.value_of("conf_file") {
+        Some(path) => Box::new(CustomRes::new(path)?),
+        None => Box::new(ConfigRes::new("config.ini")?),
     };
 
-    let conf = Config::parse_file(&args, &path)?;
+    let conf = Config::parse_file(&args, &res.path())?;
     Ok(conf)
 }
 
+/// TODO: this shouldn't panic
 #[pyfunction]
 pub fn init_logging(config: &Config) {
-    let file = Res::new(ResKind::Data, "session.log").expect("Couldn't load log file");
-    let file: &str = &file;
+    let res = DataRes::new("session.log").expect("Couldn't load log file");
     CombinedLogger::init(vec![
         TermLogger::new(
             if config.debug {
@@ -244,7 +244,7 @@ pub fn init_logging(config: &Config) {
         WriteLogger::new(
             LevelFilter::Trace,
             simplelog::Config::default(),
-            File::open(file).unwrap(),
+            File::open(res.path()).unwrap(),
         ),
     ])
     .expect("Couldn't load loggers");

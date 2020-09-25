@@ -19,7 +19,7 @@ class SpotifyWebTest(unittest.TestCase):
         """
 
         from vidify.api.spotify.web import SpotifyWebAPI, get_token
-        from vidify.config import Config
+        from vidify.core import Config
 
         config = Config()
         with unittest.mock.patch("sys.argv", [""]):

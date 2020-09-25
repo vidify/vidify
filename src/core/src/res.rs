@@ -1,100 +1,104 @@
-//! TODO: module-level docs
+//! This module contains classes for different kinds of resources. These are
+//! specially helpful to make sure the paths that point to them are intialized.
+//!
+//! Note: a resource is considered a file, not a directory.
 
 use crate::error::Result;
 
-use std::fs::{create_dir, File};
-use std::ops::Deref;
+use std::io;
+use std::fs;
 use std::path::PathBuf;
 
-use dirs::*;
-// use pyo3::prelude::*;
+use pyo3::prelude::*;
 
-// TODO: blocked by https://github.com/PyO3/pyo3/pull/1045
-// #[pymodule]
-// fn res(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-//     m.add_class::<Res>()?;
-//     m.add_class::<ResKind>()?;
+#[pymodule]
+fn res(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+    m.add_class::<CustomRes>()?;
+    m.add_class::<DataRes>()?;
+    m.add_class::<ConfigRes>()?;
 
-//     Ok(())
-// }
-
-/// What kind of resource it is, to determine where it should be stored. The
-/// custom type holds the full path, the rest of them only contain the file
-/// name, which will be appended to a predetermined directory.
-// #[pyenum]
-#[derive(Clone)]
-pub enum ResKind {
-    /// Can be anything, no path is appended to it.
-    Custom,
-    /// Holds configuration files, like `~/.config/vidify/config.ini`.
-    Config,
-    /// Holds persistent data for the user, like
-    /// `~/.local/share/vidify/session.log`.
-    Data,
-    /// Holds resources for the app, which should be in the install location.
-    Resource,
+    Ok(())
 }
 
-/// The actual struct with the functionalities required to initialize the
-/// resource's path and access to them.
-// #[pyclass]
-#[derive(Clone)]
-pub struct Res {
-    // #[pyo3(get)]
-    pub kind: ResKind,
-    // #[pyo3(get)]
-    pub path: String,
+pub trait Res {
+    fn new(path: &str) -> Result<Self>
+        where Self: Sized;
+
+    fn path(&self) -> &str;
 }
 
-// #[pymethods]
-impl Res {
-    // #[new]
-    pub fn new(kind: ResKind, path: &str) -> Result<Self> {
-        use std::io::{Error, ErrorKind};
-        use ResKind::*;
+/// Can be anything, no path is appended to it.
+#[pyclass]
+pub struct CustomRes {
+    path: String,
+}
 
-        let path = match kind {
-            Custom => path.to_string(),
-            Config => Self::custom(
-                &mut config_dir().ok_or_else(|| Error::new(ErrorKind::NotFound, "config dir"))?,
-                path,
-            )?,
-            Data => Self::custom(
-                &mut data_dir().ok_or_else(|| Error::new(ErrorKind::NotFound, "data dir"))?,
-                path,
-            )?,
-            Resource => Self::custom(
-                &mut data_dir().ok_or_else(|| Error::new(ErrorKind::NotFound, "data dir"))?,
-                path,
-            )?,
-        };
+/// Holds persistent data for the user, like `~/.local/share/vidify/2020.log`.
+#[pyclass]
+pub struct DataRes {
+    path: String,
+}
 
-        Ok(Res { kind, path })
+/// Holds configuration files, like `~/.config/vidify/config.ini`.
+#[pyclass]
+pub struct ConfigRes {
+    path: String,
+}
+
+fn init_path(path: &PathBuf) -> Result<()> {
+    if let Some(path) = path.parent() {
+        fs::create_dir_all(path)?;
+    }
+    if let Some(file) = path.file_name() {
+        if !path.exists() {
+            fs::File::create(file)?;
+        }
+    }
+
+    Ok(())
+}
+
+impl Res for CustomRes {
+    fn new(path: &str) -> Result<Self> {
+        init_path(&PathBuf::from(path))?;
+        Ok(Self { path: path.to_owned() })
+    }
+
+    fn path(&self) -> &str {
+        &self.path
     }
 }
 
-impl Res {
-    fn custom(path: &mut PathBuf, file: &str) -> Result<String> {
-        // Creating the directory first
+impl Res for ConfigRes {
+    fn new(file: &str) -> Result<Self> {
+        let mut path = dirs::config_dir().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::NotFound, "config dir")
+        })?;
         path.push("vidify");
-        if !path.exists() {
-            create_dir(&path)?;
-        }
-
-        // And then the file
         path.push(file);
-        if !path.exists() {
-            File::create(&path)?;
-        }
+        init_path(&path)?;
 
-        Ok(path.to_string_lossy().into_owned())
+        Ok(Self { path: path.to_string_lossy().into_owned() })
+    }
+
+    fn path(&self) -> &str {
+        &self.path
     }
 }
 
-impl Deref for Res {
-    type Target = str;
+impl Res for DataRes {
+    fn new(file: &str) -> Result<Self> {
+        let mut path = dirs::data_dir().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::NotFound, "data dir")
+        })?;
+        path.push("vidify");
+        path.push(file);
+        init_path(&path)?;
 
-    fn deref(&self) -> &Self::Target {
+        Ok(Self { path: path.to_string_lossy().into_owned() })
+    }
+
+    fn path(&self) -> &str {
         &self.path
     }
 }
