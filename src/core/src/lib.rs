@@ -7,10 +7,12 @@
 //! solution with Python using reflection.
 
 pub mod error;
-pub mod res;
 
 use crate::error::{Error, Result};
-use crate::res::{Res, CustomRes, ConfigRes, DataRes};
+
+use std::fs;
+use std::io;
+use std::path::PathBuf;
 
 use std::fs::File;
 use std::str::FromStr;
@@ -27,8 +29,60 @@ fn core(_py: Python<'_>, core: &PyModule) -> PyResult<()> {
     core.add_wrapped(wrap_pyfunction!(init_config))?;
     core.add_wrapped(wrap_pyfunction!(init_logging))?;
     core.add_wrapped(wrap_pyfunction!(log))?;
+    core.add_wrapped(wrap_pyfunction!(init_custom_res))?;
+    core.add_wrapped(wrap_pyfunction!(init_data_res))?;
+    core.add_wrapped(wrap_pyfunction!(init_config_res))?;
 
     Ok(())
+}
+
+fn init_path(path: &PathBuf) -> Result<()> {
+    // Creating the previous directories
+    if let Some(path) = path.parent() {
+        fs::create_dir_all(path)?;
+    }
+
+    // And also creating the file itself
+    if !path.exists() {
+        fs::File::create(path)?;
+    }
+
+    Ok(())
+}
+
+/// The path for the passed file will be initialized, meaning that all the
+/// required directories will be created, and the file itself.
+#[pyfunction]
+pub fn init_custom_res(file: &str) -> Result<String> {
+    init_path(&PathBuf::from(file))?;
+
+    Ok(file.to_owned())
+}
+
+/// Holds configuration files, like `~/.config/vidify/config.ini`.
+/// Its path will be initialized like `init_custom_res`.
+#[pyfunction]
+pub fn init_config_res(file: &str) -> Result<String> {
+    let mut path =
+        dirs::config_dir().ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "config dir"))?;
+    path.push("vidify");
+    path.push(file);
+    init_path(&path)?;
+
+    Ok(path.to_string_lossy().into_owned())
+}
+
+/// Holds persistent data for the user, like `~/.local/share/vidify/2020.log`.
+/// Its path will be initialized like `init_custom_res`.
+#[pyfunction]
+pub fn init_data_res(file: &str) -> Result<String> {
+    let mut path =
+        dirs::data_dir().ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "data dir"))?;
+    path.push("vidify");
+    path.push(file);
+    init_path(&path)?;
+
+    Ok(path.to_string_lossy().into_owned())
 }
 
 /// TODO: the struct is actually unnecessary. A function should be enough.
@@ -218,19 +272,19 @@ pub fn init_config(args: Vec<String>) -> Result<Config> {
         .version(clap::crate_version!())
         .author(clap::crate_authors!());
     let args = Config::parse_args_from(app, args);
-    let res: Box<dyn Res> = match args.value_of("conf_file") {
-        Some(path) => Box::new(CustomRes::new(path)?),
-        None => Box::new(ConfigRes::new("config.ini")?),
+    let res = match args.value_of("conf_file") {
+        Some(path) => init_custom_res(path)?,
+        None => init_config_res("config.ini")?,
     };
 
-    let conf = Config::parse_file(&args, &res.path())?;
+    let conf = Config::parse_file(&args, &res)?;
     Ok(conf)
 }
 
 /// TODO: this shouldn't panic
 #[pyfunction]
 pub fn init_logging(config: &Config) {
-    let res = DataRes::new("session.log").expect("Couldn't load log file");
+    let res = init_data_res("session.log").expect("Couldn't load log file");
     CombinedLogger::init(vec![
         TermLogger::new(
             if config.debug {
@@ -244,7 +298,7 @@ pub fn init_logging(config: &Config) {
         WriteLogger::new(
             LevelFilter::Trace,
             simplelog::Config::default(),
-            File::open(res.path()).unwrap(),
+            File::open(&res).unwrap(),
         ),
     ])
     .expect("Couldn't load loggers");
@@ -254,8 +308,8 @@ pub fn init_logging(config: &Config) {
 ///
 /// This is used instead of Python's native logging module to have a common
 /// ground for both Rust and Python logging. Thus, it requires to use f-strings
-/// on Python, which aren't recommended in the native module because they might
-/// be evaluated even though logging is disabled. In this case, though, logging
+/// on Python, which aren't recommended in the native module because they will
+/// be evaluated even when logging is disabled. In this case, though, logging
 /// is always enabled at least for the logging file, so this doesn't matter.
 #[pyfunction]
 pub fn log(msg: &str) {
