@@ -16,7 +16,7 @@ def is_installed(pkgname: str) -> bool:
 
 # The version should be the same as the one in `Cargo.toml`.
 def get_version():
-    cargo_dir = join(dirname(abspath(__file__)), "Cargo.toml")
+    cargo_dir = join(dirname(abspath(__file__)), "src", "core", "Cargo.toml")
     with open(cargo_dir, "r") as f:
         for line in f:
             split = line.split()
@@ -63,6 +63,7 @@ extras_require = {
 rust_ext_conf = {"path": "Cargo.toml", "binding": Binding.PyO3, "debug": False}
 rust_extensions = [
     RustExtension("vidify.core", **rust_ext_conf),
+    #  RustExtension("vidify._audiosync", **rust_ext_conf),
 ]
 
 packages = find_packages(exclude=("tests*", "dev*"))

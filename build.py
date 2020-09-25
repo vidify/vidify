@@ -36,7 +36,7 @@ SUFFIXES = {
 
 # The version is inside the `Cargo.toml` file.
 def get_version():
-    cargo_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Cargo.toml")
+    cargo_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "core", "Cargo.toml")
     with open(cargo_dir, "r") as f:
         for line in f:
             split = line.split()

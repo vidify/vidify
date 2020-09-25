@@ -1,0 +1,31 @@
+[package]
+name = "core"
+version = "2.3.0"
+authors = ["Mario Ortiz Manero <marioortizmanero@gmail.com>"]
+license = "GPL-3.0+"
+edition = "2018"
+
+[lib]
+name = "core"
+path = "src/lib.rs"
+# For Python interoperability
+crate-type = ["cdylib"]
+
+[dependencies]
+# Base dependencies
+dirs = "3.0.0"
+log = "0.4.11"
+serde = { version = "1.0", features = ["derive"] }
+simplelog = "0.8.0"
+structconf = "0.4.0"
+thiserror = "1.0.20"
+
+# Python interoperability. See workaround at `features` section.
+pyo3 = "0.12.1"
+
+[features]
+# FIXME: Workaround until https://github.com/PyO3/pyo3/issues/341 is fixed.
+# This way, `cargo test --no-default-features` can be used to run tests
+# instead.
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]
