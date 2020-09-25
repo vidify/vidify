@@ -57,12 +57,12 @@ class ResBase:
     """
 
     fonts = (
-        res_font("Inter/Inter-Regular"),
-        res_font("Inter/Inter-Italic"),
-        res_font("Inter/Inter-Bold"),
-        res_font("Inter/Inter-BoldItalic"),
-        res_font("Inter/Inter-Medium"),
-        res_font("Inter/Inter-MediumItalic"),
+        res_font("fonts/Inter-Regular"),
+        res_font("fonts/Inter-Italic"),
+        res_font("fonts/Inter-Bold"),
+        res_font("fonts/Inter-BoldItalic"),
+        res_font("fonts/Inter-Medium"),
+        res_font("fonts/Inter-MediumItalic"),
     )
 
     default_video = res_path("default_video.mp4")
@@ -74,12 +74,12 @@ class ResBase:
     )
     cross = res_path("cross.svg")
 
-    mpris_linux_icon = res_path("api_icons/mpris.svg")
-    swspotify_icon = res_path("api_icons/spotify/swspotify.svg")
-    spotify_web_icon = res_path("api_icons/spotify/web.svg")
+    mpris_linux_icon = res_path("apis/icons/mpris.svg")
+    swspotify_icon = res_path("apis/icons/spotify/swspotify.svg")
+    spotify_web_icon = res_path("apis/icons/spotify/web.svg")
 
-    mpv_icon = res_path("player_icons/mpv.svg")
-    external_icon = res_path("player_icons/external.svg")
+    mpv_icon = res_path("players/icons/mpv.svg")
+    external_icon = res_path("players/icons/external.svg")
 
     def set_dark_mode(self) -> None:
         """
@@ -87,7 +87,7 @@ class ResBase:
         will change to dark mode.
         """
 
-        self.cross = res_path("dark_mode_cross.svg")
+        self.cross = res_path("dark_cross.svg")
 
 
 class FontsBase:
@@ -110,9 +110,9 @@ class FontsBase:
 # The classes are initialized so that they can be dynamically modified from
 # other modules acting as global variables, and other utilities like dark
 # mode.
-Res = ResBase()
-Colors = ColorsBase()
-Fonts = FontsBase()
+RES = ResBase()
+COLORS = ColorsBase()
+FONTS = FontsBase()
 
 
 def set_dark_mode() -> None:
@@ -121,4 +121,4 @@ def set_dark_mode() -> None:
     module.
     """
 
-    Res.set_dark_mode()
+    RES.set_dark_mode()

@@ -14,7 +14,7 @@ from tekore import (
     scope,
 )
 
-from vidify.gui import Colors, Fonts
+from vidify.gui import COLORS, FONTS
 from vidify.gui.components import InputField
 
 
@@ -51,35 +51,23 @@ class SpotifyWebPrompt(QWidget):
         self.layout.setSpacing(0)
 
         # The web form for the user to input the credentials.
-        self.web_form = SpotifyWebForm(client_id=client_id, client_secret=client_secret)
+        self.form = SpotifyWebForm(client_id=client_id, client_secret=client_secret)
         # on_submit_spotify_web creds will be called once the credentials have
         # been input.
-        self.web_form.button.clicked.connect(self.on_submit_creds)
-        self.layout.addWidget(self.web_form)
+        self.form.button.clicked.connect(self.on_submit_creds)
+        self.layout.addWidget(self.form)
 
-        # The web browser for the user to login and grant access.
-        # It's hidden at the beggining and will appear once the credentials
-        # are input.
-        # TODO: replace with new browser-based solution
-        self.browser = WebBrowser()
-        self.browser.hide()
-        # The initial screen with the web form will be shown if the user
-        # clicks on the Go Back button.
-        self.browser.go_back_button.pressed.connect(
-            lambda: (self.browser.hide(), self.web_form.show())
-        )
-        # Any change in the browser URL will redirect to on__login to check if
-        # the login was succesful.
+        self.auth = AuthServer()
         self.browser.web_view.urlChanged.connect(self.on_login)
         self.layout.addWidget(self.browser)
 
     @property
     def client_id(self) -> str:
-        return self.web_form.client_id
+        return self.form.client_id
 
     @property
     def client_secret(self) -> str:
-        return self.web_form.client_secret
+        return self.form.client_secret
 
     @Slot()
     def on_submit_creds(self) -> None:
@@ -89,29 +77,29 @@ class SpotifyWebPrompt(QWidget):
         """
 
         # Obtaining the input data
-        form_client_id = self.web_form.client_id
-        form_client_secret = self.web_form.client_secret
+        form_client_id = self.form.client_id
+        form_client_secret = self.form.client_secret
         logging.info("Input creds: '%s' & '%s'", form_client_id, form_client_secret)
 
         # Checking that the data isn't empty
         empty_field = False
         if form_client_id == "":
-            self.web_form.input_client_id.highlight()
+            self.form.input_client_id.highlight()
             empty_field = True
         else:
-            self.web_form.input_client_id.undo_highlight()
+            self.form.input_client_id.undo_highlight()
 
         if form_client_secret == "":
-            self.web_form.input_client_secret.highlight()
+            self.form.input_client_secret.highlight()
             empty_field = True
         else:
-            self.web_form.input_client_secret.undo_highlight()
+            self.form.input_client_secret.undo_highlight()
 
         if empty_field:
             return
 
         # Hiding the form and showing the web browser for the next step
-        self.web_form.hide()
+        self.form.hide()
         self.browser.show()
 
         # Creating the request URL to obtain the authorization token
@@ -161,13 +149,13 @@ class SpotifyWebPrompt(QWidget):
             token = self.creds.request_user_token(code)
         except HTTPError as e:
             self.browser.hide()
-            self.web_form.show()
-            self.web_form.show_error(str(e))
+            self.form.show()
+            self.form.show_error(str(e))
             return
 
         # Removing the GUI elements used to obtain the credentials
-        self.layout.removeWidget(self.web_form)
-        self.web_form.hide()
+        self.layout.removeWidget(self.form)
+        self.form.hide()
         self.layout.removeWidget(self.browser)
         self.browser.hide()
 
@@ -222,7 +210,7 @@ class SpotifyWebForm(QWidget):
         text.setWordWrap(True)
         text.setOpenExternalLinks(True)
         text.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        text.setFont(Fonts.text)
+        text.setFont(FONTS.text)
         text.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(text)
 
@@ -246,8 +234,8 @@ class SpotifyWebForm(QWidget):
 
         self.error_msg = QLabel()
         self.error_msg.setWordWrap(True)
-        self.error_msg.setFont(Fonts.text)
-        self.error_msg.setStyleSheet(f"color: {Colors.darkerror};")
+        self.error_msg.setFont(FONTS.text)
+        self.error_msg.setStyleSheet(f"color: {COLORS.darkerror};")
         self.error_msg.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(self.error_msg)
 
@@ -258,7 +246,7 @@ class SpotifyWebForm(QWidget):
         """
 
         self.button = QPushButton("SUBMIT")
-        self.button.setFont(Fonts.bigbutton)
+        self.button.setFont(FONTS.bigbutton)
         self.layout.addWidget(self.button)
 
     @property

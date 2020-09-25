@@ -20,6 +20,7 @@ use pyo3::wrap_pyfunction;
 use simplelog::{CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger};
 use structconf::{clap, StructConf};
 
+/// Public functions for Python, included as `vidify.core`.
 #[pymodule]
 fn core(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<Config>()?;

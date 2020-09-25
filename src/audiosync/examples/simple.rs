@@ -1,8 +1,7 @@
 use audiosync::Audiosync;
-use simple_logger::SimpleLogger;
 
 fn main() {
-    SimpleLogger::new().init().unwrap();
+    env_logger::init();
 
     let audiosync = Audiosync::new();
 

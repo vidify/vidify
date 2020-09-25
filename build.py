@@ -153,13 +153,6 @@ args_os = {
     "--hidden-import=tekore": ALL_OS,
     "--hidden-import=youtube-dl": ALL_OS,
     "--hidden-import=zeroconf": ALL_OS,
-    #  "--hidden-import=vidify.api.mpris": ["Linux"],
-    #  "--hidden-import=vidify.api.spotify.swspotify": ["Windows", "Darwin"],
-    #  "--hidden-import=vidify.api.spotify.web": ALL_OS,
-    #  "--hidden-import=vidify.audiosync": ["Linux"],
-    #  "--hidden-import=vidify.player.external": ALL_OS,
-    #  "--hidden-import=vidify.player.mpv": ALL_OS,
-    #  "--hidden-import=vidify_audiosync": ["Linux"],
     "--add-data=res:res": ALL_OS,
     "--add-data=mpv-1.dll": ["Windows"],
 }

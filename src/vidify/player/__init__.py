@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from vidify import BaseModuleData, is_installed
 from vidify.config import Config
-from vidify.gui import Res
+from vidify.gui import RES
 from vidify.player.generic import PlayerBase
 
 
@@ -22,7 +22,7 @@ PLAYERS = (
         name="Mpv",
         short_name="Mpv",
         description="Play the music videos locally with the mpv player.",
-        icon=Res.mpv_icon,
+        icon=RES.mpv_icon,
         compatible=True,
         installed=is_installed("python-mpv"),
         module="vidify.player.mpv",
@@ -31,7 +31,7 @@ PLAYERS = (
         name="External",
         short_name="External",
         description="Play the music videos on external devices.",
-        icon=Res.external_icon,
+        icon=RES.external_icon,
         compatible=True,
         installed=is_installed("zeroconf"),
         module="vidify.player.external",

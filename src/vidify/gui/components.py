@@ -24,7 +24,7 @@ from qtpy.QtWidgets import (
 
 from vidify import BaseModuleData
 from vidify.api import APIS, ConnectionNotReady
-from vidify.gui import Colors, Fonts, Res
+from vidify.gui import COLORS, FONTS, RES
 from vidify.player import PLAYERS
 
 
@@ -42,7 +42,7 @@ class ModuleCard(QGroupBox):
         super().__init__(module.short_name)
 
         self.module = module
-        self.setFont(Fonts.smalltext)
+        self.setFont(FONTS.smalltext)
         self.setMinimumHeight(270)
         self.setMaximumHeight(400)
         self.setMinimumWidth(220)
@@ -63,7 +63,7 @@ class ModuleCard(QGroupBox):
         self.text = QLabel(description)
         self.text.setStyleSheet("padding: 10px 3px")
         self.text.setWordWrap(True)
-        self.text.setFont(Fonts.smalltext)
+        self.text.setFont(FONTS.smalltext)
         self.text.setAlignment(Qt.AlignHCenter)
         self.text.setTextFormat(Qt.RichText)
         self.text.setTextInteractionFlags(Qt.TextBrowserInteraction)
@@ -78,7 +78,7 @@ class ModuleCard(QGroupBox):
         self.button = QRadioButton("USE" if enabled else "Not Installed")
         self.button.setEnabled(enabled)
         self.button.setChecked(selected)
-        font = Fonts.text
+        font = FONTS.text
         font.setItalic(True)
         self.button.setFont(font)
         self.layout.addWidget(self.button)
@@ -117,7 +117,7 @@ class SetupWidget(QWidget):
         """
 
         self.continue_btn = QPushButton("CONTINUE")
-        self.continue_btn.setFont(Fonts.mediumbutton)
+        self.continue_btn.setFont(FONTS.mediumbutton)
         self.continue_btn.clicked.connect(self.on_click)
         self.layout.addWidget(self.continue_btn)
 
@@ -146,7 +146,7 @@ class SetupWidget(QWidget):
         """
 
         text = QLabel(title)
-        font = Fonts.bigtext
+        font = FONTS.bigtext
         font.setBold(True)
         text.setFont(font)
         self.layout.addWidget(text)
@@ -222,10 +222,10 @@ class InputField(QLineEdit):
     def __init__(self, *args) -> None:
         super().__init__(*args)
 
-        self.setFont(Fonts.bigtext)
+        self.setFont(FONTS.bigtext)
 
         # A clear button
-        clear = self.addAction(QIcon(Res.cross), QLineEdit.TrailingPosition)
+        clear = self.addAction(QIcon(RES.cross), QLineEdit.TrailingPosition)
         clear.triggered.connect(lambda: self.setText(""))
 
     def highlight(self) -> None:
@@ -234,7 +234,7 @@ class InputField(QLineEdit):
         for instance.
         """
 
-        self.setStyleSheet(f"background-color: {Colors.lighterror}")
+        self.setStyleSheet(f"background-color: {COLORS.lighterror}")
 
     def undo_highlight(self) -> None:
         """
@@ -266,7 +266,7 @@ class APIConnecter(QLabel):
         self.connect_api = connect_api
 
         self.setWordWrap(True)
-        self.setFont(Fonts.title)
+        self.setFont(FONTS.title)
         self.setMargin(50)
         self.setAlignment(Qt.AlignCenter)
 
@@ -295,7 +295,7 @@ class APIConnecter(QLabel):
         # connection attempt was unsuccessful.
         if self.attempts == self.MAX_ATTEMPTS - 1:
             self.setText(self.wait_msg)
-            self.setFont(Fonts.header)
+            self.setFont(FONTS.header)
 
         # The APIs will raise `ConnectionNotReady` if the connection attempt
         # was unsuccessful.

@@ -30,8 +30,8 @@ Vidify ships with the most popular [music players](#the-apis) for your operating
 
 Here are the different ways to install Vidify, depending on your Operating System:
 
-* **Cross-platform:** With [pip](https://pypi.org/project/vidify): `pip install --user vidify`. Optional APIs and Players can be installed with `pip install --user vidify[extra1,extra2]`, which is equivalent to installing the list of dependencies needed for `extra1` and `extra2`.
-* **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs, and use mpv as the player.
+* **Cross-platform:** With [pip](https://pypi.org/project/vidify): `pip install --user vidify`.
+* **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all APIs available on your platform, and use mpv as the player.
 * **Linux:**
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
     * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) at [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
@@ -42,11 +42,11 @@ Here are the different ways to install Vidify, depending on your Operating Syste
 ### The APIs
 An API is simply a source of information about the music playing on a device. For example, the Spotify desktop client, or iTunes. Here are the currently supported ones:
 
-| Name                                         | Wiki link                                                                 | Extra requirements              | Description |
-|----------------------------------------------|:-------------------------------------------------------------------------:|---------------------------------------|-------------|
-| Linux Media Players (`mpris_linux`\*)        | [🔗](https://vidify.org/wiki/linux-media-players/)           | *Installed by default* (see the wiki) | Any MPRIS compatible media player for Linux or BSD (99% of them, like Spotify, Clementine, VLC...). |
-| Spotify for Windows & MacOS (`swspotify`\*)  | [🔗](https://vidify.org/wiki/spotify-for-windows-and-macos/) | *Installed by default*                | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
-| Spotify Web (`spotify_web`\*)                | [🔗](https://vidify.org/wiki/spotify-web-api/)               | *Installed by default*                | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to set it up. |
+| Name                                         | Wiki link                                                    | Description |
+|----------------------------------------------|:------------------------------------------------------------:|-------------|
+| Linux Media Players (`mpris_linux`\*)        | [🔗](https://vidify.org/wiki/linux-media-players/)           | Any MPRIS compatible media player for Linux or BSD (99% of them, like Spotify, Clementine, VLC...). |
+| Spotify for Windows & MacOS (`swspotify`\*)  | [🔗](https://vidify.org/wiki/spotify-for-windows-and-macos/) | The Spotify desktop app for Windows & MacOS, using the [SwSpotify](https://github.com/SwagLyrics/SwSpotify) library. |
+| Spotify Web (`spotify_web`\*)                | [🔗](https://vidify.org/wiki/spotify-web-api/)               | The official Spotify Web API, using [Tekore](https://github.com/felix-hilden/tekore). Check the wiki for more details on how to set it up. |
 
 \* The name inside parenthesis is used as a key for the [arguments](#usage) and the [config](#the-config-file) options. `--api mpris_linux` would force using the Linux Media Players API, for instance. It's also used for the extra dependencies installation with pip: `pip install vidify[extra1]` would install all the extra requirements for `extra1` with pip.
 
@@ -56,30 +56,6 @@ The music videos can be played inside Vidify with [an embedded instance of Mpv](
 The external player lets you play Vidify's music videos essentially anywhere. It will send all the music video information to an external application. Here are the current implementations:
 
 * **Vidify TV**: available on Android, Android TV and Amazon Fire Stick TV. [Play Store page](https://play.google.com/store/apps/details?id=com.glowapps.vidify).
-
-### Audio synchronization
-Vidify has an audio synchronization feature. The full repository is in [vidify/audiosync](https://github.com/vidify/audiosync-rs). It's still Work-In-Progress, so it's disabled by default. It requires the following dependencies:
-
-<!-- TODO: these will change after audiosync-rs replaces the C implementation -->
-* FFTW: `libfftw3` on Debian-based distros.
-* ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
-* pulseaudio: `pulseaudio`, pre-installed on most repos.
-* youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
-
-It can be activated with `--audiosync`, or inside your [config file](#the-config-file):
-
-```ini
-[Defaults]
-audiosync = true
-```
-
-You can calibrate the audiosync results with the option `--audiosync-calibration` or `audiosync_calibration`. By default it's 0 milliseconds, but it may depend on your hardware.
-
-*Note: if when using audiosync there's no sound on Linux, you might need to disable stream target device restore by editing the corresponing line in `/etc/pulse/default.pa` to `load-module module-stream-restore restore_device=false`.*
-
-*Note 2: you should make sure that the sink being recorded is either `audiosync`, or the one where the music is playing. Here's an example on Pavucontrol (it's usually called 'Monitor of ...'):*
-
-![pavucontrol](images/pavucontrol-audiosync.png)
 
 ## Usage
 The app has an interface that will guide you through most of the set-up, but you can use command line arguments and the config file for more advanced options (and until the GUI is completely finished):

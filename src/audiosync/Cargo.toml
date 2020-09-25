@@ -17,8 +17,18 @@ cpal = "0.12.1"
 log = "0.4.11"
 thiserror = "1.0.20"
 
-[dev-dependencies]
-simple_logger = "1.9.0"
-
 [target.'cfg(target_os = "linux")'.dependencies]
 libpulse-binding = "2.16.1"
+
+# Python interoperability. See workaround at `features` section.
+pyo3 = "0.12.1"
+
+[dev-dependencies]
+env_logger = "0.7.1"
+
+[features]
+# FIXME: Workaround until https://github.com/PyO3/pyo3/issues/341 is fixed.
+# This way, `cargo test --no-default-features` can be used to run tests
+# instead.
+extension-module = ["pyo3/extension-module"]
+default = ["extension-module"]

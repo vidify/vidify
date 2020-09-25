@@ -10,7 +10,9 @@ thread just consists on calling the main run() function, and then being
 able to control and monitor its progress.
 
 Check out the README.md and see the official repo for more information:
-https://github.com/vidify/audiosync
+
+NOTE: this module was left here after the deprecation of the original
+implementation.
 """
 
 import logging

@@ -35,7 +35,6 @@ install_requires = [
     "youtube-dl",
     "qdarkstyle==2.8",
     'dataclasses; python_version<"3.7"',
-    "vidify_audiosync",
     # APIs and players
     "tekore==3",
     "flask==1.1",

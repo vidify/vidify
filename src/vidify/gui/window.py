@@ -64,7 +64,7 @@ from qtpy.QtWidgets import QHBoxLayout, QWidget
 from vidify import find_module, format_name
 from vidify.api import APIS, APIData
 from vidify.config import Config
-from vidify.gui import Colors, Res
+from vidify.gui import COLORS, RES
 from vidify.gui.components import APIConnecter, SetupWidget
 from vidify.lyrics import get_lyrics
 from vidify.player import PlayerData, initialize_player
@@ -93,7 +93,7 @@ class MainWindow(QWidget):
 
         # Loading the used fonts (Inter)
         font_db = QFontDatabase()
-        for font in Res.fonts:
+        for font in RES.fonts:
             font_db.addApplicationFont(font)
 
         # Initializing the player and saving the config object in the window.
@@ -241,7 +241,7 @@ class MainWindow(QWidget):
             self.audiosync.failed.connect(self.on_audiosync_fail)
 
         # Initializing the player and starting the first video
-        self.setStyleSheet(f"background-color:{Colors.black};")
+        self.setStyleSheet(f"background-color:{COLORS.black};")
         self.layout.addWidget(self.player)
         self.play_video(self.api.artist, self.api.title, start_time)
 
@@ -385,7 +385,7 @@ class MainWindow(QWidget):
         )
 
         # Or playing the default video in the GUI
-        self.player.start_video(Res.default_video, self.api.is_playing)
+        self.player.start_video(RES.default_video, self.api.is_playing)
 
     @Slot(dict)
     def on_youtubedl_success(self, data: dict) -> None:
