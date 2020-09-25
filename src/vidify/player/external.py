@@ -15,8 +15,8 @@ from qtpy.QtNetwork import QHostAddress, QTcpServer, QTcpSocket
 from qtpy.QtWidgets import QLabel, QVBoxLayout
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
-from vidify import CURRENT_PLATFORM
-from vidify.core import log, Core
+from vidify import CUR_PLATFORM
+from vidify.core import Config, log
 from vidify.gui import FONTS, RES
 from vidify.player import PlayerBase
 from vidify.version import __version__
@@ -225,7 +225,7 @@ class External(PlayerBase):
         desc = {
             "id": self.SERVICE_NAME,
             "version": __version__,
-            "os": CURRENT_PLATFORM.name,
+            "os": CUR_PLATFORM.name,
             "api": self._api_name,
         }
         # The name can't have '.', because it's a special character used as

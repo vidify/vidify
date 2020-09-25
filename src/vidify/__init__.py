@@ -25,15 +25,15 @@ class Platform(Enum):
 
 # Getting the current platform as a global variable
 if sys.platform.startswith("linux"):
-    CURRENT_PLATFORM = Platform.LINUX
+    CUR_PLATFORM = Platform.LINUX
 elif sys.platform.startswith("darwin"):
-    CURRENT_PLATFORM = Platform.MACOS
+    CUR_PLATFORM = Platform.MACOS
 elif sys.platform.startswith("win"):
-    CURRENT_PLATFORM = Platform.WINDOWS
+    CUR_PLATFORM = Platform.WINDOWS
 elif sys.platform.find("bsd") != -1:
-    CURRENT_PLATFORM = Platform.BSD
+    CUR_PLATFORM = Platform.BSD
 else:
-    CURRENT_PLATFORM = Platform.UNKNOWN
+    CUR_PLATFORM = Platform.UNKNOWN
 
 
 def is_installed(*args: str) -> bool:

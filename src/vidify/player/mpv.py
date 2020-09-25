@@ -9,7 +9,7 @@ except ModuleNotFoundError:
         " Read the installation guide for more details."
     ) from None
 
-from vidify.core import log, Config
+from vidify.core import Config, log
 from vidify.player.generic import PlayerBase
 
 

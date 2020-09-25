@@ -9,7 +9,7 @@ from os.path import abspath, dirname, join
 
 from qtpy.QtGui import QFont
 
-from vidify import CURRENT_PLATFORM, Platform
+from vidify import CUR_PLATFORM, Platform
 
 # The vidify installation path's resources folder, assuming this file is
 # always exactly at 'vidify/gui/__init__.py'.
@@ -46,7 +46,7 @@ def res_font(name: str) -> str:
     what this function selects.
     """
 
-    extension = ".ttf" if CURRENT_PLATFORM == Platform.WINDOWS else ".otf"
+    extension = ".ttf" if CUR_PLATFORM == Platform.WINDOWS else ".otf"
 
     return res_path(name) + extension
 
@@ -68,8 +68,8 @@ class ResBase:
     default_video = res_path("default_video.mp4")
 
     icon = (
-        res_path("icon16x16.ico")
-        if CURRENT_PLATFORM == Platform.WINDOWS
+        res_path("icon.ico")
+        if CUR_PLATFORM == Platform.WINDOWS
         else res_path("icon.svg")
     )
     cross = res_path("cross.svg")
