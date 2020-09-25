@@ -62,10 +62,14 @@ extras_require = {
 
 # The Rust extensions will share the same `vidify` namespace as the Python
 # module.
-rust_ext_conf = {"path": "Cargo.toml", "binding": Binding.PyO3, "debug": False}
+rust_ext_conf = {"binding": Binding.PyO3, "debug": False}
 rust_extensions = [
-    RustExtension("vidify.core", **rust_ext_conf),
-    #  RustExtension("vidify._audiosync", **rust_ext_conf),
+    RustExtension("vidify.core", path="src/core/Cargo.toml", **rust_ext_conf),
+    # RustExtension(
+    #     "vidify._audiosync",
+    #     path="src/audiosync/Cargo.toml",
+    #     **rust_ext_conf
+    # ),
 ]
 
 packages = find_packages(exclude=("tests*", "dev*"))

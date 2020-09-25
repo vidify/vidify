@@ -1,5 +1,4 @@
 import locale
-import logging
 
 try:
     from mpv import MPV
@@ -11,6 +10,7 @@ except ModuleNotFoundError:
     ) from None
 
 from vidify.config import Config
+from vidify.core import log
 from vidify.player.generic import PlayerBase
 
 
@@ -36,7 +36,7 @@ class MpvPlayer(PlayerBase):
         flags.extend(self.DEFAULT_FLAGS)
 
         args = {}
-        if logging.root.level <= logging.INFO:
+        if config.debug:
             args["log_handler"] = print
             args["loglevel"] = "info"
         args["wid"] = str(int(self.winId()))  # sip.voidptr -> int -> str
@@ -50,7 +50,7 @@ class MpvPlayer(PlayerBase):
 
     @pause.setter
     def pause(self, do_pause: bool) -> None:
-        logging.info("Playing/Pausing video")
+        log("Playing/Pausing video")
         self._mpv.pause = do_pause
 
     @property
@@ -65,13 +65,13 @@ class MpvPlayer(PlayerBase):
         """
 
         self._mpv.wait_for_property("seekable")
-        logging.info("Position set to %d milliseconds", ms)
+        log(f"Position set to {ms} milliseconds")
         self._mpv.seek(
             round(ms / 1000, 2), reference="relative" if relative else "absolute"
         )
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
-        logging.info("Started new video")
+        log("Started new video")
         self._mpv.play(media)
         # Mpv starts automatically playing the video
         if not is_playing:

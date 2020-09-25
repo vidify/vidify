@@ -3,7 +3,6 @@ This module contains commonly used components so that their usage and
 initialization is easier.
 """
 
-import logging
 import time
 from typing import Callable, Optional, Tuple
 
@@ -24,6 +23,7 @@ from qtpy.QtWidgets import (
 
 from vidify import BaseModuleData
 from vidify.api import APIS, ConnectionNotReady
+from vidify.core import log
 from vidify.gui import COLORS, FONTS, RES
 from vidify.player import PLAYERS
 
@@ -181,11 +181,9 @@ class SetupWidget(QWidget):
             else:
                 disabled.append(card)
             group.addButton(card.button)
-            logging.info(
-                "Created API card: %s (enabled=%s, selected=%s)",
-                module.name,
-                module.installed,
-                selected,
+            log(
+                f"Created API card: {module.name} (enabled={module.installed},"
+                f" selected={selected})",
             )
 
         for card in disabled:
@@ -209,7 +207,7 @@ class SetupWidget(QWidget):
         except AttributeError:
             return
 
-        logging.info("Selected: api=%s, player=%s", api.name, player.name)
+        log(f"Selected: api={api.name}, player={player.name}")
         self.done.emit(api, player)
 
 
@@ -303,7 +301,7 @@ class APIConnecter(QLabel):
             self.connect_api()
         except ConnectionNotReady:
             self.attempts -= 1
-            logging.info("Connection attempts left: %d", self.attempts)
+            log(f"Connection attempts left: {self.attempts}")
 
             # If the maximum amount of attempts is reached, the app is closed.
             if self.attempts == 0:

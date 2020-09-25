@@ -15,9 +15,9 @@ NOTE: this module was left here after the deprecation of the original
 implementation.
 """
 
-import logging
-
 from qtpy.QtCore import QThread, Signal
+
+from vidify.core import log
 
 try:
     import audiosync
@@ -74,7 +74,7 @@ class AudiosyncWorker(QThread):
         nothing is done.
         """
 
-        logging.info("Setting audiosync is_running to %r", do_run)
+        log(f"Setting audiosync is_running to {do_run}")
         if do_run:
             audiosync.resume()
         else:

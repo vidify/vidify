@@ -2,8 +2,6 @@
 Custom API implementation to ask the user for the Spotify Web credentials.
 """
 
-import logging
-
 from qtpy.QtCore import QSize, Qt, Signal, Slot
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 from tekore import (
@@ -14,6 +12,7 @@ from tekore import (
     scope,
 )
 
+from vidify.core import log
 from vidify.gui import COLORS, FONTS
 from vidify.gui.components import InputField
 
@@ -42,7 +41,7 @@ class SpotifyWebPrompt(QWidget):
 
         super().__init__(*args)
 
-        logging.info("Initializing the Spotify Web API prompt interface")
+        log("Initializing the Spotify Web API prompt interface")
         self.redirect_uri = redirect_uri
 
         # Creating the layout
@@ -79,7 +78,7 @@ class SpotifyWebPrompt(QWidget):
         # Obtaining the input data
         form_client_id = self.form.client_id
         form_client_secret = self.form.client_secret
-        logging.info("Input creds: '%s' & '%s'", form_client_id, form_client_secret)
+        log(f"Input creds: '{form_client_id}' & '{form_client_secret}'")
 
         # Checking that the data isn't empty
         empty_field = False
@@ -122,7 +121,7 @@ class SpotifyWebPrompt(QWidget):
         """
 
         url = self.browser.url
-        logging.info("Now at: %s", url)
+        log(f"Now at: {url}")
 
         # If the URL isn't the Spotify response URI (localhost), do nothing
         if url.find(self.redirect_uri) == -1:
@@ -134,7 +133,7 @@ class SpotifyWebPrompt(QWidget):
         try:
             code = parse_code_from_url(url)
         except KeyError as e:
-            logging.info("ERROR: %s", str(e))
+            log(f"ERROR: {e}")
             return
 
         # Now the user token has to be requested to Spotify, while

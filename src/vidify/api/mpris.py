@@ -10,7 +10,6 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import logging
 import time
 from typing import Tuple
 
@@ -19,6 +18,7 @@ from gi.repository import GLib
 
 from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
+from vidify.core import log
 
 
 class MPRIS(APIBase):
@@ -39,7 +39,7 @@ class MPRIS(APIBase):
         Safely disconnects from the bus and loop.
         """
 
-        logging.info("Disconnecting")
+        log("Disconnecting")
         try:
             self._disconnect_obj.disconnect()
         except (AttributeError, RuntimeError):
@@ -85,7 +85,7 @@ class MPRIS(APIBase):
         otherwise.
         """
 
-        logging.info("Looking for players")
+        log("Looking for players")
 
         # Iterating through every bus name and checking that it's valid.
         for bus_name in self._bus.get(".DBus", "DBus").ListNames():
@@ -97,19 +97,17 @@ class MPRIS(APIBase):
             try:
                 obj = self._bus.get(bus_name, "/org/mpris/MediaPlayer2")
             except (GLib.Error, KeyError) as e:
-                logging.info("Skipping %s because of error: %s", bus_name, str(e))
+                log(f"Skipping {bus_name} because of error: {e}")
                 continue
 
             # And making sure that it's playing at the moment (otherwise
             # only the first player found would be returned, but it could
             # not be the one actually being used).
             if not self._bool_status(obj.PlaybackStatus):
-                logging.info(
-                    "Skipping %s because it's not playing at" " the moment", bus_name
-                )
+                log(f"Skipping {bus_name} because it's not playing at the moment")
                 continue
 
-            logging.info("Using %s", bus_name)
+            log(f"Using {bus_name}")
             return bus_name, obj
 
         # ConnectionNotReady is raised at the end, in case that no valid
@@ -207,7 +205,7 @@ class MPRIS(APIBase):
             if self.artist != artist or self.title != title:
                 # Refreshes the metadata with the new data and sends the
                 # signal to play the next video.
-                logging.info("New video detected")
+                log("New video detected")
                 self.artist = artist
                 self.title = title
                 self.new_song_signal.emit(artist, title, start_time)
@@ -216,6 +214,6 @@ class MPRIS(APIBase):
             is_playing = self._bool_status(properties["PlaybackStatus"])
             if self.is_playing != is_playing:
                 # Refreshes the metadata and pauses/plays the video
-                logging.info("Status change detected")
+                log("Status change detected")
                 self.status_signal.emit(is_playing)
                 self.is_playing = is_playing

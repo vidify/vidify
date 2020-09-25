@@ -22,18 +22,17 @@ use structconf::{clap, StructConf};
 
 /// Public functions for Python, included as `vidify.core`.
 #[pymodule]
-fn core(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_class::<Config>()?;
-    m.add_wrapped(wrap_pyfunction!(init_config))?;
-    m.add_wrapped(wrap_pyfunction!(init_logging))?;
-    m.add_wrapped(wrap_pyfunction!(debug))?;
-    m.add_wrapped(wrap_pyfunction!(info))?;
-    m.add_wrapped(wrap_pyfunction!(error))?;
-    m.add_wrapped(wrap_pyfunction!(log_level))?;
+fn core(_py: Python<'_>, core: &PyModule) -> PyResult<()> {
+    core.add_class::<Config>()?;
+    core.add_wrapped(wrap_pyfunction!(init_config))?;
+    core.add_wrapped(wrap_pyfunction!(init_logging))?;
+    core.add_wrapped(wrap_pyfunction!(log))?;
 
     Ok(())
 }
 
+/// TODO: the struct is actually unnecessary. A function should be enough.
+///
 /// The generic properties are represented by this struct, which uses the
 /// format `key1=val1;key2=val2`. In the future with const generics, the
 /// delimiter could be made generic as well. For now, it's `;`.
@@ -251,24 +250,16 @@ pub fn init_logging(config: &Config) {
     .expect("Couldn't load loggers");
 }
 
+/// All logs from Vidify have the 'info' level for now for simplicity.
+///
+/// This is used instead of Python's native logging module to have a common
+/// ground for both Rust and Python logging. Thus, it requires to use f-strings
+/// on Python, which aren't recommended in the native module because they might
+/// be evaluated even though logging is disabled. In this case, though, logging
+/// is always enabled at least for the logging file, so this doesn't matter.
 #[pyfunction]
-pub fn log_level() -> String {
-    log::max_level().to_string()
-}
-
-#[pyfunction]
-pub fn debug(msg: &str) {
-    log::debug!("{}", msg);
-}
-
-#[pyfunction]
-pub fn info(msg: &str) {
+pub fn log(msg: &str) {
     log::info!("{}", msg);
-}
-
-#[pyfunction]
-pub fn error(msg: &str) {
-    log::error!("{}", msg);
 }
 
 #[cfg(test)]

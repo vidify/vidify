@@ -5,7 +5,7 @@ There should always be lots of [open issues](https://github.com/vidify/vidify/is
 
 It's strongly recommended to join [the official Discord server](https://discord.gg/yfJSyPv) for discussion and help when developing.
 
-You can run the module locally with `python -m vidify`, after running `python setup.py develop`. The first command will run the Python module, but you need the second one to compile the Rust parts of Vidify ([make sure you have Rust installed in your system](https://www.rust-lang.org/tools/install)). You will also need all the required Python dependencies installed with `python setup.py install`.
+You can run the module locally with `python -m vidify`, after running `python setup.py develop`. The first command will run the Python module, but you need the second one to compile the Rust parts of Vidify ([make sure you have Rust installed in your system](https://www.rust-lang.org/tools/install)). You will also need all the required Python dependencies installed with `pip install -e .`.
 
 ## Project organization
 Vidify combines both Rust and Python, the former for core and performance-focused parts, and the latter for the rest. Here's a brief description of the directories in this repository:

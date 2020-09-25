@@ -9,6 +9,7 @@ use std::path::PathBuf;
 use dirs::*;
 // use pyo3::prelude::*;
 
+// TODO: blocked by https://github.com/PyO3/pyo3/pull/1045
 // #[pymodule]
 // fn res(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 //     m.add_class::<Res>()?;

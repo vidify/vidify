@@ -3,14 +3,13 @@ This module chooses the player and platform and starts them. The Qt GUI is
 also initialized here.
 """
 
-import logging
 import sys
 
 import qdarkstyle
 from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QApplication
 
-from vidify.core import Config, init_config, init_logging
+from vidify.core import Config, init_config, init_logging, log
 from vidify.gui import RES, set_dark_mode
 from vidify.gui.window import MainWindow
 
@@ -25,7 +24,7 @@ def start_gui(config: Config) -> None:
     app = QApplication(["vidify"])
     # Setting dark mode if enabled
     if config.dark_mode:
-        logging.info("Enabling dark mode")
+        log("Enabling dark mode")
         app.setStyleSheet(qdarkstyle.load_stylesheet_from_environment())
         set_dark_mode()
     app.setWindowIcon(QIcon(RES.icon))

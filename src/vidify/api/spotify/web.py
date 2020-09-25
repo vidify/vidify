@@ -12,10 +12,13 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import logging
 import os
 import time
 from typing import Optional
+
+from vidify.api import ConnectionNotReady, split_title
+from vidify.api.generic import APIBase
+from vidify.core import log
 
 try:
     from tekore import RefreshingToken, Spotify, refresh_user_token
@@ -25,9 +28,6 @@ except ModuleNotFoundError:
         "To use the Spotify Web API, please install tekore. Read more about"
         " this in the Installation Guide."
     )
-
-from vidify.api import ConnectionNotReady, split_title
-from vidify.api.generic import APIBase
 
 
 class SpotifyWeb(APIBase):
@@ -101,11 +101,11 @@ class SpotifyWeb(APIBase):
         # First checking if a new song started, so that position or status
         # changes are related to the new song.
         if self.artist != artist or self.title != title:
-            logging.info("New video detected")
+            log("New video detected")
             self.new_song_signal.emit(self.artist, self.title, 0)
 
         if self.is_playing != is_playing:
-            logging.info("Status change detected")
+            log("Status change detected")
             self.status_signal.emit(self.is_playing)
 
         # The position difference between calls is compared to the elapsed
@@ -116,7 +116,7 @@ class SpotifyWeb(APIBase):
         playback_diff = self._position - position
         calls_diff = int((time.time() - self._event_timestamp) * 1000)
         if playback_diff >= (calls_diff + 100) or playback_diff < 0:
-            logging.info("Position change detected")
+            log("Position change detected")
             self.position_signal.emit(self._position)
 
         # The time passed between calls is refreshed
@@ -148,10 +148,7 @@ def get_token(
     # refresh token.
     for c in (refresh_token, client_id, client_secret):
         if c in (None, ""):
-            logging.info(
-                "Rejecting the token because one of the credentials"
-                " provided is empty."
-            )
+            log("Rejecting the token because one of the credentials provided is empty.")
             return None
 
     # Generating a RefreshingToken with the parameters

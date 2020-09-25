@@ -14,12 +14,11 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import logging
-
 from SwSpotify import SpotifyClosed, SpotifyPaused, spotify
 
 from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
+from vidify.core import log
 
 
 class SwSpotify(APIBase):
@@ -93,9 +92,9 @@ class SwSpotify(APIBase):
         # First checking if a new song started, so that status changes are
         # related to the new song.
         if self.artist != artist or self.title != title:
-            logging.info("New video detected")
+            log("New video detected")
             self.new_song_signal.emit(self.artist, self.title, 0)
 
         if self.is_playing != is_playing:
-            logging.info("Status change detected")
+            log("Status change detected")
             self.status_signal.emit(self.is_playing)

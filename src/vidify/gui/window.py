@@ -51,7 +51,6 @@ These events are emitted inside the APIs.
 """
 
 import importlib
-import logging
 import time
 import types
 from contextlib import suppress
@@ -63,7 +62,7 @@ from qtpy.QtWidgets import QHBoxLayout, QWidget
 
 from vidify import find_module, format_name
 from vidify.api import APIS, APIData
-from vidify.config import Config
+from vidify.core import Config, log
 from vidify.gui import COLORS, RES
 from vidify.gui.components import APIConnecter, SetupWidget
 from vidify.lyrics import get_lyrics
@@ -104,7 +103,7 @@ class MainWindow(QWidget):
 
         # Otherwise, the user is prompted for an API. After choosing one,
         # it will be initialized from outside this function.
-        logging.info("Loading setup screen")
+        log("Loading setup screen")
         self.setup_widget = SetupWidget(config.api, config.player)
         self.layout.addWidget(self.setup_widget)
         self.setup_widget.done.connect(self.on_setup_done)
@@ -118,7 +117,7 @@ class MainWindow(QWidget):
         attributes are correctly deleted.
         """
 
-        logging.info("Closing event detected")
+        log("Closing event detected")
         try:
             # Stopping the audiosync thread (always initialized)
             if self.config.audiosync:
@@ -137,7 +136,7 @@ class MainWindow(QWidget):
             with suppress(AttributeError):
                 del self.api
         except Exception as e:
-            logging.info("Error when closing: %s", str(e))
+            log(f"Error when closing: {e}")
 
         super().closeEvent(event)
 
@@ -159,11 +158,11 @@ class MainWindow(QWidget):
 
         # Starting the asynchronous API initialization
         self.initialize_api(api)
-        logging.info("Using %s as the API", api.name)
+        log(f"Using {api.name} as the API")
 
         # Initializing the player
         self.player = initialize_player(player, self.config)
-        logging.info("Using %s as the player", player.name)
+        log(f"Using {player.name} as the player")
 
     def initialize_api(self, api_data: APIData) -> None:
         """
@@ -224,7 +223,7 @@ class MainWindow(QWidget):
         be started properly.
         """
 
-        logging.info("Succesfully connected to the API")
+        log("Succesfully connected to the API")
         self.layout.removeWidget(self.api_connecter)
         del self.api_connecter
 
@@ -262,7 +261,7 @@ class MainWindow(QWidget):
         `ms` seconds if a change has happened, like if the song was paused.
         """
 
-        logging.info("Starting event loop")
+        log("Starting event loop")
         timer = QTimer(self)
 
         # Qt doesn't accept a method as the parameter so it's converted
@@ -316,7 +315,7 @@ class MainWindow(QWidget):
 
         # Checking that the artist and title are valid first of all
         if self.api.artist in (None, "") and self.api.title in (None, ""):
-            logging.info("The provided artist and title are empty.")
+            log("The provided artist and title are empty.")
             self.on_youtubedl_fail()
             if self.config.audiosync:
                 self.on_audiosync_fail()
@@ -350,7 +349,7 @@ class MainWindow(QWidget):
         self.audiosync.wait()
         self.audiosync.youtube_title = query
         self.audiosync.start()
-        logging.info("Started a new audiosync job")
+        log("Started a new audiosync job")
 
     def launch_youtubedl(self, query: str) -> None:
         """
@@ -358,7 +357,7 @@ class MainWindow(QWidget):
         self.on_youtubedl_success or self.on_youtubedl_fail once it's done.
         """
 
-        logging.info("Starting the youtube-dl thread")
+        log("Starting the youtube-dl thread")
         self.youtubedl = YouTubeDLWorker(
             query, self.config.debug, self.config.width, self.config.height
         )
@@ -414,7 +413,7 @@ class MainWindow(QWidget):
         Currently, when audiosync fails, nothing happens.
         """
 
-        logging.info("Audiosync module failed to return the lag")
+        log("Audiosync module failed to return the lag")
 
     @Slot(int)
     def on_audiosync_success(self, lag: int) -> None:
@@ -426,7 +425,7 @@ class MainWindow(QWidget):
         https://github.com/vidify/audiosync/issues/12
         """
 
-        logging.info("Audiosync module returned %d ms", lag)
+        log(f"Audiosync module returned {lag} ms")
 
         # The current API position according to what's being recorded.
         playback_delay = (
@@ -440,7 +439,7 @@ class MainWindow(QWidget):
         # negative value.
         lag += self.config.audiosync_calibration
 
-        logging.info("Total delay is %d ms", lag)
+        log(f"Total delay is {lag} ms")
         if lag > 0:
             self.player.seek(lag, relative=True)
         elif lag < 0:
@@ -473,14 +472,14 @@ class MainWindow(QWidget):
 
         if token is not None:
             # If the previous token was valid, the API can already start.
-            logging.info("Reusing a previously generated token")
+            log("Reusing a previously generated token")
             self.start_spotify_web_api(token, save_config=False)
         else:
             # Otherwise, the credentials are obtained with the GUI. When
             # a valid auth token is ready, the GUI will initialize the API
             # automatically exactly like above. The GUI won't ask for a
             # redirect URI for now.
-            logging.info("Asking the user for credentials")
+            log("Asking the user for credentials")
             # The SpotifyWebPrompt handles the interaction with the user and
             # emits a `done` signal when it's done.
             self._spotify_web_prompt = SpotifyWebPrompt(
@@ -502,7 +501,7 @@ class MainWindow(QWidget):
         """
         from vidify.api.spotify.web import SpotifyWebAPI
 
-        logging.info("Initializing the Spotify Web API")
+        log("Initializing the Spotify Web API")
 
         # Initializing the web API
         self.api = SpotifyWebAPI(token)
@@ -515,7 +514,7 @@ class MainWindow(QWidget):
 
         # The obtained credentials are saved for the future
         if save_config:
-            logging.info("Saving the Spotify Web API credentials")
+            log("Saving the Spotify Web API credentials")
             self.config.client_secret = self._spotify_web_prompt.client_secret
             self.config.client_id = self._spotify_web_prompt.client_id
             self.config.refresh_token = token.refresh_token

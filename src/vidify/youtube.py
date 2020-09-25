@@ -4,11 +4,12 @@ That way, the video can be played directly with a video player like VLC
 or mpv.
 """
 
-import logging
 from typing import Optional
 
 from qtpy.QtCore import QObject, Signal
 from youtube_dl import YoutubeDL
+
+from vidify.core import log
 
 
 def get_direct_url(data: dict) -> str:
@@ -76,11 +77,11 @@ class YouTubeDLWorker(QObject):
                 # Any kind of error has to be caught, so that it doesn't only
                 # send the error signal when the download wasn't successful
                 # (a DownloadError from youtube_dl).
-                logging.info("YouTube-dl wasn't able to obtain the video: %s", str(e))
+                log(f"YouTube-dl wasn't able to obtain the video: {e}")
                 self.fail.emit()
             else:
                 if len(data["entries"]) == 0:
-                    logging.info("YouTube-dl returned no entries")
+                    log("YouTube-dl returned no entries")
                     self.fail.emit()
                 else:
                     self.success.emit(data)

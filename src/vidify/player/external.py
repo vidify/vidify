@@ -4,7 +4,6 @@ https://vidify.org/wiki/the-external-player-protocol/
 """
 
 import json
-import logging
 import platform
 import socket
 import time
@@ -18,6 +17,7 @@ from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 from vidify import CURRENT_PLATFORM
 from vidify.config import Config
+from vidify.core import log
 from vidify.gui import FONTS, RES
 from vidify.player import PlayerBase
 from vidify.version import __version__
@@ -61,7 +61,7 @@ class Client(QObject):
 
     @Slot()
     def on_disconnected(self) -> None:
-        logging.info("%s disconnected", self)
+        log(f"{self} disconnected")
         self.done.emit(self)
 
     @Slot()
@@ -74,7 +74,7 @@ class Client(QObject):
         try:
             data = json.loads(msg)
         except json.decoder.JSONDecodeError as e:
-            logging.info("%s sent invalid message: %s. Original: %s", self, str(e), msg)
+            log(f"{self} sent invalid message: {e}. Original: {msg}")
         else:
             self.identify(data)
 
@@ -179,7 +179,7 @@ class External(PlayerBase):
             self.log_layout.addWidget(self.labels[key])
 
     def __del__(self) -> None:
-        logging.info("Closing the server and unregistering the service")
+        log("Closing the server and unregistering the service")
         try:
             self.unregister_service()
             self._server.close()
@@ -198,12 +198,12 @@ class External(PlayerBase):
 
         if not self._server.listen(QHostAddress.Any, self.port):
             # TODO: this should raise an exception
-            logging.error("Server couldn't wake up")
+            log("Server couldn't wake up")
             return
 
         # Updating the port to the one that's actually being used.
         self.port = self._server.serverPort()
-        logging.info("Server is listening on port %d", self.port)
+        log(f"Server is listening on port {self.port}")
         # Now that the port is known, the Vidify service can be
         # registered.
         self.register_service()
@@ -220,7 +220,7 @@ class External(PlayerBase):
         s.connect(("8.8.8.8", 1))
         self.address = s.getsockname()[0]
         s.close()
-        logging.info("Using address %s", self.address)
+        log(f"Using address {self.address}")
 
         # Other useful attributes for the connection.
         desc = {
@@ -245,7 +245,7 @@ class External(PlayerBase):
             properties=desc,
         )
 
-        logging.info("Registering Vidify service")
+        log("Registering Vidify service")
         self.zeroconf = Zeroconf(ip_version=self.IP_VERSION)
         self.zeroconf.register_service(self.info)
 
@@ -261,7 +261,7 @@ class External(PlayerBase):
         """
 
         while self._server.hasPendingConnections():
-            logging.info("Accepting connection number %d", len(self._clients))
+            log(f"Accepting connection number {len(self._clients)}")
             # The initial client state is pending, until the first message
             # is received.
             client = Client(self._server.nextPendingConnection())
@@ -277,7 +277,7 @@ class External(PlayerBase):
         connection is assured to be compatible.
         """
 
-        logging.info("Client %s confirmation successful", str(client))
+        log(f"Client {client} confirmation successful")
         self._pending.remove(client)
         self._clients.append(client)
         # Sending the reply with the currently available data
@@ -295,7 +295,7 @@ class External(PlayerBase):
         If a client fails to identify itself, its connection is closed.
         """
 
-        logging.info("Client %s confirmation failed: %s", str(client), msg)
+        log(f"Client {client} confirmation failed: {msg}")
 
         # Answering back
         reply = json.dumps({"success": False, "error_msg": msg}).encode("utf-8")
@@ -353,7 +353,7 @@ class External(PlayerBase):
         for c in clients:
             c.send(dump)
 
-        logging.info("Sent message '%s' to %s", dump, str(self._clients))
+        log(f"Sent message '{dump}' to {self._clients}")
 
         # The label refresh is done in a separate method at the end to send
         # the TCP packet as soon as possible.
