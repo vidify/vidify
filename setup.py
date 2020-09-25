@@ -30,26 +30,27 @@ version = get_version()
 
 install_requires = [
     # Base package
-    "QtPy",
-    "lyricwikia",
+    "QtPy==1.9",
+    "lyricwikia==0.1",
     "youtube-dl",
-    "qdarkstyle",
+    "qdarkstyle==2.8",
     'dataclasses; python_version<"3.7"',
     "vidify_audiosync",
     # APIs and players
-    "tekore<3.0",
-    "zeroconf",
-    'pydbus; platform_system=="Linux"',
-    'SwSpotify>=1.1.1; platform_system=="Windows"' ' or platform_system=="Darwin"',
+    "tekore==3",
+    "flask==1.1",
+    "zeroconf==0.28",
+    'pydbus==0.6; platform_system=="Linux"',
+    'SwSpotify==1.2; platform_system=="Windows" or platform_system=="Darwin"',
 ]
 
 # If PySide2 is installed and PyQt5 is not, append PySide2 to dependencies
 if is_installed("PySide2") and not is_installed("PyQt5"):
-    install_requires.append("PySide2")
+    install_requires.append("PySide2==5.15")
 # If PySide2 is not installed, or if both PyQt5 and PySide2 are installed
 # Use QtPy's default: PyQt5
 else:
-    install_requires.append("PyQt5")
+    install_requires.append("PyQt5==5.15")
 
 extras_require = {
     "dev": [
