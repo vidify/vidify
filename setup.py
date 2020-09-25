@@ -54,6 +54,8 @@ else:
 extras_require = {
     "dev": [
         "flake8",
+        "black",
+        "isort",
         "pyinstaller",
     ]
 }

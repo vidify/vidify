@@ -17,8 +17,8 @@ use std::str::FromStr;
 
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
-use structconf::{clap, StructConf};
 use simplelog::{CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger};
+use structconf::{clap, StructConf};
 
 #[pymodule]
 fn core(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
@@ -84,9 +84,7 @@ impl ToString for Properties {
     fn to_string(&self) -> String {
         self.values
             .iter()
-            .map(|(key, val)| {
-                format!("{}={};", key, val)
-            })
+            .map(|(key, val)| format!("{}={};", key, val))
             .collect()
     }
 }

@@ -17,7 +17,7 @@ import platform
 import shutil
 import subprocess
 import urllib.request
-from typing import List, Dict
+from typing import Dict, List
 
 import PyInstaller.__main__ as pyinstaller
 
@@ -36,7 +36,9 @@ SUFFIXES = {
 
 # The version is inside the `Cargo.toml` file.
 def get_version():
-    cargo_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src", "core", "Cargo.toml")
+    cargo_dir = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "src", "core", "Cargo.toml"
+    )
     with open(cargo_dir, "r") as f:
         for line in f:
             split = line.split()

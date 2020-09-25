@@ -5,7 +5,7 @@ fonts.
 In the future, these properties could be modified if dark mode was enabled.
 """
 
-from os.path import join, dirname, abspath
+from os.path import abspath, dirname, join
 
 from qtpy.QtGui import QFont
 
