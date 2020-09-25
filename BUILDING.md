@@ -1,3 +1,2 @@
-# Building.md
-
-Building is fully automated with GitHub Actions. You can follow the exact steps needed at `.github/workflows/release.yaml`. It basically installs the required dependencies and then runs `build_linux.sh` and `build_windows.ps1`.
+# Building
+Building is fully automated with GitHub Actions. All you need to do is run `python build.py`. If you find any problems, please [open an issue](https://github.com/vidify/vidify/issues/new).
