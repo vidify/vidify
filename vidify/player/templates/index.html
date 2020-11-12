@@ -37,6 +37,8 @@
                 previousId = currentId;
             }
 
+            // If song paused on Spotify and YT video is playing, pause it
+            // and the other way around
             if (!isPlaying && playingState) {
                 playingState = false;
                 video_frame.contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
@@ -45,6 +47,7 @@
                 video_frame.contentWindow.postMessage('{"event":"command","func":"' + 'playVideo' + '","args":""}', '*');
             }
 
+            // Recursively call the function every 500ms
             setTimeout(updateMessages, 500);
         }
 

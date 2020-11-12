@@ -60,12 +60,12 @@ PLAYERS = (
         id='WEB',
         short_name='Web',
         description='Play the music videos in a web page.',
-        icon=Res.external_icon,
+        icon=Res.external_icon, #TODO: Change to it's own icon
         compatible=True,
         installed=True,
         module='vidify.player.web',
-        class_name='WebPlayer',
-        flags=('api',))
+        class_name='WebPlayer', 
+        flags=())
 )
 
 

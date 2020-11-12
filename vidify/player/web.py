@@ -19,7 +19,8 @@ import sys
 import os
 
 PORT = 9999
-ROOT_URL = 'http://localhost:{}/hello'.format(PORT)
+ROOT_URL = 'http://localhost:{}/video'.format(PORT)
+DEFAULT_VIDEO_ID = "GfKs8oNP9m8"
 class WebPlayer(PlayerBase, QObject):
     DIRECT_URL = False
     app = None
@@ -29,20 +30,20 @@ class WebPlayer(PlayerBase, QObject):
         super().__init__()
         print(__name__)
         self.app = flask.Flask("flask_web_server", template_folder="vidify/player/templates", static_folder="vidify/player/static")
-        self.add_endpoints()
-        app_thread = Thread(target=self.runFlaskWebServer)
+        self.__add_endpoints()
+        app_thread = Thread(target=self.__runFlaskWebServer)
         app_thread.daemon = True
-        Timer(5, open, args=[ROOT_URL]).start()
+        Timer(3, open, args=[ROOT_URL]).start()
         app_thread.start()
         
-    def runFlaskWebServer(self):
+    def __runFlaskWebServer(self):
         self.app.run(debug=False, port=PORT)
 
-    def hello(self):
+    def __video(self):
         return flask.render_template('index.html')
 
-    def getLatestSpotify(self):
-        youtubeId = "GfKs8oNP9m8"
+    def __getVideoIdForCurrentSong(self):
+        youtubeId = DEFAULT_VIDEO_ID
         isPlaying = True
         if self.currentMedia != "" and not "default_video" in self.currentMedia:
             youtubeId = self.currentMedia.replace("https://www.youtube.com/watch?v=", "")
@@ -57,19 +58,11 @@ class WebPlayer(PlayerBase, QObject):
 
         return data
 
-    def add_endpoints(self):
-        self.app.add_url_rule("/hello", "hello", self.hello)
-        self.app.add_url_rule("/api/", "getLatestSpotify", self.getLatestSpotify)
-    
-    @property
-    def pause(self) -> bool:
-        print("SOMETHING IS PAUSEDzzzz")
-        logging.info("Playing/Pausing video")
+    def __add_endpoints(self):
+        self.app.add_url_rule("/video", "video", self.__video)
+        self.app.add_url_rule("/api/", "getVideoIdForCurrentSong", self.__getVideoIdForCurrentSong)
 
-    @pause.setter
     def pause(self, do_pause: bool) -> None:
-        # Saved in variable to not call self._player.is_playing() twice
-        logging.info("Playing/Pausing video")
         if do_pause and self.isPlaying:
             self.isPlaying = False
         elif not do_pause and not self.isPlaying:
@@ -77,12 +70,14 @@ class WebPlayer(PlayerBase, QObject):
 
     @property
     def position(self) -> int:
-        logging.info("Return video play time")
+        """
+        Currently not supported.
+        """
 
     def seek(self, ms: int, relative: bool = False) -> None:
-        logging.info("Go to time in video")
+        """
+        Currently not supported.
+        """
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
         self.currentMedia = media
-        print(self.currentMedia)
-        logging.info("Start playing new video")
