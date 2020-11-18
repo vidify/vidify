@@ -31,7 +31,7 @@
             // If when the endpoint is polled the id is the same as the last time it was polled, do nothing
             // If there is a new id (so the current playing song has changed) update the video frame
             // with the new video
-            var video_frame = document.getElementById("video_frame");
+            let video_frame = document.getElementById("video_frame");
             if (currentId != previousId) {
                 video_frame.src = "https://www.youtube.com/embed/" + currentId + "?rel=0&autoplay=1&controls=0&enablejsapi=1&version=3&playerapiid=ytplayer&loop=1&mute=1";
                 previousId = currentId;
@@ -46,12 +46,10 @@
                 playingState = true;
                 video_frame.contentWindow.postMessage('{"event":"command","func":"' + 'playVideo' + '","args":""}', '*');
             }
-
-            // Recursively call the function every 500ms
-            setTimeout(updateMessages, 500);
         }
 
-        updateMessages();
+        // Call the api every 500ms
+        setInterval(updateMessages, 500);
     </script>
 </body>
 
