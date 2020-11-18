@@ -36,7 +36,7 @@ class WebPlayer(PlayerBase):
         self._add_endpoints()
         app_thread = Thread(target=self._runFlaskWebServer)
         app_thread.daemon = True
-        Timer(3, open, args=[ROOT_URL]).start()
+        Timer(0, open, args=[ROOT_URL]).start()
         app_thread.start()
         self._initGUI()
 
