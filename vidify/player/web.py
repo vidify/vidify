@@ -13,8 +13,8 @@ except OSError:
     raise ImportError("Flask is not installed")
 
 from vidify import Platform, CURRENT_PLATFORM
-from vidify.player.generic import PlayerBase
 from PyQt5.QtCore import QObject
+from vidify.player.generic import PlayerBase
 import sys
 import os
 
@@ -23,50 +23,46 @@ ROOT_URL = 'http://localhost:{}/video'.format(PORT)
 DEFAULT_VIDEO_ID = "GfKs8oNP9m8"
 class WebPlayer(PlayerBase, QObject):
     DIRECT_URL = False
-    app = None
-    currentMedia = ""
-    isPlaying = True
-    def __init__(self, vlc_args: Optional[str] = None) -> None:
+    flask_app = None
+    current_media = None
+    is_playing = True
+    def __init__(self) -> None:
         super().__init__()
-        print(__name__)
-        self.app = flask.Flask("flask_web_server", template_folder="vidify/player/templates", static_folder="vidify/player/static")
-        self.__add_endpoints()
-        app_thread = Thread(target=self.__runFlaskWebServer)
+        self.flask_app = flask.Flask("flask_web_server", template_folder="vidify/player/templates", static_folder="vidify/player/static")
+        self._add_endpoints()
+        app_thread = Thread(target=self._runFlaskWebServer)
         app_thread.daemon = True
         Timer(3, open, args=[ROOT_URL]).start()
         app_thread.start()
         
-    def __runFlaskWebServer(self):
-        self.app.run(debug=False, port=PORT)
+    def _runFlaskWebServer(self):
+        self.flask_app.run(debug=False, port=PORT)
 
-    def __video(self):
+    def _videoEndpoint(self):
         return flask.render_template('index.html')
 
-    def __getVideoIdForCurrentSong(self):
+    def _getVideoIdForCurrentSongEndpoint(self):
         youtubeId = DEFAULT_VIDEO_ID
-        isPlaying = True
-        if self.currentMedia != "" and not "default_video" in self.currentMedia:
-            youtubeId = self.currentMedia.replace("https://www.youtube.com/watch?v=", "")
 
-        if not self.isPlaying:
-            isPlaying = False
+        if self.current_media != None and not ("default_video" in self.current_media):
+            youtubeId = self.current_media.replace("https://www.youtube.com/watch?v=", "")
 
         data = {
             "youtubeId": youtubeId,
-            "isPlaying": isPlaying
+            "isPlaying": self.is_playing
         }
 
         return data
 
-    def __add_endpoints(self):
-        self.app.add_url_rule("/video", "video", self.__video)
-        self.app.add_url_rule("/api/", "getVideoIdForCurrentSong", self.__getVideoIdForCurrentSong)
+    def _add_endpoints(self):
+        self.flask_app.add_url_rule("/video", "video", self._videoEndpoint)
+        self.flask_app.add_url_rule("/api/", "getVideoIdForCurrentSong", self._getVideoIdForCurrentSongEndpoint)
 
     def pause(self, do_pause: bool) -> None:
-        if do_pause and self.isPlaying:
-            self.isPlaying = False
-        elif not do_pause and not self.isPlaying:
-            self.isPlaying = True
+        if do_pause and self.is_playing:
+            self.is_playing = False
+        elif not do_pause and not self.is_playing:
+            self.is_playing = True
 
     @property
     def position(self) -> int:
@@ -80,4 +76,4 @@ class WebPlayer(PlayerBase, QObject):
         """
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
-        self.currentMedia = media
+        self.current_media = media
