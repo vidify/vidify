@@ -3,7 +3,6 @@
 
 import logging
 from typing import Optional
-from threading import Thread
 from webbrowser import open
 from threading import Timer, Thread
 
@@ -12,8 +11,6 @@ try:
 except OSError:
     raise ImportError("Flask is not installed")
 
-from vidify import Platform, CURRENT_PLATFORM
-from PyQt5.QtCore import QObject
 from vidify.player.generic import PlayerBase
 import sys
 import os
@@ -21,7 +18,7 @@ import os
 PORT = 9999
 ROOT_URL = 'http://localhost:{}/video'.format(PORT)
 DEFAULT_VIDEO_ID = "GfKs8oNP9m8"
-class WebPlayer(PlayerBase, QObject):
+class WebPlayer(PlayerBase):
     DIRECT_URL = False
     flask_app = None
     current_media = None
