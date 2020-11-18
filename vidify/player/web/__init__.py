@@ -25,7 +25,7 @@ class WebPlayer(PlayerBase):
     is_playing = True
     def __init__(self) -> None:
         super().__init__()
-        self.flask_app = flask.Flask("flask_web_server", template_folder="vidify/player/templates", static_folder="vidify/player/static")
+        self.flask_app = flask.Flask("flask_web_server", template_folder="vidify/player/web/templates", static_folder="vidify/player/web/static")
         self._add_endpoints()
         app_thread = Thread(target=self._runFlaskWebServer)
         app_thread.daemon = True
@@ -56,6 +56,7 @@ class WebPlayer(PlayerBase):
         self.flask_app.add_url_rule("/api/", "getVideoIdForCurrentSong", self._getVideoIdForCurrentSongEndpoint)
 
     def pause(self, do_pause: bool) -> None:
+        print("HELLLLLOOOOOO")
         if do_pause and self.is_playing:
             self.is_playing = False
         elif not do_pause and not self.is_playing:
