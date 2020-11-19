@@ -89,6 +89,13 @@ class WebPlayer(PlayerBase):
         self.flask_app.add_url_rule("/video", "video", self._videoEndpoint)
         self.flask_app.add_url_rule("/api/", "getVideoIdForCurrentSong", self._getVideoIdForCurrentSongEndpoint)
 
+    @property
+    def pause(self) -> bool:
+        """
+        Currently not supported.
+        """
+
+    @pause.setter
     def pause(self, do_pause: bool) -> None:
         if do_pause and self.is_playing:
             self.is_playing = False
