@@ -533,9 +533,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-binding"
-version = "2.16.2"
+version = "2.17.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1795efad67f34ae95740ded62e3c346e707b0caeb0f6088d75958e97316b5538"
+checksum = "2659790e368bdcc49bfb674c76ba4fc609db7a1939112395bcf3409fa9d82a31"
 dependencies = [
  "libc",
  "libpulse-sys",
@@ -544,9 +544,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-sys"
-version = "1.13.2"
+version = "1.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f53857071d564f864755a6945d316cc8fe62c36ed20bd4231c8ab6b62141786"
+checksum = "92c09b34c6579692a9e53905543db2b712984b720677b76d0569ecdea52770cb"
 dependencies = [
  "libc",
  "pkg-config",
