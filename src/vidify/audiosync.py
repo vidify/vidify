@@ -9,7 +9,7 @@ as an event loop, since it's controlled inside the audiosync module. The
 thread just consists on calling the main run() function, and then being
 able to control and monitor its progress.
 
-Check out the README.md and see the official repo for more information:
+Check out the README and see the official repo for more information:
 
 NOTE: this module was left here after the deprecation of the original
 implementation.

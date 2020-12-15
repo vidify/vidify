@@ -104,7 +104,7 @@ setup(
     keywords="spotify music video player videos lyrics linux windows macos",
     # Data included
     package_dir={"": "src"},
-    long_description=open("README.md", "r").read(),
+    long_description="Read more at https://github.com/vidify/vidify.",
     long_description_content_type="text/markdown",
     data_files=datafiles,
     # Authors

@@ -200,15 +200,10 @@ Not playing any videos (`HTTP Error 403: Forbidden`)::
 
 == Development
 
-If you want to help to develop Vidify, please read the link:CONTRIBUTING.md[CONTRIBUTING.md] file.
-
-The app logo was created by https://github.com/xypnox[xypnox] in this
-https://github.com/vidify/vidify/issues/26[issue].
+=== Releases
 
 The changelog and more information about this program's versions can be found in
-the https://github.com/vidify/vidify/releases[Releases page].
-
-Vidify's license is the link:LICENSE[GPL v3].
+the https://github.com/vidify/vidify/releases[GitHub Releases page].
 
 === External player implementations
 
@@ -216,9 +211,82 @@ The Vidify external player has an open protocol for anyone to implement their
 own app or program to play the videos. You can read more about how it works in
 this https://vidify.org/wiki/the-external-player-protocol/[wiki article].
 
+=== Contributing
+
+Any contributions to Vidify are welcome!
+
+There should always be lots of https://github.com/vidify/vidify/issues[open
+issues] in the GitHub repo. The easiest ones for newcomers are those tagged with
+https://github.com/vidify/vidify/labels/good%20first%20issue["good first
+issue"], but you can still try to tackle others. If you need help, leave a
+comment and a maintainer will try to explain what needs to be done to do in
+steps. When you open a PR with the implementation, ask for a review to get some
+feedback on your work.
+
+It's strongly recommended to join https://discord.gg/yfJSyPv[the official
+Discord server] for discussion and help when developing.
+
+You can run the module locally with `python -m vidify`, after running `python
+setup.py develop`. The first command will run the Python module, but you need
+the second one to compile the Rust parts of Vidify
+(https://www.rust-lang.org/tools/install[make sure you have Rust installed in
+your system]). You will also need all the required Python dependencies installed
+with `pip install -e .`.
+
+====  Project organization
+
+Vidify combines both Rust and Python, the former for core and
+performance-focused parts, and the latter for the rest. Here's a brief
+description of the directories in this repository:
+
+* `src`: source code
+** `audiosync`: the audiosync feature, written in Rust
+** `core`: some parts of Vidify written in Rust
+** `vidify`: main source code for both the logic and GUI of Vidify, in Python
+* `res`: resources Vidify uses, like fonts, icons, images...
+* `dev`: some scripts and tools needed for developer tasks, like building
+* `tests`: both Rust and Python tests. See the <<_tests>> section for more
+* `images`: some images used for the README and such
+
+==== Style
+
+Vidify tries to follow a consistent style for both Python and Rust by using
+automatic formatting tools:
+
+* `cargo fmt` as the Rust formatter, and `cargo clippy` as the linter.
+* `black`, `isort` for formatting, and `flake8` for linting. Simply run them
+  with `python -m <module>` at the root of the repo.
+
 === Tests
 
-You can run the module locally with `python -m vidify`.
+This project uses `unittest` for testing with Python. Run them with `python -m
+unittest`. You'll need all the extra dependencies installed for this to work.
 
-This project uses `unittest` for testing. Run them with `python -m unittest`.
-You'll need all the extra dependencies installed for this to work.
+Rust tests can be ran with `cargo test`.
+
+=== Building
+
+Vidify is deployed with static binaries for ease of use and reproducibility.
+This is fully automated with GitHub Actions; binaries will be generated when a
+new version of Vidify is released.
+
+If you want to manually try it out, you need to do is run the build script,
+preferably inside the docker container:
+
+[source, bash]
+----
+$ sudo docker build -t vidify .
+$ sudo docker run -v $PWD:/vidify/ -t vidify ./build.sh
+$ ls ./build/*.zip
+./build/vidify-X.Y.Z_OS_ARCH.zip
+----
+
+If you find any problems, please
+https://github.com/vidify/vidify/issues/new[open an issue].
+
+=== License
+
+Vidify's license is the link:LICENSE[GPL v3].
+
+The app logo was created by https://github.com/xypnox[xypnox] in this
+https://github.com/vidify/vidify/issues/26[issue].
