@@ -9,8 +9,6 @@ WORKDIR /vidify/
 ENV DEBIAN_FRONTEND=noninteractive
 # Continuous integration indicator (some tests will be skipped)
 ENV CI=true
-# Cargo cache for interactive sessions
-ENV CARGO_TARGET_DIR="/root/.cache/cargo"
 
 # Apt build dependencies
 RUN apt-get update && apt-get install -y \

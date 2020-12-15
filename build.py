@@ -34,8 +34,11 @@ SUFFIXES = {
 }
 
 
-# The version is inside the `Cargo.toml` file.
 def get_version():
+    """
+    The version is inside the `Cargo.toml` file.
+    """
+
     cargo_dir = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "src", "core", "Cargo.toml"
     )
@@ -48,8 +51,11 @@ def get_version():
     raise Exception("Couldn't find `Cargo.toml` version")
 
 
-# Obtains the resulting name the binary will be named as.
-def format_name() -> str:
+def format_release_name() -> str:
+    """
+    Obtains the resulting name the binary will be named as.
+    """
+
     cur_os = platform.system()
     machine = platform.machine()
     version = get_version()
@@ -63,9 +69,12 @@ def download_file(uri: str, name: str) -> None:
             output_file.write(input_file.read())
 
 
-# This function is used in shutil.copytree to ignore specific files and make
-# it considerably faster in some situations.
 def get_ignored(path: str, filenames: List[str]) -> List[str]:
+    """
+    This function is used in shutil.copytree to ignore specific files and make
+    it considerably faster in some situations.
+    """
+
     ret = []
     for filename in filenames:
         if os.path.join(path, filename) in IGNORED_FILES:
@@ -73,9 +82,12 @@ def get_ignored(path: str, filenames: List[str]) -> List[str]:
     return ret
 
 
-# Returns a tuple from a dictionary with keys depending on the supported OS.
-# See `args_os` below.
-def filter_os_args(args: Dict[str]) -> List[str]:
+def filter_os_args(args: Dict[str, str]) -> List[str]:
+    """
+    Returns a tuple from a dictionary with keys depending on the supported OS.
+    See `args_os` below.
+    """
+
     args_os = []
     cur_os = platform.system()
     for val, supp_os in args.items():
@@ -83,6 +95,30 @@ def filter_os_args(args: Dict[str]) -> List[str]:
             args_os.append(val)
 
     return args_os
+
+
+def download_mpv() -> None:
+    """
+    Downloading mpv so that it can be embed in the binary.
+    """
+
+    if cur_os == "Windows":
+        download_file(MPV_DOWNLOAD_WINDOWS, "libmpv.7z")
+        ret = subprocess.run(["7z", "e", "-y", "libmpv.7z"])
+        if ret.returncode != 0:
+            logging.error("Couldn't extract libmpv.7z")
+            exit(1)
+    else:
+        ret = subprocess.run(
+            ["find", "/", "-name", "libmpv.so", "-print", "-quit"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+        path = ret.stdout.decode("utf-8").strip()
+        if len(path) == 0:
+            logging.error("Couldn't find libmpv.so")
+            exit(1)
+        shutil.copy(path, ".")
 
 
 # Making sure the current OS is supported
@@ -107,24 +143,7 @@ if ret.returncode != 0:
     exit(1)
 
 logging.info("Downloading libraries")
-# Downloading mpv so that it can be embed in the binary
-if cur_os == "Windows":
-    download_file(MPV_DOWNLOAD_WINDOWS, "libmpv.7z")
-    subprocess.run(["7z", "e", "-y", "libmpv.7z"])
-    if ret.returncode != 0:
-        logging.error("Couldn't extract libmpv.7z")
-        exit(1)
-else:
-    ret = subprocess.run(
-        ["find", "/", "-name", "libmpv.so", "-print", "-quit"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    path = ret.stdout.decode("utf-8").strip()
-    if len(path) == 0:
-        logging.error("Couldn't find libmpv.so")
-        exit(1)
-    shutil.copy(path, ".")
+download_mpv()
 
 logging.info("Applying pre-build patches")
 
@@ -159,6 +178,6 @@ args_os = {
 args = filter_os_args(args_os)
 pyinstaller.run(args)
 
-logging.info("Compressing resulting binaries")
-name = format_name()
+name = format_release_name()
+logging.info(f"Compressing release: `{name}.zip`")
 shutil.make_archive(name, "zip", "dist/vidify")
