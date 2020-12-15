@@ -533,22 +533,27 @@ dependencies = [
 
 [[package]]
 name = "libpulse-binding"
-version = "2.16.2"
+version = "2.20.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1795efad67f34ae95740ded62e3c346e707b0caeb0f6088d75958e97316b5538"
+checksum = "abe5eff2802b9abd2593af97b0d30e13c489f098568003b4b8b6964f100732bd"
 dependencies = [
+ "bitflags",
  "libc",
  "libpulse-sys",
+ "num-derive",
+ "num-traits",
  "winapi",
 ]
 
 [[package]]
 name = "libpulse-sys"
-version = "1.13.2"
+version = "1.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f53857071d564f864755a6945d316cc8fe62c36ed20bd4231c8ab6b62141786"
+checksum = "1d1518ea9718ca1641990faddb6c2546f181a3e68c815b2434264e499dc8523d"
 dependencies = [
  "libc",
+ "num-derive",
+ "num-traits",
  "pkg-config",
  "winapi",
 ]
@@ -622,6 +627,17 @@ checksum = "ffb4262d26ed83a1c0a33a38fe2bb15797329c85770da05e6b828ddb782627af"
 dependencies = [
  "memchr",
  "version_check",
+]
+
+[[package]]
+name = "num-derive"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "876a53fff98e03a936a674b29568b0e605f06b29372c2489ff4de23f1949743d"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
