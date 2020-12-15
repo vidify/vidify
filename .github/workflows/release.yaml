@@ -12,12 +12,9 @@ jobs:
       strategy:
         matrix:
           os: [ubuntu-20.04, windows-latest]
-          python: [3.6]
           include:
             - os: ubuntu-20.04
-              artifact_prefix: linux_x86_64
             - os: windows-latest
-              artifact_prefix: win10_x86_64
       steps:
         - name: Checkout code
           uses: actions/checkout@v2
@@ -26,47 +23,33 @@ jobs:
           id: tag-name
           uses: olegtarasov/get-tag@v2
 
-        - name: Build on Windows
+        - name: Setup on Windows
           if: matrix.os == 'windows-latest'
           shell: pwsh
           run: |
             choco install wget 7zip.install
             pip install .[dev] --verbose
-            cd dev
-            ./build_windows.ps1
+            ./build.py
 
-        - name: Build on Linux
+        - name: Setup on Linux
           if: matrix.os == 'ubuntu-20.04'
           run: |
             sudo apt-get update -y
             sudo apt-get install curl -y
             curl -fsSL https://get.docker.com | sudo sh
             sudo docker build -t vidify .
-            sudo docker run -v $PWD/dev:/vidify/dev/dist vidify:latest /bin/sh -c 'cd dev; bash build_linux.sh'
+            sudo docker run -v $PWD:/vidify -t vidify ./build.py
 
         - name: Uploading Release Assets
           uses: softprops/action-gh-release@v1
           with:
             body: ""
-            files: dev/vidify-${{ steps.tag-name.outputs.tag }}_${{ matrix.artifact_prefix }}.zip
+            files: ./build/vidify-*.zip
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  pypi:
-      name: Upload to PyPi
-      runs-on: ubuntu-20.04
-      steps:
-        - name: Checkout code
-          uses: actions/checkout@master
-
-        - name: Preparing Docker Image
-          run: |
-            sudo apt-get update -y
-            sudo apt-get install curl -y
-            curl -fsSL https://get.docker.com | sudo sh
-            sudo docker build -t vidify .
-
-        - name: Uploading
+        - name: Uploading to PyPi
+          if: matrix.os == 'ubuntu-20.04'
           env:
             TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
             TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}

@@ -9,11 +9,11 @@ from os.path import abspath, dirname, join
 
 from qtpy.QtGui import QFont
 
+import vidify
 from vidify import CUR_PLATFORM, Platform
 
-# The vidify installation path's resources folder, assuming this file is
-# always exactly at 'vidify/gui/__init__.py'.
-RES_DIR = join(dirname(dirname(dirname(dirname(abspath(__file__))))), "res")
+# The vidify installation path's resources directory.
+RES_DIR = join(dirname(abspath(vidify.__file__)), "res")
 
 
 class ColorsBase:

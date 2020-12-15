@@ -27,6 +27,8 @@ IGNORED_FILES = [".git", ".venv", "target"]
 
 ALL_OS = ["Linux", "Windows", "Darwin"]
 
+APP_NAME = "Vidify"
+
 SUFFIXES = {
     "Linux": "linux",
     "Windows": "win32",
@@ -158,9 +160,10 @@ args_os = {
     "src/vidify/api/mpris.py": ["Linux"],
     "src/vidify/api/spotify/swspotify.py": ["Windows", "Darwin"],
     "-y": ALL_OS,
-    "--name=Vidify": ALL_OS,
+    f"--name={APP_NAME}": ALL_OS,
     "--exclude-module=PySide2": ALL_OS,
     "--hidden-import=gi": ALL_OS,
+    "--hidden-import=encodings": ALL_OS,
     "--hidden-import=lyricwikia": ALL_OS,
     "--hidden-import=pkg_resources.py2_warn": ALL_OS,
     "--hidden-import=pydbus": ["Linux"],
@@ -172,7 +175,7 @@ args_os = {
     "--hidden-import=tekore": ALL_OS,
     "--hidden-import=youtube-dl": ALL_OS,
     "--hidden-import=zeroconf": ALL_OS,
-    "--add-data=res:res": ALL_OS,
+    "--add-data=src/vidify/res:vidify/res": ALL_OS,
     "--add-data=mpv-1.dll": ["Windows"],
 }
 args = filter_os_args(args_os)
@@ -180,4 +183,4 @@ pyinstaller.run(args)
 
 name = format_release_name()
 logging.info(f"Compressing release: `{name}.zip`")
-shutil.make_archive(name, "zip", "dist/vidify")
+shutil.make_archive(name, "zip", f"dist/{APP_NAME}")
