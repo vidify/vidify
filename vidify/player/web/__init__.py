@@ -116,7 +116,10 @@ class WebPlayer(PlayerBase):
         """
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
-        self.current_media = media
+        if "default_video" in media:
+            self.current_media = DEFAULT_VIDEO_ID
+        else:
+            self.current_media = media
 
-        self.labels['url'].setText(f"{self._LABEL_PREFIXES['url']}{media}")
+        self.labels['url'].setText(f"{self._LABEL_PREFIXES['url']}{self.current_media}")
         self.labels['is_playing'].setText(f"{self._LABEL_PREFIXES['is_playing']}{is_playing}")
