@@ -1,7 +1,6 @@
 """
 """
 
-from typing import Optional
 from webbrowser import open
 from threading import Timer, Thread
 
@@ -11,16 +10,15 @@ except OSError:
     raise ImportError("Flask is not installed")
 
 from vidify.player.generic import PlayerBase
-from qtpy.QtCore import QObject, Slot, Signal, Qt
-from qtpy.QtNetwork import QTcpServer, QHostAddress, QTcpSocket
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout, QLabel
-from vidify.gui import Res, Fonts
-import sys
-import os
+from vidify.gui import Fonts
 
 PORT = 9999
 ROOT_URL = 'http://localhost:{}/video'.format(PORT)
 DEFAULT_VIDEO_ID = "GfKs8oNP9m8"
+
+
 class WebPlayer(PlayerBase):
     DIRECT_URL = False
     flask_app = None
@@ -29,10 +27,16 @@ class WebPlayer(PlayerBase):
     _LABEL_PREFIXES = {
         'url': '<b>Current URL:</b> ',
         'is_playing': '<b>Is it playing?:</b> ',
+
     }
+
     def __init__(self) -> None:
         super().__init__()
-        self.flask_app = flask.Flask("flask_web_server", template_folder="vidify/player/web/templates", static_folder="vidify/player/web/static")
+        self.flask_app = flask.Flask(
+            "flask_web_server",
+            template_folder="vidify/player/web/templates",
+            static_folder="vidify/player/web/static"
+        )
         self._add_endpoints()
         app_thread = Thread(target=self._runFlaskWebServer)
         app_thread.daemon = True
@@ -65,7 +69,7 @@ class WebPlayer(PlayerBase):
             self.labels[key].setFont(font)
             self.labels[key].setAlignment(Qt.AlignHCenter)
             self.log_layout.addWidget(self.labels[key])
-        
+
     def _runFlaskWebServer(self):
         self.flask_app.run(debug=False, port=PORT)
 
@@ -75,8 +79,12 @@ class WebPlayer(PlayerBase):
     def _getVideoIdForCurrentSongEndpoint(self):
         youtubeId = DEFAULT_VIDEO_ID
 
-        if self.current_media != None and not ("default_video" in self.current_media):
-            youtubeId = self.current_media.replace("https://www.youtube.com/watch?v=", "")
+        if (self.current_media is not None and
+                not ("default_video" in self.current_media)):
+            youtubeId = self.current_media.replace(
+                "https://www.youtube.com/watch?v=",
+                ""
+            )
 
         data = {
             "youtubeId": youtubeId,
@@ -87,7 +95,11 @@ class WebPlayer(PlayerBase):
 
     def _add_endpoints(self):
         self.flask_app.add_url_rule("/video", "video", self._videoEndpoint)
-        self.flask_app.add_url_rule("/api/", "getVideoIdForCurrentSong", self._getVideoIdForCurrentSongEndpoint)
+        self.flask_app.add_url_rule(
+            "/api/",
+            "getVideoIdForCurrentSong",
+            self._getVideoIdForCurrentSongEndpoint
+        )
 
     @property
     def pause(self) -> bool:
@@ -101,8 +113,10 @@ class WebPlayer(PlayerBase):
             self.is_playing = False
         elif not do_pause and not self.is_playing:
             self.is_playing = True
-        
-        self.labels['is_playing'].setText(f"{self._LABEL_PREFIXES['is_playing']}{self.is_playing}")
+
+        self.labels['is_playing'].setText(
+            f"{self._LABEL_PREFIXES['is_playing']}{self.is_playing}"
+        )
 
     @property
     def position(self) -> int:
@@ -121,5 +135,9 @@ class WebPlayer(PlayerBase):
         else:
             self.current_media = media
 
-        self.labels['url'].setText(f"{self._LABEL_PREFIXES['url']}{self.current_media}")
-        self.labels['is_playing'].setText(f"{self._LABEL_PREFIXES['is_playing']}{is_playing}")
+        self.labels['url'].setText(
+            f"{self._LABEL_PREFIXES['url']}{self.current_media}"
+        )
+        self.labels['is_playing'].setText(
+            f"{self._LABEL_PREFIXES['is_playing']}{is_playing}"
+        )
