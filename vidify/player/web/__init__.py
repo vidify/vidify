@@ -1,4 +1,9 @@
 """
+The WEB player plays the Youtube video in a tab in your web browser.
+
+For more information about the player modules, please check out
+vidify.player.generic. It contains the abstract base class of which any
+player implementation inherits, and an explanation in detail of the methods.
 """
 
 from webbrowser import open
@@ -14,16 +19,12 @@ from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QVBoxLayout, QLabel
 from vidify.gui import Fonts
 
-PORT = 9999
-ROOT_URL = 'http://localhost:{}/video'.format(PORT)
-DEFAULT_VIDEO_ID = "GfKs8oNP9m8"
-
 
 class WebPlayer(PlayerBase):
+    PORT = 9999
+    ROOT_URL = 'http://localhost:{}/video'.format(PORT)
+    DEFAULT_VIDEO_ID = "GfKs8oNP9m8"
     DIRECT_URL = False
-    flask_app = None
-    current_media = None
-    is_playing = True
     _LABEL_PREFIXES = {
         'url': '<b>Current URL:</b> ',
         'is_playing': '<b>Is it playing?:</b> ',
@@ -32,19 +33,21 @@ class WebPlayer(PlayerBase):
 
     def __init__(self) -> None:
         super().__init__()
+        self.current_media = None
+        self.is_playing = True
         self.flask_app = flask.Flask(
             "flask_web_server",
             template_folder="vidify/player/web/templates",
             static_folder="vidify/player/web/static"
         )
         self._add_endpoints()
-        app_thread = Thread(target=self._runFlaskWebServer)
+        app_thread = Thread(target=self._run_flask_web_server)
         app_thread.daemon = True
-        Timer(0, open, args=[ROOT_URL]).start()
+        Timer(0, open, args=[self.ROOT_URL]).start()
         app_thread.start()
-        self._initGUI()
+        self._init_gui()
 
-    def _initGUI(self) -> None:
+    def _init_gui(self) -> None:
         self.layout = QVBoxLayout(self)
         self.layout.setAlignment(Qt.AlignTop)
         self.title = QLabel("Web player")
@@ -70,14 +73,14 @@ class WebPlayer(PlayerBase):
             self.labels[key].setAlignment(Qt.AlignHCenter)
             self.log_layout.addWidget(self.labels[key])
 
-    def _runFlaskWebServer(self):
-        self.flask_app.run(debug=False, port=PORT)
+    def _run_flask_web_server(self):
+        self.flask_app.run(debug=False, port=self.PORT)
 
-    def _videoEndpoint(self):
+    def _video_endpoint(self):
         return flask.render_template('index.html')
 
-    def _getVideoIdForCurrentSongEndpoint(self):
-        youtubeId = DEFAULT_VIDEO_ID
+    def _get_video_id_for_current_song_endpoint(self):
+        youtubeId = self.DEFAULT_VIDEO_ID
 
         if (self.current_media is not None and
                 not ("default_video" in self.current_media)):
@@ -94,11 +97,11 @@ class WebPlayer(PlayerBase):
         return data
 
     def _add_endpoints(self):
-        self.flask_app.add_url_rule("/video", "video", self._videoEndpoint)
+        self.flask_app.add_url_rule("/video", "video", self._video_endpoint)
         self.flask_app.add_url_rule(
             "/api/",
             "getVideoIdForCurrentSong",
-            self._getVideoIdForCurrentSongEndpoint
+            self._get_video_id_for_current_song_endpoint
         )
 
     @property
@@ -131,7 +134,7 @@ class WebPlayer(PlayerBase):
 
     def start_video(self, media: str, is_playing: bool = True) -> None:
         if "default_video" in media:
-            self.current_media = DEFAULT_VIDEO_ID
+            self.current_media = self.DEFAULT_VIDEO_ID
         else:
             self.current_media = media
 
