@@ -17,6 +17,7 @@ use std::path::PathBuf;
 use std::fs::File;
 use std::str::FromStr;
 
+use dirs_next as dirs;
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 use simplelog::{CombinedLogger, LevelFilter, TermLogger, TerminalMode, WriteLogger};
