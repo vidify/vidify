@@ -21,7 +21,7 @@ thiserror = "1.0"
 libpulse-binding = "2.21"
 
 # Python interoperability. See workaround at `features` section.
-pyo3 = "0.12"
+pyo3 = "0.13"
 
 [dev-dependencies]
 env_logger = "0.8"
