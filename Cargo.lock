@@ -769,9 +769,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-binding"
-version = "2.22.0"
+version = "2.23.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce89ab17bd343b08bd4321c674ef1477d34f83be18b1ab2ee47a5e5fbee64a91"
+checksum = "b2405f806801527dfb3d2b6d48a282cdebe9a1b41b0652e0d7b5bad81dbc700e"
 dependencies = [
  "bitflags",
  "libc",
@@ -783,9 +783,9 @@ dependencies = [
 
 [[package]]
 name = "libpulse-sys"
-version = "1.17.0"
+version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0fcfb56118765adba111da47e36278b77d00aebf822e4f014a832fbfa183a13b"
+checksum = "cf17e9832643c4f320c42b7d78b2c0510f45aa5e823af094413b94e45076ba82"
 dependencies = [
  "libc",
  "num-derive",

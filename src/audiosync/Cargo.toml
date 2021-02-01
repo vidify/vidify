@@ -18,7 +18,7 @@ log = "0.4"
 thiserror = "1.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
-libpulse-binding = "2.22"
+libpulse-binding = "2.23"
 
 # Python interoperability. See workaround at `features` section.
 pyo3 = "0.13"
