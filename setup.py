@@ -36,7 +36,7 @@ install_requires = [
     "qdarkstyle==2.8",
     'dataclasses; python_version<"3.7"',
     # APIs and players
-    "tekore==3",
+    "tekore==3.*",
     "flask==1.1",
     "zeroconf==0.28",
     'pydbus==0.6; platform_system=="Linux"',
