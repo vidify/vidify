@@ -86,8 +86,6 @@ pub fn init_data_res(file: &str) -> Result<String> {
     Ok(path.to_string_lossy().into_owned())
 }
 
-/// TODO: the struct is actually unnecessary. A function should be enough.
-///
 /// The generic properties are represented by this struct, which uses the
 /// format `key1=val1;key2=val2`. In the future with const generics, the
 /// delimiter could be made generic as well. For now, it's `;`.

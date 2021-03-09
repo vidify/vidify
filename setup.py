@@ -36,11 +36,12 @@ install_requires = [
     "qdarkstyle==2.8",
     'dataclasses; python_version<"3.7"',
     # APIs and players
-    "tekore==3.*",
+    "tekore==3",
     "flask==1.1",
     "zeroconf==0.28",
     'pydbus==0.6; platform_system=="Linux"',
     'SwSpotify==1.2; platform_system=="Windows" or platform_system=="Darwin"',
+    'python-mpv==0.5',
 ]
 
 # If PySide2 is installed and PyQt5 is not, append PySide2 to dependencies

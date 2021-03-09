@@ -7,6 +7,7 @@ use crate::error::{Error, Result};
 use cpal::traits::*;
 // use cpal::{OutputCallbackInfo, StreamError};
 
+#[derive(Default, Debug, Clone)]
 pub struct Audiosync {}
 
 impl Audiosync {

@@ -45,12 +45,17 @@ jobs:
             libmpv-dev \
             libpulse-dev \
             pulseaudio
+      # FIXME: Workaround until https://github.com/PyO3/pyo3/issues/341 is
+      # fixed.
+      - run: cd src/core
       - uses: actions-rs/cargo@v1
         with:
           command: test
-          # FIXME: Workaround until https://github.com/PyO3/pyo3/issues/341
-          # is fixed.
           args: --no-default-features
+      - run: cd ../audiosync
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
 
   rust-fmt:
     name: Rust formatting
