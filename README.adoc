@@ -284,6 +284,24 @@ $ ls ./build/*.zip
 If you find any problems, please
 https://github.com/vidify/vidify/issues/new[open an issue].
 
+==== Building Appx Package for Windows
+
+You may build the package as an `.appx` application. You'll need
+https://docs.microsoft.com/en-us/windows/msix/package/create-app-package-with-makeappx-tool[MakeAppX]
+installed in your system. If it's available as a cmdlet, you can use the full
+path `C:\"Program Files (x86)\Windows Kits\10\App Certification
+Kit\makeappx.exe"` (or wherever you've installed it).
+
+[source, powershell]
+----
+$ python build.py
+$ mv build dev/Vidify
+$ cd dev
+$ makeappx.exe pack /m .\appxmanifest.xml /f .\AppxMapping.ini /p AppxVidify
+----
+
+You can now use `AppxVidify.appx` to launch Vidify.
+
 === License
 
 Vidify's license is the link:LICENSE[GPL v3].
