@@ -1,0 +1,18 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  target-branch: rust-integration
+  ignore:
+  - dependency-name: cpal
+    versions:
+    - 0.13.2
+  - dependency-name: serde
+    versions:
+    - 1.0.124
+  - dependency-name: thiserror
+    versions:
+    - 1.0.23
