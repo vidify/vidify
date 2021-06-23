@@ -44,7 +44,7 @@ MANIFEST
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
-# *.spec
+*.spec
 
 # Installer logs
 pip-log.txt
@@ -139,3 +139,9 @@ dmypy.json
 # Custom
 .vim/
 test.ini
+vidify-v*.zip
+*.h
+*.dll
+*.a
+*.7z
+mpv.def
