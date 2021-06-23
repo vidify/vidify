@@ -37,7 +37,7 @@ jobs:
       - name: Intall python package
         run: pip install . --verbose
       - name: Run Tests
-        run: sh dev/run-python-tests.sh
+        run: ./dev/test-qt-bindings.sh
 
   python-linter:
       name: Python linter

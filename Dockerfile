@@ -14,24 +14,27 @@ ENV CI=true
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     gir1.2-gtk-3.0 \
+    libasound2-dev \
+    libdbus-1-dev \
     libfftw3-dev \
     libgirepository1.0-dev \
     libmpv-dev \
     libnss3 \
+    libpango1.0-dev \
     libpulse-dev \
-    libvlc-dev \
+    p7zip-full \
     pulseaudio \
-    vlc \
     xvfb \
     zip \
  && rm -rf /var/lib/apt/lists/*
 
-# Python dependencies
+# Installing Python dependencies
+RUN pip install -U pip
 COPY dev/build_requires.txt dev/
 RUN pip install -r dev/build_requires.txt
 
-# The app is ready to be installed
+# Installing the app itself
 COPY . .
-RUN pip install . --no-deps
+RUN pip install ".[dev]" --verbose
 
-CMD sh dev/run-tests-docker.sh
+CMD ./dev/test-qt-bindings.sh

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Running the tests on docker for multiple Qt bindings.
 
 set -e
