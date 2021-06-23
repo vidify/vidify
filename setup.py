@@ -27,6 +27,7 @@ install_requires = [
     # APIs and players
     'tekore==3.*',
     'zeroconf==0.28',
+    'python-mpv==0.5',
     'pydbus==0.6; platform_system=="Linux"',
     'SwSpotify==1.2; platform_system=="Windows" or platform_system=="Darwin"'
 ]
