@@ -4,12 +4,12 @@ them.
 """
 
 import importlib
-from typing import Tuple
 from dataclasses import dataclass
+from typing import Tuple
 
-from vidify import is_installed, BaseModuleData
-from vidify.gui import Res
+from vidify import BaseModuleData, is_installed
 from vidify.config import Config
+from vidify.gui import Res
 from vidify.player.generic import PlayerBase
 
 
@@ -25,37 +25,38 @@ class PlayerData(BaseModuleData):
 
 PLAYERS = (
     PlayerData(
-        id='VLC',
-        short_name='VLC',
-        description='Play the music videos locally with the VLC player.',
+        id="VLC",
+        short_name="VLC",
+        description="Play the music videos locally with the VLC player.",
         icon=Res.vlc_icon,
         compatible=True,
-        installed=is_installed('python-vlc'),
-        module='vidify.player.vlc',
-        class_name='VLCPlayer',
-        flags=('vlc_args',)),
-
+        installed=is_installed("python-vlc"),
+        module="vidify.player.vlc",
+        class_name="VLCPlayer",
+        flags=("vlc_args",),
+    ),
     PlayerData(
-        id='MPV',
-        short_name='Mpv',
-        description='Play the music videos locally with the mpv player.',
+        id="MPV",
+        short_name="Mpv",
+        description="Play the music videos locally with the mpv player.",
         icon=Res.mpv_icon,
         compatible=True,
-        installed=is_installed('python-mpv'),
-        module='vidify.player.mpv',
-        class_name='MpvPlayer',
-        flags=('mpv_flags',)),
-
+        installed=is_installed("python-mpv"),
+        module="vidify.player.mpv",
+        class_name="MpvPlayer",
+        flags=("mpv_flags",),
+    ),
     PlayerData(
-        id='EXTERNAL',
-        short_name='External',
-        description='Play the music videos on external devices.',
+        id="EXTERNAL",
+        short_name="External",
+        description="Play the music videos on external devices.",
         icon=Res.external_icon,
         compatible=True,
-        installed=is_installed('zeroconf'),
-        module='vidify.player.external',
-        class_name='ExternalPlayer',
-        flags=('api',))
+        installed=is_installed("zeroconf"),
+        module="vidify.player.external",
+        class_name="ExternalPlayer",
+        flags=("api",),
+    ),
 )
 
 

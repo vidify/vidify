@@ -16,7 +16,7 @@ try:
 except OSError:
     raise ImportError("VLC is not installed")
 
-from vidify import Platform, CURRENT_PLATFORM
+from vidify import CURRENT_PLATFORM, Platform
 from vidify.player.generic import PlayerBase
 
 
@@ -44,7 +44,8 @@ class VLCPlayer(PlayerBase):
         if self._vlc is None:
             raise AttributeError(
                 "VLC couldn't load. This may have been caused by an incorrect"
-                " installation or an invalid parameter in --vlc-args.")
+                " installation or an invalid parameter in --vlc-args."
+            )
 
         self._player = self._vlc.media_player_new()
 

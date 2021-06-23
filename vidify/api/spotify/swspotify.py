@@ -16,7 +16,7 @@ confusing at first glance.
 
 import logging
 
-from SwSpotify import spotify, SpotifyPaused, SpotifyClosed
+from SwSpotify import SpotifyClosed, SpotifyPaused, spotify
 
 from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
@@ -66,14 +66,14 @@ class SwSpotifyAPI(APIBase):
             raise ConnectionNotReady("No song currently playing") from None
 
         # Splitting the artist and title for local songs
-        if self.artist == '':
+        if self.artist == "":
             self.artist, self.title = split_title(self.title)
 
         # Checking that the metadata is valid
         if "" in (self.artist, self.title):
             raise ConnectionNotReady(
-                "No Spotify session currently running or no song currently"
-                " playing.") from None
+                "No Spotify session currently running or no song currently" " playing."
+            ) from None
 
     def event_loop(self) -> None:
         """

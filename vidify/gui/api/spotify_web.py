@@ -4,13 +4,17 @@ Custom API implementation to ask the user for the Spotify Web credentials.
 
 import logging
 
-from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
-                            QVBoxLayout)
-from qtpy.QtCore import Qt, QSize, Signal, Slot
-from tekore import (scope, RefreshingCredentials, RefreshingToken,
-                    parse_code_from_url, HTTPError)
+from qtpy.QtCore import QSize, Qt, Signal, Slot
+from qtpy.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+from tekore import (
+    HTTPError,
+    RefreshingCredentials,
+    RefreshingToken,
+    parse_code_from_url,
+    scope,
+)
 
-from vidify.gui import Fonts, Colors
+from vidify.gui import Colors, Fonts
 from vidify.gui.components import InputField, WebBrowser
 
 
@@ -22,8 +26,9 @@ class SpotifyWebPrompt(QWidget):
 
     done = Signal(RefreshingToken)
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str,
-                 *args) -> None:
+    def __init__(
+        self, client_id: str, client_secret: str, redirect_uri: str, *args
+    ) -> None:
         """
         Starts the API initialization flow, which is the following:
             1. The user inputs the credentials.
@@ -46,8 +51,7 @@ class SpotifyWebPrompt(QWidget):
         self.layout.setSpacing(0)
 
         # The web form for the user to input the credentials.
-        self.web_form = SpotifyWebForm(client_id=client_id,
-                                       client_secret=client_secret)
+        self.web_form = SpotifyWebForm(client_id=client_id, client_secret=client_secret)
         # on_submit_spotify_web creds will be called once the credentials have
         # been input.
         self.web_form.button.clicked.connect(self.on_submit_creds)
@@ -61,7 +65,8 @@ class SpotifyWebPrompt(QWidget):
         # The initial screen with the web form will be shown if the user
         # clicks on the Go Back button.
         self.browser.go_back_button.pressed.connect(
-            lambda: (self.browser.hide(), self.web_form.show()))
+            lambda: (self.browser.hide(), self.web_form.show())
+        )
         # Any change in the browser URL will redirect to on__login to check if
         # the login was succesful.
         self.browser.web_view.urlChanged.connect(self.on_login)
@@ -85,18 +90,17 @@ class SpotifyWebPrompt(QWidget):
         # Obtaining the input data
         form_client_id = self.web_form.client_id
         form_client_secret = self.web_form.client_secret
-        logging.info("Input creds: '%s' & '%s'", form_client_id,
-                     form_client_secret)
+        logging.info("Input creds: '%s' & '%s'", form_client_id, form_client_secret)
 
         # Checking that the data isn't empty
         empty_field = False
-        if form_client_id == '':
+        if form_client_id == "":
             self.web_form.input_client_id.highlight()
             empty_field = True
         else:
             self.web_form.input_client_id.undo_highlight()
 
-        if form_client_secret == '':
+        if form_client_secret == "":
             self.web_form.input_client_secret.highlight()
             empty_field = True
         else:
@@ -111,7 +115,8 @@ class SpotifyWebPrompt(QWidget):
 
         # Creating the request URL to obtain the authorization token
         self.creds = RefreshingCredentials(
-            form_client_id, form_client_secret, self.redirect_uri)
+            form_client_id, form_client_secret, self.redirect_uri
+        )
         self.scope = scope.user_read_currently_playing
         url = self.creds.user_authorisation_url(self.scope)
         self.browser.url = url
@@ -175,8 +180,7 @@ class SpotifyWebForm(QWidget):
     process in the Web API.
     """
 
-    def __init__(self, *args, client_id: str = "", client_secret: str = ""
-                 ) -> None:
+    def __init__(self, *args, client_id: str = "", client_secret: str = "") -> None:
         """
         Loading the main components inside the form. The initial client ID
         and client secret can be passed as a parameter to have an initial
@@ -211,11 +215,12 @@ class SpotifyWebForm(QWidget):
         It can also show error messages.
         """
 
-        url = 'https://vidify.org/wiki/spotify-web-api/'
+        url = "https://vidify.org/wiki/spotify-web-api/"
         text = QLabel(
             "<h2><i>Please introduce your Spotify keys</i></h2>"
             "If you don't know how to obtain them, please read this"
-            f" <a href='{url}'>quick tutorial.</a>")
+            f" <a href='{url}'>quick tutorial.</a>"
+        )
         text.setWordWrap(True)
         text.setOpenExternalLinks(True)
         text.setTextInteractionFlags(Qt.TextBrowserInteraction)

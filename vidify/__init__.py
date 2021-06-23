@@ -4,9 +4,10 @@ logger, cross-platform variables...
 """
 
 import sys
+from dataclasses import dataclass
 from enum import Enum
 from typing import Optional, Tuple
-from dataclasses import dataclass
+
 from pkg_resources import DistributionNotFound, get_distribution
 
 
@@ -23,13 +24,13 @@ class Platform(Enum):
 
 
 # Getting the current platform as a global variable
-if sys.platform.startswith('linux'):
+if sys.platform.startswith("linux"):
     CURRENT_PLATFORM = Platform.LINUX
-elif sys.platform.startswith('darwin'):
+elif sys.platform.startswith("darwin"):
     CURRENT_PLATFORM = Platform.MACOS
-elif sys.platform.startswith('win'):
+elif sys.platform.startswith("win"):
     CURRENT_PLATFORM = Platform.WINDOWS
-elif sys.platform.find('bsd') != -1:
+elif sys.platform.find("bsd") != -1:
     CURRENT_PLATFORM = Platform.BSD
 else:
     CURRENT_PLATFORM = Platform.UNKNOWN
@@ -52,10 +53,10 @@ def format_name(artist: Optional[str], title: Optional[str]) -> str:
     use all it has.
     """
 
-    is_empty = lambda x: x in (None, '')
+    is_empty = lambda x: x in (None, "")
 
     if is_empty(artist) and is_empty(title):
-        return ''
+        return ""
 
     if is_empty(artist):
         return title

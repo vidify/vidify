@@ -10,14 +10,14 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import time
 import logging
+import time
 from typing import Tuple
 
 import pydbus
 from gi.repository import GLib
 
-from vidify.api import split_title, ConnectionNotReady
+from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
 
 
@@ -68,8 +68,8 @@ class MPRISAPI(APIBase):
         self._bus = pydbus.SessionBus()
         self._bus_name, self._obj = self._get_player()
 
-        self.player_name = self._obj['org.mpris.MediaPlayer2'].Identity
-        self._player_interface = self._obj['org.mpris.MediaPlayer2.Player']
+        self.player_name = self._obj["org.mpris.MediaPlayer2"].Identity
+        self._player_interface = self._obj["org.mpris.MediaPlayer2.Player"]
 
         try:
             self._refresh_metadata()
@@ -78,7 +78,7 @@ class MPRISAPI(APIBase):
 
         self._start_event_loop()
 
-    def _get_player(self) -> Tuple[str, 'CompositeObject']:
+    def _get_player(self) -> Tuple[str, "CompositeObject"]:
         """
         Method used to find the available players in the DBus bus. It returns
         the bus' name and object if it was found, or raises ConnectionNotReady
@@ -90,23 +90,23 @@ class MPRISAPI(APIBase):
         # Iterating through every bus name and checking that it's valid.
         for bus_name in self._bus.get(".DBus", "DBus").ListNames():
             # It must be from MediaPlayer2
-            if not bus_name.startswith('org.mpris.MediaPlayer2'):
+            if not bus_name.startswith("org.mpris.MediaPlayer2"):
                 continue
 
             # Trying to obtain the bus object
             try:
-                obj = self._bus.get(bus_name, '/org/mpris/MediaPlayer2')
+                obj = self._bus.get(bus_name, "/org/mpris/MediaPlayer2")
             except (GLib.Error, KeyError) as e:
-                logging.info("Skipping %s because of error: %s",
-                             bus_name, str(e))
+                logging.info("Skipping %s because of error: %s", bus_name, str(e))
                 continue
 
             # And making sure that it's playing at the moment (otherwise
             # only the first player found would be returned, but it could
             # not be the one actually being used).
             if not self._bool_status(obj.PlaybackStatus):
-                logging.info("Skipping %s because it's not playing at"
-                             " the moment", bus_name)
+                logging.info(
+                    "Skipping %s because it's not playing at" " the moment", bus_name
+                )
                 continue
 
             logging.info("Using %s", bus_name)
@@ -122,7 +122,8 @@ class MPRISAPI(APIBase):
         """
 
         self._disconnect_obj = self._obj.PropertiesChanged.connect(
-            self._on_properties_changed)
+            self._on_properties_changed
+        )
 
     def event_loop(self) -> None:
         """
@@ -148,18 +149,18 @@ class MPRISAPI(APIBase):
         """
 
         try:
-            title = metadata['xesam:title']
+            title = metadata["xesam:title"]
         except KeyError:
-            title = ''
+            title = ""
 
         try:
-            artist = metadata['xesam:artist'][0]
+            artist = metadata["xesam:artist"][0]
         except KeyError:
-            artist = ''
+            artist = ""
 
         # Some players use `Unknown` when the artist or title metadata
         # is empty.
-        if artist in ('', 'Unknown'):
+        if artist in ("", "Unknown"):
             artist, title = split_title(title)
 
         return artist, title
@@ -182,10 +183,11 @@ class MPRISAPI(APIBase):
         with the other API status variables.
         """
 
-        return status.lower() == 'playing'
+        return status.lower() == "playing"
 
-    def _on_properties_changed(self, interface: str, properties: dict,
-                               signature: list) -> None:
+    def _on_properties_changed(
+        self, interface: str, properties: dict, signature: list
+    ) -> None:
         """
         Function called from DBus on event changes like the song or if it
         has been paused.
@@ -199,8 +201,8 @@ class MPRISAPI(APIBase):
         # feature.
         start_time = time.time()
 
-        if 'Metadata' in properties:
-            metadata = properties['Metadata']
+        if "Metadata" in properties:
+            metadata = properties["Metadata"]
             artist, title = self._format_metadata(metadata)
             if self.artist != artist or self.title != title:
                 # Refreshes the metadata with the new data and sends the
@@ -210,8 +212,8 @@ class MPRISAPI(APIBase):
                 self.title = title
                 self.new_song_signal.emit(artist, title, start_time)
 
-        if 'PlaybackStatus' in properties:
-            is_playing = self._bool_status(properties['PlaybackStatus'])
+        if "PlaybackStatus" in properties:
+            is_playing = self._bool_status(properties["PlaybackStatus"])
             if self.is_playing != is_playing:
                 # Refreshes the metadata and pauses/plays the video
                 logging.info("Status change detected")

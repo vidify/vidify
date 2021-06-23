@@ -3,21 +3,30 @@ This module contains commonly used components so that their usage and
 initialization is easier.
 """
 
-import time
 import logging
+import time
 from typing import Callable, Optional, Tuple
 
-from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
-                            QVBoxLayout, QGroupBox, QRadioButton, QHBoxLayout,
-                            QButtonGroup, QScrollArea)
+from qtpy.QtCore import Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtCore import Qt, QUrl, Signal, Slot, QTimer
 from qtpy.QtWebEngineWidgets import QWebEngineView
+from qtpy.QtWidgets import (
+    QButtonGroup,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from vidify import BaseModuleData
 from vidify.api import APIS, ConnectionNotReady
+from vidify.gui import Colors, Fonts, Res
 from vidify.player import PLAYERS
-from vidify.gui import Fonts, Colors, Res
 
 
 class ModuleCard(QGroupBox):
@@ -85,8 +94,9 @@ class SetupWidget(QWidget):
     # respectively.
     done = Signal(object, object)
 
-    def __init__(self, saved_api: Optional[str] = None,
-                 saved_player: Optional[str] = None, *args) -> None:
+    def __init__(
+        self, saved_api: Optional[str] = None, saved_player: Optional[str] = None, *args
+    ) -> None:
         """
         The setup widget can be initialized with the previously selected API
         and Player so that all the user has to do is press "Next".
@@ -96,10 +106,10 @@ class SetupWidget(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.api_group = self.load_data(
-            APIS, "Select your music player:", saved_api)
+        self.api_group = self.load_data(APIS, "Select your music player:", saved_api)
         self.player_group = self.load_data(
-            PLAYERS, "Select where to play the videos:", saved_player)
+            PLAYERS, "Select where to play the videos:", saved_player
+        )
         self.init_button()
 
     def init_button(self) -> None:
@@ -142,8 +152,9 @@ class SetupWidget(QWidget):
         text.setFont(font)
         self.layout.addWidget(text)
 
-    def load_data(self, data: Tuple[BaseModuleData], msg: str,
-                  saved_item: Optional[str] = None) -> QButtonGroup:
+    def load_data(
+        self, data: Tuple[BaseModuleData], msg: str, saved_item: Optional[str] = None
+    ) -> QButtonGroup:
         """
         The provided data is converted into cards in the GUI. If the
         module isn't supported on the current OS, it's not added to avoid
@@ -163,8 +174,7 @@ class SetupWidget(QWidget):
             if not module.compatible:
                 continue
 
-            selected = saved_item is not None \
-                and module.id == saved_item.upper()
+            selected = saved_item is not None and module.id == saved_item.upper()
             card = ModuleCard(module, selected)
 
             if module.installed:
@@ -172,8 +182,12 @@ class SetupWidget(QWidget):
             else:
                 disabled.append(card)
             group.addButton(card.button)
-            logging.info("Created API card: %s (enabled=%s, selected=%s)",
-                         module.id, module.installed, selected)
+            logging.info(
+                "Created API card: %s (enabled=%s, selected=%s)",
+                module.id,
+                module.installed,
+                selected,
+            )
 
         for card in disabled:
             layout.addWidget(card)
@@ -213,7 +227,7 @@ class InputField(QLineEdit):
 
         # A clear button
         clear = self.addAction(QIcon(Res.cross), QLineEdit.TrailingPosition)
-        clear.triggered.connect(lambda: self.setText(''))
+        clear.triggered.connect(lambda: self.setText(""))
 
     def highlight(self) -> None:
         """

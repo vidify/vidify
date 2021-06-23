@@ -7,8 +7,8 @@ or mpv.
 import logging
 from typing import Optional
 
-from youtube_dl import YoutubeDL
 from qtpy.QtCore import QObject, Signal
+from youtube_dl import YoutubeDL
 
 
 def get_direct_url(data: dict) -> str:
@@ -17,7 +17,7 @@ def get_direct_url(data: dict) -> str:
     https://r1---sn-vg5obxn25po-cjod.googlevideo.com/videoplayback?...
     """
 
-    return data['entries'][0]['url']
+    return data["entries"][0]["url"]
 
 
 def get_youtube_url(data: dict) -> str:
@@ -26,7 +26,7 @@ def get_youtube_url(data: dict) -> str:
     https://www.youtube.com/watch?v=dQw4w9WgXcQ
     """
 
-    return data['entries'][0]['webpage_url']
+    return data["entries"][0]["webpage_url"]
 
 
 class YouTubeDLWorker(QObject):
@@ -44,22 +44,23 @@ class YouTubeDLWorker(QObject):
     fail = Signal()
     finish = Signal()
 
-    def __init__(self, query: str, debug: bool = False,
-                 width: Optional[int] = None, height: Optional[int] = None
-                 ) -> None:
+    def __init__(
+        self,
+        query: str,
+        debug: bool = False,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+    ) -> None:
         super().__init__()
 
         # The query attribute contains the full search to be done on YouTube.
         self.query = query
 
-        self.options = {
-            'format': 'bestvideo',
-            'quiet': not debug
-        }
+        self.options = {"format": "bestvideo", "quiet": not debug}
         if width is not None:
-            self.options['format'] += f'[width<={width}]'
+            self.options["format"] += f"[width<={width}]"
         if height is not None:
-            self.options['format'] += f'[height<={height}]'
+            self.options["format"] += f"[height<={height}]"
 
     def get_url(self) -> None:
         """
@@ -75,11 +76,10 @@ class YouTubeDLWorker(QObject):
                 # Any kind of error has to be caught, so that it doesn't only
                 # send the error signal when the download wasn't successful
                 # (a DownloadError from youtube_dl).
-                logging.info("YouTube-dl wasn't able to obtain the video: %s",
-                             str(e))
+                logging.info("YouTube-dl wasn't able to obtain the video: %s", str(e))
                 self.fail.emit()
             else:
-                if len(data['entries']) == 0:
+                if len(data["entries"]) == 0:
                     logging.info("YouTube-dl returned no entries")
                     self.fail.emit()
                 else:

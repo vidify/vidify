@@ -6,7 +6,6 @@ from qtpy.QtWidgets import QApplication
 
 from vidify.player.external import ExternalPlayer
 
-
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
 p: ExternalPlayer = None
@@ -116,5 +115,5 @@ class ExternalPlayerTest(unittest.TestCase):
         self.assertTrue(pos_equal(0, p.position))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
