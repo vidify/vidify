@@ -156,7 +156,7 @@ args_os = {
     "src/vidify/__main__.py": ALL_OS,
     "src/vidify/player/mpv.py": ALL_OS,
     "src/vidify/api/spotify/web.py": ALL_OS,
-    "src/vidify/audiosync.py": ALL_OS,
+    # "src/vidify/audiosync.py": ALL_OS,
     "src/vidify/api/mpris.py": ["Linux"],
     "src/vidify/api/spotify/swspotify.py": ["Windows", "Darwin"],
     "-y": ALL_OS,
