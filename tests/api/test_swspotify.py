@@ -4,7 +4,7 @@ import unittest
 import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
-from vidify import CURRENT_PLATFORM, Platform
+from vidify import CUR_PLATFORM, Platform
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
@@ -14,7 +14,7 @@ SKIP_MSG = "Skipping this test as it won't work on the current system."
 
 class SwSpotifyTest(unittest.TestCase):
     @unittest.skipIf(
-        CI or CURRENT_PLATFORM not in (Platform.MACOS, Platform.WINDOWS), SKIP_MSG
+        CI or CUR_PLATFORM not in (Platform.MACOS, Platform.WINDOWS), SKIP_MSG
     )
     def test_simple(self):
         from vidify.api.spotify.swspotify import SwSpotifyAPI

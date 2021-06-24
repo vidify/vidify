@@ -5,15 +5,15 @@ fonts.
 In the future, these properties could be modified if dark mode was enabled.
 """
 
-import os
+from os.path import abspath, dirname, join
 
 from qtpy.QtGui import QFont
 
-from vidify import CURRENT_PLATFORM, Platform
+import vidify
+from vidify import CUR_PLATFORM, Platform
 
-# The vidify installation path's resources folder, having in account that this
-# module is vidify.gui and that the resources folder is vidify.gui.res.
-RES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "res")
+# The vidify installation path's resources directory.
+RES_DIR = join(dirname(abspath(vidify.__file__)), "res")
 
 
 class ColorsBase:
@@ -36,7 +36,7 @@ def res_path(rel_path: str) -> str:
     from directories other than the main one.
     """
 
-    return os.path.join(RES_DIR, rel_path)
+    return join(RES_DIR, rel_path)
 
 
 def res_font(name: str) -> str:
@@ -46,7 +46,7 @@ def res_font(name: str) -> str:
     what this function selects.
     """
 
-    extension = ".ttf" if CURRENT_PLATFORM == Platform.WINDOWS else ".otf"
+    extension = ".ttf" if CUR_PLATFORM == Platform.WINDOWS else ".otf"
 
     return res_path(name) + extension
 
@@ -57,30 +57,29 @@ class ResBase:
     """
 
     fonts = (
-        res_font("Inter/Inter-Regular"),
-        res_font("Inter/Inter-Italic"),
-        res_font("Inter/Inter-Bold"),
-        res_font("Inter/Inter-BoldItalic"),
-        res_font("Inter/Inter-Medium"),
-        res_font("Inter/Inter-MediumItalic"),
+        res_font("fonts/Inter-Regular"),
+        res_font("fonts/Inter-Italic"),
+        res_font("fonts/Inter-Bold"),
+        res_font("fonts/Inter-BoldItalic"),
+        res_font("fonts/Inter-Medium"),
+        res_font("fonts/Inter-MediumItalic"),
     )
 
     default_video = res_path("default_video.mp4")
 
     icon = (
-        res_path("icon16x16.ico")
-        if CURRENT_PLATFORM == Platform.WINDOWS
+        res_path("icon.ico")
+        if CUR_PLATFORM == Platform.WINDOWS
         else res_path("icon.svg")
     )
     cross = res_path("cross.svg")
 
-    mpris_linux_icon = res_path("api_icons/mpris.svg")
-    swspotify_icon = res_path("api_icons/spotify/swspotify.svg")
-    spotify_web_icon = res_path("api_icons/spotify/web.svg")
+    mpris_linux_icon = res_path("apis/icons/mpris.svg")
+    swspotify_icon = res_path("apis/icons/spotify/swspotify.svg")
+    spotify_web_icon = res_path("apis/icons/spotify/web.svg")
 
-    vlc_icon = res_path("player_icons/vlc.svg")
-    mpv_icon = res_path("player_icons/mpv.svg")
-    external_icon = res_path("player_icons/external.svg")
+    mpv_icon = res_path("players/icons/mpv.svg")
+    external_icon = res_path("players/icons/external.svg")
 
     def set_dark_mode(self) -> None:
         """
@@ -88,7 +87,7 @@ class ResBase:
         will change to dark mode.
         """
 
-        self.cross = res_path("dark_mode_cross.svg")
+        self.cross = res_path("dark_cross.svg")
 
 
 class FontsBase:
@@ -111,9 +110,9 @@ class FontsBase:
 # The classes are initialized so that they can be dynamically modified from
 # other modules acting as global variables, and other utilities like dark
 # mode.
-Res = ResBase()
-Colors = ColorsBase()
-Fonts = FontsBase()
+RES = ResBase()
+COLORS = ColorsBase()
+FONTS = FontsBase()
 
 
 def set_dark_mode() -> None:
@@ -122,4 +121,4 @@ def set_dark_mode() -> None:
     module.
     """
 
-    Res.set_dark_mode()
+    RES.set_dark_mode()

@@ -16,8 +16,8 @@ from qtpy.QtNetwork import QHostAddress, QTcpServer, QTcpSocket
 from qtpy.QtWidgets import QLabel, QVBoxLayout
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
-from vidify import CURRENT_PLATFORM
-from vidify.gui import Fonts, Res
+from vidify import CUR_PLATFORM
+from vidify.gui import FONTS, RES
 from vidify.player import PlayerBase
 from vidify.version import __version__
 
@@ -150,7 +150,7 @@ class ExternalPlayer(PlayerBase):
         self.layout.setAlignment(Qt.AlignTop)
         self.title = QLabel("External player")
         self.title.setStyleSheet("padding: 30px; color: white")
-        self.title.setFont(Fonts.title)
+        self.title.setFont(FONTS.title)
         self.layout.addWidget(self.title)
         self.log_layout = QVBoxLayout()
         self.layout.addLayout(self.log_layout)
@@ -161,7 +161,7 @@ class ExternalPlayer(PlayerBase):
             self.labels[key] = QLabel(prefix + "-")
             self.labels[key].setStyleSheet("padding: 20px; color: white")
             self.labels[key].setWordWrap(True)
-            font = Fonts.bigtext
+            font = FONTS.bigtext
             font.setBold(False)
             self.labels[key].setFont(font)
             self.labels[key].setAlignment(Qt.AlignHCenter)
@@ -215,7 +215,7 @@ class ExternalPlayer(PlayerBase):
         desc = {
             "id": self.SERVICE_NAME,
             "version": __version__,
-            "os": CURRENT_PLATFORM.name,
+            "os": CUR_PLATFORM.name,
             "api": self._api_name,
         }
         # The name can't have '.', because it's a special character used as
@@ -328,7 +328,7 @@ class ExternalPlayer(PlayerBase):
         # The URL shall only be null when the video couldn't be found.
         # Otherwise, it won't be included in the message.
         if url is not None:
-            data["url"] = None if url == Res.default_video else url
+            data["url"] = None if url == RES.default_video else url
         # The absolute position has priority over the relative.
         if absolute_pos is not None:
             data["absolute_pos"] = absolute_pos

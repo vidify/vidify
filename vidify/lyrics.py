@@ -10,7 +10,7 @@ free, in comparison to Genius.
 
 import lyricwikia
 
-from vidify import CURRENT_PLATFORM, Platform, format_name
+from vidify import CUR_PLATFORM, Platform, format_name
 
 # The different error messages returned by LyricWikia in order to override
 # them with the default error message.
@@ -30,7 +30,7 @@ def get_lyrics(artist: str, title: str) -> str:
 
     # Colors are not displayed on Windows because it doesn't support ANSI
     # escape codes and importing colorama isn't worth it.
-    if CURRENT_PLATFORM == Platform.WINDOWS:
+    if CUR_PLATFORM == Platform.WINDOWS:
         name = f">> {name}"
     else:
         name = f"\033[4m{name}\033[0m"

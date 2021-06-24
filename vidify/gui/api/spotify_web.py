@@ -14,7 +14,7 @@ from tekore import (
     scope,
 )
 
-from vidify.gui import Colors, Fonts
+from vidify.gui import COLORS, FONTS
 from vidify.gui.components import InputField, WebBrowser
 
 
@@ -224,7 +224,7 @@ class SpotifyWebForm(QWidget):
         text.setWordWrap(True)
         text.setOpenExternalLinks(True)
         text.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        text.setFont(Fonts.text)
+        text.setFont(FONTS.text)
         text.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(text)
 
@@ -248,8 +248,8 @@ class SpotifyWebForm(QWidget):
 
         self.error_msg = QLabel()
         self.error_msg.setWordWrap(True)
-        self.error_msg.setFont(Fonts.text)
-        self.error_msg.setStyleSheet(f"color: {Colors.darkerror};")
+        self.error_msg.setFont(FONTS.text)
+        self.error_msg.setStyleSheet(f"color: {COLORS.darkerror};")
         self.error_msg.setAlignment(Qt.AlignHCenter)
         self.layout.addWidget(self.error_msg)
 
@@ -260,7 +260,7 @@ class SpotifyWebForm(QWidget):
         """
 
         self.button = QPushButton("SUBMIT")
-        self.button.setFont(Fonts.bigbutton)
+        self.button.setFont(FONTS.bigbutton)
         self.layout.addWidget(self.button)
 
     @property

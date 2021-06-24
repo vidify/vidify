@@ -11,7 +11,7 @@ from qtpy.QtGui import QIcon
 from qtpy.QtWidgets import QApplication
 
 from vidify.config import Config
-from vidify.gui import Res, set_dark_mode
+from vidify.gui import RES, set_dark_mode
 from vidify.gui.window import MainWindow
 
 
@@ -28,7 +28,7 @@ def start_gui(config: Config) -> None:
         logging.info("Enabling dark mode")
         app.setStyleSheet(qdarkstyle.load_stylesheet_from_environment())
         set_dark_mode()
-    app.setWindowIcon(QIcon(Res.icon))
+    app.setWindowIcon(QIcon(RES.icon))
     window = MainWindow(config)
     window.show()
     sys.exit(app.exec_())
@@ -38,6 +38,14 @@ def main() -> None:
     # Initialization and parsing of the config from arguments and config file
     config = Config()
     config.parse()
+
+    # Deprecated options
+    if config.audiosync:
+        print(
+            "WARNING: Audiosync is disabled until a new implementation is"
+            " worked on. Stay updated with vidify.org."
+        )
+        config.audiosync = False
 
     # Logger initialzation with precise milliseconds handler.
     logging.basicConfig(

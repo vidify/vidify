@@ -4,7 +4,7 @@ import unittest
 import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
-from vidify import CURRENT_PLATFORM, Platform
+from vidify import CUR_PLATFORM, Platform
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
@@ -13,9 +13,7 @@ SKIP_MSG = "Skipping this test as it won't work on the current system."
 
 
 class MPRISTest(unittest.TestCase):
-    @unittest.skipIf(
-        CI or CURRENT_PLATFORM not in (Platform.BSD, Platform.LINUX), SKIP_MSG
-    )
+    @unittest.skipIf(CI or CUR_PLATFORM not in (Platform.BSD, Platform.LINUX), SKIP_MSG)
     def test_simple(self):
         from vidify.api.mpris import MPRISAPI
 
@@ -23,7 +21,7 @@ class MPRISTest(unittest.TestCase):
         api.connect_api()
         api._refresh_metadata()
 
-    @unittest.skipIf(CURRENT_PLATFORM not in (Platform.BSD, Platform.LINUX), SKIP_MSG)
+    @unittest.skipIf(CUR_PLATFORM not in (Platform.BSD, Platform.LINUX), SKIP_MSG)
     def test_bool_status(self):
         from vidify.api.mpris import MPRISAPI
 

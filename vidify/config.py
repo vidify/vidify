@@ -16,7 +16,7 @@ from typing import Any, Optional, Tuple, Union
 
 from appdirs import AppDirs
 
-from vidify import CURRENT_PLATFORM, Platform
+from vidify import CUR_PLATFORM, Platform
 from vidify.version import __version__
 
 # Default config path in the system
@@ -63,7 +63,7 @@ OPTIONS = {
     # Note: for the argument options with a single identifier, a comma has to
     # be used at the end to specify that it's a tuple.
     "debug": FullOption(
-        description="display debug messages.",
+        description="Display debug messages.",
         type=bool,
         default=False,
         args=("--debug",),
@@ -72,7 +72,7 @@ OPTIONS = {
     ),
     # Custom config file, only available for the argument parser.
     "config_file": Argument(
-        description="the config file path.",
+        description="The config file path.",
         type=str,
         default=DEFAULT_PATH,
         args=("--config-file",),
@@ -82,7 +82,7 @@ OPTIONS = {
     # meaning that it has to be set to False in the config file to be
     # equivalent.
     "lyrics": FullOption(
-        description="do not print lyrics.",
+        description="Do not print lyrics.",
         type=bool,
         default=True,
         args=("-n", "--no-lyrics"),
@@ -91,7 +91,7 @@ OPTIONS = {
     ),
     # Starting the app fullscreen.
     "fullscreen": FullOption(
-        description="open the app in fullscreen mode.",
+        description="Open the app in fullscreen mode.",
         type=bool,
         default=False,
         args=("-f", "--fullscreen"),
@@ -100,7 +100,7 @@ OPTIONS = {
     ),
     # The dark mode
     "dark_mode": FullOption(
-        description="activate the dark mode.",
+        description="Activate the dark mode.",
         type=bool,
         default=False,
         args=("--dark-mode",),
@@ -109,7 +109,7 @@ OPTIONS = {
     ),
     # Window that always stays on top of others.
     "stay_on_top": FullOption(
-        description="the window will stay on top of all apps.",
+        description="The window will stay on top of all apps.",
         type=bool,
         default=False,
         args=("--stay-on-top",),
@@ -118,7 +118,7 @@ OPTIONS = {
     ),
     # Initial window's width.
     "width": FullOption(
-        description="set the maximum width for the player. This is helpful to"
+        description="Set the maximum width for the player. This is helpful to"
         " download lower res videos if your connection isn't too good.",
         type=int,
         default=None,
@@ -128,7 +128,7 @@ OPTIONS = {
     ),
     # Initial window's height.
     "height": FullOption(
-        description="set the maximum height for the player.",
+        description="Set the maximum height for the player.",
         type=int,
         default=None,
         args=("--height",),
@@ -139,7 +139,7 @@ OPTIONS = {
     # to the user. The option's contents should be one of the names listed in
     # `vidify.api`'s APIData enumeration.
     "api": FullOption(
-        description="select the API use. Please read the installation guide"
+        description="Select the API use. Please read the installation guide"
         " for a list with the available APIs with detailed information about"
         " them.",
         type=str,
@@ -151,7 +151,7 @@ OPTIONS = {
     # Player used. By default it's VLC. This option's contents should be one
     # of the names listed in `vidify.player`'s PlayerData enumeration.
     "player": FullOption(
-        description="select the player to be used. Plase read the installation"
+        description="Select the player to be used. Plase read the installation"
         " guide for a list with the available players.",
         type=str,
         default="VLC",
@@ -159,14 +159,10 @@ OPTIONS = {
         arg_action="store",
         section="Defaults",
     ),
-    # The audio synchronization feature. It will try to automatically
-    # synchronize the video playing with the system recorded audio. Currently
-    # only available on Linux.
+    # The audio synchronization feature.
     "audiosync": FullOption(
-        description="enable automatic audio synchronization. You may need to"
-        " install additional dependencies. Read the installation guide for"
-        " more information. Note: this feature is still in development."
-        " It's recommended to use Mpv for precision.",
+        description="Enable automatic audio synchronization. NOTE: this is"
+        " deprecated until a new implementation is worked on.",
         type=bool,
         default=False,
         args=("--audiosync",),
@@ -178,7 +174,7 @@ OPTIONS = {
     # video. Usually it's about 200ms, but it depends on the hardware so
     # it's left as an option.
     "audiosync_calibration": FullOption(
-        description="the audio synchronization's precision may depend on your"
+        description="The audio synchronization's precision may depend on your"
         " hardware. You can calibrate the delay in milliseconds returned with"
         " this. It can be positive or negative.",
         type=int,
@@ -189,7 +185,7 @@ OPTIONS = {
     ),
     # Arguments and options provided for the players.
     "vlc_args": FullOption(
-        description="custom arguments used when opening VLC.",
+        description="Custom arguments used when opening VLC.",
         type=str,
         default=None,
         args=("--vlc-args",),
@@ -197,7 +193,7 @@ OPTIONS = {
         section="Defaults",
     ),
     "mpv_flags": FullOption(
-        description="custom boolean flags used when opening mpv, with dashes"
+        description="Custom boolean flags used when opening mpv, with dashes"
         " and separated by spaces.",
         type=str,
         default=None,
@@ -207,7 +203,7 @@ OPTIONS = {
     ),
     # Data for the Spotify Web API
     "client_id": FullOption(
-        description="your client ID key for the Spotify Web API. Check the"
+        description="Your client ID key for the Spotify Web API. Check the"
         " README to learn how to obtain yours. Example:"
         " --client-id='5fe01282e44241328a84e7c5cc169165'.",
         type=str,
@@ -217,7 +213,7 @@ OPTIONS = {
         section="SpotifyWeb",
     ),
     "client_secret": FullOption(
-        description="your client secret key for the Spotify Web API. Check the"
+        description="Your client secret key for the Spotify Web API. Check the"
         " wiki to learn how to obtain yours. Example:"
         " --client-secret='2665f6d143be47c1bc9ff284e9dfb350'.",
         type=str,
@@ -227,7 +223,7 @@ OPTIONS = {
         section="SpotifyWeb",
     ),
     "redirect_uri": FullOption(
-        description="optional redirect uri for the Spotify Web API to get the"
+        description="Optional redirect uri for the Spotify Web API to get the"
         " authorization token.",
         type=str,
         default="http://localhost:8888/callback/",
@@ -295,10 +291,6 @@ class Config:
             else:
                 default = data.default
             default_str = f"Default is '{default}'"
-            if CURRENT_PLATFORM == Platform.WINDOWS:
-                default_str = "[" + default_str + "]"
-            else:
-                default_str = "\033[34m" + default_str + "\033[0m"
 
             kwargs = {
                 "action": data.arg_action,
