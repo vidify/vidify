@@ -34,6 +34,7 @@ class Option:
     default: Any
 
 
+# TODO: use list instead of tuple
 @dataclass
 class Argument(Option):
     # The argparse action: 'store', 'store_true'. Will be ignored if `args`
@@ -203,27 +204,17 @@ OPTIONS = {
     ),
     # Data for the Spotify Web API
     "client_id": FullOption(
-        description="Your client ID key for the Spotify Web API. Check the"
-        " README to learn how to obtain yours. Example:"
-        " --client-id='5fe01282e44241328a84e7c5cc169165'.",
+        description="The client ID key for the Spotify Web API authentication"
+        " process via PKCE. Vidify's is used by default, but you can configure"
+        " it. Check the README to learn how to obtain yours.",
         type=str,
-        default=None,
+        default="cffe5ab69ab64b6bbe8914c2a4092f98",
         args=("--client-id",),
         arg_action="store",
         section="SpotifyWeb",
     ),
-    "client_secret": FullOption(
-        description="Your client secret key for the Spotify Web API. Check the"
-        " wiki to learn how to obtain yours. Example:"
-        " --client-secret='2665f6d143be47c1bc9ff284e9dfb350'.",
-        type=str,
-        default=None,
-        args=("--client-secret",),
-        arg_action="store",
-        section="SpotifyWeb",
-    ),
     "redirect_uri": FullOption(
-        description="Optional redirect uri for the Spotify Web API to get the"
+        description="The redirect uri for the Spotify Web API to get the"
         " authorization token.",
         type=str,
         default="http://localhost:8888/callback/",

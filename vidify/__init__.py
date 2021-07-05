@@ -6,7 +6,7 @@ logger, cross-platform variables...
 import sys
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Optional, List
 
 from pkg_resources import DistributionNotFound, get_distribution
 
@@ -86,7 +86,7 @@ class BaseModuleData:
     module: str
 
 
-def find_module(data: Tuple[BaseModuleData], module_id: str) -> BaseModuleData:
+def find_module(data: List[BaseModuleData], module_id: str) -> BaseModuleData:
     for element in data:
         if element.name == module_id:
             return element

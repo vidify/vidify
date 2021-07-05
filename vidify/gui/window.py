@@ -57,6 +57,7 @@ import types
 from contextlib import suppress
 from typing import Callable, Optional
 
+import tekore
 from qtpy.QtCore import QCoreApplication, Qt, QThread, QTimer, Slot
 from qtpy.QtGui import QFontDatabase
 from qtpy.QtWidgets import QHBoxLayout, QWidget
@@ -66,6 +67,7 @@ from vidify.api import APIS, APIData
 from vidify.config import Config
 from vidify.gui import COLORS, RES
 from vidify.gui.components import APIConnecter, SetupWidget
+from vidify.gui.api.spotify_web import SpotifyWebAuthenticator
 from vidify.lyrics import get_lyrics
 from vidify.player import PlayerData, initialize_player
 from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
@@ -457,73 +459,28 @@ class MainWindow(QWidget):
 
     def init_spotify_web_api(self) -> None:
         """
-        SPOTIFY WEB API CUSTOM FUNCTION
-
-        Note: the Tekore imports are done inside the functions so that
-        Tekore isn't needed for whoever doesn't plan to use the Spotify
-        Web API.
+        NOTE: This is a custom function for the Spotify Web API initialization.
         """
 
-        from vidify.api.spotify.web import get_token
-        from vidify.gui.api.spotify_web import SpotifyWebPrompt
+        def start_api(self, token: tekore.RefreshingToken) -> None:
+            logging.info("Initializing the Spotify Web API")
 
-        token = get_token(
-            self.config.refresh_token, self.config.client_id, self.config.client_secret
-        )
+            from vidify.api.spotify.web import SpotifyWebAPI
 
-        if token is not None:
-            # If the previous token was valid, the API can already start.
-            logging.info("Reusing a previously generated token")
-            self.start_spotify_web_api(token, save_config=False)
-        else:
-            # Otherwise, the credentials are obtained with the GUI. When
-            # a valid auth token is ready, the GUI will initialize the API
-            # automatically exactly like above. The GUI won't ask for a
-            # redirect URI for now.
-            logging.info("Asking the user for credentials")
-            # The SpotifyWebPrompt handles the interaction with the user and
-            # emits a `done` signal when it's done.
-            self._spotify_web_prompt = SpotifyWebPrompt(
-                self.config.client_id,
-                self.config.client_secret,
-                self.config.redirect_uri,
+            # Initializing the web API
+            self.api = SpotifyWebAPI(token)
+            api_data = find_module(APIS, "SPOTIFY_WEB")
+            self.wait_for_connection(
+                self.api.connect_api,
+                message=api_data.connect_msg,
+                event_loop_interval=api_data.event_loop_interval,
             )
-            self._spotify_web_prompt.done.connect(self.start_spotify_web_api)
-            self.layout.addWidget(self._spotify_web_prompt)
 
-    def start_spotify_web_api(
-        self, token: "RefreshingToken", save_config: bool = True
-    ) -> None:
-        """
-        SPOTIFY WEB API CUSTOM FUNCTION
-
-        Initializes the Web API, also saving them in the config for future
-        usage (if `save_config` is true).
-        """
-        from vidify.api.spotify.web import SpotifyWebAPI
-
-        logging.info("Initializing the Spotify Web API")
-
-        # Initializing the web API
-        self.api = SpotifyWebAPI(token)
-        api_data = find_module(APIS, "SPOTIFY_WEB")
-        self.wait_for_connection(
-            self.api.connect_api,
-            message=api_data.connect_msg,
-            event_loop_interval=api_data.event_loop_interval,
-        )
-
-        # The obtained credentials are saved for the future
-        if save_config:
-            logging.info("Saving the Spotify Web API credentials")
-            self.config.client_secret = self._spotify_web_prompt.client_secret
-            self.config.client_id = self._spotify_web_prompt.client_id
-            self.config.refresh_token = token.refresh_token
-
-        # The credentials prompt widget is removed after saving the data. It
-        # may not exist because start_spotify_web_api was called directly,
-        # so errors are taken into account.
-        with suppress(AttributeError):
-            self.layout.removeWidget(self._spotify_web_prompt)
-            self._spotify_web_prompt.hide()
+            self.layout.removeWidget(self._spotify_web_auth)
+            self._spotify_web_auth.hide()
             del self._spotify_web_prompt
+
+        # Initializing the authenticator and waiting for it to be done.
+        self._spotify_web_auth = SpotifyWebAuthenticator(self.config)
+        self._spotify_web_auth.done.connect(start_api)
+        self.layout.addWidget(self._spotify_web_auth)

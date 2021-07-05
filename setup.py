@@ -19,13 +19,14 @@ install_requires = [
     # Base package
     "QtPy==1.9",
     "lyricwikia==0.1",
-    "youtube-dl",
-    "appdirs==1.4.4",
+    "youtube-dl",  # Always the latest version to avoid breakage
+    "appdirs==1.4",
     "qdarkstyle==2.8",
+    "Flask==2.0",
     # Fixes for older Python versions
     'dataclasses; python_version<"3.7"',
     # APIs and players
-    "tekore==3.*",
+    "tekore==3.7",
     "zeroconf==0.28",
     "python-mpv==0.5",
     'pydbus==0.6; platform_system=="Linux"',
