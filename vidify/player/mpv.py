@@ -9,12 +9,11 @@ player implementation inherits, and an explanation in detail of the methods.
 
 import locale
 import logging
-from typing import Optional
 
 from mpv import MPV
 
-from vidify.player.generic import PlayerBase
 from vidify.config import Config
+from vidify.player.generic import PlayerBase
 
 # Importing locale is necessary since qtpy stomps over the locale settings
 # needed by libmpv. This needs to happen after importing PyQT before creating

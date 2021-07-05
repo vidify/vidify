@@ -16,7 +16,7 @@ from tekore import (
 )
 
 from vidify.gui import COLORS, FONTS
-from vidify.gui.components import InputField, WebBrowser
+from vidify.gui.components import InputField
 
 
 class SpotifyWebPrompt(QWidget):

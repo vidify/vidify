@@ -16,7 +16,6 @@ from typing import Any, Optional, Tuple, Union
 
 from appdirs import AppDirs
 
-from vidify import CUR_PLATFORM, Platform
 from vidify.version import __version__
 
 # Default config path in the system

@@ -9,7 +9,7 @@ import unittest
 from qtpy.QtWidgets import QApplication
 
 from vidify.api import APIS
-from vidify.config import OPTIONS, Config
+from vidify.config import Config
 from vidify.gui.window import MainWindow
 from vidify.player import PLAYERS, initialize_player
 

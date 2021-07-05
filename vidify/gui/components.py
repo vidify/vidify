@@ -7,7 +7,7 @@ import logging
 import time
 from typing import Callable, List, Optional
 
-from qtpy.QtCore import Qt, QTimer, QUrl, Signal, Slot
+from qtpy.QtCore import Qt, QTimer, Signal, Slot
 from qtpy.QtGui import QIcon, QPixmap
 from qtpy.QtWidgets import (
     QButtonGroup,
