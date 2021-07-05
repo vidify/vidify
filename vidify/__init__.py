@@ -84,7 +84,6 @@ class BaseModuleData:
     compatible: bool
     installed: bool
     module: str
-    class_name: str
 
 
 def find_module(data: Tuple[BaseModuleData], module_id: str) -> BaseModuleData:

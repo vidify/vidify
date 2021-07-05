@@ -5,7 +5,7 @@ initialization is easier.
 
 import logging
 import time
-from typing import Callable, Optional, Tuple
+from typing import Callable, List, Optional
 
 from qtpy.QtCore import Qt, QTimer, QUrl, Signal, Slot
 from qtpy.QtGui import QIcon, QPixmap
@@ -152,7 +152,7 @@ class SetupWidget(QWidget):
         self.layout.addWidget(text)
 
     def load_data(
-        self, data: Tuple[BaseModuleData], msg: str, saved_item: Optional[str] = None
+        self, data: List[BaseModuleData], msg: str, saved_item: Optional[str] = None
     ) -> QButtonGroup:
         """
         The provided data is converted into cards in the GUI. If the
@@ -243,52 +243,6 @@ class InputField(QLineEdit):
         """
 
         self.setStyleSheet("")
-
-
-class WebBrowser(QWidget):
-    """
-    This widget contains a QWebEngineView and other simple controls.
-    """
-
-    def __init__(self, *args) -> None:
-        super().__init__(*args)
-        self.layout = QVBoxLayout(self)
-        self.setup_controls()
-        self.setup_web_view()
-
-    def setup_web_view(self) -> None:
-        """
-        The web view itself, with a fixed size.
-        """
-
-        self.web_view = QWebEngineView()
-        self.layout.addWidget(self.web_view)
-
-    def setup_controls(self) -> None:
-        """
-        The web view controls for now are just a button to go back.
-        """
-
-        self.go_back_button = QPushButton("← Go back")
-        self.go_back_button.setFont(FONTS.mediumbutton)
-        self.layout.addWidget(self.go_back_button)
-
-    @property
-    def url(self) -> str:
-        """
-        Returns the web view's browser as a string. The first url() returns
-        a QUrl and the second the string with the URL.
-        """
-
-        return self.web_view.url().url()
-
-    @url.setter
-    def url(self, url: str) -> None:
-        """
-        Sets the web view's URL to `url`.
-        """
-
-        self.web_view.setUrl(QUrl(url))
 
 
 class APIConnecter(QLabel):

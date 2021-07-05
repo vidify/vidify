@@ -17,6 +17,7 @@ from qtpy.QtWidgets import QLabel, QVBoxLayout
 from zeroconf import IPVersion, ServiceInfo, Zeroconf
 
 from vidify import CUR_PLATFORM
+from vidify.config import Config
 from vidify.gui import FONTS, RES
 from vidify.player import PlayerBase
 from vidify.version import __version__
@@ -126,8 +127,9 @@ class ExternalPlayer(PlayerBase):
     }
 
     _CONFIRM_MSG = json.dumps({"success": True}).encode("utf-8")
+    _MAX_NSD_NAME_LENGTH = 64
 
-    def __init__(self, api_name: str) -> None:
+    def __init__(self, config: Config) -> None:
         """
         This initializes both the player widget and the TCP server.
         """
@@ -137,13 +139,22 @@ class ExternalPlayer(PlayerBase):
         # conflicts when the port is already being used.
         self.port = 0
         self._time_delay = 0
-        self._api_name = api_name
+        self._api_name = config.api
         self._clients = []
         self._pending = []
         # The external player saves the previous values so that they can be
         # sent to new connections.
         self._media = None
         self._is_playing = None
+
+        self.setup_ui()
+        self.start_server()
+
+    def setup_ui(self) -> None:
+        """
+        The player contains a label to show messages and the status of the
+        tracks playing.
+        """
 
         # The player itself contains a label to show messages.
         self.layout = QVBoxLayout(self)
@@ -167,11 +178,6 @@ class ExternalPlayer(PlayerBase):
             self.labels[key].setAlignment(Qt.AlignHCenter)
             self.log_layout.addWidget(self.labels[key])
 
-        # Initializing the TCP server
-        self._server = QTcpServer()
-        self._server.newConnection.connect(self.on_new_connection)
-        self.start_server()
-
     def __del__(self) -> None:
         logging.info("Closing the server and unregistering the service")
         try:
@@ -183,10 +189,15 @@ class ExternalPlayer(PlayerBase):
     def start_server(self) -> None:
         """
         Starts to wait for new connections asynchronously, and registers
-        the service so that clients can find Vidify.
+        the service so that clients can find the server information.
         """
 
+        # Initializing the TCP server
+        self._server = QTcpServer()
+        self._server.newConnection.connect(self.on_new_connection)
+
         if not self._server.listen(QHostAddress.Any, self.port):
+            # TODO: this should raise an exception
             logging.info("Server couldn't wake up")
             return
 
@@ -222,9 +233,9 @@ class ExternalPlayer(PlayerBase):
         # a separator, and some NSD clients can't handle names with it.
         system = f"{platform.system()} {platform.node()}".replace(".", "_")
         full_name = f"{self.SERVICE_NAME} - {system}"
-        # The name's maximum length is 64 bytes
-        if len(full_name) >= 64:
+        if len(full_name) >= self._MAX_NSD_NAME_LENGTH:
             full_name = full_name[:60] + "..."
+            full_name = full_name[: self._MAX_NSD_NAME_LENGTH - 3] + "..."
 
         self.info = ServiceInfo(
             self.SERVICE_TYPE,
@@ -245,8 +256,8 @@ class ExternalPlayer(PlayerBase):
     @Slot()
     def on_new_connection(self) -> None:
         """
-        When a new client connects to this server, it's added to the current
-        clients list until it disconnects.
+        When a new client connects to this server, it's added to the list of
+        clients until it disconnects.
         """
 
         while self._server.hasPendingConnections():
@@ -269,7 +280,7 @@ class ExternalPlayer(PlayerBase):
         logging.info("Client %s confirmation successful", str(client))
         self._pending.remove(client)
         self._clients.append(client)
-        # Sending it the reply and the available data
+        # Sending the reply with the currently available data
         client.send(self._CONFIRM_MSG)
         self.send_message([client], self._media, is_playing=self._is_playing)
         # The client won't confirm again
@@ -344,7 +355,7 @@ class ExternalPlayer(PlayerBase):
         logging.info("Sent message '%s' to %s", dump, str(self._clients))
 
         # The label refresh is done in a separate method at the end to send
-        # the TCP packet as soon as possible. This part isn't important.
+        # the TCP packet as soon as possible.
         for key, val in data.items():
             self.update_label(key, val)
 

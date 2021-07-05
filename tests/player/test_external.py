@@ -1,7 +1,6 @@
 import time
 import unittest
 
-import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
 from vidify.player.external import ExternalPlayer

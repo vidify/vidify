@@ -3,6 +3,7 @@ Custom API implementation to ask the user for the Spotify Web credentials.
 """
 
 import logging
+from typing import Optional
 
 from qtpy.QtCore import QSize, Qt, Signal, Slot
 from qtpy.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
@@ -51,12 +52,14 @@ class SpotifyWebPrompt(QWidget):
         self.layout.setSpacing(0)
 
         # The web form for the user to input the credentials.
-        self.web_form = SpotifyWebForm(client_id=client_id, client_secret=client_secret)
+        self.form = SpotifyWebForm(client_id=client_id, client_secret=client_secret)
         # on_submit_spotify_web creds will be called once the credentials have
         # been input.
-        self.web_form.button.clicked.connect(self.on_submit_creds)
-        self.layout.addWidget(self.web_form)
+        self.form.button.clicked.connect(self.on_submit_creds)
+        self.layout.addWidget(self.form)
 
+        self.auth = AuthServer()
+        """
         # The web browser for the user to login and grant access.
         # It's hidden at the beggining and will appear once the credentials
         # are input.
@@ -65,8 +68,9 @@ class SpotifyWebPrompt(QWidget):
         # The initial screen with the web form will be shown if the user
         # clicks on the Go Back button.
         self.browser.go_back_button.pressed.connect(
-            lambda: (self.browser.hide(), self.web_form.show())
+            lambda: (self.browser.hide(), self.form.show())
         )
+        """
         # Any change in the browser URL will redirect to on__login to check if
         # the login was succesful.
         self.browser.web_view.urlChanged.connect(self.on_login)
@@ -74,11 +78,11 @@ class SpotifyWebPrompt(QWidget):
 
     @property
     def client_id(self) -> str:
-        return self.web_form.client_id
+        return self.form.client_id
 
     @property
     def client_secret(self) -> str:
-        return self.web_form.client_secret
+        return self.form.client_secret
 
     @Slot()
     def on_submit_creds(self) -> None:
@@ -88,29 +92,29 @@ class SpotifyWebPrompt(QWidget):
         """
 
         # Obtaining the input data
-        form_client_id = self.web_form.client_id
-        form_client_secret = self.web_form.client_secret
+        form_client_id = self.form.client_id
+        form_client_secret = self.form.client_secret
         logging.info("Input creds: '%s' & '%s'", form_client_id, form_client_secret)
 
         # Checking that the data isn't empty
         empty_field = False
         if form_client_id == "":
-            self.web_form.input_client_id.highlight()
+            self.form.input_client_id.highlight()
             empty_field = True
         else:
-            self.web_form.input_client_id.undo_highlight()
+            self.form.input_client_id.undo_highlight()
 
         if form_client_secret == "":
-            self.web_form.input_client_secret.highlight()
+            self.form.input_client_secret.highlight()
             empty_field = True
         else:
-            self.web_form.input_client_secret.undo_highlight()
+            self.form.input_client_secret.undo_highlight()
 
         if empty_field:
             return
 
         # Hiding the form and showing the web browser for the next step
-        self.web_form.hide()
+        self.form.hide()
         self.browser.show()
 
         # Creating the request URL to obtain the authorization token
@@ -160,13 +164,13 @@ class SpotifyWebPrompt(QWidget):
             token = self.creds.request_user_token(code)
         except HTTPError as e:
             self.browser.hide()
-            self.web_form.show()
-            self.web_form.show_error(str(e))
+            self.form.show()
+            self.form.show_error(str(e))
             return
 
         # Removing the GUI elements used to obtain the credentials
-        self.layout.removeWidget(self.web_form)
-        self.web_form.hide()
+        self.layout.removeWidget(self.form)
+        self.form.hide()
         self.layout.removeWidget(self.browser)
         self.browser.hide()
 
@@ -180,7 +184,12 @@ class SpotifyWebForm(QWidget):
     process in the Web API.
     """
 
-    def __init__(self, *args, client_id: str = "", client_secret: str = "") -> None:
+    def __init__(
+        self,
+        *args,
+        client_id: Optional[str] = None,
+        client_secret: Optional[str] = None,
+    ) -> None:
         """
         Loading the main components inside the form. The initial client ID
         and client secret can be passed as a parameter to have an initial
@@ -191,10 +200,8 @@ class SpotifyWebForm(QWidget):
 
         # Checking that the credentials aren't None and using an empty field
         # instead.
-        if client_id is None:
-            client_id = ""
-        if client_secret is None:
-            client_secret = ""
+        client_id = client_id or ""
+        client_secret = client_secret or ""
 
         # The main layout will now have a widget with a vertical layout inside
         # it. This way, the widget's size can be controlled.
@@ -215,11 +222,10 @@ class SpotifyWebForm(QWidget):
         It can also show error messages.
         """
 
-        url = "https://vidify.org/wiki/spotify-web-api/"
         text = QLabel(
-            "<h2><i>Please introduce your Spotify keys</i></h2>"
-            "If you don't know how to obtain them, please read this"
-            f" <a href='{url}'>quick tutorial.</a>"
+            """<h2><i>Please introduce your Spotify keys</i></h2>
+            If you don't know how to obtain them, please read this
+            <a href='https://vidify.org/wiki/spotify-web-api/'>quick guide.</a>"""
         )
         text.setWordWrap(True)
         text.setOpenExternalLinks(True)

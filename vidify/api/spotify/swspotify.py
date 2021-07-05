@@ -72,7 +72,7 @@ class SwSpotifyAPI(APIBase):
         # Checking that the metadata is valid
         if "" in (self.artist, self.title):
             raise ConnectionNotReady(
-                "No Spotify session currently running or no song currently" " playing."
+                "No Spotify session currently running or no song currently playing."
             ) from None
 
     def event_loop(self) -> None:

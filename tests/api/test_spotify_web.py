@@ -2,7 +2,6 @@ import os
 import unittest
 import unittest.mock
 
-import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
 if QApplication.instance() is None:

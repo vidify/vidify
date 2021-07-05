@@ -6,7 +6,6 @@ throughout the entire module.
 
 import unittest
 
-import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
 from vidify.api import APIS
@@ -58,29 +57,6 @@ class DataStructuresTest(unittest.TestCase):
         for player in PLAYERS:
             if player.compatible and player.installed:
                 initialize_player(player, config)
-
-    def test_event_loop_interval(self):
-        """
-        Checking that the event intervals in APIData are valid (higher than
-        100 milliseconds at least). Rather than 0, None should be used to
-        specify that no event loops are used. A very low refresh rate would
-        also cause lag in some systems.
-        """
-
-        for api in APIS:
-            if api.event_loop_interval is not None:
-                self.assertTrue(api.event_loop_interval > 100)
-
-    def test_player_flags_name_exists(self):
-        """
-        Checking that the config options listed in the PlayerData structure
-        holds real entries in Config.
-        """
-
-        for player in PLAYERS:
-            for attr in player.flags:
-                # Will raise AtributeError if it isn't found
-                OPTIONS[attr]
 
     def test_gui_init_exists(self):
         """
