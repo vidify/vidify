@@ -180,7 +180,7 @@ class MainWindow(QWidget):
 
         # Initializing the API with dependency injection.
         mod = importlib.import_module(api_data.module)
-        cls = getattr(mod, api_data.class_name)
+        cls = getattr(mod, api_data.name)
         self.api = cls()
 
         self.wait_for_connection(

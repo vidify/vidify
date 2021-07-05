@@ -191,12 +191,13 @@ OPTIONS = {
         arg_action="store",
         section="Defaults",
     ),
-    "mpv_flags": FullOption(
-        description="Custom boolean flags used when opening mpv, with dashes"
-        " and separated by spaces.",
+    "mpv_properties": FullOption(
+        description="Custom properties used when opening mpv, passed as a JSON"
+        ' object. For example: {"brightness": 50, "sub-gray": true}.'
+        " See all of them here: https://mpv.io/manual/master/#options",
         type=str,
-        default=None,
-        args=("--mpv-flags",),
+        default="{}",
+        args=("--mpv-properties",),
         arg_action="store",
         section="Defaults",
     ),

@@ -7,6 +7,7 @@ vidify.player.generic, which contains the abstract base class of which any
 player implementation inherits, and an explanation in detail of the methods.
 """
 
+import json
 import locale
 import logging
 
@@ -21,12 +22,16 @@ from vidify.player.generic import PlayerBase
 locale.setlocale(locale.LC_NUMERIC, "C")
 
 
-class MpvPlayer(PlayerBase):
+class Mpv(PlayerBase):
     # The audio is always muted, which is needed because not all the
     # youtube-dl videos are silent. The keep-open flag stops mpv from closing
     # after the video is over.
-    DEFAULT_FLAGS = ["mute"]
-    DEFAULT_ARGS = {"vo": "gpu,libmpv,x11", "config": False, "keep-open": "always"}
+    DEFAULT_PROPERTIES = {
+        "mute": True,
+        "vo": "gpu,libmpv,x11",
+        "config": False,
+        "keep-open": "always",
+    }
 
     def __init__(self, config: Config) -> None:
         # Importing locale is necessary since qtpy stomps over the locale
@@ -37,19 +42,14 @@ class MpvPlayer(PlayerBase):
 
         super().__init__()
 
-        # Converting the flags passed by parameter (str) to a tuple
-        # TODO: this won't work from Python
-        flags = config.mpv_properties
-        flags.extend(self.DEFAULT_FLAGS)
-
-        args = {}
+        args = self.DEFAULT_PROPERTIES
+        args["wid"] = str(int(self.winId()))  # conversions: sip.voidptr -> int -> str
         if config.debug:
             args["log_handler"] = print
             args["loglevel"] = "info"
-        args["wid"] = str(int(self.winId()))  # sip.voidptr -> int -> str
-        args.update(self.DEFAULT_ARGS)
+        args.update(json.loads(config.mpv_properties))
 
-        self._mpv = MPV(*flags, **args)
+        self._mpv = MPV(**args)
 
     @property
     def pause(self) -> bool:

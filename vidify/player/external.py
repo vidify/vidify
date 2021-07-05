@@ -88,7 +88,7 @@ class Client(QObject):
             self.confirmed.emit(self)
 
 
-class ExternalPlayer(PlayerBase):
+class External(PlayerBase):
     """
     The external player acts as a server that sends information about the
     videos to other sources.

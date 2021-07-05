@@ -21,7 +21,7 @@ from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
 
 
-class MPRISAPI(APIBase):
+class MPRIS(APIBase):
     player_name: str = None
     artist: str = None
     title: str = None
