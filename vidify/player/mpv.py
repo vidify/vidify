@@ -11,16 +11,10 @@ import locale
 import logging
 from typing import Optional
 
-try:
-    from mpv import MPV
-except ModuleNotFoundError:
-    raise ModuleNotFoundError(
-        "No module named 'mpv'.\n"
-        "To use this player, please install vidify along with python-mpv."
-        " Read the installation guide for more details."
-    ) from None
+from mpv import MPV
 
 from vidify.player.generic import PlayerBase
+from vidify.config import Config
 
 # Importing locale is necessary since qtpy stomps over the locale settings
 # needed by libmpv. This needs to happen after importing PyQT before creating
@@ -35,15 +29,22 @@ class MpvPlayer(PlayerBase):
     DEFAULT_FLAGS = ["mute"]
     DEFAULT_ARGS = {"vo": "gpu,libmpv,x11", "config": False, "keep-open": "always"}
 
-    def __init__(self, flags: Optional[str] = None) -> None:
+    def __init__(self, config: Config) -> None:
+        # Importing locale is necessary since qtpy stomps over the locale
+        # settings needed by libmpv. This needs to happen after importing PyQT
+        # before creating the first mpv.MPV instance, so it's in global
+        # context.
+        locale.setlocale(locale.LC_NUMERIC, "C")
+
         super().__init__()
 
         # Converting the flags passed by parameter (str) to a tuple
-        flags = flags.split() if flags not in (None, "") else []
+        # TODO: this won't work from Python
+        flags = config.mpv_properties
         flags.extend(self.DEFAULT_FLAGS)
 
         args = {}
-        if logging.root.level <= logging.INFO:
+        if config.debug:
             args["log_handler"] = print
             args["loglevel"] = "info"
         args["wid"] = str(int(self.winId()))  # sip.voidptr -> int -> str
