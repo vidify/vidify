@@ -34,18 +34,20 @@ def start_gui(config: Config) -> None:
     sys.exit(app.exec_())
 
 
-def main() -> None:
-    # Initialization and parsing of the config from arguments and config file
-    config = Config()
-    config.parse()
-
-    # Deprecated options
+def check_deprecated(config: Config) -> None:
     if config.audiosync:
         print(
             "WARNING: Audiosync is disabled until a new implementation is"
             " worked on. Stay updated with vidify.org."
         )
         config.audiosync = False
+
+
+def main() -> None:
+    # Initialization and parsing of the config from arguments and config file
+    config = Config()
+    config.parse()
+    check_deprecated(config)
 
     # Logger initialzation with precise milliseconds handler.
     logging.basicConfig(
