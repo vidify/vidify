@@ -34,7 +34,7 @@ Here are the different ways to install Vidify, depending on your Operating Syste
 * **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs, and use mpv as the player.
 * **Linux:**
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
-    * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) at [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
+    * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the main repository at [media-video/vidify](https://packages.gentoo.org/packages/media-video/vidify): `emerge vidify`
     * *Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.*
 
 *Note: Vidify requires Python >= 3.6.*
