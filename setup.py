@@ -19,7 +19,7 @@ install_deps = [
     # Base package
     'QtPy',
     'lyricwikia',
-    'youtube-dl',
+    'yt-dlp',
     'appdirs',
     'qdarkstyle',
     'dataclasses; python_version<"3.7"',

@@ -34,7 +34,7 @@ Here are the different ways to install Vidify, depending on your Operating Syste
 * **Windows or Linux:** Using the binaries from the [latest stable releases](https://github.com/vidify/vidify/releases). These include support for all optional APIs, and use mpv as the player.
 * **Linux:**
     * Arch Linux: you can install it from the AUR: [`vidify`](https://aur.archlinux.org/packages/vidify/). Maintained by me ([marioortizmanero](https://github.com/marioortizmanero)).
-    * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the [GURU overlay](https://wiki.gentoo.org/wiki/Project:GURU) at [media-video/vidify](https://gpo.zugaina.org/media-video/vidify): `eselect repository enable guru && emerge --sync guru && emerge vidify`
+    * Gentoo Linux: there's an ebuild maintained by [AndrewAmmerlaan](https://github.com/AndrewAmmerlaan) in the main repository at [media-video/vidify](https://packages.gentoo.org/packages/media-video/vidify): `emerge vidify`
     * *Feel free to upload it to your distro's repositories! Let me know in an issue so that I can add it to this list.*
 
 *Note: Vidify requires Python >= 3.6.*
@@ -79,7 +79,7 @@ Audiosync is only available on Linux for now. It's strongly recommended to use M
 * FFTW: `libfftw3` on Debian-based distros.
 * ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
 * pulseaudio: `pulseaudio`, pre-installed on most repos.
-* youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
+* yt-dlp: this is installed by default with Vidify, but make sure it's available on your path.
 
 It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR, and it comes pre-installed in the binaries.
 

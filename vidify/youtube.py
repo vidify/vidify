@@ -1,5 +1,5 @@
 """
-This module uses youtube-dl to obtain the actual URL of a YouTube link.
+This module uses yt-dlp to obtain the actual URL of a YouTube link.
 That way, the video can be played directly with a video player like VLC
 or mpv.
 """
@@ -7,7 +7,7 @@ or mpv.
 import logging
 from typing import Optional
 
-from youtube_dl import YoutubeDL
+from yt_dlp import YoutubeDL
 from qtpy.QtCore import QObject, Signal
 
 
@@ -63,7 +63,7 @@ class YouTubeDLWorker(QObject):
 
     def get_url(self) -> None:
         """
-        Getting the youtube direct link with youtube-dl, intended to be used
+        Getting the youtube direct link with yt-dlp, intended to be used
         with a QThread. It's guaranteed that either a success signal or a
         fail signal will be emitted.
         """
@@ -74,13 +74,13 @@ class YouTubeDLWorker(QObject):
             except Exception as e:
                 # Any kind of error has to be caught, so that it doesn't only
                 # send the error signal when the download wasn't successful
-                # (a DownloadError from youtube_dl).
-                logging.info("YouTube-dl wasn't able to obtain the video: %s",
+                # (a DownloadError from yt_dlp).
+                logging.info("yt-dlp wasn't able to obtain the video: %s",
                              str(e))
                 self.fail.emit()
             else:
                 if len(data['entries']) == 0:
-                    logging.info("YouTube-dl returned no entries")
+                    logging.info("yt-dlp returned no entries")
                     self.fail.emit()
                 else:
                     self.success.emit(data)

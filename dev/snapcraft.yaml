@@ -22,7 +22,7 @@ parts:
       - python3-pyqt5
       - python3-appdirs
       - python3-pydbus
-      - youtube-dl
+      - yt-dlp
       # Mpv is used by default because it's lighter and works better
       # with the audiosync feature.
       - libmpv-dev
