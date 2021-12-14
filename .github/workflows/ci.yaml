@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
         matrix:
-            python: [3.6, 3.7, 3.8]
+            python: ['3.8', '3.9', '3.10']
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -28,8 +28,11 @@ jobs:
               libmpv-dev \
               libnss3 \
               libpulse-dev \
+              libqt5gui5 \
               pulseaudio \
-              xvfb
+              xvfb \
+              vlc \
+              mpv
           python -m pip install -r dev/build_requires.txt
       - name: Run Tests
         run: sh dev/run-tests-docker.sh
