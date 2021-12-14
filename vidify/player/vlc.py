@@ -31,7 +31,7 @@ class VLCPlayer(PlayerBase):
         else:
             vlc_args += " --quiet"
         # The audio is always muted, which is needed because not all the
-        # youtube-dl videos are silent.
+        # yt-dlp videos are silent.
         # Needed for the audiosync feature: set the Group of Pictures size to
         # one, so that seeking is more precise.
         vlc_args += " --no-audio --sout-x264-min-keyint 1"

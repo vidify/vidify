@@ -79,7 +79,7 @@ Audiosync is only available on Linux for now. It's strongly recommended to use M
 * FFTW: `libfftw3` on Debian-based distros.
 * ffmpeg: `ffmpeg` on most repositories. It must be available on your path.
 * pulseaudio: `pulseaudio`, pre-installed on most repos.
-* youtube-dl: this is installed by default with Vidify, but make sure it's available on your path.
+* yt-dlp: this is installed by default with Vidify, but make sure it's available on your path.
 
 It's also available as [`vidify-audiosync`](https://aur.archlinux.org/packages/vidify-audiosync) on the AUR, and it comes pre-installed in the binaries.
 
