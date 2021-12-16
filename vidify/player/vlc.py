@@ -75,9 +75,9 @@ class VLCPlayer(PlayerBase):
     def start_video(self, media: str, is_playing: bool = True) -> None:
         logging.info("Starting new video")
         if CURRENT_PLATFORM in (Platform.LINUX, Platform.BSD):
-            self._player.set_xwindow(self.winId())
+            self._player.set_xwindow(int(self.winId()))
         elif CURRENT_PLATFORM == Platform.WINDOWS:
-            self._player.set_hwnd(self.winId())
+            self._player.set_hwnd(int(self.winId()))
         elif CURRENT_PLATFORM == Platform.MACOS:
             self._player.set_nsobject(int(self.winId()))
 
