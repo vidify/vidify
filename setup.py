@@ -25,7 +25,7 @@ install_requires = [
     # Fixes for older Python versions
     'dataclasses; python_version<"3.7"',
     # APIs and players
-    "tekore==3.7",
+    "tekore==4.*",
     "zeroconf==0.28",
     "python-mpv==0.5",
     'pydbus==0.6; platform_system=="Linux"',

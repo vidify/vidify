@@ -25,8 +25,11 @@ class SpotifyWebAuthenticator(QWidget):
     The authenticator will try to reuse credentials from previous attempts. If
     that fails, the usual procedure takes place:
 
-    1. A server is started in the background.
-    2. The user inputs their credentials.
+    1. A server is started in the background. This will make it easier to obtain
+       the authorization code. Otherwise, the user would have to copy-paste the
+       resulting URL into this application. With a server, this is automatic.
+    2. The PKCE authentication flow is followed by using the configured client
+       credentials.
     3. The credentials are sent to Spotify in order to authenticate. The results
        will be sent to the server.
     4. If the previous step was successful, the server is shut down, and the
@@ -45,15 +48,23 @@ class SpotifyWebAuthenticator(QWidget):
         self._config = config
 
         # Setting up the layout
-        self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(0)
+        self._layout = QHBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
 
+        # Configuring the credentials for the auth process
+        self._creds = tk.RefreshingCredentials(
+            client_id=self._config.client_id,
+            redirect_uri=self._config.redirect_uri,
+        )
+
+        # Trying to use previous credentials
         token = self._try_refresh_token()
         if token is not None:
             self.done.emit(token)
             return
 
+        # Otherwise, starting the auth flow from scratch
         self._start_auth()
 
     def _try_refresh_token(self) -> Optional[tk.RefreshingToken]:
@@ -78,32 +89,36 @@ class SpotifyWebAuthenticator(QWidget):
                 logging.info("Skipping: %s is empty", name)
                 return
 
-        # Generating a RefreshingToken with the parameters
-        return tk.refresh_user_token(**creds)
+        # TODO: pretty error handling
+        try:
+            # Generating a RefreshingToken with the parameters
+            return tk.refresh_pkce_token(**creds)
+        except tk.HTTPError as e:
+            print(f"Failed to refresh token: {e}")
 
     def _start_auth(self) -> None:
         # TODO: show message to user
 
-        # Start the server in the background
+        # Start the authentication server in the background
         self.server = Flask(
             "vidify_auth",
             template_folder="res/web/templates",
             static_folder="res/web/static"
         )
-        self.server.add_url_rule("/callback/", view_func=self._callback, methods=["GET"])
-        self.server_thread = Thread(target=self._start_web_server)
+        self.server.add_url_rule("/callback/", view_func=self._auth_callback, methods=["GET"])
+        self.server_thread = Thread(target=self._auth_server)
         self.server_thread.daemon = True
         self.server_thread.start()
 
-        # Setup credentials and open auth URL in the browser
-        self.creds = tk.RefreshingCredentials(
-            client_id=self._config.client_id,
-            redirect_uri=self._config.redirect_uri,
-        )
-        url = self.creds.user_authorisation_url(self.SCOPES)
+        # Open auth URL in the browser
+        url = self._creds.user_authorisation_url(self.SCOPES)
         webbrowser.open_new(url)
 
-    def _start_web_server(self) -> None:
+    def _auth_server(self) -> None:
+        """
+        Thread in which the Flask server is ran in the background.
+        """
+
         uri = urlparse(self._config.redirect_uri)
         if uri.hostname is None:
             raise Exception("Invalid redirect URI: no hostname specified")
@@ -113,21 +128,35 @@ class SpotifyWebAuthenticator(QWidget):
         logging.info("Starting web server at %s:%d", uri.hostname, uri.port)
         self.server.run(uri.hostname, uri.port, debug=False)
 
-    def _callback(self) -> None:
-        # TODO: add template with prettier HTML
-        code = request.args.get('code', None)
-        # state = request.args.get('state', None)
-        # auth = auths.pop(state, None)
-
-        # token = auth.request_token(code, state)
-        return f"code {code}"
-
-    def save_config(self):
+    def _auth_callback(self) -> None:
         """
-        The obtained credentials are saved for the future
+        Called by the Spotify API upon successful authentication with the code.
+        """
+
+        code = request.args.get('code', None)
+        state = request.args.get('state', None)
+
+        # TODO: pretty error handling (HTML)
+        try:
+            token = self._creds.request_pkce_token(code, state)
+        except tk.HTTPError as e:
+            print(f"Unable to obtain token: {e}")
+            return f'error: {e}'
+
+        # TODO: use logging
+        print(f"Got token: {token}")
+        self.save_config(token)
+        self.done.emit(token)
+
+        # TODO: add template with prettier HTML
+        return 'success!'
+
+    def save_config(self, token: tk.RefreshingToken):
+        """
+        The obtained credentials are saved for future attempts, so that we can
+        avoid prompting the user.
         """
 
         logging.info("Saving the Spotify Web API credentials")
-        self.config.client_secret = self._spotify_web_prompt.client_secret
         self.config.client_id = self._spotify_web_prompt.client_id
         self.config.refresh_token = token.refresh_token
