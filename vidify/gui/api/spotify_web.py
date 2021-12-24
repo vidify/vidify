@@ -3,289 +3,154 @@ Custom API implementation to ask the user for the Spotify Web credentials.
 """
 
 import logging
+from typing import Optional
+from threading import Thread
+from urllib.parse import urlparse
+import webbrowser
 
-from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QHBoxLayout,
-                            QVBoxLayout)
-from qtpy.QtCore import Qt, QSize, Signal, Slot
-from tekore import (scope, RefreshingCredentials, RefreshingToken,
-                    parse_code_from_url, HTTPError)
+from qtpy.QtCore import QSize, Qt, Signal
+from qtpy.QtWidgets import QHBoxLayout, QLabel, QWidget
+import tekore as tk
+from flask import Flask, request
 
-from vidify.gui import Fonts, Colors
-from vidify.gui.components import InputField, WebBrowser
+from vidify.gui import COLORS, FONTS
+from vidify.config import Config
 
 
-class SpotifyWebPrompt(QWidget):
+class SpotifyWebAuthenticator(QWidget):
     """
-    This widget handles all the interaction with the user to obtain the
-    credentials for the Spotify Web API.
+    This class is the main component in the Spotify Web Authenticator. It will
+    follow the required protocol and emit the `done` signal once it's done.
+
+    The authenticator will try to reuse credentials from previous attempts. If
+    that fails, the usual procedure takes place:
+
+    1. A server is started in the background. This will make it easier to obtain
+       the authorization code. Otherwise, the user would have to copy-paste the
+       resulting URL into this application. With a server, this is automatic.
+    2. The PKCE authentication flow is followed by using the configured client
+       credentials.
+    3. The credentials are sent to Spotify in order to authenticate. The results
+       will be sent to the server.
+    4. If the previous step was successful, the server is shut down, and the
+       `done` signal is emitted with the obtained token. Otherwise, back to step
+       two.
     """
 
-    done = Signal(RefreshingToken)
+    done = Signal(tk.RefreshingToken)
 
-    def __init__(self, client_id: str, client_secret: str, redirect_uri: str,
-                 *args) -> None:
-        """
-        Starts the API initialization flow, which is the following:
-            1. The user inputs the credentials.
-            ** self.on_submit_creds is called **
-            2. The user logs in.
-            ** self.on_login is called **
-            3. If the credentials were correct, the Web API is set up and
-               started from outside this widget. Otherwise, go back to step 1.
-            ** self.done is emitted **
-        """
+    SCOPES = tk.scope.user_read_currently_playing
 
-        super().__init__(*args)
+    # TODO: save credentials on success
+    def __init__(self, config: Config) -> None:
+        super().__init__()
 
-        logging.info("Initializing the Spotify Web API prompt interface")
-        self.redirect_uri = redirect_uri
+        self._config = config
 
-        # Creating the layout
-        self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(0)
+        # Setting up the layout
+        self._layout = QHBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
 
-        # The web form for the user to input the credentials.
-        self.web_form = SpotifyWebForm(client_id=client_id,
-                                       client_secret=client_secret)
-        # on_submit_spotify_web creds will be called once the credentials have
-        # been input.
-        self.web_form.button.clicked.connect(self.on_submit_creds)
-        self.layout.addWidget(self.web_form)
+        # Configuring the credentials for the auth process
+        self._creds = tk.RefreshingCredentials(
+            client_id=self._config.client_id,
+            redirect_uri=self._config.redirect_uri,
+        )
 
-        # The web browser for the user to login and grant access.
-        # It's hidden at the beggining and will appear once the credentials
-        # are input.
-        self.browser = WebBrowser()
-        self.browser.hide()
-        # The initial screen with the web form will be shown if the user
-        # clicks on the Go Back button.
-        self.browser.go_back_button.pressed.connect(
-            lambda: (self.browser.hide(), self.web_form.show()))
-        # Any change in the browser URL will redirect to on__login to check if
-        # the login was succesful.
-        self.browser.web_view.urlChanged.connect(self.on_login)
-        self.layout.addWidget(self.browser)
-
-    @property
-    def client_id(self) -> str:
-        return self.web_form.client_id
-
-    @property
-    def client_secret(self) -> str:
-        return self.web_form.client_secret
-
-    @Slot()
-    def on_submit_creds(self) -> None:
-        """
-        Checking if the submitted credentials were correct, and starting the
-        logging-in step.
-        """
-
-        # Obtaining the input data
-        form_client_id = self.web_form.client_id
-        form_client_secret = self.web_form.client_secret
-        logging.info("Input creds: '%s' & '%s'", form_client_id,
-                     form_client_secret)
-
-        # Checking that the data isn't empty
-        empty_field = False
-        if form_client_id == '':
-            self.web_form.input_client_id.highlight()
-            empty_field = True
-        else:
-            self.web_form.input_client_id.undo_highlight()
-
-        if form_client_secret == '':
-            self.web_form.input_client_secret.highlight()
-            empty_field = True
-        else:
-            self.web_form.input_client_secret.undo_highlight()
-
-        if empty_field:
+        # Trying to use previous credentials
+        token = self._try_refresh_token()
+        if token is not None:
+            self.done.emit(token)
             return
 
-        # Hiding the form and showing the web browser for the next step
-        self.web_form.hide()
-        self.browser.show()
+        # Otherwise, starting the auth flow from scratch
+        self._start_auth()
 
-        # Creating the request URL to obtain the authorization token
-        self.creds = RefreshingCredentials(
-            form_client_id, form_client_secret, self.redirect_uri)
-        self.scope = scope.user_read_currently_playing
-        url = self.creds.user_authorisation_url(self.scope)
-        self.browser.url = url
-
-    @Slot()
-    def on_login(self) -> None:
+    def _try_refresh_token(self) -> Optional[tk.RefreshingToken]:
         """
-        This function is called once the user has logged into Spotify to
-        obtain the access token.
+        Tries to generate a self-refreshing token from the config.
 
-        Part of this function is a reimplementation of
-        `tekore.prompt_user_token`. It does the same thing but in a more
-        automatized way, because Qt has access over the web browser too.
+        The authentication token itself isn't even saved in the config because
+        it expires in an hour. Instead, the refresh token is used to generate a
+        new token whenever the app is launched.
         """
 
-        url = self.browser.url
-        logging.info("Now at: %s", url)
+        logging.info("Trying to refresh token")
 
-        # If the URL isn't the Spotify response URI (localhost), do nothing
-        if url.find(self.redirect_uri) == -1:
-            return
+        # Checking that the required credentials are valid before performing a
+        # request.
+        creds = {
+            "client_id": self._config.client_id,
+            "refresh_token": self._config.refresh_token,
+        }
+        for name, cred in creds.items():
+            if cred in (None, ""):
+                logging.info("Skipping: %s is empty", name)
+                return
 
-        # Trying to get the auth token from the URL with Tekore's
-        # parse_code_from_url(), which throws a KeyError if the URL doesn't
-        # contain an auth token or if it contains more than one.
+        # TODO: pretty error handling
         try:
-            code = parse_code_from_url(url)
-        except KeyError as e:
-            logging.info("ERROR: %s", str(e))
-            return
+            # Generating a RefreshingToken with the parameters
+            return tk.refresh_pkce_token(**creds)
+        except tk.HTTPError as e:
+            print(f"Failed to refresh token: {e}")
 
-        # Now the user token has to be requested to Spotify, while
-        # checking for errors to make sure the credentials were correct.
-        # This will only happen with the client secret because it's only
-        # checked when requesting the user token.
+    def _start_auth(self) -> None:
+        # TODO: show message to user
+
+        # Start the authentication server in the background
+        self.server = Flask(
+            "vidify_auth",
+            template_folder="res/web/templates",
+            static_folder="res/web/static"
+        )
+        self.server.add_url_rule("/callback/", view_func=self._auth_callback, methods=["GET"])
+        self.server_thread = Thread(target=self._auth_server)
+        self.server_thread.daemon = True
+        self.server_thread.start()
+
+        # Open auth URL in the browser. The verifier is saved to request the
+        # token later on.
+        url, verifier = self._creds.pkce_user_authorisation(self.SCOPES)
+        self._verifier = verifier
+        webbrowser.open_new(url)
+
+    def _auth_server(self) -> None:
+        """
+        Thread in which the Flask server is ran in the background.
+        """
+
+        uri = urlparse(self._config.redirect_uri)
+        if uri.hostname is None:
+            raise Exception("Invalid redirect URI: no hostname specified")
+        if uri.port is None:
+            raise Exception("Invalid redirect URI: no port specified")
+
+        logging.info("Starting web server at %s:%d", uri.hostname, uri.port)
+        self.server.run(uri.hostname, uri.port, debug=False)
+
+    def _auth_callback(self) -> None:
+        """
+        Called by the Spotify API upon successful authentication with the code.
+        """
+
+        code = request.args.get('code', None)
+        # TODO: how to check state?
+        # state = request.args.get('state', None)
+
+        # TODO: pretty error handling (HTML)
         try:
-            # A RefreshingToken is used instead of a regular Token so that
-            # it's automatically refreshed before it expires. self.creds is
-            # of type `RefreshingCredentials`, so it returns always a
-            # RefreshingToken.
-            token = self.creds.request_user_token(code)
-        except HTTPError as e:
-            self.browser.hide()
-            self.web_form.show()
-            self.web_form.show_error(str(e))
-            return
+            token = self._creds.request_pkce_token(code, self._verifier)
+        except tk.HTTPError as e:
+            print(f"Unable to obtain token: {e}")
+            return f'error: {e}'
 
-        # Removing the GUI elements used to obtain the credentials
-        self.layout.removeWidget(self.web_form)
-        self.web_form.hide()
-        self.layout.removeWidget(self.browser)
-        self.browser.hide()
-
-        # Finally starting the Web API
+        # The authentication process is done. We save the refresh token for a
+        # future attempt.
+        logging.info("Successfully obtained acess token")
+        self._config.refresh_token = token.refresh_token
         self.done.emit(token)
 
-
-class SpotifyWebForm(QWidget):
-    """
-    This form is used to obtain the credentials needed for the authorization
-    process in the Web API.
-    """
-
-    def __init__(self, *args, client_id: str = "", client_secret: str = ""
-                 ) -> None:
-        """
-        Loading the main components inside the form. The initial client ID
-        and client secret can be passed as a parameter to have an initial
-        value for them in the input fields.
-        """
-
-        super().__init__(*args)
-
-        # Checking that the credentials aren't None and using an empty field
-        # instead.
-        if client_id is None:
-            client_id = ""
-        if client_secret is None:
-            client_secret = ""
-
-        # The main layout will now have a widget with a vertical layout inside
-        # it. This way, the widget's size can be controlled.
-        self.setMaximumSize(QSize(600, 250))
-        self.layout = QVBoxLayout()
-        self.setLayout(self.layout)
-
-        # Setting up all the elements inside
-        self.setup_text()
-        self.setup_inputs(client_id, client_secret)
-        self.setup_button()
-        self.setup_error_msg()
-
-    def setup_text(self) -> None:
-        """
-        Setting up the text layout with the header and the description.
-
-        It can also show error messages.
-        """
-
-        url = 'https://vidify.org/wiki/spotify-web-api/'
-        text = QLabel(
-            "<h2><i>Please introduce your Spotify keys</i></h2>"
-            "If you don't know how to obtain them, please read this"
-            f" <a href='{url}'>quick tutorial.</a>")
-        text.setWordWrap(True)
-        text.setOpenExternalLinks(True)
-        text.setTextInteractionFlags(Qt.TextBrowserInteraction)
-        text.setFont(Fonts.text)
-        text.setAlignment(Qt.AlignHCenter)
-        self.layout.addWidget(text)
-
-    def setup_inputs(self, client_id: str, client_secret: str) -> None:
-        """
-        Setting up the input fields for the client ID and client secret.
-        """
-
-        self.input_client_id = InputField(client_id)
-        self.input_client_id.setPlaceholderText("Client ID...")
-        self.input_client_secret = InputField(client_secret)
-        self.input_client_secret.setPlaceholderText("Client secret...")
-        self.layout.addWidget(self.input_client_id)
-        self.layout.addWidget(self.input_client_secret)
-
-    def setup_error_msg(self) -> None:
-        """
-        Creates a QLabel widget under the input fields to show error messages.
-        It's hidden by default.
-        """
-
-        self.error_msg = QLabel()
-        self.error_msg.setWordWrap(True)
-        self.error_msg.setFont(Fonts.text)
-        self.error_msg.setStyleSheet(f"color: {Colors.darkerror};")
-        self.error_msg.setAlignment(Qt.AlignHCenter)
-        self.layout.addWidget(self.error_msg)
-
-    def setup_button(self) -> None:
-        """
-        Setting up the submit button.
-        if the input credentials are correct.
-        """
-
-        self.button = QPushButton("SUBMIT")
-        self.button.setFont(Fonts.bigbutton)
-        self.layout.addWidget(self.button)
-
-    @property
-    def client_id(self) -> str:
-        """
-        Returns the client ID from the input.
-        """
-
-        return self.input_client_id.text().strip()
-
-    @property
-    def client_secret(self) -> str:
-        """
-        Returns the client secret from the input.
-        """
-
-        return self.input_client_secret.text().strip()
-
-    def hide_error(self) -> None:
-        """
-        Hides and removes the error message under the input fields.
-        """
-
-        self.error_msg.hide()
-        self.error_msg.setText()
-
-    def show_error(self, msg: str) -> None:
-        """
-        Displays an error mesage under the input fields.
-        """
-
-        self.error_msg.show()
-        self.error_msg.setText(msg)
+        # TODO: add template with prettier HTML
+        return 'success!'

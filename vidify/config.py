@@ -7,18 +7,16 @@ in order of priority:
     * The default options
 """
 
-import os
-import errno
 import argparse
 import configparser
+import errno
+import os
 from dataclasses import dataclass
-from typing import Optional, Union, Tuple, Any
+from typing import Any, Optional, Tuple, Union
 
 from appdirs import AppDirs
 
-from vidify import Platform, CURRENT_PLATFORM
 from vidify.version import __version__
-
 
 # Default config path in the system
 APP_DIRS = AppDirs("vidify", "vidify")
@@ -36,6 +34,7 @@ class Option:
     default: Any
 
 
+# TODO: use list instead of tuple
 @dataclass
 class Argument(Option):
     # The argparse action: 'store', 'store_true'. Will be ignored if `args`
@@ -63,185 +62,173 @@ OPTIONS = {
     # developers to code.
     # Note: for the argument options with a single identifier, a comma has to
     # be used at the end to specify that it's a tuple.
-    'debug': FullOption(
-        description="display debug messages.",
+    "debug": FullOption(
+        description="Display debug messages.",
         type=bool,
         default=False,
-        args=('--debug',),
-        arg_action='store_true',
-        section='Defaults'),
-
+        args=("--debug",),
+        arg_action="store_true",
+        section="Defaults",
+    ),
     # Custom config file, only available for the argument parser.
-    'config_file': Argument(
-        description="the config file path.",
+    "config_file": Argument(
+        description="The config file path.",
         type=str,
         default=DEFAULT_PATH,
-        args=('--config-file',),
-        arg_action='store'),
-
+        args=("--config-file",),
+        arg_action="store",
+    ),
     # Showing the lyrics. For the argument parser, it's a negated option,
     # meaning that it has to be set to False in the config file to be
     # equivalent.
-    'lyrics': FullOption(
-        description="do not print lyrics.",
+    "lyrics": FullOption(
+        description="Do not print lyrics.",
         type=bool,
         default=True,
-        args=('-n', '--no-lyrics'),
-        arg_action='store_false',
-        section='Defaults'),
-
+        args=("-n", "--no-lyrics"),
+        arg_action="store_false",
+        section="Defaults",
+    ),
     # Starting the app fullscreen.
-    'fullscreen': FullOption(
-        description="open the app in fullscreen mode.",
+    "fullscreen": FullOption(
+        description="Open the app in fullscreen mode.",
         type=bool,
         default=False,
-        args=('-f', '--fullscreen'),
-        arg_action='store_true',
-        section='Defaults'),
-
+        args=("-f", "--fullscreen"),
+        arg_action="store_true",
+        section="Defaults",
+    ),
     # The dark mode
-    'dark_mode': FullOption(
-        description="activate the dark mode.",
+    "dark_mode": FullOption(
+        description="Activate the dark mode.",
         type=bool,
         default=False,
-        args=('--dark-mode',),
-        arg_action='store_true',
-        section='Defaults'),
-
+        args=("--dark-mode",),
+        arg_action="store_true",
+        section="Defaults",
+    ),
     # Window that always stays on top of others.
-    'stay_on_top': FullOption(
-        description="the window will stay on top of all apps.",
+    "stay_on_top": FullOption(
+        description="The window will stay on top of all apps.",
         type=bool,
         default=False,
-        args=('--stay-on-top',),
-        arg_action='store_true',
-        section='Defaults'),
-
+        args=("--stay-on-top",),
+        arg_action="store_true",
+        section="Defaults",
+    ),
     # Initial window's width.
-    'width': FullOption(
-        description="set the maximum width for the player. This is helpful to"
+    "width": FullOption(
+        description="Set the maximum width for the player. This is helpful to"
         " download lower res videos if your connection isn't too good.",
         type=int,
         default=None,
-        args=('--width',),
-        arg_action='store',
-        section='Defaults'),
-
+        args=("--width",),
+        arg_action="store",
+        section="Defaults",
+    ),
     # Initial window's height.
-    'height': FullOption(
-        description="set the maximum height for the player.",
+    "height": FullOption(
+        description="Set the maximum height for the player.",
         type=int,
         default=None,
-        args=('--height',),
-        arg_action='store',
-        section='Defaults'),
-
+        args=("--height",),
+        arg_action="store",
+        section="Defaults",
+    ),
     # API used. If it's None, the initial menu to choose an API will be shown
     # to the user. The option's contents should be one of the names listed in
     # `vidify.api`'s APIData enumeration.
-    'api': FullOption(
-        description="select the API use. Please read the installation guide"
+    "api": FullOption(
+        description="Select the API use. Please read the installation guide"
         " for a list with the available APIs with detailed information about"
         " them.",
         type=str,
         default=None,
-        args=('-a', '--api'),
-        arg_action='store',
-        section='Defaults'),
-
+        args=("-a", "--api"),
+        arg_action="store",
+        section="Defaults",
+    ),
     # Player used. By default it's VLC. This option's contents should be one
     # of the names listed in `vidify.player`'s PlayerData enumeration.
-    'player': FullOption(
-        description="select the player to be used. Plase read the installation"
+    "player": FullOption(
+        description="Select the player to be used. Plase read the installation"
         " guide for a list with the available players.",
         type=str,
         default="VLC",
-        args=('-p', '--player'),
-        arg_action='store',
-        section='Defaults'),
-
-    # The audio synchronization feature. It will try to automatically
-    # synchronize the video playing with the system recorded audio. Currently
-    # only available on Linux.
-    'audiosync': FullOption(
-        description="enable automatic audio synchronization. You may need to"
-        " install additional dependencies. Read the installation guide for"
-        " more information. Note: this feature is still in development."
-        " It's recommended to use Mpv for precision.",
+        args=("-p", "--player"),
+        arg_action="store",
+        section="Defaults",
+    ),
+    # The audio synchronization feature.
+    "audiosync": FullOption(
+        description="Enable automatic audio synchronization. NOTE: this is"
+        " deprecated until a new implementation is worked on.",
         type=bool,
         default=False,
-        args=('--audiosync',),
-        arg_action='store_true',
-        section='Defaults'),
-
+        args=("--audiosync",),
+        arg_action="store_true",
+        section="Defaults",
+    ),
     # Option to tweak the audio synchronization extension. This delay is
     # approximately the time taken until the extension starts recording the
     # video. Usually it's about 200ms, but it depends on the hardware so
     # it's left as an option.
-    'audiosync_calibration': FullOption(
-        description="the audio synchronization's precision may depend on your"
+    "audiosync_calibration": FullOption(
+        description="The audio synchronization's precision may depend on your"
         " hardware. You can calibrate the delay in milliseconds returned with"
         " this. It can be positive or negative.",
         type=int,
         default=0,
-        args=('--audiosync-calibration',),
-        arg_action='store',
-        section='Defaults'),
-
+        args=("--audiosync-calibration",),
+        arg_action="store",
+        section="Defaults",
+    ),
     # Arguments and options provided for the players.
-    'vlc_args': FullOption(
-        description="custom arguments used when opening VLC.",
+    "vlc_args": FullOption(
+        description="Custom arguments used when opening VLC.",
         type=str,
         default=None,
-        args=('--vlc-args',),
-        arg_action='store',
-        section='Defaults'),
-
-    'mpv_flags': FullOption(
-        description="custom boolean flags used when opening mpv, with dashes"
-        " and separated by spaces.",
+        args=("--vlc-args",),
+        arg_action="store",
+        section="Defaults",
+    ),
+    "mpv_properties": FullOption(
+        description="Custom properties used when opening mpv, passed as a JSON"
+        ' object. For example: {"brightness": 50, "sub-gray": true}.'
+        " See all of them here: https://mpv.io/manual/master/#options",
         type=str,
-        default=None,
-        args=('--mpv-flags',),
-        arg_action='store',
-        section='Defaults'),
-
+        default="{}",
+        args=("--mpv-properties",),
+        arg_action="store",
+        section="Defaults",
+    ),
     # Data for the Spotify Web API
-    'client_id': FullOption(
-        description="your client ID key for the Spotify Web API. Check the"
-        " README to learn how to obtain yours. Example:"
-        " --client-id='5fe01282e44241328a84e7c5cc169165'.",
+    "client_id": FullOption(
+        description="The client ID key for the Spotify Web API authentication"
+        " process via PKCE. Vidify's is used by default, but you can configure"
+        " it. Check the README to learn how to obtain yours.",
         type=str,
-        default=None,
-        args=('--client-id',),
-        arg_action='store',
-        section='SpotifyWeb'),
-
-    'client_secret': FullOption(
-        description="your client secret key for the Spotify Web API. Check the"
-        " wiki to learn how to obtain yours. Example:"
-        " --client-secret='2665f6d143be47c1bc9ff284e9dfb350'.",
-        type=str,
-        default=None,
-        args=('--client-secret',),
-        arg_action='store',
-        section='SpotifyWeb'),
-
-    'redirect_uri': FullOption(
-        description="optional redirect uri for the Spotify Web API to get the"
+        default="cffe5ab69ab64b6bbe8914c2a4092f98",
+        args=("--client-id",),
+        arg_action="store",
+        section="SpotifyWeb",
+    ),
+    "redirect_uri": FullOption(
+        description="The redirect uri for the Spotify Web API to get the"
         " authorization token.",
         type=str,
-        default='http://localhost:8888/callback/',
-        args=('--redirect-uri',),
-        arg_action='store',
-        section='SpotifyWeb'),
-
-    'refresh_token': ConfigOption(
+        default="http://localhost:8888/callback/",
+        args=("--redirect-uri",),
+        arg_action="store",
+        section="SpotifyWeb",
+    ),
+    "refresh_token": ConfigOption(
         description="Internal field to save the Spotify Web login token for"
         " future accesses.",
         type=str,
         default=None,
-        section='SpotifyWeb')
+        section="SpotifyWeb",
+    ),
 }
 
 
@@ -259,7 +246,8 @@ class Config:
         self._argparser = argparse.ArgumentParser(
             prog="vidify",
             description="Read more about the options in the README and the"
-            " wiki at https://github.com/vidify/vidify")
+            " wiki at https://github.com/vidify/vidify",
+        )
         self.add_arguments()
 
         self._file = configparser.ConfigParser()
@@ -275,10 +263,12 @@ class Config:
         """
 
         self._argparser.add_argument(
-            "-v", "--version",
+            "-v",
+            "--version",
             action="version",
             version=f"%(prog)s {__version__}",
-            help="show program's version number and exit")
+            help="show program's version number and exit",
+        )
 
         # The used arguments are fairly simple, so they can be initialized
         # automatically.
@@ -292,20 +282,16 @@ class Config:
             else:
                 default = data.default
             default_str = f"Default is '{default}'"
-            if CURRENT_PLATFORM == Platform.WINDOWS:
-                default_str = "[" + default_str + "]"
-            else:
-                default_str = "\033[34m" + default_str + "\033[0m"
 
             kwargs = {
-                'action': data.arg_action,
-                'dest': name,
-                'default': None,
-                'help': data.description + " " + default_str
+                "action": data.arg_action,
+                "dest": name,
+                "default": None,
+                "help": data.description + " " + default_str,
             }
             # Only store arguments must specify their type.
-            if data.arg_action == 'store':
-                kwargs['type'] = data.type
+            if data.arg_action == "store":
+                kwargs["type"] = data.type
 
             self._argparser.add_argument(*data.args, **kwargs)
 
@@ -331,9 +317,11 @@ class Config:
             return self._file.get(option.section, attr)
         except ValueError as e:
             # Showing a more detailed error than the one given by configparser
-            raise ValueError(f"Error when parsing the config file: in the"
-                             f" {option.section} section, {attr} doesn't"
-                             f" have a valid type ({e}).")
+            raise ValueError(
+                f"Error when parsing the config file: in the"
+                f" {option.section} section, {attr} doesn't"
+                f" have a valid type ({e})."
+            )
 
     def write_file(self, section: str, name: str, value: any) -> None:
         """
@@ -349,13 +337,13 @@ class Config:
             return
 
         if section not in self._file.sections():
-            with open(self._path, 'a') as configfile:
-                configfile.write(f'\n[{section}]')
+            with open(self._path, "a") as configfile:
+                configfile.write(f"\n[{section}]")
             # Refreshing the config file
             self._file.read(self._path)
 
         self._file[section][name] = str(value)
-        with open(self._path, 'w') as configfile:
+        with open(self._path, "w") as configfile:
             self._file.write(configfile)
 
     def parse(self, config_file: Optional[str] = None) -> None:
@@ -374,7 +362,7 @@ class Config:
 
         # Checking if the directory exists and creating it
         dirname = os.path.dirname(self._path)
-        if not os.path.isdir(dirname) and dirname not in (None, ''):
+        if not os.path.isdir(dirname) and dirname not in (None, ""):
             # Checking for a race condition
             try:
                 os.makedirs(dirname)
@@ -385,7 +373,7 @@ class Config:
         # Checking if the file exists and creating it
         if not os.path.exists(self._path):
             print("Creating config file at", self._path)
-            with open(self._path, 'w') as f:
+            with open(self._path, "w") as f:
                 f.write("[Defaults]\n")
 
         self._file.read(self._path)

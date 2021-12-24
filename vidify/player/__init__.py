@@ -4,58 +4,38 @@ them.
 """
 
 import importlib
-from typing import Tuple
 from dataclasses import dataclass
 
-from vidify import is_installed, BaseModuleData
-from vidify.gui import Res
+from vidify import BaseModuleData, is_installed
 from vidify.config import Config
+from vidify.gui import RES
 from vidify.player.generic import PlayerBase
 
 
 @dataclass(frozen=True)
 class PlayerData(BaseModuleData):
-    """
-    Information structure about the different Players supported, with a
-    description for the user and how to initialize it.
-    """
-
-    flags: Tuple[str]
+    pass
 
 
 PLAYERS = (
     PlayerData(
-        id='VLC',
-        short_name='VLC',
-        description='Play the music videos locally with the VLC player.',
-        icon=Res.vlc_icon,
+        name="Mpv",
+        short_name="Mpv",
+        description="Play the music videos locally with the mpv player.",
+        icon=RES.mpv_icon,
         compatible=True,
-        installed=is_installed('python-vlc'),
-        module='vidify.player.vlc',
-        class_name='VLCPlayer',
-        flags=('vlc_args',)),
-
+        installed=is_installed("python-mpv"),
+        module="vidify.player.mpv",
+    ),
     PlayerData(
-        id='MPV',
-        short_name='Mpv',
-        description='Play the music videos locally with the mpv player.',
-        icon=Res.mpv_icon,
+        name="External",
+        short_name="External",
+        description="Play the music videos on external devices.",
+        icon=RES.external_icon,
         compatible=True,
-        installed=is_installed('python-mpv'),
-        module='vidify.player.mpv',
-        class_name='MpvPlayer',
-        flags=('mpv_flags',)),
-
-    PlayerData(
-        id='EXTERNAL',
-        short_name='External',
-        description='Play the music videos on external devices.',
-        icon=Res.external_icon,
-        compatible=True,
-        installed=is_installed('zeroconf'),
-        module='vidify.player.external',
-        class_name='ExternalPlayer',
-        flags=('api',))
+        installed=is_installed("zeroconf"),
+        module="vidify.player.external",
+    ),
 )
 
 
@@ -67,13 +47,8 @@ def initialize_player(player: PlayerData, config: Config) -> PlayerBase:
 
     # Importing the module first
     mod = importlib.import_module(player.module)
-    # Then obtaining the player class
-    cls = getattr(mod, player.class_name)
-    # No other arguments are needed for now, so all this does is initialize
-    # the player with the config flags (if present).
-    params = []
-    for flag in player.flags:
-        params.append(getattr(config, flag))
-    obj = cls(*params)
+    # Obtaining the player class and creating an instance with the config
+    cls = getattr(mod, player.name)
+    obj = cls(config)
 
     return obj

@@ -2,9 +2,7 @@ import os
 import unittest
 import unittest.mock
 
-import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
-
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
@@ -20,18 +18,18 @@ class SpotifyWebTest(unittest.TestCase):
         the auth token and the expiration date.
         """
 
-        from vidify.api.spotify.web import get_token, SpotifyWebAPI
+        from vidify.api.spotify.web import SpotifyWebAPI, get_token
         from vidify.config import Config
+
         config = Config()
-        with unittest.mock.patch('sys.argv', ['']):
+        with unittest.mock.patch("sys.argv", [""]):
             config.parse()
-        token = get_token(config.refresh_token, config.client_id,
-                          config.client_secret)
+        token = get_token(config.refresh_token, config.client_id, config.client_secret)
         api = SpotifyWebAPI(token)
         api.connect_api()
         api._refresh_metadata()
         api.event_loop()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

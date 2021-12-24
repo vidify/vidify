@@ -12,24 +12,16 @@ work. This module only contains comments specific to the API, so it may be
 confusing at first glance.
 """
 
-import os
-import time
 import logging
-from typing import Optional
+import time
 
-try:
-    from tekore import Spotify, RefreshingToken, refresh_user_token
-except ModuleNotFoundError:
-    raise ModuleNotFoundError(
-        "No module named 'tekore'.\n"
-        "To use the Spotify Web API, please install tekore. Read more about"
-        " this in the Installation Guide.")
+from tekore import RefreshingToken, Spotify
 
-from vidify.api import split_title, ConnectionNotReady
+from vidify.api import ConnectionNotReady, split_title
 from vidify.api.generic import APIBase
 
 
-class SpotifyWebAPI(APIBase):
+class SpotifyWeb(APIBase):
     player_name: str = "Spotify"
     artist: str = None
     title: str = None
@@ -72,7 +64,7 @@ class SpotifyWebAPI(APIBase):
 
         # Some local songs don't have an artist name so `split_title`
         # is called in an attempt to manually get it from the title.
-        if self.artist == '':
+        if self.artist == "":
             self.artist, self.title = split_title(self.title)
 
         self._position = metadata.progress_ms
@@ -120,35 +112,3 @@ class SpotifyWebAPI(APIBase):
 
         # The time passed between calls is refreshed
         self._event_timestamp = time.time()
-
-
-def get_token(refresh_token: Optional[str], client_id: Optional[str],
-              client_secret: Optional[str]) -> Optional[RefreshingToken]:
-    """
-    Tries to generate a self-refreshing token from the parameters. The
-    authentication token itself isn't even saved in the config because it
-    expires in an hour. Instead, the refresh token is used to generate a new
-    token whenever the app is launched.
-
-    `refresh_token` is a special token used to refresh or generate a token.
-    It's useful to create a RefreshingToken rather than a regular Token so
-    that it automatically refreshes itself when it's expired.
-    """
-
-    # Trying to use the environment variables
-    if client_id is None:
-        client_id = os.getenv('SPOTIFY_CLIENT_ID')
-    if client_secret is None:
-        client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-
-    # Checking that the credentials are valid. The refresh token isn't really
-    # needed because tekore.refresh_user_token already obtains it from the
-    # refresh token.
-    for c in (refresh_token, client_id, client_secret):
-        if c in (None, ''):
-            logging.info("Rejecting the token because one of the credentials"
-                         " provided is empty.")
-            return None
-
-    # Generating a RefreshingToken with the parameters
-    return refresh_user_token(client_id, client_secret, refresh_token)

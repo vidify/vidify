@@ -5,6 +5,7 @@ This describes the exact behaviour the players should have.
 
 
 from abc import ABCMeta, abstractmethod
+
 from qtpy.QtWidgets import QFrame
 
 

@@ -1,14 +1,13 @@
+import configparser
 import os
 import sys
 import unittest
 import unittest.mock
-import configparser
 
 from vidify.config import OPTIONS, Argument, Config
 
-
 # Using a dummy config file
-TEST_PATH = 'test.ini'
+TEST_PATH = "test.ini"
 
 
 class ConfigTest(unittest.TestCase):
@@ -22,7 +21,7 @@ class ConfigTest(unittest.TestCase):
         except FileNotFoundError:
             pass
 
-        with unittest.mock.patch('sys.argv', ['']):
+        with unittest.mock.patch("sys.argv", [""]):
             self.config.parse(config_file=TEST_PATH)
 
     def tearDown(self):
@@ -37,35 +36,35 @@ class ConfigTest(unittest.TestCase):
         __setattr__ > arguments > config file > defaults
         """
 
-        attr = 'vlc_args'
-        arg = '--vlc-args'
+        attr = "vlc_args"
+        arg = "--vlc-args"
         section = OPTIONS[attr].section
 
         # Default
-        with unittest.mock.patch('sys.argv', ['']):
+        with unittest.mock.patch("sys.argv", [""]):
             self.config.parse(TEST_PATH)
         true_value = OPTIONS[attr].default
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
         # Config file
-        true_value = 'file'
+        true_value = "file"
         self.config.write_file(section, attr, true_value)
-        with unittest.mock.patch('sys.argv', ['']):
+        with unittest.mock.patch("sys.argv", [""]):
             self.config.parse(TEST_PATH)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
         # Arguments
-        true_value = 'args'
+        true_value = "args"
         args = [sys.argv[0], f"{arg}={true_value}"]
-        with unittest.mock.patch('sys.argv', args):
+        with unittest.mock.patch("sys.argv", args):
             self.config.parse(TEST_PATH)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
         # __setattr__
-        true_value = '__setattr__'
+        true_value = "__setattr__"
         setattr(self.config, attr, true_value)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
@@ -74,14 +73,14 @@ class ConfigTest(unittest.TestCase):
         # it should stay the same as the last one with __setattr__)
         invalid_value = "not_this_value"
         args = [sys.argv[0], f"{arg}={invalid_value}"]
-        with unittest.mock.patch('sys.argv', args):
+        with unittest.mock.patch("sys.argv", args):
             self.config.parse(TEST_PATH)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
 
         # Config file again. Same as above.
         self.config.write_file(section, attr, invalid_value)
-        with unittest.mock.patch('sys.argv', ['']):
+        with unittest.mock.patch("sys.argv", [""]):
             self.config.parse(TEST_PATH)
         conf_value = getattr(self.config, attr)
         self.assertEqual(conf_value, true_value)
@@ -104,8 +103,8 @@ class ConfigTest(unittest.TestCase):
 
             # Arguments formatting is valid
             if len(option.args) == 2:
-                self.assertTrue(option.args[0].startswith('-'))
-            self.assertTrue(option.args[len(option.args) - 1].startswith('--'))
+                self.assertTrue(option.args[0].startswith("-"))
+            self.assertTrue(option.args[len(option.args) - 1].startswith("--"))
 
             # Consistency with the arguments: converting it to an option:
             # --vlc-args -> vlc_args. If 'store_false' is used, it should
@@ -113,17 +112,17 @@ class ConfigTest(unittest.TestCase):
             opt = option.name
             arg = option.args[len(option.args) - 1]
             arg = arg[2:]
-            arg = arg.replace('-', '_')
-            if option.arg_action == 'store_false':
-                arg = 'no_' + arg
+            arg = arg.replace("-", "_")
+            if option.arg_action == "store_false":
+                arg = "no_" + arg
             self.assertEqual(opt, option.name)
 
             # If it's an argument, the description and arg_action shouldn't be
             # empty.
             self.assertNotIsInstance(option.description, type(None))
-            self.assertNotEqual(option.description, '')
+            self.assertNotEqual(option.description, "")
             self.assertNotIsInstance(option.arg_action, type(None))
-            self.assertNotEqual(option.arg_action, '')
+            self.assertNotEqual(option.arg_action, "")
 
     def test_argument_actions(self):
         """
@@ -136,7 +135,7 @@ class ConfigTest(unittest.TestCase):
                 continue
 
             # store_true and store_false should be of type boolean
-            if option.arg_action in ('store_true', 'store_false'):
+            if option.arg_action in ("store_true", "store_false"):
                 self.assertEqual(option.type, bool)
 
     def test_option_defaults(self):
@@ -158,9 +157,9 @@ class ConfigTest(unittest.TestCase):
         """
 
         # The non-existing section should be created with write_value
-        key = 'test_attr'
-        section = 'Test'
-        true_value = 'test_value'
+        key = "test_attr"
+        section = "Test"
+        true_value = "test_value"
         self.config.write_file(section, key, true_value)
         # Checking the new value in the config file
         conf = configparser.ConfigParser()
@@ -169,9 +168,9 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(value, true_value)
 
         # With the __setattr__ implementation
-        key = 'vlc_args'
-        section = 'Defaults'
-        true_value = 'test_value2'
+        key = "vlc_args"
+        section = "Defaults"
+        true_value = "test_value2"
         setattr(self.config, key, true_value)
         # Checking in the object
         value = getattr(self.config, key)
@@ -195,7 +194,7 @@ class ConfigTest(unittest.TestCase):
         """
 
         for name, opt in OPTIONS.items():
-            with open(self.config._path, 'w') as configfile:
+            with open(self.config._path, "w") as configfile:
                 configfile.write(f"[Defaults]\n{name} =\n")
             value = getattr(self.config, name)
             true_value = opt.default
@@ -208,12 +207,12 @@ class ConfigTest(unittest.TestCase):
         """
 
         variables = {
-            'debug': True,
-            'width': 22,
-            'vlc_args': 'test',
-            'lyrics': None,
-            'height': None,
-            'mpv_flags': None
+            "debug": True,
+            "width": 22,
+            "vlc_args": "test",
+            "lyrics": None,
+            "height": None,
+            "mpv_flags": None,
         }
 
         # Checking that the values are the same as the ones set.
@@ -223,5 +222,5 @@ class ConfigTest(unittest.TestCase):
             self.assertEqual(conf_value, real_value)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

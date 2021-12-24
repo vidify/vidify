@@ -6,14 +6,12 @@ throughout the entire module.
 
 import unittest
 
-import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
-from vidify.gui.window import MainWindow
 from vidify.api import APIS
+from vidify.config import Config
+from vidify.gui.window import MainWindow
 from vidify.player import PLAYERS, initialize_player
-from vidify.config import Config, OPTIONS
-
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
@@ -31,15 +29,15 @@ class DataStructuresTest(unittest.TestCase):
 
         existing_apis = []
         for api in APIS:
-            self.assertEqual(api.id, api.id.upper())
-            self.assertTrue(api.id not in existing_apis)
-            existing_apis.append(api.id)
+            self.assertEqual(api.name, api.name.upper())
+            self.assertTrue(api.name not in existing_apis)
+            existing_apis.append(api.name)
 
         existing_players = []
         for player in PLAYERS:
-            self.assertEqual(player.id, player.id.upper())
-            self.assertTrue(player.id not in existing_players)
-            existing_players.append(player.id)
+            self.assertEqual(player.name, player.name.upper())
+            self.assertTrue(player.name not in existing_players)
+            existing_players.append(player.name)
 
     def test_imports_and_class_names_in_modules(self):
         """
@@ -60,29 +58,6 @@ class DataStructuresTest(unittest.TestCase):
             if player.compatible and player.installed:
                 initialize_player(player, config)
 
-    def test_event_loop_interval(self):
-        """
-        Checking that the event intervals in APIData are valid (higher than
-        100 milliseconds at least). Rather than 0, None should be used to
-        specify that no event loops are used. A very low refresh rate would
-        also cause lag in some systems.
-        """
-
-        for api in APIS:
-            if api.event_loop_interval is not None:
-                self.assertTrue(api.event_loop_interval > 100)
-
-    def test_player_flags_name_exists(self):
-        """
-        Checking that the config options listed in the PlayerData structure
-        holds real entries in Config.
-        """
-
-        for player in PLAYERS:
-            for attr in player.flags:
-                # Will raise AtributeError if it isn't found
-                OPTIONS[attr]
-
     def test_gui_init_exists(self):
         """
         Checking that all the functions mentioned inside the APIData structures
@@ -94,5 +69,5 @@ class DataStructuresTest(unittest.TestCase):
                 getattr(win, api.gui_init_fn)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

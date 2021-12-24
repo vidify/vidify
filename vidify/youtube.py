@@ -17,7 +17,7 @@ def get_direct_url(data: dict) -> str:
     https://r1---sn-vg5obxn25po-cjod.googlevideo.com/videoplayback?...
     """
 
-    return data['entries'][0]['url']
+    return data["entries"][0]["url"]
 
 
 def get_youtube_url(data: dict) -> str:
@@ -26,7 +26,7 @@ def get_youtube_url(data: dict) -> str:
     https://www.youtube.com/watch?v=dQw4w9WgXcQ
     """
 
-    return data['entries'][0]['webpage_url']
+    return data["entries"][0]["webpage_url"]
 
 
 class YouTubeDLWorker(QObject):
@@ -44,22 +44,23 @@ class YouTubeDLWorker(QObject):
     fail = Signal()
     finish = Signal()
 
-    def __init__(self, query: str, debug: bool = False,
-                 width: Optional[int] = None, height: Optional[int] = None
-                 ) -> None:
+    def __init__(
+        self,
+        query: str,
+        debug: bool = False,
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+    ) -> None:
         super().__init__()
 
         # The query attribute contains the full search to be done on YouTube.
         self.query = query
 
-        self.options = {
-            'format': 'bestvideo',
-            'quiet': not debug
-        }
+        self.options = {"format": "bestvideo", "quiet": not debug}
         if width is not None:
-            self.options['format'] += f'[width<={width}]'
+            self.options["format"] += f"[width<={width}]"
         if height is not None:
-            self.options['format'] += f'[height<={height}]'
+            self.options["format"] += f"[height<={height}]"
 
     def get_url(self) -> None:
         """

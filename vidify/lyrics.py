@@ -8,17 +8,17 @@ enough. Lyricwikia is actually a scrapper but its lyrics are available for
 free, in comparison to Genius.
 """
 
-import lyricwikia
+# import lyricwikia
 
-from vidify import format_name, Platform, CURRENT_PLATFORM
-
+from vidify import CUR_PLATFORM, Platform, format_name
 
 # The different error messages returned by LyricWikia in order to override
 # them with the default error message.
 ERROR_MESSAGES = (
     "Unfortunately, we are not licensed to display the full lyrics for this"
     " song at the moment. Hopefully we will be able to in the future. Until"
-    " then... how about a random page?",)
+    " then... how about a random page?",
+)
 
 
 def get_lyrics(artist: str, title: str) -> str:
@@ -30,17 +30,18 @@ def get_lyrics(artist: str, title: str) -> str:
 
     # Colors are not displayed on Windows because it doesn't support ANSI
     # escape codes and importing colorama isn't worth it.
-    if CURRENT_PLATFORM == Platform.WINDOWS:
+    if CUR_PLATFORM == Platform.WINDOWS:
         name = f">> {name}"
     else:
         name = f"\033[4m{name}\033[0m"
 
-    try:
-        lyrics = lyricwikia.get_lyrics(artist, title)
-    except (lyricwikia.LyricsNotFound, AttributeError):
-        lyrics = "No lyrics found"
-    else:
-        if lyrics in ERROR_MESSAGES:
-            lyrics = "No lyrics found"
+    lyrics = "No lyrics available currently"
+    # try:
+    #     lyrics = lyricwikia.get_lyrics(artist, title)
+    # except (lyricwikia.LyricsNotFound, AttributeError):
+    #     lyrics = "No lyrics found"
+    # else:
+    #     if lyrics in ERROR_MESSAGES:
+    #         lyrics = "No lyrics found"
 
     return f"{name}\n{lyrics}\n"

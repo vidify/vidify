@@ -1,4 +1,3 @@
-include vidify/gui/res/*
-include vidify/gui/res/*/*
-include vidify/gui/res/*/*/*
-include dev/vidify.desktop
+recursive-include vidify *
+recursive-include res *
+include dev/vidify.desktop dev/vidify.svg

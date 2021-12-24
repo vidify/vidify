@@ -3,21 +3,29 @@ This module contains commonly used components so that their usage and
 initialization is easier.
 """
 
-import time
 import logging
-from typing import Callable, Optional, Tuple
+import time
+from typing import Callable, List, Optional
 
-from qtpy.QtWidgets import (QWidget, QLabel, QPushButton, QLineEdit,
-                            QVBoxLayout, QGroupBox, QRadioButton, QHBoxLayout,
-                            QButtonGroup, QScrollArea)
+from qtpy.QtCore import Qt, QTimer, Signal, Slot
 from qtpy.QtGui import QIcon, QPixmap
-from qtpy.QtCore import Qt, QUrl, Signal, Slot, QTimer
-from qtpy.QtWebEngineWidgets import QWebEngineView
+from qtpy.QtWidgets import (
+    QButtonGroup,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QRadioButton,
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from vidify import BaseModuleData
 from vidify.api import APIS, ConnectionNotReady
+from vidify.gui import COLORS, FONTS, RES
 from vidify.player import PLAYERS
-from vidify.gui import Fonts, Colors, Res
 
 
 class ModuleCard(QGroupBox):
@@ -34,7 +42,7 @@ class ModuleCard(QGroupBox):
         super().__init__(module.short_name)
 
         self.module = module
-        self.setFont(Fonts.smalltext)
+        self.setFont(FONTS.smalltext)
         self.setMinimumHeight(270)
         self.setMaximumHeight(400)
         self.setMinimumWidth(220)
@@ -55,7 +63,7 @@ class ModuleCard(QGroupBox):
         self.text = QLabel(description)
         self.text.setStyleSheet("padding: 10px 3px")
         self.text.setWordWrap(True)
-        self.text.setFont(Fonts.smalltext)
+        self.text.setFont(FONTS.smalltext)
         self.text.setAlignment(Qt.AlignHCenter)
         self.text.setTextFormat(Qt.RichText)
         self.text.setTextInteractionFlags(Qt.TextBrowserInteraction)
@@ -70,7 +78,7 @@ class ModuleCard(QGroupBox):
         self.button = QRadioButton("USE" if enabled else "Not Installed")
         self.button.setEnabled(enabled)
         self.button.setChecked(selected)
-        font = Fonts.text
+        font = FONTS.text
         font.setItalic(True)
         self.button.setFont(font)
         self.layout.addWidget(self.button)
@@ -85,8 +93,9 @@ class SetupWidget(QWidget):
     # respectively.
     done = Signal(object, object)
 
-    def __init__(self, saved_api: Optional[str] = None,
-                 saved_player: Optional[str] = None, *args) -> None:
+    def __init__(
+        self, saved_api: Optional[str] = None, saved_player: Optional[str] = None, *args
+    ) -> None:
         """
         The setup widget can be initialized with the previously selected API
         and Player so that all the user has to do is press "Next".
@@ -96,10 +105,10 @@ class SetupWidget(QWidget):
 
         self.layout = QVBoxLayout(self)
 
-        self.api_group = self.load_data(
-            APIS, "Select your music player:", saved_api)
+        self.api_group = self.load_data(APIS, "Select your music player:", saved_api)
         self.player_group = self.load_data(
-            PLAYERS, "Select where to play the videos:", saved_player)
+            PLAYERS, "Select where to play the videos:", saved_player
+        )
         self.init_button()
 
     def init_button(self) -> None:
@@ -108,7 +117,7 @@ class SetupWidget(QWidget):
         """
 
         self.continue_btn = QPushButton("CONTINUE")
-        self.continue_btn.setFont(Fonts.mediumbutton)
+        self.continue_btn.setFont(FONTS.mediumbutton)
         self.continue_btn.clicked.connect(self.on_click)
         self.layout.addWidget(self.continue_btn)
 
@@ -137,13 +146,14 @@ class SetupWidget(QWidget):
         """
 
         text = QLabel(title)
-        font = Fonts.bigtext
+        font = FONTS.bigtext
         font.setBold(True)
         text.setFont(font)
         self.layout.addWidget(text)
 
-    def load_data(self, data: Tuple[BaseModuleData], msg: str,
-                  saved_item: Optional[str] = None) -> QButtonGroup:
+    def load_data(
+        self, data: List[BaseModuleData], msg: str, saved_item: Optional[str] = None
+    ) -> QButtonGroup:
         """
         The provided data is converted into cards in the GUI. If the
         module isn't supported on the current OS, it's not added to avoid
@@ -163,8 +173,7 @@ class SetupWidget(QWidget):
             if not module.compatible:
                 continue
 
-            selected = saved_item is not None \
-                and module.id == saved_item.upper()
+            selected = saved_item is not None and module.name == saved_item.upper()
             card = ModuleCard(module, selected)
 
             if module.installed:
@@ -172,8 +181,12 @@ class SetupWidget(QWidget):
             else:
                 disabled.append(card)
             group.addButton(card.button)
-            logging.info("Created API card: %s (enabled=%s, selected=%s)",
-                         module.id, module.installed, selected)
+            logging.info(
+                "Created API card: %s (enabled=%s, selected=%s)",
+                module.name,
+                module.installed,
+                selected,
+            )
 
         for card in disabled:
             layout.addWidget(card)
@@ -196,7 +209,7 @@ class SetupWidget(QWidget):
         except AttributeError:
             return
 
-        logging.info("Selected: api=%s, player=%s", api.id, player.id)
+        logging.info("Selected: api=%s, player=%s", api.name, player.name)
         self.done.emit(api, player)
 
 
@@ -209,11 +222,11 @@ class InputField(QLineEdit):
     def __init__(self, *args) -> None:
         super().__init__(*args)
 
-        self.setFont(Fonts.bigtext)
+        self.setFont(FONTS.bigtext)
 
         # A clear button
-        clear = self.addAction(QIcon(Res.cross), QLineEdit.TrailingPosition)
-        clear.triggered.connect(lambda: self.setText(''))
+        clear = self.addAction(QIcon(RES.cross), QLineEdit.TrailingPosition)
+        clear.triggered.connect(lambda: self.setText(""))
 
     def highlight(self) -> None:
         """
@@ -221,7 +234,7 @@ class InputField(QLineEdit):
         for instance.
         """
 
-        self.setStyleSheet(f"background-color: {Colors.lighterror}")
+        self.setStyleSheet(f"background-color: {COLORS.lighterror}")
 
     def undo_highlight(self) -> None:
         """
@@ -230,52 +243,6 @@ class InputField(QLineEdit):
         """
 
         self.setStyleSheet("")
-
-
-class WebBrowser(QWidget):
-    """
-    This widget contains a QWebEngineView and other simple controls.
-    """
-
-    def __init__(self, *args) -> None:
-        super().__init__(*args)
-        self.layout = QVBoxLayout(self)
-        self.setup_controls()
-        self.setup_web_view()
-
-    def setup_web_view(self) -> None:
-        """
-        The web view itself, with a fixed size.
-        """
-
-        self.web_view = QWebEngineView()
-        self.layout.addWidget(self.web_view)
-
-    def setup_controls(self) -> None:
-        """
-        The web view controls for now are just a button to go back.
-        """
-
-        self.go_back_button = QPushButton("← Go back")
-        self.go_back_button.setFont(Fonts.mediumbutton)
-        self.layout.addWidget(self.go_back_button)
-
-    @property
-    def url(self) -> str:
-        """
-        Returns the web view's browser as a string. The first url() returns
-        a QUrl and the second the string with the URL.
-        """
-
-        return self.web_view.url().url()
-
-    @url.setter
-    def url(self, url: str) -> None:
-        """
-        Sets the web view's URL to `url`.
-        """
-
-        self.web_view.setUrl(QUrl(url))
 
 
 class APIConnecter(QLabel):
@@ -299,7 +266,7 @@ class APIConnecter(QLabel):
         self.connect_api = connect_api
 
         self.setWordWrap(True)
-        self.setFont(Fonts.title)
+        self.setFont(FONTS.title)
         self.setMargin(50)
         self.setAlignment(Qt.AlignCenter)
 
@@ -328,7 +295,7 @@ class APIConnecter(QLabel):
         # connection attempt was unsuccessful.
         if self.attempts == self.MAX_ATTEMPTS - 1:
             self.setText(self.wait_msg)
-            self.setFont(Fonts.header)
+            self.setFont(FONTS.header)
 
         # The APIs will raise `ConnectionNotReady` if the connection attempt
         # was unsuccessful.

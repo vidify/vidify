@@ -4,9 +4,10 @@ logger, cross-platform variables...
 """
 
 import sys
-from enum import Enum
-from typing import Optional, Tuple
 from dataclasses import dataclass
+from enum import Enum
+from typing import Optional, List
+
 from pkg_resources import DistributionNotFound, get_distribution
 
 
@@ -23,16 +24,16 @@ class Platform(Enum):
 
 
 # Getting the current platform as a global variable
-if sys.platform.startswith('linux'):
-    CURRENT_PLATFORM = Platform.LINUX
-elif sys.platform.startswith('darwin'):
-    CURRENT_PLATFORM = Platform.MACOS
-elif sys.platform.startswith('win'):
-    CURRENT_PLATFORM = Platform.WINDOWS
-elif sys.platform.find('bsd') != -1:
-    CURRENT_PLATFORM = Platform.BSD
+if sys.platform.startswith("linux"):
+    CUR_PLATFORM = Platform.LINUX
+elif sys.platform.startswith("darwin"):
+    CUR_PLATFORM = Platform.MACOS
+elif sys.platform.startswith("win"):
+    CUR_PLATFORM = Platform.WINDOWS
+elif sys.platform.find("bsd") != -1:
+    CUR_PLATFORM = Platform.BSD
 else:
-    CURRENT_PLATFORM = Platform.UNKNOWN
+    CUR_PLATFORM = Platform.UNKNOWN
 
 
 def is_installed(*args: str) -> bool:
@@ -52,10 +53,11 @@ def format_name(artist: Optional[str], title: Optional[str]) -> str:
     use all it has.
     """
 
-    is_empty = lambda x: x in (None, '')
+    def is_empty(s: str):
+        return s in (None, "")
 
     if is_empty(artist) and is_empty(title):
-        return ''
+        return ""
 
     if is_empty(artist):
         return title
@@ -75,19 +77,18 @@ class BaseModuleData:
     initialize them programatically.
     """
 
-    id: str
+    name: str
     short_name: str
     description: str
     icon: str
     compatible: bool
     installed: bool
     module: str
-    class_name: str
 
 
-def find_module(data: Tuple[BaseModuleData], module_id: str) -> BaseModuleData:
+def find_module(data: List[BaseModuleData], module_id: str) -> BaseModuleData:
     for element in data:
-        if element.id == module_id:
+        if element.name == module_id:
             return element
 
     raise ValueError("Module with id {module_id} not found")

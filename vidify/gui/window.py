@@ -50,25 +50,27 @@ The API and player modules are mixed using Qt events:
 These events are emitted inside the APIs.
 """
 
+import importlib
+import logging
 import time
 import types
-import logging
-import importlib
-from typing import Callable, Optional
 from contextlib import suppress
+from typing import Callable, Optional
 
-from qtpy.QtWidgets import QWidget, QHBoxLayout
+import tekore
+from qtpy.QtCore import QCoreApplication, Qt, QThread, QTimer, Slot
 from qtpy.QtGui import QFontDatabase
-from qtpy.QtCore import Qt, QTimer, QCoreApplication, Slot, QThread
+from qtpy.QtWidgets import QHBoxLayout, QWidget
 
-from vidify import format_name, find_module
+from vidify import find_module, format_name
 from vidify.api import APIS, APIData
-from vidify.player import initialize_player, PlayerData
 from vidify.config import Config
-from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
+from vidify.gui import COLORS, RES
+from vidify.gui.components import APIConnecter, SetupWidget
+from vidify.gui.api.spotify_web import SpotifyWebAuthenticator
 from vidify.lyrics import get_lyrics
-from vidify.gui import Res, Colors
-from vidify.gui.components import SetupWidget, APIConnecter
+from vidify.player import PlayerData, initialize_player
+from vidify.youtube import YouTubeDLWorker, get_direct_url, get_youtube_url
 
 
 class MainWindow(QWidget):
@@ -78,7 +80,7 @@ class MainWindow(QWidget):
         """
 
         super().__init__()
-        self.setWindowTitle('vidify')
+        self.setWindowTitle("vidify")
 
         # Setting the window to stay on top
         if config.stay_on_top:
@@ -93,7 +95,7 @@ class MainWindow(QWidget):
 
         # Loading the used fonts (Inter)
         font_db = QFontDatabase()
-        for font in Res.fonts:
+        for font in RES.fonts:
             font_db.addApplicationFont(font)
 
         # Initializing the player and saving the config object in the window.
@@ -154,16 +156,16 @@ class MainWindow(QWidget):
         del self.setup_widget
 
         # Saving the API and Player in the config
-        self.config.api = api.id
-        self.config.player = player.id
+        self.config.api = api.name
+        self.config.player = player.name
 
         # Starting the asynchronous API initialization
         self.initialize_api(api)
-        logging.info("Using %s as the API", api.id)
+        logging.info("Using %s as the API", api.name)
 
         # Initializing the player
         self.player = initialize_player(player, self.config)
-        logging.info("Using %s as the player", player.id)
+        logging.info("Using %s as the player", player.name)
 
     def initialize_api(self, api_data: APIData) -> None:
         """
@@ -180,16 +182,21 @@ class MainWindow(QWidget):
 
         # Initializing the API with dependency injection.
         mod = importlib.import_module(api_data.module)
-        cls = getattr(mod, api_data.class_name)
+        cls = getattr(mod, api_data.name)
         self.api = cls()
 
         self.wait_for_connection(
-            self.api.connect_api, message=api_data.connect_msg,
-            event_loop_interval=api_data.event_loop_interval)
+            self.api.connect_api,
+            message=api_data.connect_msg,
+            event_loop_interval=api_data.event_loop_interval,
+        )
 
-    def wait_for_connection(self, conn_fn: Callable[[], None],
-                            message: Optional[str] = None,
-                            event_loop_interval: int = 1000) -> None:
+    def wait_for_connection(
+        self,
+        conn_fn: Callable[[], None],
+        message: Optional[str] = None,
+        event_loop_interval: int = 1000,
+    ) -> None:
 
         """
         Creates an APIConnecter instance and waits for the API to be
@@ -197,8 +204,7 @@ class MainWindow(QWidget):
         """
 
         self.event_loop_interval = event_loop_interval
-        self.api_connecter = APIConnecter(
-            conn_fn, message or "Waiting for connection")
+        self.api_connecter = APIConnecter(conn_fn, message or "Waiting for connection")
         self.api_connecter.success.connect(self.on_conn_success)
         self.api_connecter.fail.connect(self.on_conn_fail)
         self.layout.addWidget(self.api_connecter)
@@ -229,6 +235,7 @@ class MainWindow(QWidget):
         # is only available on Linux.
         if self.config.audiosync:
             from vidify.audiosync import AudiosyncWorker
+
             self.audiosync = AudiosyncWorker(self.api.player_name)
             if self.config.debug:
                 self.audiosync.debug = True
@@ -236,7 +243,7 @@ class MainWindow(QWidget):
             self.audiosync.failed.connect(self.on_audiosync_fail)
 
         # Initializing the player and starting the first video
-        self.setStyleSheet(f"background-color:{Colors.black};")
+        self.setStyleSheet(f"background-color:{COLORS.black};")
         self.layout.addWidget(self.player)
         self.play_video(self.api.artist, self.api.title, start_time)
 
@@ -248,11 +255,9 @@ class MainWindow(QWidget):
         # Starting the event loop if it was initially passed as
         # a parameter.
         if self.event_loop_interval is not None:
-            self.start_event_loop(self.api.event_loop,
-                                  self.event_loop_interval)
+            self.start_event_loop(self.api.event_loop, self.event_loop_interval)
 
-    def start_event_loop(self, event_loop: Callable[[], None],
-                         ms: int) -> None:
+    def start_event_loop(self, event_loop: Callable[[], None], ms: int) -> None:
         """
         Starts a "manual" event loop with a timer every `ms` milliseconds.
         This is used with the SwSpotify API and the Web API to check every
@@ -278,7 +283,7 @@ class MainWindow(QWidget):
 
         # If there is an audiosync thread running, this will pause the sound
         # recording and youtube downloading.
-        if self.config.audiosync and self.audiosync.status != 'idle':
+        if self.config.audiosync and self.audiosync.status != "idle":
             self.audiosync.is_running = is_playing
 
         self.player.pause = not is_playing
@@ -291,7 +296,7 @@ class MainWindow(QWidget):
 
         # Audiosync is aborted if the position of the video changed, since
         # the audio being recorded won't make sense.
-        if self.config.audiosync and self.audiosync.status != 'idle':
+        if self.config.audiosync and self.audiosync.status != "idle":
             self.audiosync.abort()
 
         if not self.config.audiosync:
@@ -312,7 +317,7 @@ class MainWindow(QWidget):
         """
 
         # Checking that the artist and title are valid first of all
-        if self.api.artist in (None, '') and self.api.title in (None, ''):
+        if self.api.artist in (None, "") and self.api.title in (None, ""):
             logging.info("The provided artist and title are empty.")
             self.on_youtubedl_fail()
             if self.config.audiosync:
@@ -357,7 +362,8 @@ class MainWindow(QWidget):
 
         logging.info("Starting the youtube-dl thread")
         self.youtubedl = YouTubeDLWorker(
-            query, self.config.debug, self.config.width, self.config.height)
+            query, self.config.debug, self.config.width, self.config.height
+        )
         self.yt_thread = QThread()
         self.youtubedl.moveToThread(self.yt_thread)
         self.yt_thread.started.connect(self.youtubedl.get_url)
@@ -374,12 +380,14 @@ class MainWindow(QWidget):
         happened.
         """
 
-        print("The video wasn't found, either because of an issue with your"
-              " internet connection or because the provided data was invalid."
-              " For more information, enable the debug mode.")
+        print(
+            "The video wasn't found, either because of an issue with your"
+            " internet connection or because the provided data was invalid."
+            " For more information, enable the debug mode."
+        )
 
         # Or playing the default video in the GUI
-        self.player.start_video(Res.default_video, self.api.is_playing)
+        self.player.start_video(RES.default_video, self.api.is_playing)
 
     @Slot(dict)
     def on_youtubedl_success(self, data: dict) -> None:
@@ -393,8 +401,7 @@ class MainWindow(QWidget):
         # Otherwise, playing the video inside the GUI. If audiosync is
         # enabled, the position is ignored. That way, it can stay
         # synchronized.
-        url = get_direct_url(data) if self.player.DIRECT_URL \
-            else get_youtube_url(data)
+        url = get_direct_url(data) if self.player.DIRECT_URL else get_youtube_url(data)
         self.player.start_video(url, is_playing)
         if not self.config.audiosync:
             self.player.seek(position)
@@ -424,8 +431,9 @@ class MainWindow(QWidget):
         logging.info("Audiosync module returned %d ms", lag)
 
         # The current API position according to what's being recorded.
-        playback_delay = round((time.time() - self.timestamp) * 1000) \
-            - self.player.position
+        playback_delay = (
+            round((time.time() - self.timestamp) * 1000) - self.player.position
+        )
         lag += playback_delay
 
         # The user's custom audiosync delay. This is basically the time taken
@@ -443,74 +451,36 @@ class MainWindow(QWidget):
             # with a timer.
             if self.player.position < -lag:
                 self.sync_timer = QTimer(self)
-                self.sync_timer.singleShot(-self.player.position - lag,
-                                           lambda: self.player.seek(0))
+                self.sync_timer.singleShot(
+                    -self.player.position - lag, lambda: self.player.seek(0)
+                )
             else:
                 self.player.seek(lag, relative=True)
 
     def init_spotify_web_api(self) -> None:
         """
-        SPOTIFY WEB API CUSTOM FUNCTION
-
-        Note: the Tekore imports are done inside the functions so that
-        Tekore isn't needed for whoever doesn't plan to use the Spotify
-        Web API.
+        NOTE: This is a custom function for the Spotify Web API initialization.
         """
 
-        from vidify.api.spotify.web import get_token
-        from vidify.gui.api.spotify_web import SpotifyWebPrompt
+        def start_api(self, token: tekore.RefreshingToken) -> None:
+            logging.info("Initializing the Spotify Web API")
 
-        token = get_token(self.config.refresh_token, self.config.client_id,
-                          self.config.client_secret)
+            from vidify.api.spotify.web import SpotifyWebAPI
 
-        if token is not None:
-            # If the previous token was valid, the API can already start.
-            logging.info("Reusing a previously generated token")
-            self.start_spotify_web_api(token, save_config=False)
-        else:
-            # Otherwise, the credentials are obtained with the GUI. When
-            # a valid auth token is ready, the GUI will initialize the API
-            # automatically exactly like above. The GUI won't ask for a
-            # redirect URI for now.
-            logging.info("Asking the user for credentials")
-            # The SpotifyWebPrompt handles the interaction with the user and
-            # emits a `done` signal when it's done.
-            self._spotify_web_prompt = SpotifyWebPrompt(
-                self.config.client_id, self.config.client_secret,
-                self.config.redirect_uri)
-            self._spotify_web_prompt.done.connect(self.start_spotify_web_api)
-            self.layout.addWidget(self._spotify_web_prompt)
+            # Initializing the web API
+            self.api = SpotifyWebAPI(token)
+            api_data = find_module(APIS, "SPOTIFY_WEB")
+            self.wait_for_connection(
+                self.api.connect_api,
+                message=api_data.connect_msg,
+                event_loop_interval=api_data.event_loop_interval,
+            )
 
-    def start_spotify_web_api(self, token: 'RefreshingToken',
-                              save_config: bool = True) -> None:
-        """
-        SPOTIFY WEB API CUSTOM FUNCTION
+            self.layout.removeWidget(self._spotify_web_auth)
+            self._spotify_web_auth.hide()
+            del self._spotify_web_auth
 
-        Initializes the Web API, also saving them in the config for future
-        usage (if `save_config` is true).
-        """
-        from vidify.api.spotify.web import SpotifyWebAPI
-
-        logging.info("Initializing the Spotify Web API")
-
-        # Initializing the web API
-        self.api = SpotifyWebAPI(token)
-        api_data = find_module(APIS, 'SPOTIFY_WEB')
-        self.wait_for_connection(
-            self.api.connect_api, message=api_data.connect_msg,
-            event_loop_interval=api_data.event_loop_interval)
-
-        # The obtained credentials are saved for the future
-        if save_config:
-            logging.info("Saving the Spotify Web API credentials")
-            self.config.client_secret = self._spotify_web_prompt.client_secret
-            self.config.client_id = self._spotify_web_prompt.client_id
-            self.config.refresh_token = token.refresh_token
-
-        # The credentials prompt widget is removed after saving the data. It
-        # may not exist because start_spotify_web_api was called directly,
-        # so errors are taken into account.
-        with suppress(AttributeError):
-            self.layout.removeWidget(self._spotify_web_prompt)
-            self._spotify_web_prompt.hide()
-            del self._spotify_web_prompt
+        # Initializing the authenticator and waiting for it to be done.
+        self._spotify_web_auth = SpotifyWebAuthenticator(self.config)
+        self._spotify_web_auth.done.connect(start_api)
+        self.layout.addWidget(self._spotify_web_auth)

@@ -1,0 +1,10 @@
+# NOTE: this is a separate file until
+# https://gitlab.com/pycqa/flake8/-/issues/428 is fixed.
+[flake8]
+# Recommend matching the black line length (default 88),
+# rather than using the flake8 default of 79:
+max-line-length = 88
+exclude = .git,.venv,env,__pycache__,build,dist
+extend-ignore =
+    # See https://github.com/PyCQA/pycodestyle/issues/373
+    E203,

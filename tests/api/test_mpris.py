@@ -1,11 +1,9 @@
 import os
 import unittest
 
-import qtpy.QtWebEngineWidgets  # noqa: F401
 from qtpy.QtWidgets import QApplication
 
-from vidify import CURRENT_PLATFORM, Platform
-
+from vidify import CUR_PLATFORM, Platform
 
 if QApplication.instance() is None:
     _ = QApplication(["vidify"])
@@ -14,18 +12,18 @@ SKIP_MSG = "Skipping this test as it won't work on the current system."
 
 
 class MPRISTest(unittest.TestCase):
-    @unittest.skipIf(CI or CURRENT_PLATFORM not in (Platform.BSD,
-                     Platform.LINUX), SKIP_MSG)
+    @unittest.skipIf(CI or CUR_PLATFORM not in (Platform.BSD, Platform.LINUX), SKIP_MSG)
     def test_simple(self):
         from vidify.api.mpris import MPRISAPI
+
         api = MPRISAPI()
         api.connect_api()
         api._refresh_metadata()
 
-    @unittest.skipIf(CURRENT_PLATFORM not in (Platform.BSD, Platform.LINUX),
-                     SKIP_MSG)
+    @unittest.skipIf(CUR_PLATFORM not in (Platform.BSD, Platform.LINUX), SKIP_MSG)
     def test_bool_status(self):
         from vidify.api.mpris import MPRISAPI
+
         self.assertFalse(MPRISAPI._bool_status("stopped"))
         self.assertFalse(MPRISAPI._bool_status("sToPPeD"))
         self.assertFalse(MPRISAPI._bool_status("paused"))
@@ -34,5 +32,5 @@ class MPRISTest(unittest.TestCase):
         self.assertTrue(MPRISAPI._bool_status("Playing"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
