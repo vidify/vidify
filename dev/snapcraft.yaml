@@ -43,7 +43,6 @@ parts:
       - qdarkstyle
       # Mandatory
       - python-mpv
-      - lyricwikia
       - tekore
       # Optionals
       - vidify-audiosync

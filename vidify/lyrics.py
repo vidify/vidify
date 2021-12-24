@@ -8,7 +8,7 @@ enough. Lyricwikia is actually a scrapper but its lyrics are available for
 free, in comparison to Genius.
 """
 
-import lyricwikia
+# import lyricwikia
 
 from vidify import CUR_PLATFORM, Platform, format_name
 
@@ -35,12 +35,13 @@ def get_lyrics(artist: str, title: str) -> str:
     else:
         name = f"\033[4m{name}\033[0m"
 
-    try:
-        lyrics = lyricwikia.get_lyrics(artist, title)
-    except (lyricwikia.LyricsNotFound, AttributeError):
-        lyrics = "No lyrics found"
-    else:
-        if lyrics in ERROR_MESSAGES:
-            lyrics = "No lyrics found"
+    lyrics = "No lyrics available currently"
+    # try:
+    #     lyrics = lyricwikia.get_lyrics(artist, title)
+    # except (lyricwikia.LyricsNotFound, AttributeError):
+    #     lyrics = "No lyrics found"
+    # else:
+    #     if lyrics in ERROR_MESSAGES:
+    #         lyrics = "No lyrics found"
 
     return f"{name}\n{lyrics}\n"

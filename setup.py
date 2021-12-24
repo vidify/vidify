@@ -18,7 +18,6 @@ exec(compile(open("vidify/version.py").read(), "vidify/version.py", "exec"))
 install_requires = [
     # Base package
     "QtPy==1.9",
-    "lyricwikia==0.1",
     'yt-dlp',  # Always the latest version to avoid breakage
     "appdirs==1.4",
     "qdarkstyle==2.8",

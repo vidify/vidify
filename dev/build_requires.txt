@@ -1,6 +1,5 @@
 appdirs
 dataclasses; python_version < '3.7'
-lyricwikia
 pydbus; platform_system == "Linux"
 pygobject
 pyinstaller
