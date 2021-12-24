@@ -110,8 +110,10 @@ class SpotifyWebAuthenticator(QWidget):
         self.server_thread.daemon = True
         self.server_thread.start()
 
-        # Open auth URL in the browser
-        url = self._creds.user_authorisation_url(self.SCOPES)
+        # Open auth URL in the browser. The verifier is saved to request the
+        # token later on.
+        url, verifier = self._creds.pkce_user_authorisation(self.SCOPES)
+        self._verifier = verifier
         webbrowser.open_new(url)
 
     def _auth_server(self) -> None:
@@ -134,29 +136,21 @@ class SpotifyWebAuthenticator(QWidget):
         """
 
         code = request.args.get('code', None)
-        state = request.args.get('state', None)
+        # TODO: how to check state?
+        # state = request.args.get('state', None)
 
         # TODO: pretty error handling (HTML)
         try:
-            token = self._creds.request_pkce_token(code, state)
+            token = self._creds.request_pkce_token(code, self._verifier)
         except tk.HTTPError as e:
             print(f"Unable to obtain token: {e}")
             return f'error: {e}'
 
-        # TODO: use logging
-        print(f"Got token: {token}")
-        self.save_config(token)
+        # The authentication process is done. We save the refresh token for a
+        # future attempt.
+        logging.info("Successfully obtained acess token")
+        self._config.refresh_token = token.refresh_token
         self.done.emit(token)
 
         # TODO: add template with prettier HTML
         return 'success!'
-
-    def save_config(self, token: tk.RefreshingToken):
-        """
-        The obtained credentials are saved for future attempts, so that we can
-        avoid prompting the user.
-        """
-
-        logging.info("Saving the Spotify Web API credentials")
-        self.config.client_id = self._spotify_web_prompt.client_id
-        self.config.refresh_token = token.refresh_token

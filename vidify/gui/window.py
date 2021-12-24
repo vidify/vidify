@@ -478,7 +478,7 @@ class MainWindow(QWidget):
 
             self.layout.removeWidget(self._spotify_web_auth)
             self._spotify_web_auth.hide()
-            del self._spotify_web_prompt
+            del self._spotify_web_auth
 
         # Initializing the authenticator and waiting for it to be done.
         self._spotify_web_auth = SpotifyWebAuthenticator(self.config)
