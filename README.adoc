@@ -49,10 +49,9 @@ System:
    https://aur.archlinux.org/packages/vidify[`vidify`]. Maintained by me
    https://github.com/marioortizmanero[marioortizmanero].
 ** Gentoo Linux: there's an ebuild maintained by
-   https://github.com/AndrewAmmerlaan[AndrewAmmerlaan] in the
-   https://wiki.gentoo.org/wiki/Project:GURU[GURU overlay] at
-   https://gpo.zugaina.org/media-video/vidify[media-video/vidify]: `eselect
-   repository enable guru && emerge --sync guru && emerge vidify`
+   https://github.com/AndrewAmmerlaan[AndrewAmmerlaan] in the main repository at
+   https://packages.gentoo.org/packages/media-video/vidify[media-video/vidify]:
+   `emerge vidify`
 --
 +
 Feel free to upload Vidify to your distro's repositories! Let me know in an

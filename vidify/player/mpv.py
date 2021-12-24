@@ -24,7 +24,7 @@ locale.setlocale(locale.LC_NUMERIC, "C")
 
 class Mpv(PlayerBase):
     # The audio is always muted, which is needed because not all the
-    # youtube-dl videos are silent. The keep-open flag stops mpv from closing
+    # yt-dlp videos are silent. The keep-open flag stops mpv from closing
     # after the video is over.
     DEFAULT_PROPERTIES = {
         "mute": True,

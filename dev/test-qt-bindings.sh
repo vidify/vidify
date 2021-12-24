@@ -4,7 +4,7 @@
 set -e
 
 export DISPLAY=:99
-Xvfb :99 -screen 0 640x480x8 -nolisten tcp &
+Xvfb ${DISPLAY} -screen 0 1280x1024x24 +extension RANDR -nolisten tcp &
 
 for binding in "PyQt5" "PySide2"; do
     echo ">> RUNNING TESTS FOR $binding"

@@ -11,5 +11,5 @@ qdarkstyle
 QtPy
 SwSpotify>=1.1.1; platform_system == "Windows" or platform_system == "Darwin"
 tekore < 2.0
-youtube-dl
+yt-dlp
 zeroconf

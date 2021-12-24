@@ -19,7 +19,7 @@ install_requires = [
     # Base package
     "QtPy==1.9",
     "lyricwikia==0.1",
-    "youtube-dl",  # Always the latest version to avoid breakage
+    'yt-dlp',  # Always the latest version to avoid breakage
     "appdirs==1.4",
     "qdarkstyle==2.8",
     "Flask==2.0",
