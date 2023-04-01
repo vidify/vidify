@@ -55,7 +55,17 @@ PLAYERS = (
         installed=is_installed('zeroconf'),
         module='vidify.player.external',
         class_name='ExternalPlayer',
-        flags=('api',))
+        flags=('api',)),
+    PlayerData(
+        id='WEB',
+        short_name='Web',
+        description='Play the music videos in a web page.',
+        icon=Res.external_icon,  # TODO: Change to it's own icon
+        compatible=True,
+        installed=True,
+        module='vidify.player.web',
+        class_name='WebPlayer',
+        flags=())
 )
 
 

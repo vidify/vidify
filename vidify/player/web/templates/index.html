@@ -1,0 +1,58 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="{{ url_for('static', filename='css/style.css') }}" type="text/css" rel="stylesheet">
+    <title>Vidify</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/logo_square.png') }}" type="image/gif" sizes="16x16">
+</head>
+
+<body style="border: 0px; margin:0px; padding: 0px; position:fixed; overflow:hidden; width: 100%;">
+    <!-- Main video frame for youtube video -->
+    <div class="video-container">
+        <div class="h_iframe">
+            <iframe id="video_frame" class="videoContainer__video" width="1920" height="1080" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+    <script>
+        var currentId = "";
+        var previousId = "";
+        var playingState = true;
+        // Get Youtube video id from backend endpoint
+        // Polls are synchronous in order for this to work
+        function updateMessages() {
+            $.ajax({
+                url: "/api/",
+                async: false
+            }).done(function(res) {
+                currentId = res['youtubeId'];
+                isPlaying = res['isPlaying'];
+            });
+
+            // If when the endpoint is polled the id is the same as the last time it was polled, do nothing
+            // If there is a new id (so the current playing song has changed) update the video frame
+            // with the new video
+            let video_frame = document.getElementById("video_frame");
+            if (currentId != previousId) {
+                video_frame.src = "https://www.youtube.com/embed/" + currentId + "?rel=0&autoplay=1&controls=0&disablekb=1&enablejsapi=1&version=3&playerapiid=ytplayer&loop=1&mute=1";
+                previousId = currentId;
+            }
+
+            // If song paused on Spotify and YT video is playing, pause it
+            // and the other way around
+            if (!isPlaying && playingState) {
+                playingState = false;
+                video_frame.contentWindow.postMessage('{"event":"command","func":"' + 'pauseVideo' + '","args":""}', '*');
+            } else if (isPlaying && !playingState) {
+                playingState = true;
+                video_frame.contentWindow.postMessage('{"event":"command","func":"' + 'playVideo' + '","args":""}', '*');
+            }
+        }
+
+        // Call the api every 500ms
+        setInterval(updateMessages, 500);
+    </script>
+</body>
+
+</html>

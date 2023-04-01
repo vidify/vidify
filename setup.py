@@ -27,6 +27,7 @@ install_deps = [
     'python-vlc',
     'tekore',
     'zeroconf',
+    'Flask',
     'pydbus; platform_system=="Linux"',
     'SwSpotify>=1.1.1; platform_system=="Windows"'
     ' or platform_system=="Darwin"'
