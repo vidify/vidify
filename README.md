@@ -1,3 +1,5 @@
+## NOTE: Vidify has been archived. Read more [here](https://vidify.org/blog/archived/).
+
 <div align="center">
 
 <img src="images/logo.png" height=100 alt="logo" align="center"/>
